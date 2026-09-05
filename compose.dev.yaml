@@ -1,0 +1,21 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      KAMELOG_ORIGIN: http://localhost:3000
+      KAMELOG_DATA_DIR: /data
+      KAMELOG_BOOTSTRAP_TOKEN: ${KAMELOG_BOOTSTRAP_TOKEN:-}
+      WATCHPACK_POLLING: "true"
+    volumes:
+      - .:/app
+      - dev-dependencies:/app/node_modules
+      - dev-build:/app/.next
+      - dev-data:/data
+    init: true
+volumes:
+  dev-dependencies:
+  dev-build:
+  dev-data:
