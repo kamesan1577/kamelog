@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title desc">
+  <title id="title">Developer tools thumbnail</title>
+  <desc id="desc">Abstract collection of code cards</desc>
+  <rect width="640" height="360" fill="#f1efeb"/>
+  <g fill="#fff" stroke="#d9d4cc" stroke-width="4">
+    <rect x="76" y="72" width="214" height="216" rx="16"/>
+    <rect x="350" y="72" width="214" height="216" rx="16"/>
+  </g>
+  <path d="M143 150l-34 30 34 30M221 150l34 30-34 30M195 130l-28 100" fill="none" stroke="#494640" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="457" cy="180" r="56" fill="#e6ede2" stroke="#809075" stroke-width="12"/>
+  <path d="M457 145v70M422 180h70" stroke="#56644f" stroke-width="12" stroke-linecap="round"/>
+</svg>

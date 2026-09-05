@@ -1,0 +1,35 @@
+name: Cleanup initial history metadata
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Delete bootstrap workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh api --paginate "repos/$GH_REPO/actions/runs?per_page=100" \
+            --jq '.workflow_runs[] | select(.name == "Sanitize initial history") | .id' |
+          while read -r run_id; do
+            gh api --method DELETE "repos/$GH_REPO/actions/runs/$run_id"
+          done
+      - name: Remove one-shot cleanup
+        run: |
+          rm -f .github/workflows/cleanup-initial-history.yml
+          git add -A
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'Remove initial history cleanup'
+          git push origin HEAD:main
