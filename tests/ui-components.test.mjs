@@ -36,7 +36,7 @@ async function readCssTree(directory) {
 }
 
 test("emits the catalog's animation and scrolling utilities", async () => {
-  const css = await readCssTree(path.join(root, "dist"));
+  const css = await readCssTree(path.join(root, ".next/static"));
 
   assert.match(css, /--tw-enter-opacity/);
   assert.match(css, /scrollbar-width:\s*thin/);
@@ -50,7 +50,9 @@ test("emits the catalog's animation and scrolling utilities", async () => {
 
 test("forwards progress semantics to the primitive", async () => {
   const { Progress } = await vite.ssrLoadModule("/components/ui/progress.tsx");
-  const html = renderToStaticMarkup(React.createElement(Progress, { value: 37 }));
+  const html = renderToStaticMarkup(
+    React.createElement(Progress, { value: 37 }),
+  );
 
   assert.match(html, /aria-valuenow="37"/);
   assert.match(html, /aria-valuetext="37%"/);

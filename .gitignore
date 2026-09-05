@@ -29,6 +29,12 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+/.runtime/
+/playwright-report/
+/test-results/
+/.private-markers
+*.tsbuildinfo
 
 # vercel
 .vercel

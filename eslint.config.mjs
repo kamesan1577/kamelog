@@ -23,6 +23,13 @@ const eslintConfig = defineConfig([
       "react-hooks/set-state-in-effect": "off",
     },
   },
+  {
+    files: ["app/notebook.tsx"],
+    rules: {
+      // Existing user-selected thumbnails and profile data URLs are intentionally plain img elements.
+      "@next/next/no-img-element": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

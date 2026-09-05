@@ -1,0 +1,40 @@
+name: Clean release transport
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Temporary transport commit
+        required: true
+        type: string
+      extra_sha:
+        description: Earlier temporary transport commit
+        required: true
+        type: string
+permissions:
+  contents: write
+  actions: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Remove transport workflow and run records
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          EXTRA_SHA: ${{ inputs.extra_sha }}
+        run: |
+          git config user.name kamelog-maintainer
+          git config user.email kamesan1577@gmail.com
+          git rm .github/workflows/cleanup-transport.yml
+          git commit -m "Remove release transport workflow"
+          git push origin HEAD:main
+          sleep 10
+          for transport_sha in "$SOURCE_SHA" "$EXTRA_SHA"; do
+            gh api "repos/${{ github.repository }}/actions/runs?head_sha=$transport_sha&per_page=100" --jq '.workflow_runs[].id' | while read -r run_id; do
+              gh api --method DELETE "repos/${{ github.repository }}/actions/runs/$run_id"
+            done
+          done
+          gh workflow run ci.yml --ref main
