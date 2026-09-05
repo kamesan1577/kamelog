@@ -1,0 +1,44 @@
+name: Clean release transport
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Temporary transport commit
+        required: true
+        type: string
+      extra_sha:
+        description: Earlier temporary transport commit
+        required: true
+        type: string
+permissions:
+  contents: write
+  actions: write
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Remove transport workflow and run records
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          EXTRA_SHA: ${{ inputs.extra_sha }}
+        run: |
+          git config user.name kamelog-maintainer
+          git config user.email kamesan1577@gmail.com
+          git rm .github/workflows/cleanup-transport.yml
+          git commit -m "Remove release transport workflow"
+          git push origin HEAD:main
+          for transport_sha in "$SOURCE_SHA" "$EXTRA_SHA" 3ad1d89f21f9cae884a985360bc4888ee1f7b4c8 bcf1f8f83ed8b7094b3a9ed8978a85bf31d2b93e 80a68c0bc004d50c5b2e006489f7efa8a53dd8c3 24263a6eb27aa24e9ac323b31d40e5487a782f3d 14df7a7b71d43c39562951a8e0d493c9dcd5d858 3e4180139c1f6629413a78c4d6f3ef93d8e12adb; do
+            for attempt in $(seq 1 180); do
+              active=$(gh api "repos/${{ github.repository }}/actions/runs?head_sha=$transport_sha&per_page=100" --jq '[.workflow_runs[] | select(.status != "completed")] | length')
+              if [ "$active" = 0 ]; then break; fi
+              sleep 5
+            done
+            gh api "repos/${{ github.repository }}/actions/runs?head_sha=$transport_sha&per_page=100" --jq '.workflow_runs[].id' | while read -r run_id; do
+              gh api --method DELETE "repos/${{ github.repository }}/actions/runs/$run_id" || true
+            done
+          done
+          gh workflow run ci.yml --ref main

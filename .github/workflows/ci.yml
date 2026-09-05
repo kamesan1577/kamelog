@@ -1,0 +1,77 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npm ci
+      - run: make check
+        env:
+          KAMELOG_PRIVATE_MARKERS: ${{ secrets.KAMELOG_PRIVATE_MARKERS }}
+      - run: npm audit --audit-level=high
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: make e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: fictional-e2e-diagnostics
+          path: test-results/
+          retention-days: 3
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker compose config --quiet && docker compose -f compose.dev.yaml config --quiet
+        env:
+          KAMELOG_ORIGIN: https://example.test
+      - run: docker build -t kamelog:ci .
+      - name: Non-root runtime smoke test
+        run: |
+          docker run -d --name kamelog-ci -e KAMELOG_ORIGIN=http://localhost:3000 -p 127.0.0.1:3000:3000 kamelog:ci
+          trap 'docker rm -f kamelog-ci' EXIT
+          test "$(docker exec kamelog-ci id -u)" != 0
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/api/health; then ready=1; break; fi
+            sleep 1
+          done
+          test "$ready" = 1
+          docker exec kamelog-ci node --input-type=module -e "import {Store} from './server/store.mjs'; const store=new Store('/data'); store.save('posts','container-fixture',{kind:'tweet',body:'fictional persisted post',tags:[],date:'2026-01-01T00:00:00.000Z'}); store.close()"
+          docker restart kamelog-ci
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/api/posts | grep -q 'fictional persisted post'; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - run: docker build -f Dockerfile.dev -t kamelog:dev-ci .

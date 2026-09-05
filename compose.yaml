@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    ports: ["127.0.0.1:3000:3000"]
+    environment:
+      KAMELOG_ORIGIN: ${KAMELOG_ORIGIN:?Set the public HTTPS origin}
+      KAMELOG_BOOTSTRAP_TOKEN: ${KAMELOG_BOOTSTRAP_TOKEN:-}
+    volumes: ["kamelog-data:/data"]
+    init: true
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    mem_limit: 1g
+    pids_limit: 128
+    stop_grace_period: 30s
+volumes:
+  kamelog-data:
