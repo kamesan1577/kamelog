@@ -191,8 +191,9 @@ export default function Notebook({
   const logIn = () =>
     guard(async () => {
       await signIn();
+      const saved = await api<Draft[]>("drafts");
+      setDrafts(saved);
       setLogin(true);
-      setDrafts(await api<Draft[]>("drafts"));
     });
   const logOut = () =>
     guard(async () => {
