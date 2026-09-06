@@ -21,14 +21,10 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - ローカル `make check`: public-repo check、UI契約、型、lint、unit/API/media/backup test、本番build。
 - 実FFmpegによる縦動画fixtureの16:9変換。
 - 不正WebAuthn応答、未ログイン書込、Origin不一致、revision競合、破損backup拒否。
-
-## GitHub CIで確認する項目
-
-- Playwright Chromiumによる公開/PC/スマホ/パスキー/vlog journey。
-- 本番Docker imageの非root起動、health、Compose構文、開発image build。
-- production dependency audit。
-
-CIが同一commitで成功するまでは、上記をリモート検証済みと扱わない。
+- GitHub Actions run #52（commit `ed946978372062b7db871617a91959005ac66ea9`）の `check` / `e2e` / `container` がすべて成功。
+- Playwright Chromiumで匿名表示、PC/スマホ、仮想パスキー、下書き保護・復元、投稿永続化、Markdown無害化、再ログイン、実動画vlog投稿を確認。
+- 本番Docker imageの非root起動、health、再起動後のデータ永続、Compose構文、開発image buildを確認。
+- production dependency auditはhigh以上0件。
 
 ## 対象サーバーでのみ完了できる項目
 
