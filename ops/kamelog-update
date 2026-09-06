@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+APP_DIR="${KAMELOG_APP_DIR:-/srv/kamelog}"
+ENV_FILE="${KAMELOG_ENV_FILE:-/etc/kamelog/env}"
+BACKUP_ROOT="${KAMELOG_BACKUP_ROOT:-/var/backups/kamelog}"
+STATE_DIR="${KAMELOG_DEPLOY_STATE_DIR:-/var/lib/kamelog-deploy}"
+HEALTH_URL="${KAMELOG_HEALTH_URL:-http://127.0.0.1:3000/api/health}"
+REPOSITORY="${KAMELOG_GITHUB_REPOSITORY:-kamesan1577/kamelog}"
+BRANCH="${KAMELOG_DEPLOY_BRANCH:-main}"
+WORKFLOW="${KAMELOG_DEPLOY_WORKFLOW:-ci.yml}"
+LOCK_FILE="${KAMELOG_DEPLOY_LOCK:-/run/lock/kamelog-update.lock}"
+
+log() {
+  printf '%s %s\n' "$(date --iso-8601=seconds)" "$*"
+}
+
+fail() {
+  log "ERROR: $*"
+  exit 1
+}
+
+for command in curl docker flock git node; do
+  command -v "$command" >/dev/null || fail "required command is missing: $command"
+done
+
+exec 9>"$LOCK_FILE"
+flock -n 9 || {
+  log "another deployment is running"
+  exit 0
+}
+
+test -d "$APP_DIR/.git" || fail "not a Git checkout: $APP_DIR"
+test -r "$ENV_FILE" || fail "environment file is not readable: $ENV_FILE"
+mkdir -p "$BACKUP_ROOT" "$STATE_DIR"
+
+cd "$APP_DIR"
+if test -n "$(git status --porcelain --untracked-files=no)"; then
+  fail "tracked files in the production checkout were modified"
+fi
+
+remote_sha="$(git ls-remote origin "refs/heads/$BRANCH" | awk 'NR == 1 {print $1}')"
+test "$remote_sha" || fail "could not resolve origin/$BRANCH"
+
+runs_url="https://api.github.com/repos/$REPOSITORY/actions/workflows/$WORKFLOW/runs?branch=$BRANCH&event=push&status=success&per_page=1"
+ci_sha="$(curl --fail --silent --show-error --location \
+  --header 'Accept: application/vnd.github+json' \
+  --header 'X-GitHub-Api-Version: 2022-11-28' \
+  --user-agent 'kamelog-pull-deployer' \
+  "$runs_url" | node --input-type=module -e '
+    let input = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", chunk => input += chunk);
+    process.stdin.on("end", () => {
+      const run = JSON.parse(input).workflow_runs?.[0];
+      if (run?.status === "completed" && run?.conclusion === "success" && run?.event === "push") {
+        process.stdout.write(run.head_sha);
+      }
+    });
+  ')"
+test "$ci_sha" || fail "GitHub returned no successful push CI run"
+
+if test "$remote_sha" != "$ci_sha"; then
+  log "origin/$BRANCH has not passed CI yet; leaving the running release unchanged"
+  exit 0
+fi
+
+current_sha="$(git rev-parse HEAD)"
+if test "$current_sha" = "$remote_sha"; then
+  log "already running $current_sha"
+  exit 0
+fi
+
+git fetch --quiet --no-tags origin "$remote_sha"
+git cat-file -e "$remote_sha^{commit}"
+
+compose=(docker compose --env-file "$ENV_FILE" -f "$APP_DIR/compose.yaml")
+timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+backup_name="$timestamp-${current_sha:0:12}"
+
+restore_previous_release() {
+  local failed_status=$?
+  trap - ERR
+  log "deployment failed; restoring code revision $current_sha"
+  git checkout --quiet --detach "$current_sha" || true
+  "${compose[@]}" build app || true
+  "${compose[@]}" up -d app || true
+  log "rollback attempted; backup retained at $BACKUP_ROOT/$backup_name"
+  exit "$failed_status"
+}
+trap restore_previous_release ERR
+
+log "stopping application for a consistent backup"
+"${compose[@]}" stop app
+if ! "${compose[@]}" run --rm --no-deps \
+  -v "$BACKUP_ROOT:/backups" \
+  app node scripts/admin.mjs backup /data "/backups/$backup_name"; then
+  "${compose[@]}" up -d app
+  fail "backup failed; current release was restarted"
+fi
+
+log "deploying CI-approved revision $remote_sha"
+git checkout --quiet --detach "$remote_sha"
+"${compose[@]}" build app
+"${compose[@]}" up -d app
+
+healthy=0
+for _attempt in $(seq 1 60); do
+  if curl --fail --silent --show-error "$HEALTH_URL" >/dev/null; then
+    healthy=1
+    break
+  fi
+  sleep 1
+done
+test "$healthy" = 1
+
+printf '%s\n' "$remote_sha" >"$STATE_DIR/deployed-sha"
+trap - ERR
+log "deployment completed: $remote_sha"

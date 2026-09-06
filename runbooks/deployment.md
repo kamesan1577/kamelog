@@ -25,6 +25,72 @@ bootstrap tokenは32文字以上の暗号学的乱数を管理環境で生成し
 localhostだけで確認する場合は `KAMELOG_ORIGIN=http://localhost:3000` を使用できる。
 公開ホストのHTTPはアプリが拒否する。実行プロセス/volumeは専用OSユーザーで管理する。
 
+## systemdによる本番起動
+
+以下はDebian系ホストで、Docker Engine、Compose plugin、Git、curl、Node 24が導入済みであることを前提とする。
+本番checkoutを開発用checkoutから分離し、対話ログイン不能な専用ユーザーで管理する。
+
+```sh
+sudo adduser --system --group --home /srv/kamelog --shell /usr/sbin/nologin kamelog
+sudo usermod -aG docker kamelog
+sudo install -d -o kamelog -g kamelog -m 0750 /srv/kamelog
+sudo -u kamelog git clone https://github.com/kamesan1577/kamelog.git /srv/kamelog
+sudo install -d -o root -g kamelog -m 0750 /etc/kamelog
+sudo install -d -o kamelog -g kamelog -m 0700 /var/backups/kamelog /var/lib/kamelog-deploy
+```
+
+`/etc/kamelog/env` はGitへ追加せず、次の形式でrootが作成する。
+bootstrap登録済みなら `KAMELOG_BOOTSTRAP_TOKEN` は書かない。
+
+```dotenv
+KAMELOG_ORIGIN=https://kamesan.org
+```
+
+権限を設定し、追跡対象のdeploy scriptとunitをroot領域へコピーする。
+
+```sh
+sudo chown root:kamelog /etc/kamelog/env
+sudo chmod 0640 /etc/kamelog/env
+sudo install -o root -g root -m 0755 /srv/kamelog/ops/kamelog-update /usr/local/sbin/kamelog-update
+sudo install -o root -g root -m 0644 /srv/kamelog/ops/systemd/*.service /etc/systemd/system/
+sudo install -o root -g root -m 0644 /srv/kamelog/ops/systemd/*.timer /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now kamelog.service kamelog-update.timer
+```
+
+既存の `~/dev/kamelog` Composeから移行する場合も、ディレクトリ名が同じため既定のCompose project/volume名は維持される。
+先に既存アプリを `docker compose stop app` で止め、上の `kamelog.service` を開始する。
+`down -v` は実行しない。
+
+DockerとCloudflare Tunnelもboot時に起動するよう確認する。
+
+```sh
+sudo systemctl enable docker cloudflared
+sudo systemctl is-enabled docker cloudflared kamelog.service kamelog-update.timer
+sudo systemctl is-active docker cloudflared kamelog.service kamelog-update.timer
+curl --fail http://127.0.0.1:3000/api/health
+```
+
+## 自動更新
+
+`kamelog-update.timer` は約5分ごとに公開GitHub APIと `origin/main` を照合する。
+main先頭と成功済みpush CIのSHAが一致した場合だけ、アプリ停止、backup、checkout、build、起動、health確認を行う。
+GitHub Actionsから本番サーバーへの接続や受信ポートの追加は不要。
+
+初回は手動で実行し、ログと状態を確認する。
+
+```sh
+sudo systemctl start kamelog-update.service
+sudo systemctl status kamelog-update.service --no-pager
+sudo journalctl -u kamelog-update.service -n 100 --no-pager
+sudo systemctl list-timers kamelog-update.timer
+```
+
+失敗時は直前のコードrevisionを再buildして起動するが、更新前backupは削除しない。
+失敗通知はホスト側の監視へ接続する。
+deploy script自体とsystemd unitはroot所有の固定コピーであり、Git更新では自動置換しない。
+これらを変更したreleaseでは、レビュー後に再度 `install` してからtimerを再開する。
+
 ## 更新・ロールバック
 
 更新前にアプリを停止しbackupを取得する。通常の停止で `down -v` を使わない。

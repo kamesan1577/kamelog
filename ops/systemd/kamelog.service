@@ -1,0 +1,20 @@
+[Unit]
+Description=kamelog application
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=kamelog
+Group=kamelog
+SupplementaryGroups=docker
+WorkingDirectory=/srv/kamelog
+ExecStart=/usr/bin/docker compose --env-file /etc/kamelog/env -f /srv/kamelog/compose.yaml up -d app
+ExecStop=/usr/bin/docker compose --env-file /etc/kamelog/env -f /srv/kamelog/compose.yaml stop app
+TimeoutStartSec=10min
+TimeoutStopSec=1min
+
+[Install]
+WantedBy=multi-user.target

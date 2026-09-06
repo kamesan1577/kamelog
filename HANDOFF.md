@@ -14,6 +14,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - revision競合、Origin/CSRF、入力上限、媒体Range、rate limitをAPIで処理。
 - DB/媒体のhash manifest付きbackup/restoreと全パスキー喪失時のoffline reset。
 - Node 24の非root本番image、開発Compose、CIのcheck/e2e/container job。
+- 成功済みmain CIだけを取得するpull型自動deploy、停止backup、health、コードrollback、systemd boot起動。
 - AGENTS、仕様、不変条件、ADR、脅威モデル、runbook、リポジトリ固有skillsを整備。
 
 ## 検証済み
@@ -32,11 +33,14 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 実機iOS/Androidでのパスキー、横向き撮影、既存動画upload。
 - 永続volumeから別ディレクトリへの復元訓練とオフホスト暗号化backup。
 - GitHub required checks `check` / `e2e` / `container` の有効化。
+- 対象ホストへのsystemd unit導入、初回timer実行、Cloudflare Tunnelを含む再起動試験。
 
 ## 既知の制約
 
 - 単一ホスト・単一writer向けで水平スケールは対象外。
 - 投稿に紐付く前の孤児媒体は自動削除しない。容量監視し、GC実装前はDBを迂回して消さない。
 - main UIの正式な変更は利用者の明示承認とUI baseline更新を必要とする。
+- 自動deployはコードrollbackのみ。非互換DB migrationはbackupから別volumeへ手動復元する。
+- deploy script/unitはroot領域の固定コピーであり、リポジトリ更新だけでは置換されない。
 
 本番可否は `runbooks/deployment.md` の全項目で判定する。未実施項目を成功扱いしない。

@@ -12,7 +12,7 @@
     "test": "node --test tests/server/*.test.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint --max-warnings=0 app server tests/server scripts/check*.mjs",
-    "format:check": "prettier --check app lib server scripts tests *.mjs *.ts *.json *.md .github .codex adr docs runbooks spec",
+    "format:check": "prettier --check app lib server scripts tests *.mjs *.ts *.json *.md .github .codex adr docs ops runbooks spec",
     "test:e2e": "playwright test",
     "check:public": "node scripts/check-public-repo.mjs",
     "check:ui": "node scripts/check-ui.mjs"

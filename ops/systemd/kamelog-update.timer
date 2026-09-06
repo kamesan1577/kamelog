@@ -1,0 +1,12 @@
+[Unit]
+Description=Check for a CI-approved kamelog release
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+RandomizedDelaySec=30s
+Persistent=true
+Unit=kamelog-update.service
+
+[Install]
+WantedBy=timers.target

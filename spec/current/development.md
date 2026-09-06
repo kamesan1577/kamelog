@@ -12,9 +12,16 @@
 | I08/I09 保存 | 再起動、更新競合、migration、整合バックアップ、空の別ディレクトリ復元、破損拒否      | storeテスト       |
 | I10 公開     | 秘密値・実データ・私的マーカー・コミット名義、検査自身のnegative fixture             | public-repo-check |
 | I11 配布     | 空DB起動、health、非root、永続volume、再起動後保存                                   | container         |
+| I12 自動更新 | main先頭と成功CIの一致、排他、停止backup、health、失敗時rollback、volume非削除       | deploy契約テスト  |
 
 `make check` は公開検査・型検査・lint・テスト・本番buildを集約する。
 `make e2e` は実アプリに対してブラウザjourneyを実行する。retryは0、fixtureは固定、テスト間でデータを隔離する。
 CIはcheck/e2e/containerを別jobとして失敗を可視化する。失敗成果物は架空データに限定する。
 受入条件を弱める変更、テスト削除、baseline更新はその理由と承認を必要とする。
 branch protectionの設定は管理権限が必要。設定されていないなら「強制済み」と報告しない。
+
+本番配布はADR 0005のpull方式を採用する。
+systemdがアプリのboot起動と更新timerを管理し、更新scriptは成功済みpush CIのSHAとmain先頭が一致するまでdeployしない。
+GitHub Actions runnerへ本番サーバー資格情報を渡さない。
+自動更新は停止状態の整合backupを先に作り、health失敗時に直前コードを再起動する。
+schema非互換時のデータrollbackは自動化せず、runbookに従い別volumeへ復元する。
