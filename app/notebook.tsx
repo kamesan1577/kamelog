@@ -173,14 +173,16 @@ export default function Notebook({
 }) {
   const inFlight = useRef(false);
   const guard = async (fn: () => Promise<void>) => {
-    if (inFlight.current) return;
+    if (inFlight.current) return false;
     inFlight.current = true;
     try {
       await fn();
+      return true;
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "操作に失敗しました。",
       );
+      return false;
     } finally {
       inFlight.current = false;
     }
@@ -188,13 +190,14 @@ export default function Notebook({
   const refresh = async () => {
     setPosts(await api<Post[]>("posts"));
   };
-  const logIn = () =>
-    guard(async () => {
+  const logIn = async () => {
+    const authenticated = await guard(async () => {
       await signIn();
       const saved = await api<Draft[]>("drafts");
       setDrafts(saved);
-      setLogin(true);
     });
+    if (authenticated) setLogin(true);
+  };
   const logOut = () =>
     guard(async () => {
       await api("auth/logout", "POST", {});
