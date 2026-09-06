@@ -25,6 +25,7 @@ export const containsSensitiveText = (text, privateMarkers = markers) =>
   privateMarkers.some((marker) => text.includes(marker));
 export const isAllowedEmail = (email) =>
   email === "kamesan1577@gmail.com" ||
+  email === "matsugaura_ken@andfactory.co.jp" ||
   email.endsWith("@users.noreply.github.com");
 for (const file of new Set(tracked)) {
   if (!existsSync(file)) continue;

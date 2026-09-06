@@ -16,6 +16,7 @@ test("public repository gate catches negative fixtures", () => {
   );
   assert.equal(containsSensitiveText("safe fixture", []), false);
   assert.equal(isAllowedEmail("kamesan1577@gmail.com"), true);
+  assert.equal(isAllowedEmail("matsugaura_ken@andfactory.co.jp"), true);
   assert.equal(
     isAllowedEmail("41898282+github-actions[bot]@users.noreply.github.com"),
     true,
