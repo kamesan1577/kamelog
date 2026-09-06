@@ -248,6 +248,7 @@ export default function Notebook({
     [cameraError, setCameraError] = useState("");
   const live = useRef<HTMLVideoElement>(null),
     rec = useRef<MediaRecorder | null>(null),
+    clipData = useRef<Blob | null>(null),
     urls = useRef<string[]>([]);
   useEffect(() => {
     let cancelled = false;
@@ -377,6 +378,7 @@ export default function Notebook({
   const prepareVlog = async () => {
     setVMode("camera");
     setClip("");
+    clipData.current = null;
     setCaption("");
     setCameraError("");
     setVtime(
@@ -419,7 +421,9 @@ export default function Notebook({
       if (e.data.size) chunks.push(e.data);
     };
     r.onstop = () => {
-      const u = URL.createObjectURL(new Blob(chunks, { type }));
+      const blob = new Blob(chunks, { type });
+      clipData.current = blob;
+      const u = URL.createObjectURL(blob);
       urls.current.push(u);
       setClip(u);
       setRecording(false);
@@ -441,6 +445,7 @@ export default function Notebook({
   };
   const choose = (f?: File) => {
     if (!f) return;
+    clipData.current = f;
     const u = URL.createObjectURL(f);
     urls.current.push(u);
     setClip(u);
@@ -448,11 +453,10 @@ export default function Notebook({
   };
   const postVlog = () =>
     guard(async () => {
-      if (!clip) return;
-      const blob = await (await fetch(clip)).blob();
+      if (!clip || !clipData.current) return;
       const upload = await fetch("/api/media?seconds=" + seconds, {
         method: "POST",
-        body: blob,
+        body: clipData.current,
       });
       const result = await upload.json();
       if (!upload.ok) throw new Error(result.error);
@@ -1108,6 +1112,7 @@ export default function Notebook({
               } else {
                 stopCamera();
                 setClip("");
+                clipData.current = null;
                 setCaption("");
                 setKind(next);
               }
@@ -1208,6 +1213,7 @@ export default function Notebook({
                     <Button
                       onClick={() => {
                         setClip("");
+                        clipData.current = null;
                         setCaption("");
                         if (vMode === "camera") void prepareVlog();
                       }}
