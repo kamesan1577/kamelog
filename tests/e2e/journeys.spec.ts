@@ -49,11 +49,26 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     page.getByRole("heading", { name: "この投稿を保存しますか？" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "編集を続ける" }).click();
+  await expect(
+    page.getByRole("dialog").filter({ hasText: "この投稿を保存しますか？" }),
+  ).toHaveCount(0);
   await expect(page.getByPlaceholder("本文", { exact: true })).toHaveValue(
     "保存される架空の下書き",
   );
   await page.keyboard.press("Escape");
-  await page.getByRole("button", { name: "下書き保存", exact: true }).click();
+  const saveDraft = page.getByRole("button", {
+    name: "下書き保存",
+    exact: true,
+  });
+  await expect(saveDraft).toBeVisible();
+  const saved = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/drafts") &&
+      response.request().method() === "POST",
+  );
+  await saveDraft.click();
+  expect((await saved).ok()).toBe(true);
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.reload();
   await page.setViewportSize({ width: 1280, height: 900 });
   await expect(page.locator(".desktop-composer")).toBeVisible();

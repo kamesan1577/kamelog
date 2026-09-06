@@ -1,21 +1,24 @@
-import { mkdtemp, rm } from "node:fs/promises";
+import { cp, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
 const directory = await mkdtemp(join(tmpdir(), "kamelog-e2e-"));
-const child = spawn(
-  process.execPath,
-  ["node_modules/next/dist/bin/next", "start", "-H", "127.0.0.1"],
-  {
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      KAMELOG_DATA_DIR: directory,
-      KAMELOG_ORIGIN: "http://localhost:3000",
-      KAMELOG_BOOTSTRAP_TOKEN: "fictional-e2e-bootstrap-token-not-a-secret",
-    },
+await cp(".next/static", ".next/standalone/.next/static", {
+  recursive: true,
+});
+await cp("public", ".next/standalone/public", { recursive: true });
+const child = spawn(process.execPath, ["server.js"], {
+  cwd: ".next/standalone",
+  stdio: "inherit",
+  env: {
+    ...process.env,
+    KAMELOG_DATA_DIR: directory,
+    KAMELOG_ORIGIN: "http://localhost:3000",
+    KAMELOG_BOOTSTRAP_TOKEN: "fictional-e2e-bootstrap-token-not-a-secret",
+    HOSTNAME: "127.0.0.1",
+    PORT: "3000",
   },
-);
+});
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => child.kill(signal));
 child.on("exit", async (code) => {
