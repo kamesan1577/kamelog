@@ -30,6 +30,16 @@ localhostだけで確認する場合は `KAMELOG_ORIGIN=http://localhost:3000` �
 以下はDebian系ホストで、Docker Engine、Compose plugin、Git、curl、Node 24が導入済みであることを前提とする。
 本番checkoutを開発用checkoutから分離し、対話ログイン不能な専用ユーザーで管理する。
 
+既存の非rootユーザーとcheckoutを使う単一管理者ホストでは、`.env` 作成後に次の冪等コマンドでunit、drop-in、backup先、timerを再現できる。
+
+```sh
+sudo env KAMELOG_NODE_BIN="$(command -v node)" ./ops/install-host.sh
+```
+
+既定では呼出元ユーザー、現在のcheckout、checkout内の `.env` を使用する。
+上書きが必要なら `KAMELOG_SERVICE_USER`、`KAMELOG_APP_DIR`、`KAMELOG_ENV_FILE`、`KAMELOG_BACKUP_ROOT`、`KAMELOG_DEPLOY_STATE_DIR` を同じコマンドへ渡す。
+installerは既存のenv、runtime volume、backupを削除しない。
+
 ```sh
 sudo adduser --system --group --home /srv/kamelog --shell /usr/sbin/nologin kamelog
 sudo usermod -aG docker kamelog
