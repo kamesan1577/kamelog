@@ -84,7 +84,21 @@ export class Store {
         throw new Conflict("Revision conflict");
       if (!old && revision !== undefined && revision !== 0)
         throw new Conflict("Missing revision");
-      const next = { ...value, id, revision: (old?.revision || 0) + 1 };
+      let persisted = value;
+      if (table === "posts" && old?.kind === "blog" && value.kind === "blog") {
+        const contentChanged =
+          old.title !== value.title || old.body !== value.body;
+        persisted = {
+          ...value,
+          ...(old.updatedAt ? { updatedAt: old.updatedAt } : {}),
+          ...(contentChanged ? { updatedAt: new Date().toISOString() } : {}),
+        };
+      }
+      const next = {
+        ...persisted,
+        id,
+        revision: (old?.revision || 0) + 1,
+      };
       this.db
         .prepare(
           `INSERT INTO ${table} VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data, revision=excluded.revision`,
