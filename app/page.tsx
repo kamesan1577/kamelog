@@ -49,8 +49,7 @@ export async function generateMetadata({
 
   const copy = socialCopy(post);
   const title = post.kind === "blog" ? post.title.trim() : copy;
-  const description =
-    post.kind === "blog" ? seoDescription(post.body) : copy;
+  const description = post.kind === "blog" ? seoDescription(post.body) : copy;
   const image = ogImageUrl(post.id);
   const canonical = postUrl(post.id);
   const modified = post.updatedAt || post.date;
