@@ -1,0 +1,413 @@
+.landing-page {
+  max-width: 1040px;
+  margin: -18px auto 0;
+  padding-bottom: 30px;
+}
+.landing-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.75fr);
+  gap: 48px;
+  align-items: end;
+  padding: 28px 0 46px;
+  border-bottom: 1px solid #dedbd4;
+}
+.landing-kicker {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0 0 26px;
+  color: #807b72;
+  font:
+    600 12px/1.4 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.landing-kicker span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #277dae;
+  box-shadow: 0 0 0 4px #e9f3f8;
+}
+.landing-copy h1 {
+  max-width: 670px;
+  margin: 0;
+  color: #2f2d29;
+  font:
+    700 clamp(38px, 5vw, 68px)/1.13 Georgia,
+    "Yu Mincho",
+    serif;
+  letter-spacing: -0.045em;
+}
+.landing-lead {
+  max-width: 610px;
+  margin: 25px 0 0;
+  color: #767168;
+  font-size: 15px;
+  line-height: 2;
+}
+.landing-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 31px;
+}
+.landing-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid #d9d5ce;
+  border-radius: 4px;
+  background: #fff;
+  color: #635f57;
+  font-size: 13px;
+  font-weight: 600;
+}
+.landing-actions button:hover {
+  border-color: #aaa59b;
+  color: #37352f;
+}
+.landing-actions .landing-primary {
+  border-color: #37352f;
+  background: #37352f;
+  color: #fff;
+}
+.landing-actions .landing-primary:hover {
+  background: #25231f;
+  color: #fff;
+}
+.landing-profile {
+  position: relative;
+  padding: 23px;
+  border: 1px solid #ddd9d1;
+  border-radius: 4px;
+  background: #fbfbf9;
+  box-shadow: 6px 6px 0 #efeee9;
+}
+.landing-profile:before {
+  content: "PROFILE";
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  color: #b1aca2;
+  font:
+    600 10px/1 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+  letter-spacing: 0.12em;
+}
+.landing-profile > .avatar {
+  margin-bottom: 17px;
+}
+.landing-profile > div > span {
+  color: #9a958b;
+  font-size: 12px;
+}
+.landing-profile h2 {
+  margin: 4px 0 2px;
+  font-size: 19px;
+}
+.landing-profile > div > p {
+  margin: 0;
+  color: #8a857b;
+  font-size: 12px;
+  line-height: 1.7;
+}
+.landing-profile blockquote {
+  margin: 19px 0;
+  padding: 13px 0 13px 15px;
+  border-left: 2px solid #37352f;
+  color: #666158;
+  font:
+    14px/1.85 Georgia,
+    "Yu Mincho",
+    serif;
+}
+.landing-profile > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #277dae;
+  font-size: 12px;
+}
+.landing-lower {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+  gap: 48px;
+  padding-top: 35px;
+}
+.landing-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.landing-section-title > span {
+  color: #aaa49a;
+  font:
+    11px/1 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+.landing-section-title h2 {
+  margin: 0;
+  color: #5e5a52;
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+.content-cards {
+  display: grid;
+  gap: 7px;
+}
+.content-cards > button {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  padding: 11px 13px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  text-align: left;
+}
+.content-cards > button:hover {
+  border-color: #e4e1da;
+  background: #faf9f7;
+}
+.content-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  background: #edf4f7;
+  color: #397392;
+}
+.content-icon.tweet {
+  background: #f2f1ee;
+  color: #706b62;
+}
+.content-icon.vlog {
+  background: #f3eef8;
+  color: #886f9f;
+}
+.content-card-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+.content-card-copy strong {
+  font-size: 14px;
+  font-weight: 650;
+}
+.content-card-copy small {
+  overflow: hidden;
+  color: #8b867c;
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.content-cards > button > b {
+  color: #aaa49a;
+  font:
+    500 12px/1 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+.featured-post {
+  position: relative;
+  display: flex;
+  min-height: 154px;
+  width: 100%;
+  overflow: hidden;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 21px 22px 18px;
+  border: 0;
+  border-radius: 4px;
+  background: #37352f;
+  color: #fff;
+  text-align: left;
+  box-shadow: 6px 6px 0 #e5e3dd;
+  animation: featured-in 0.45s ease-out both;
+}
+.featured-signal {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #555149;
+}
+.featured-signal i {
+  display: block;
+  width: 28%;
+  height: 100%;
+  background: #66a8c9;
+  animation: signal-scan 4.5s ease-in-out infinite;
+}
+.featured-meta {
+  display: flex;
+  gap: 6px;
+  color: #b9b5ad;
+  font-size: 11px;
+}
+.featured-post > strong {
+  display: -webkit-box;
+  max-width: 100%;
+  margin: 19px 0 14px;
+  overflow: hidden;
+  font:
+    600 16px/1.75 Georgia,
+    "Yu Mincho",
+    serif;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.featured-open {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: auto;
+  color: #d8d5cf;
+  font-size: 12px;
+}
+.featured-post:hover .featured-open {
+  color: #fff;
+}
+.featured-empty {
+  display: flex;
+  align-items: center;
+  min-height: 154px;
+  padding: 22px;
+  border: 1px dashed #d8d4cc;
+  border-radius: 4px;
+  color: #99938a;
+  font-size: 13px;
+}
+.site-layout .content-grid.landing-layout {
+  display: block;
+  max-width: 1120px;
+}
+.right-sidebar.landing-hidden {
+  display: none;
+}
+@keyframes featured-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes signal-scan {
+  0%,
+  100% {
+    transform: translateX(-15%);
+  }
+  50% {
+    transform: translateX(275%);
+  }
+}
+@media (max-width: 950px) {
+  .landing-page {
+    margin-top: -10px;
+  }
+  .landing-intro {
+    grid-template-columns: minmax(0, 1.3fr) minmax(240px, 0.7fr);
+    gap: 28px;
+  }
+  .landing-lower {
+    gap: 28px;
+  }
+  .landing-copy h1 {
+    font-size: 46px;
+  }
+}
+@media (max-width: 760px) {
+  .landing-intro,
+  .landing-lower {
+    grid-template-columns: 1fr;
+  }
+  .landing-intro {
+    gap: 34px;
+    padding-top: 8px;
+  }
+  .landing-copy h1 {
+    font-size: clamp(39px, 11.5vw, 53px);
+  }
+  .landing-profile {
+    max-width: none;
+  }
+  .landing-lower {
+    gap: 32px;
+  }
+  .content-card-copy small {
+    white-space: normal;
+  }
+  .featured-post {
+    min-height: 145px;
+  }
+}
+@media (max-width: 640px) {
+  .landing-page {
+    margin: -8px 0 0;
+    padding-bottom: 8px;
+  }
+  .landing-intro {
+    padding-bottom: 37px;
+  }
+  .landing-kicker {
+    margin-bottom: 19px;
+  }
+  .landing-lead {
+    margin-top: 20px;
+    font-size: 14px;
+    line-height: 1.9;
+  }
+  .landing-actions {
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: 25px;
+  }
+  .landing-actions button {
+    width: 100%;
+    min-height: 46px;
+  }
+  .landing-profile {
+    padding: 19px;
+    box-shadow: 4px 4px 0 #efeee9;
+  }
+  .landing-lower {
+    padding-top: 29px;
+  }
+  .content-cards > button {
+    padding: 10px 8px;
+  }
+  .mobile-nav {
+    height: 68px;
+  }
+  .mobile-nav button {
+    padding: 7px 9px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .featured-post,
+  .featured-signal i {
+    animation: none;
+  }
+}
