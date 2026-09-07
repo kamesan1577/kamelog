@@ -958,7 +958,8 @@ export default function Notebook({
         <>
           <span>·</span>
           <time dateTime={p.updatedAt} title="最終更新日">
-            更新 {new Date(p.updatedAt).toLocaleDateString("ja-JP", {
+            更新{" "}
+            {new Date(p.updatedAt).toLocaleDateString("ja-JP", {
               month: "numeric",
               day: "numeric",
             })}
