@@ -184,9 +184,66 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".desktop-composer")).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator(".mobile-create").click();
+  const mobileBlogTab = page
+    .getByRole("tab", { name: "ブログ", exact: true })
+    .last();
+  await expect(mobileBlogTab).toBeVisible();
+  await mobileBlogTab.click();
+  await expect(page.getByPlaceholder("タイトル", { exact: true })).toBeVisible();
+  const mobileBlogDialog = page.locator(".editor-dialog");
+  const mobileMarkdownToolbar = page.getByRole("toolbar", {
+    name: "Markdown記法",
+  });
   await expect(
-    page.getByRole("tab", { name: "ブログ", exact: true }).last(),
+    mobileMarkdownToolbar.getByRole("button", { name: "Markdownヘルプ" }),
   ).toBeVisible();
+  await expect(
+    mobileMarkdownToolbar.getByRole("button", { name: "プレビュー" }),
+  ).toBeVisible();
+  const mobileEditorGeometry = await mobileBlogDialog.evaluate((dialog) => {
+    const tools = dialog.querySelector<HTMLElement>(".editor-tools");
+    const help = dialog.querySelector<HTMLElement>(".markdown-help-link");
+    const preview = dialog.querySelector<HTMLElement>(".preview-toggle");
+    if (!tools || !help || !preview) throw new Error("blog editor controls missing");
+    const dialogRect = dialog.getBoundingClientRect();
+    const toolsRect = tools.getBoundingClientRect();
+    const helpRect = help.getBoundingClientRect();
+    const previewRect = preview.getBoundingClientRect();
+    return {
+      viewportWidth: window.innerWidth,
+      dialogClientWidth: dialog.clientWidth,
+      dialogScrollWidth: dialog.scrollWidth,
+      dialogLeft: dialogRect.left,
+      dialogRight: dialogRect.right,
+      toolsLeft: toolsRect.left,
+      toolsRight: toolsRect.right,
+      helpLeft: helpRect.left,
+      helpRight: helpRect.right,
+      previewLeft: previewRect.left,
+      previewRight: previewRect.right,
+    };
+  });
+  expect(mobileEditorGeometry.dialogLeft).toBeGreaterThanOrEqual(0);
+  expect(mobileEditorGeometry.dialogRight).toBeLessThanOrEqual(
+    mobileEditorGeometry.viewportWidth,
+  );
+  expect(mobileEditorGeometry.dialogScrollWidth).toBeLessThanOrEqual(
+    mobileEditorGeometry.dialogClientWidth + 1,
+  );
+  for (const edge of [
+    mobileEditorGeometry.toolsLeft,
+    mobileEditorGeometry.helpLeft,
+    mobileEditorGeometry.previewLeft,
+  ]) {
+    expect(edge).toBeGreaterThanOrEqual(mobileEditorGeometry.dialogLeft - 1);
+  }
+  for (const edge of [
+    mobileEditorGeometry.toolsRight,
+    mobileEditorGeometry.helpRight,
+    mobileEditorGeometry.previewRight,
+  ]) {
+    expect(edge).toBeLessThanOrEqual(mobileEditorGeometry.dialogRight + 1);
+  }
   await page.getByRole("tab", { name: "vlog", exact: true }).last().click();
   await page.getByRole("tab", { name: "動画を選ぶ", exact: true }).click();
   await expect(page.locator(".vlog-stage")).toBeVisible();
