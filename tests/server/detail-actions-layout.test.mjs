@@ -16,10 +16,7 @@ test("keeps blog detail actions visible while reading", async () => {
     css,
     /@media \(min-width: 1000px\)[\s\S]*\.detail-page:has\(> \.markdown\) > \.post-actions\s*\{[^}]*position:\s*sticky;[^}]*top:\s*76px;/,
   );
-  assert.match(
-    css,
-    /grid-template-columns:\s*46px minmax\(0, 1fr\);/,
-  );
+  assert.match(css, /grid-template-columns:\s*46px minmax\(0, 1fr\);/);
   assert.match(
     css,
     /@media \(max-width: 999px\)[\s\S]*\.detail-page:has\(> \.markdown\) > \.post-actions\s*\{[^}]*position:\s*fixed;[^}]*bottom:\s*18px;/,
