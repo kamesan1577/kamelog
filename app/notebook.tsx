@@ -425,7 +425,8 @@ export default function Notebook({
     [query, setQuery] = useState(""),
     [tag, setTag] = useState(""),
     [sort, setSort] = useState<"new" | "popular">("new"),
-    [selected, setSelected] = useState<string | null>(initialSelected);
+    [selected, setSelected] = useState<string | null>(initialSelected),
+    [visibleTagCount, setVisibleTagCount] = useState(5);
   const [editor, setEditor] = useState(false),
     [kind, setKind] = useState<Kind>("tweet"),
     [title, setTitle] = useState(""),
@@ -928,6 +929,17 @@ export default function Notebook({
         ? b.likes - a.likes
         : +!!b.pinned - +!!a.pinned || b.date.localeCompare(a.date),
     );
+  const tags = Object.entries(
+    posts.reduce<Record<string, number>>((counts, post) => {
+      for (const postTag of post.tags) {
+        counts[postTag] = (counts[postTag] || 0) + 1;
+      }
+      return counts;
+    }, {}),
+  )
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ja"));
+  const visibleTags = tags.slice(0, visibleTagCount);
   const item = posts.find((p) => p.id === selected);
   const postUrl = (id: string) => {
     const url = new URL("/", location.origin);
@@ -1538,28 +1550,35 @@ export default function Notebook({
                 />
                 <kbd>/</kbd>
               </label>
-              <div className="aside-section">
-                <h3>タグ</h3>
-                <div className="topic-list">
-                  {["Go", "バックエンド", "TDD", "開発日記", "日常"].map(
-                    (t) => (
+              {tags.length > 0 && (
+                <div className="aside-section">
+                  <h3>タグ</h3>
+                  <div className="topic-list">
+                    {visibleTags.map(({ name, count }) => (
                       <button
-                        key={t}
+                        key={name}
+                        className={tag === name ? "active" : ""}
                         onClick={() => {
                           nav("home");
-                          setTag(t);
+                          setTag(name);
                           setFilter("all");
                         }}
                       >
-                        #{t}
-                        <small>
-                          {posts.filter((p) => p.tags.includes(t)).length}
-                        </small>
+                        #{name}
+                        <small>{count}</small>
                       </button>
-                    ),
+                    ))}
+                  </div>
+                  {visibleTagCount < tags.length && (
+                    <button
+                      className="tag-load-more"
+                      onClick={() => setVisibleTagCount((count) => count + 5)}
+                    >
+                      もっと見る
+                    </button>
                   )}
                 </div>
-              </div>
+              )}
             </aside>
           </div>
           <nav className="mobile-nav">
