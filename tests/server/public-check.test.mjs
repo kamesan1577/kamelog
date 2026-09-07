@@ -21,5 +21,6 @@ test("public repository gate catches negative fixtures", () => {
     isAllowedEmail("41898282+github-actions[bot]@users.noreply.github.com"),
     true,
   );
+  assert.equal(isAllowedEmail("noreply@github.com"), true);
   assert.equal(isAllowedEmail("developer@example.test"), false);
 });

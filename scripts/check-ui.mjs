@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 // Approved CSS at the initial public snapshot. Backend changes may not redesign it.
 assert.equal(
   createHash("sha256").update(readFileSync("app/globals.css")).digest("hex"),
-  "c86e64b44a297b70a38c4bda20f40e18789a2f02aff453d35e753746e1cf9611",
+  "75d931564f332c39049336d1f02993db1861016763876147a2bd77e1c1771a26",
   "Approved UI CSS changed. An explicit design decision is required.",
 );
 console.log("Approved CSS unchanged");

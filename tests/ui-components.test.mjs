@@ -85,3 +85,28 @@ test("renders sidebar skeletons deterministically", async () => {
   assert.equal(first, second);
   assert.match(first, /--skeleton-width:70%/);
 });
+
+test("renders GFM lists safely and highlights fenced code", async () => {
+  const { Markdown } = await vite.ssrLoadModule("/app/notebook.tsx");
+  const html = renderToStaticMarkup(
+    React.createElement(Markdown, {
+      text: [
+        "- item",
+        "- [ ] todo",
+        "- [x] done",
+        "",
+        "```javascript",
+        "const answer = 42;",
+        "```",
+        "",
+        "<script>alert(1)</script>",
+      ].join("\n"),
+    }),
+  );
+
+  assert.match(html, /<ul class="contains-task-list">/);
+  assert.match(html, /type="checkbox" disabled=""/);
+  assert.match(html, /class="hljs language-javascript"/);
+  assert.match(html, /class="hljs-keyword">const<\/span>/);
+  assert.doesNotMatch(html, /<script>/);
+});

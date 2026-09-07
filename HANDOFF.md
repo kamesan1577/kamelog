@@ -15,6 +15,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - DB/媒体のhash manifest付きbackup/restoreと全パスキー喪失時のoffline reset。
 - Node 24の非root本番image、開発Compose、CIのcheck/e2e/container job。
 - 成功済みmain CIだけを取得するpull型自動deploy、停止backup、health、コードrollback、systemd boot起動。
+- ブログMarkdownはCommonMark/GFMを表示し、記法ツールバー、全記法ヘルプ、言語指定コードのシンタックスハイライトを提供する。パースは `react-markdown` / `remark-gfm`、ハイライトは `rehype-highlight` / `highlight.js` に任せ、生HTMLは無効のまま維持する。
 - AGENTS、仕様、不変条件、ADR、脅威モデル、runbook、リポジトリ固有skillsを整備。
 
 ## 検証済み
@@ -26,6 +27,8 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - Playwright Chromiumで匿名表示、PC/スマホ、仮想パスキー、下書き保護・復元、投稿永続化、Markdown無害化、再ログイン、実動画vlog投稿を確認。
 - 本番Docker imageの非root起動、health、再起動後のデータ永続、Compose構文、開発image buildを確認。
 - production dependency auditはhigh以上0件。
+- 2026-09-07 Markdown変更後、Node 24・FFmpeg環境の `make check`、Playwright Chromiumの全E2E、CI `container` 相当（Compose構文、本番/開発image build、非root、health、再起動後永続）が成功。production dependency auditは0件。
+- GitHub Actions run #34073823834（commit `ec5f3994`）の `check` / `e2e` / `container` がすべて成功。
 
 ## 対象サーバーでのみ完了できる項目
 
