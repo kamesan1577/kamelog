@@ -11,6 +11,8 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 未ログイン表示とオーナー操作を分離し、WebAuthnパスキーを実署名検証。
 - 投稿・下書き・プロフィールをSQLite、vlogを同一永続volumeへ保存。
 - vlogをFFmpegで実際に1280x720、2/5/10/30秒へ変換。
+- PCのインラインつぶやき、投稿ショートカット、モーダル内下書き復元、モバイル操作性を実装。
+- 10秒以下vlogの無音ループと即時停止、リンクコピー/X共有、投稿別OGP画像を実装。
 - revision競合、Origin/CSRF、入力上限、媒体Range、rate limitをAPIで処理。
 - DB/媒体のhash manifest付きbackup/restoreと全パスキー喪失時のoffline reset。
 - Node 24の非root本番image、開発Compose、CIのcheck/e2e/container job。
