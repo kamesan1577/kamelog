@@ -72,6 +72,7 @@ PageSpeed Insights APIを使う場合はmobile / desktopを分ける。429の場
 
 ## 5. 記録テンプレート
 
+<!-- prettier-ignore -->
 | date | target | strategy | LCP | INP | CLS | TTFB | note |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | YYYY-MM-DD | home | mobile |  |  |  |  |  |
