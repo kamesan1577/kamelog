@@ -13,7 +13,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     }),
   ).toBeVisible();
   await expect(page.getByText("このサイトを書いている人")).toBeVisible();
-  await expect(page.getByRole("button", { name: /ブログ/ })).toBeVisible();
+  await expect(
+    page.locator(".content-cards").getByRole("button", { name: /ブログ/ }),
+  ).toBeVisible();
   await expect(page.locator(".desktop-composer")).toHaveCount(0);
   await expect(page.locator(".mobile-create")).toHaveCount(0);
   await page
