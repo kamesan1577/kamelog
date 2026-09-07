@@ -24,5 +24,5 @@ branch protectionの設定は管理権限が必要。設定されていないな
 本番配布はADR 0005のpull方式を採用する。
 systemdがアプリのboot起動と更新timerを管理し、更新scriptは成功済みpush CIのSHAとmain先頭が一致するまでdeployしない。
 GitHub Actions runnerへ本番サーバー資格情報を渡さない。
-自動更新は停止状態の整合backupを先に作り、health失敗時に直前コードを再起動する。
+自動更新は停止状態の整合backupを先に作る。backup後は直前コードを再開した状態で新imageをbuildし、切替停止時間を起動に必要な範囲へ限定する。health失敗時は直前コードを再起動する。
 schema非互換時のデータrollbackは自動化せず、runbookに従い別volumeへ復元する。

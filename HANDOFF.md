@@ -19,6 +19,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - DB/媒体のhash manifest付きbackup/restoreと全パスキー喪失時のoffline reset。
 - Node 24の非root本番image、開発Compose、CIのcheck/e2e/container job。
 - 成功済みmain CIだけを取得するpull型自動deploy、停止backup、health、コードrollback、systemd boot起動。
+- 自動deployは整合backup後に直前releaseを再開してから新imageをbuildし、build中の公開停止を避ける。
 - ブログMarkdownはCommonMark/GFMを表示し、記法ツールバー、全記法ヘルプ、言語指定コードのシンタックスハイライトを提供する。パースは `react-markdown` / `remark-gfm`、ハイライトは `rehype-highlight` / `highlight.js` に任せ、生HTMLは無効のまま維持する。
 - ブログ本文への画像D&Dと画像追加ボタン、Mermaidコードブロック、単独行のYouTube/X投稿URL埋め込みを実装。つぶやきは画像のみを含め最大4枚をD&D/選択でき、1〜4枚グリッドと拡大表示を提供する。
 - AGENTS、仕様、不変条件、ADR、脅威モデル、runbook、リポジトリ固有skillsを整備。
