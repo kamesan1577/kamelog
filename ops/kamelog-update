@@ -99,6 +99,9 @@ if ! "${compose[@]}" run --rm --no-deps \
   fail "backup failed; current release was restarted"
 fi
 
+log "backup completed; restarting current release before build"
+"${compose[@]}" up -d app
+
 log "deploying CI-approved revision $remote_sha"
 git checkout --quiet --detach "$remote_sha"
 "${compose[@]}" build app

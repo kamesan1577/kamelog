@@ -17,14 +17,27 @@ test("deployment is serialized and restricted to a successful main CI commit", (
   assert.match(script, /remote_sha" != "\$ci_sha/);
 });
 
-test("deployment takes a stopped backup before changing revisions", () => {
+test("deployment takes a stopped backup and restores service before building", () => {
   const stop = script.indexOf('"${compose[@]}" stop app');
   const backup = script.indexOf("scripts/admin.mjs backup");
+  const resumeLog = script.indexOf(
+    'log "backup completed; restarting current release before build"',
+    backup,
+  );
+  const restart = script.indexOf('"${compose[@]}" up -d app', resumeLog);
   const checkout = script.indexOf(
     'git checkout --quiet --detach "$remote_sha"',
   );
+  const build = script.indexOf('"${compose[@]}" build app', checkout);
 
-  assert.ok(stop >= 0 && backup > stop && checkout > backup);
+  assert.ok(
+    stop >= 0 &&
+      backup > stop &&
+      resumeLog > backup &&
+      restart > resumeLog &&
+      checkout > restart &&
+      build > checkout,
+  );
   assert.doesNotMatch(script, /down\s+(?:[^\n]*\s)?-v/);
 });
 

@@ -84,7 +84,7 @@ curl --fail http://127.0.0.1:3000/api/health
 ## 自動更新
 
 `kamelog-update.timer` は約5分ごとに公開GitHub APIと `origin/main` を照合する。
-main先頭と成功済みpush CIのSHAが一致した場合だけ、アプリ停止、backup、checkout、build、起動、health確認を行う。
+main先頭と成功済みpush CIのSHAが一致した場合だけ、アプリ停止、backup、直前release再開、checkout、build、切替、health確認を行う。build中は直前releaseを提供し、停止時間は整合backupとコンテナ切替に限定する。
 GitHub Actionsから本番サーバーへの接続や受信ポートの追加は不要。
 
 初回は手動で実行し、ログと状態を確認する。
@@ -103,8 +103,8 @@ deploy script自体とsystemd unitはroot所有の固定コピーであり、Git
 
 ## 更新・ロールバック
 
-更新前にアプリを停止しbackupを取得する。通常の停止で `down -v` を使わない。
-更新imageを起動、healthと匿名閲覧・ログイン・投稿を確認する。
+更新前にアプリを停止しbackupを取得した後、直前releaseを再開してから更新imageをbuildする。通常の停止で `down -v` を使わない。
+更新imageへ切り替え、healthと匿名閲覧・ログイン・投稿を確認する。
 schema非互換変更時は古いimageだけに戻さず、更新前backupを空volumeへ復元する。
 旧volumeは検証完了まで保持する。
 
