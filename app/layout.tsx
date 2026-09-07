@@ -3,6 +3,7 @@ import "highlight.js/styles/github.css";
 import "./globals.css";
 import "./mobile-blog-editor.css";
 import "./x-share-logo.css";
+import "./composer-layout.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.KAMELOG_ORIGIN || "http://localhost:3000"),
