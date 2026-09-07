@@ -9,11 +9,13 @@
 | I03/I04 UI   | PC/スマホ、ナビアイコン、検索位置、投稿導線・ショートカット、公開画面に管理UIなし                        | CSS契約・E2E      |
 | I05 下書き   | 外タップ/Esc確認、保存と復元、失敗時入力保持                                                             | API・E2E          |
 | I06 媒体     | 不正形式、過大upload、path traversal、画像magic/寸法、4枚上限、実16:9変換、投稿参照整合性                | 媒体テスト        |
-| 閲覧・共有   | 投稿詳細URLと戻る/進む履歴同期、短尺vlog、画像グリッド/拡大、Mermaid、YouTube/X埋め込み、共有分離、投稿別OGP | unit・E2E         |
+| 閲覧・共有   | 短尺vlog、画像グリッド/拡大、Mermaid、YouTube/X埋め込み、共有分離、投稿別OGP                             | unit・E2E         |
 | I08/I09 保存 | 再起動、更新競合、migration、整合バックアップ、空の別ディレクトリ復元、破損拒否                          | storeテスト       |
 | I10 公開     | 秘密値・実データ・私的マーカー・コミット名義、検査自身のnegative fixture                                 | public-repo-check |
 | I11 配布     | 空DB起動、health、非root、永続volume、再起動後保存                                                       | container         |
 | I12 自動更新 | main先頭と成功CIの一致、排他、停止backup、health、失敗時rollback、volume非削除                            | deploy契約テスト  |
+
+閲覧・共有のE2Eは、投稿詳細URLと詳細内の戻る、ブラウザの戻る/進むが同期することも確認する。
 
 `make check` は公開検査・型検査・lint・テスト・本番buildを集約する。
 `make e2e` は実アプリに対してブラウザjourneyを実行する。retryは0、fixtureは固定、テスト間でデータを隔離する。
