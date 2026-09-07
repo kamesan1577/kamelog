@@ -39,7 +39,8 @@ test("desktop blog actions stay beside content while scrolling", async ({
 
   expect(before).not.toBeNull();
   expect(articleBox).not.toBeNull();
-  if (!before || !articleBox) throw new Error("desktop action rail unavailable");
+  if (!before || !articleBox)
+    throw new Error("desktop action rail unavailable");
 
   expect(before.x + before.width).toBeLessThan(articleBox.x);
   await page.evaluate(() => window.scrollTo(0, 600));
@@ -47,7 +48,9 @@ test("desktop blog actions stay beside content while scrolling", async ({
   expect(after).not.toBeNull();
   if (!after) throw new Error("desktop action rail unavailable after scroll");
   expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(2);
-  await expect(page.getByRole("button", { name: "リンクをコピー" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "リンクをコピー" }),
+  ).toBeVisible();
   await expect(page.getByRole("button", { name: "Xで共有" })).toBeVisible();
 });
 
@@ -67,6 +70,7 @@ test("mobile blog actions float above bottom navigation", async ({ page }) => {
   await page.evaluate(() => window.scrollTo(0, 600));
   const after = await actions.boundingBox();
   expect(after).not.toBeNull();
-  if (!after) throw new Error("mobile floating actions unavailable after scroll");
+  if (!after)
+    throw new Error("mobile floating actions unavailable after scroll");
   expect(Math.abs(after.y - before.y)).toBeLessThanOrEqual(2);
 });
