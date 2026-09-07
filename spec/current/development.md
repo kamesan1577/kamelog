@@ -15,6 +15,8 @@
 | I11 配布     | 空DB起動、health、非root、永続volume、再起動後保存                                        | container         |
 | I12 自動更新 | main先頭と成功CIの一致、排他、停止backup、health、失敗時rollback、volume非削除            | deploy契約テスト  |
 
+閲覧・共有のE2Eは、投稿詳細URLと詳細内の戻る、ブラウザの戻る/進むが同期することも確認する。
+
 `make check` は公開検査・型検査・lint・テスト・本番buildを集約する。
 `make e2e` は実アプリに対してブラウザjourneyを実行する。retryは0、fixtureは固定、テスト間でデータを隔離する。
 CIはcheck/e2e/containerを別jobとして失敗を可視化する。失敗成果物は架空データに限定する。

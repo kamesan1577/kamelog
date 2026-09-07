@@ -60,6 +60,7 @@ import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
 
 type Kind = "blog" | "tweet" | "vlog";
+type View = "home" | "projects" | "account";
 type BlogEditorMode = "edit" | "preview" | "split";
 type Post = {
   revision?: number;
@@ -85,11 +86,48 @@ type Draft = {
   savedAt: string;
   images?: string[];
 };
+type NavigationState = {
+  view: View;
+  post: string | null;
+  internal: boolean;
+};
 const label: Record<Kind, string> = {
   blog: "ブログ",
   tweet: "つぶやき",
   vlog: "vlog",
 };
+const navigationStateKey = "__kamelogNavigation";
+
+function baseHistoryState(): Record<string, unknown> {
+  const state = window.history.state;
+  return state && typeof state === "object" && !Array.isArray(state)
+    ? (state as Record<string, unknown>)
+    : {};
+}
+function isView(value: unknown): value is View {
+  return value === "home" || value === "projects" || value === "account";
+}
+function readNavigationState(): NavigationState | null {
+  const candidate = baseHistoryState()[navigationStateKey];
+  if (!candidate || typeof candidate !== "object") return null;
+  if (Array.isArray(candidate)) return null;
+  const { view, post, internal } = candidate as Partial<NavigationState>;
+  if (!isView(view)) return null;
+  if (post != null && typeof post !== "string") return null;
+  return { view, post: post ?? null, internal: internal === true };
+}
+function postFromLocation() {
+  return new URL(window.location.href).searchParams.get("post");
+}
+function navigationUrl(post: string | null) {
+  const url = new URL(window.location.href);
+  if (post) url.searchParams.set("post", post);
+  else url.searchParams.delete("post");
+  return url.pathname + url.search + url.hash;
+}
+function navigationHistoryState(next: NavigationState) {
+  return { ...baseHistoryState(), [navigationStateKey]: next };
+}
 
 function Avatar({
   value = "🐢",
@@ -426,7 +464,7 @@ export default function Notebook({
     [drafts, setDrafts] = useState<Draft[]>([]),
     [ready, setReady] = useState(false);
   const [login, setLogin] = useState(false),
-    [view, setView] = useState<"home" | "projects" | "account">("home"),
+    [view, setView] = useState<View>("home"),
     [filter, setFilter] = useState<"all" | Kind>("all"),
     [query, setQuery] = useState(""),
     [tag, setTag] = useState(""),
@@ -506,13 +544,71 @@ export default function Notebook({
   useEffect(() => {
     if (live.current && stream) live.current.srcObject = stream;
   }, [stream, editor, kind, vMode]);
-  const nav = (v: "home" | "projects" | "account") => {
+  useEffect(() => {
+    const syncNavigation = () => {
+      const post = postFromLocation();
+      const state = readNavigationState();
+      setView(post ? "home" : (state?.view ?? "home"));
+      setSelected(post);
+      if (post) setTag("");
+    };
+    if (!readNavigationState()) {
+      const post = postFromLocation();
+      window.history.replaceState(
+        navigationHistoryState({ view: "home", post, internal: false }),
+        "",
+        navigationUrl(post),
+      );
+    }
+    syncNavigation();
+    window.addEventListener("popstate", syncNavigation);
+    return () => window.removeEventListener("popstate", syncNavigation);
+  }, []);
+  const nav = (v: View) => {
+    const post = postFromLocation();
+    const state = readNavigationState();
+    if (post || (state?.view ?? "home") !== v) {
+      window.history.pushState(
+        navigationHistoryState({ view: v, post: null, internal: true }),
+        "",
+        navigationUrl(null),
+      );
+    }
     setView(v);
     setSelected(null);
     setTag("");
-    if (v === "home" && window.location.search) {
-      window.history.replaceState({}, "", window.location.pathname);
+  };
+  const openPost = (id: string) => {
+    if (postFromLocation() !== id) {
+      window.history.pushState(
+        navigationHistoryState({ view: "home", post: id, internal: true }),
+        "",
+        navigationUrl(id),
+      );
     }
+    setView("home");
+    setSelected(id);
+    setTag("");
+  };
+  const closePost = () => {
+    const post = postFromLocation();
+    if (!post) {
+      setSelected(null);
+      return;
+    }
+    const state = readNavigationState();
+    if (state?.internal && state.post === post) {
+      window.history.back();
+      return;
+    }
+    window.history.replaceState(
+      navigationHistoryState({ view: "home", post: null, internal: false }),
+      "",
+      navigationUrl(null),
+    );
+    setView("home");
+    setSelected(null);
+    setTag("");
   };
   const replaceMarkdownSelection = (
     makeReplacement: (selected: string) => {
@@ -1290,10 +1386,7 @@ export default function Notebook({
                 </section>
               ) : item ? (
                 <section className="detail-page">
-                  <button
-                    className="back-button"
-                    onClick={() => setSelected(null)}
-                  >
+                  <button className="back-button" onClick={closePost}>
                     <ArrowLeft size={17} />
                     戻る
                   </button>
@@ -1487,7 +1580,7 @@ export default function Notebook({
                             <VlogFrame post={p} />
                             <button
                               className="open-vlog-detail"
-                              onClick={() => setSelected(p.id)}
+                              onClick={() => openPost(p.id)}
                             >
                               詳細
                             </button>
@@ -1495,7 +1588,7 @@ export default function Notebook({
                         ) : (
                           <button
                             className="post-focus"
-                            onClick={() => setSelected(p.id)}
+                            onClick={() => openPost(p.id)}
                           >
                             {p.kind === "blog" ? (
                               <>

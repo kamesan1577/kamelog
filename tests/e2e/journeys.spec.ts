@@ -265,6 +265,55 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page
     .getByRole("heading", { name: "架空のブログ", exact: true })
     .click();
+
+  const openedPostId = new URL(page.url()).searchParams.get("post");
+  expect(openedPostId).toBeTruthy();
+  await page.getByRole("button", { name: "戻る", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "ホーム", exact: true }),
+  ).toBeVisible();
+  expect(new URL(page.url()).searchParams.has("post")).toBe(false);
+  await page.goForward();
+  await expect(page.locator(".detail-page")).toBeVisible();
+  expect(new URL(page.url()).searchParams.get("post")).toBe(openedPostId);
+  await page.goBack();
+  await expect(
+    page.getByRole("heading", { name: "ホーム", exact: true }),
+  ).toBeVisible();
+  expect(new URL(page.url()).searchParams.has("post")).toBe(false);
+
+  await page
+    .getByRole("heading", { name: "架空のブログ", exact: true })
+    .click();
+  await page.goBack();
+  await expect(
+    page.getByRole("heading", { name: "ホーム", exact: true }),
+  ).toBeVisible();
+  expect(new URL(page.url()).searchParams.has("post")).toBe(false);
+  await page.goForward();
+  await expect(page.locator(".detail-page")).toBeVisible();
+  expect(new URL(page.url()).searchParams.get("post")).toBe(openedPostId);
+
+  await page.locator(".site-name").click();
+  await expect(
+    page.getByRole("heading", { name: "ホーム", exact: true }),
+  ).toBeVisible();
+  expect(new URL(page.url()).searchParams.has("post")).toBe(false);
+  await page.goBack();
+  await expect(page.locator(".detail-page")).toBeVisible();
+  expect(new URL(page.url()).searchParams.get("post")).toBe(openedPostId);
+
+  await page.goto("/?post=" + openedPostId);
+  await expect(page.locator(".detail-page")).toBeVisible();
+  await page.getByRole("button", { name: "戻る", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "ホーム", exact: true }),
+  ).toBeVisible();
+  expect(new URL(page.url()).searchParams.has("post")).toBe(false);
+  await page
+    .getByRole("heading", { name: "架空のブログ", exact: true })
+    .click();
+
   await expect(page.locator(".markdown strong")).toHaveText("太字");
   await expect(page.locator(".markdown ul > li").first()).toHaveText(
     "箇条書き",
@@ -292,6 +341,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   const blog = posts.find(
     (post: { title: string }) => post.title === "架空のブログ",
   );
+  expect(blog.id).toBe(openedPostId);
   const shared = await page.request.get("/?post=" + blog.id);
   expect(await shared.text()).toContain('property="og:image"');
   const og = await page.request.get("/og?post=" + blog.id);
