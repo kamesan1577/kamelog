@@ -43,6 +43,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { api, signIn } from "@/lib/api";
 import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 
 type Kind = "blog" | "tweet" | "vlog";
@@ -90,15 +91,65 @@ function Avatar({
     </span>
   );
 }
-function Markdown({ text }: { text: string }) {
+export function Markdown({ text }: { text: string }) {
   return (
     <div className="markdown">
-      <ReactMarkdown remarkPlugins={[remarkGfm]} skipHtml>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[[rehypeHighlight, { detect: false }]]}
+        skipHtml
+      >
         {text}
       </ReactMarkdown>
     </div>
   );
 }
+
+const markdownHelp = [
+  ["段落", "空行で段落を分ける", "1つ目の段落\n\n2つ目の段落"],
+  ["改行", "行末に半角スペース2つ、または \\ を置く", "1行目  \n2行目"],
+  ["見出し", "# は1〜6個まで使える", "## 見出し2\n### 見出し3"],
+  ["太字", "文字を ** で囲む", "**太字**"],
+  ["斜体", "文字を _ で囲む", "_斜体_"],
+  ["取り消し線", "文字を ~~ で囲む", "~~取り消し~~"],
+  ["箇条書き", "-、*、+ のいずれかを使う", "- 項目1\n- 項目2"],
+  ["番号付きリスト", "数字とピリオドを使う", "1. 項目1\n2. 項目2"],
+  ["入れ子リスト", "子項目をスペースで字下げする", "- 親\n  - 子"],
+  [
+    "チェックリスト",
+    "角括弧内には半角スペースか x を入れる",
+    "- [ ] 未完了\n- [x] 完了",
+  ],
+  ["引用", "行頭に > を付ける", "> 引用文"],
+  ["リンク", "表示文字とURLを書く", "[リンク](https://example.com)"],
+  [
+    "URLの自動リンク",
+    "URLまたはメールアドレスを山括弧で囲む",
+    "<https://example.com>",
+  ],
+  [
+    "画像",
+    "先頭に ! を付け、代替テキストと画像URLを書く",
+    "![代替テキスト](https://example.com/image.png)",
+  ],
+  ["インラインコード", "文字を ` で囲む", "`const value = 1`"],
+  [
+    "コードブロック",
+    "``` の直後に言語名を書くと色分けされる",
+    "```javascript\nconst answer = 42;\n```",
+  ],
+  [
+    "表",
+    "2行目で列と位置揃えを指定する",
+    "| 左 | 中央 | 右 |\n| :-- | :--: | --: |\n| A | B | C |",
+  ],
+  ["区切り線", "ハイフンを3個以上並べる", "---"],
+  [
+    "エスケープ",
+    "記号の直前に \\ を置いて、そのまま表示する",
+    "\\*斜体にしない\\*",
+  ],
+] as const;
 
 export function PreviewShell() {
   const [mode, setMode] = useState("auto"),
@@ -231,6 +282,7 @@ export default function Notebook({
     [draftId, setDraftId] = useState<string | null>(null),
     [editorStart, setEditorStart] = useState(""),
     [preview, setPreview] = useState(false),
+    [markdownHelpOpen, setMarkdownHelpOpen] = useState(false),
     [closeAsk, setCloseAsk] = useState(false),
     [draftList, setDraftList] = useState(false),
     [remove, setRemove] = useState<string | null>(null);
@@ -249,6 +301,7 @@ export default function Notebook({
   const live = useRef<HTMLVideoElement>(null),
     rec = useRef<MediaRecorder | null>(null),
     clipData = useRef<Blob | null>(null),
+    bodyInput = useRef<HTMLTextAreaElement>(null),
     urls = useRef<string[]>([]);
   useEffect(() => {
     let cancelled = false;
@@ -291,6 +344,91 @@ export default function Notebook({
     setView(v);
     setSelected(null);
     setTag("");
+  };
+  const replaceMarkdownSelection = (
+    makeReplacement: (selected: string) => {
+      value: string;
+      selectionStart?: number;
+      selectionLength?: number;
+    },
+  ) => {
+    const input = bodyInput.current;
+    const start = input?.selectionStart ?? body.length;
+    const end = input?.selectionEnd ?? body.length;
+    const replacement = makeReplacement(body.slice(start, end));
+    setBody(body.slice(0, start) + replacement.value + body.slice(end));
+    requestAnimationFrame(() => {
+      const selectionStart = start + (replacement.selectionStart ?? 0);
+      const selectionEnd =
+        selectionStart +
+        (replacement.selectionLength ?? replacement.value.length);
+      bodyInput.current?.focus();
+      bodyInput.current?.setSelectionRange(selectionStart, selectionEnd);
+    });
+  };
+  const wrapMarkdown = (before: string, after: string, fallback: string) =>
+    replaceMarkdownSelection((selected) => {
+      const content = selected || fallback;
+      return {
+        value: before + content + after,
+        selectionStart: before.length,
+        selectionLength: content.length,
+      };
+    });
+  const insertMarkdownBlock = (content: string) =>
+    replaceMarkdownSelection(() => {
+      const input = bodyInput.current;
+      const start = input?.selectionStart ?? body.length;
+      const end = input?.selectionEnd ?? body.length;
+      const before = start > 0 && body[start - 1] !== "\n" ? "\n\n" : "";
+      const after = end < body.length && body[end] !== "\n" ? "\n\n" : "";
+      return { value: before + content + after, selectionStart: before.length };
+    });
+  const wrapMarkdownBlock = (before: string, after: string, fallback: string) =>
+    replaceMarkdownSelection((selected) => {
+      const input = bodyInput.current;
+      const start = input?.selectionStart ?? body.length;
+      const end = input?.selectionEnd ?? body.length;
+      const leading = start > 0 && body[start - 1] !== "\n" ? "\n\n" : "";
+      const trailing = end < body.length && body[end] !== "\n" ? "\n\n" : "";
+      const content = selected || fallback;
+      return {
+        value: leading + before + content + after + trailing,
+        selectionStart: leading.length + before.length,
+        selectionLength: content.length,
+      };
+    });
+  const prefixMarkdownLines = (
+    prefix: string | ((index: number) => string),
+    fallback: string,
+  ) => {
+    const input = bodyInput.current;
+    const start = input?.selectionStart ?? body.length;
+    const end = input?.selectionEnd ?? body.length;
+    const lineStart = body.lastIndexOf("\n", start - 1) + 1;
+    const nextLineBreak = body.indexOf("\n", end);
+    const lineEnd =
+      start === end
+        ? nextLineBreak === -1
+          ? body.length
+          : nextLineBreak
+        : end;
+    const original = body.slice(lineStart, lineEnd) || fallback;
+    const content = original
+      .split("\n")
+      .map(
+        (line, index) =>
+          (typeof prefix === "string" ? prefix : prefix(index)) + line,
+      )
+      .join("\n");
+    setBody(body.slice(0, lineStart) + content + body.slice(lineEnd));
+    requestAnimationFrame(() => {
+      bodyInput.current?.focus();
+      bodyInput.current?.setSelectionRange(
+        lineStart,
+        lineStart + content.length,
+      );
+    });
   };
   const openEditor = (k: Kind = "tweet", p?: Post, d?: Draft) => {
     const t = p?.title ?? d?.title ?? "",
@@ -1241,17 +1379,141 @@ export default function Notebook({
                 />
               )}
               {kind === "blog" && (
-                <div className="editor-tools">
-                  <button onClick={() => setBody((b) => b + "\n## 見出し\n")}>
-                    H2
-                  </button>
-                  <button onClick={() => setBody((b) => b + "**太字**")}>
-                    B
-                  </button>
-                  <button onClick={() => setBody((b) => b + "\n```go\n\n```")}>
-                    コード
+                <div
+                  className="editor-tools"
+                  role="toolbar"
+                  aria-label="Markdown記法"
+                >
+                  <div className="editor-tool-list">
+                    <button
+                      type="button"
+                      aria-label="見出し"
+                      onClick={() => prefixMarkdownLines("## ", "見出し")}
+                    >
+                      見出し
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="太字"
+                      onClick={() => wrapMarkdown("**", "**", "太字")}
+                    >
+                      太字
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="斜体"
+                      onClick={() => wrapMarkdown("_", "_", "斜体")}
+                    >
+                      斜体
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="取り消し線"
+                      onClick={() => wrapMarkdown("~~", "~~", "取り消し")}
+                    >
+                      取消
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="引用"
+                      onClick={() => prefixMarkdownLines("> ", "引用文")}
+                    >
+                      引用
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="箇条書き"
+                      onClick={() => prefixMarkdownLines("- ", "項目")}
+                    >
+                      ・リスト
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="番号付きリスト"
+                      onClick={() =>
+                        prefixMarkdownLines((index) => `${index + 1}. `, "項目")
+                      }
+                    >
+                      1. リスト
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="チェックリスト"
+                      onClick={() => prefixMarkdownLines("- [ ] ", "項目")}
+                    >
+                      ☑ リスト
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="リンク"
+                      onClick={() =>
+                        wrapMarkdown("[", "](https://example.com)", "リンク")
+                      }
+                    >
+                      リンク
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="画像"
+                      onClick={() =>
+                        wrapMarkdown(
+                          "![",
+                          "](https://example.com/image.png)",
+                          "代替テキスト",
+                        )
+                      }
+                    >
+                      画像
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="インラインコード"
+                      onClick={() => wrapMarkdown("`", "`", "code")}
+                    >
+                      `code`
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="コードブロック"
+                      onClick={() =>
+                        wrapMarkdownBlock(
+                          "```javascript\n",
+                          "\n```",
+                          "const answer = 42;",
+                        )
+                      }
+                    >
+                      コード
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="表"
+                      onClick={() =>
+                        insertMarkdownBlock(
+                          "| 列1 | 列2 |\n| --- | --- |\n| 値1 | 値2 |",
+                        )
+                      }
+                    >
+                      表
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="区切り線"
+                      onClick={() => insertMarkdownBlock("---")}
+                    >
+                      区切り
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    className="markdown-help-link"
+                    aria-label="Markdownヘルプ"
+                    onClick={() => setMarkdownHelpOpen(true)}
+                  >
+                    ヘルプ
                   </button>
                   <button
+                    type="button"
                     className="preview-toggle"
                     onClick={() => setPreview((x) => !x)}
                   >
@@ -1266,6 +1528,7 @@ export default function Notebook({
                 </div>
               ) : (
                 <textarea
+                  ref={bodyInput}
                   className={"body-input " + kind}
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
@@ -1281,6 +1544,25 @@ export default function Notebook({
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={markdownHelpOpen} onOpenChange={setMarkdownHelpOpen}>
+        <DialogContent className="markdown-help-dialog">
+          <DialogTitle>Markdown記法ヘルプ</DialogTitle>
+          <DialogDescription>
+            ブログで使えるCommonMarkとGFMの記法です。生HTMLは表示されません。
+          </DialogDescription>
+          <div className="markdown-help-list">
+            {markdownHelp.map(([name, description, syntax]) => (
+              <section key={name}>
+                <h3>{name}</h3>
+                <p>{description}</p>
+                <pre>
+                  <code>{syntax}</code>
+                </pre>
+              </section>
+            ))}
+          </div>
         </DialogContent>
       </Dialog>
       <Dialog open={closeAsk} onOpenChange={setCloseAsk}>

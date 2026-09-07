@@ -87,14 +87,59 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .getByRole("button", { name: "ブログ", exact: true })
     .click();
   await page.getByPlaceholder("タイトル", { exact: true }).fill("架空のブログ");
-  await page
-    .getByPlaceholder("本文", { exact: true })
-    .fill("## 見出し\n\n**太字**\n\n<script>alert(1)</script>");
+  const markdownToolbar = page.getByRole("toolbar", {
+    name: "Markdown記法",
+  });
+  for (const name of [
+    "見出し",
+    "太字",
+    "斜体",
+    "取り消し線",
+    "引用",
+    "箇条書き",
+    "番号付きリスト",
+    "チェックリスト",
+    "リンク",
+    "画像",
+    "インラインコード",
+    "コードブロック",
+    "表",
+    "区切り線",
+  ]) {
+    await expect(markdownToolbar.getByRole("button", { name })).toBeVisible();
+  }
+  await markdownToolbar.getByRole("button", { name: "Markdownヘルプ" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Markdown記法ヘルプ" }),
+  ).toBeVisible();
+  await expect(page.getByText("- [ ] 未完了")).toBeVisible();
+  await expect(page.getByText("```javascript")).toBeVisible();
+  await page.keyboard.press("Escape");
+  const blogBody = page.getByPlaceholder("本文", { exact: true });
+  await markdownToolbar.getByRole("button", { name: "箇条書き" }).click();
+  await expect(blogBody).toHaveValue("- 項目");
+  await blogBody.fill(
+    "## 見出し\n\n**太字**\n\n- 箇条書き\n- [ ] 未完了\n- [x] 完了\n\n```javascript\nconst answer = 42;\n```\n\n<script>alert(1)</script>",
+  );
   await page.getByRole("button", { name: "投稿", exact: true }).click();
   await page
     .getByRole("heading", { name: "架空のブログ", exact: true })
     .click();
   await expect(page.locator(".markdown strong")).toHaveText("太字");
+  await expect(page.locator(".markdown ul > li").first()).toHaveText(
+    "箇条書き",
+  );
+  expect(
+    await page
+      .locator(".markdown ul")
+      .first()
+      .evaluate((element) => getComputedStyle(element).listStyleType),
+  ).not.toBe("none");
+  await expect(page.locator('.markdown input[type="checkbox"]')).toHaveCount(2);
+  await expect(page.locator(".markdown pre code.hljs")).toContainText(
+    "const answer = 42;",
+  );
+  await expect(page.locator(".markdown .hljs-keyword")).toHaveText("const");
   await expect(page.locator(".markdown script")).toHaveCount(0);
   await page.getByRole("button", { name: "ログアウト", exact: true }).click();
   await expect(page.locator(".desktop-composer")).toHaveCount(0);
