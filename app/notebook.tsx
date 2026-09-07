@@ -77,13 +77,13 @@ type Draft = {
   savedAt: string;
 };
 const label: Record<Kind, string> = {
-  blog: "ブログ",
-  tweet: "つぶやき",
+  blog: "ãã­ã°",
+  tweet: "ã¤ã¶ãã",
   vlog: "vlog",
 };
 
 function Avatar({
-  value = "🐢",
+  value = "ð¢",
   large = false,
 }: {
   value?: string;
@@ -92,7 +92,7 @@ function Avatar({
   return (
     <span className={"avatar " + (large ? "large" : "")}>
       {value.startsWith("data:image/") ? (
-        <img src={value} alt="プロフィール" />
+        <img src={value} alt="ãã­ãã£ã¼ã«" />
       ) : (
         value
       )}
@@ -114,48 +114,48 @@ export function Markdown({ text }: { text: string }) {
 }
 
 const markdownHelp = [
-  ["段落", "空行で段落を分ける", "1つ目の段落\n\n2つ目の段落"],
-  ["改行", "行末に半角スペース2つ、または \\ を置く", "1行目  \n2行目"],
-  ["見出し", "# は1〜6個まで使える", "## 見出し2\n### 見出し3"],
-  ["太字", "文字を ** で囲む", "**太字**"],
-  ["斜体", "文字を _ で囲む", "_斜体_"],
-  ["取り消し線", "文字を ~~ で囲む", "~~取り消し~~"],
-  ["箇条書き", "-、*、+ のいずれかを使う", "- 項目1\n- 項目2"],
-  ["番号付きリスト", "数字とピリオドを使う", "1. 項目1\n2. 項目2"],
-  ["入れ子リスト", "子項目をスペースで字下げする", "- 親\n  - 子"],
+  ["æ®µè½", "ç©ºè¡ã§æ®µè½ãåãã", "1ã¤ç®ã®æ®µè½\n\n2ã¤ç®ã®æ®µè½"],
+  ["æ¹è¡", "è¡æ«ã«åè§ã¹ãã¼ã¹2ã¤ãã¾ãã¯ \\ ãç½®ã", "1è¡ç®  \n2è¡ç®"],
+  ["è¦åºã", "# ã¯1ã6åã¾ã§ä½¿ãã", "## è¦åºã2\n### è¦åºã3"],
+  ["å¤ªå­", "æå­ã ** ã§å²ã", "**å¤ªå­**"],
+  ["æä½", "æå­ã _ ã§å²ã", "_æä½_"],
+  ["åãæ¶ãç·", "æå­ã ~~ ã§å²ã", "~~åãæ¶ã~~"],
+  ["ç®æ¡æ¸ã", "-ã*ã+ ã®ãããããä½¿ã", "- é ç®1\n- é ç®2"],
+  ["çªå·ä»ããªã¹ã", "æ°å­ã¨ããªãªããä½¿ã", "1. é ç®1\n2. é ç®2"],
+  ["å¥ãå­ãªã¹ã", "å­é ç®ãã¹ãã¼ã¹ã§å­ä¸ããã", "- è¦ª\n  - å­"],
   [
-    "チェックリスト",
-    "角括弧内には半角スペースか x を入れる",
-    "- [ ] 未完了\n- [x] 完了",
+    "ãã§ãã¯ãªã¹ã",
+    "è§æ¬å¼§åã«ã¯åè§ã¹ãã¼ã¹ã x ãå¥ãã",
+    "- [ ] æªå®äº\n- [x] å®äº",
   ],
-  ["引用", "行頭に > を付ける", "> 引用文"],
-  ["リンク", "表示文字とURLを書く", "[リンク](https://example.com)"],
+  ["å¼ç¨", "è¡é ­ã« > ãä»ãã", "> å¼ç¨æ"],
+  ["ãªã³ã¯", "è¡¨ç¤ºæå­ã¨URLãæ¸ã", "[ãªã³ã¯](https://example.com)"],
   [
-    "URLの自動リンク",
-    "URLまたはメールアドレスを山括弧で囲む",
+    "URLã®èªåãªã³ã¯",
+    "URLã¾ãã¯ã¡ã¼ã«ã¢ãã¬ã¹ãå±±æ¬å¼§ã§å²ã",
     "<https://example.com>",
   ],
   [
-    "画像",
-    "先頭に ! を付け、代替テキストと画像URLを書く",
-    "![代替テキスト](https://example.com/image.png)",
+    "ç»å",
+    "åé ­ã« ! ãä»ããä»£æ¿ãã­ã¹ãã¨ç»åURLãæ¸ã",
+    "![ä»£æ¿ãã­ã¹ã](https://example.com/image.png)",
   ],
-  ["インラインコード", "文字を ` で囲む", "`const value = 1`"],
+  ["ã¤ã³ã©ã¤ã³ã³ã¼ã", "æå­ã ` ã§å²ã", "`const value = 1`"],
   [
-    "コードブロック",
-    "``` の直後に言語名を書くと色分けされる",
+    "ã³ã¼ããã­ãã¯",
+    "``` ã®ç´å¾ã«è¨èªåãæ¸ãã¨è²åãããã",
     "```javascript\nconst answer = 42;\n```",
   ],
   [
-    "表",
-    "2行目で列と位置揃えを指定する",
-    "| 左 | 中央 | 右 |\n| :-- | :--: | --: |\n| A | B | C |",
+    "è¡¨",
+    "2è¡ç®ã§åã¨ä½ç½®æããæå®ãã",
+    "| å·¦ | ä¸­å¤® | å³ |\n| :-- | :--: | --: |\n| A | B | C |",
   ],
-  ["区切り線", "ハイフンを3個以上並べる", "---"],
+  ["åºåãç·", "ãã¤ãã³ã3åä»¥ä¸ä¸¦ã¹ã", "---"],
   [
-    "エスケープ",
-    "記号の直前に \\ を置いて、そのまま表示する",
-    "\\*斜体にしない\\*",
+    "ã¨ã¹ã±ã¼ã",
+    "è¨å·ã®ç´åã« \\ ãç½®ãã¦ããã®ã¾ã¾è¡¨ç¤ºãã",
+    "\\*æä½ã«ããªã\\*",
   ],
 ] as const;
 
@@ -176,18 +176,18 @@ export function PreviewShell() {
       <header className="preview-toolbar">
         <span className="preview-brand">
           <b>kamelog</b>
-          <span className="mock-label">モック</span>
+          <span className="mock-label">ã¢ãã¯</span>
         </span>
         <Tabs value={mode} onValueChange={setMode}>
           <TabsList>
-            <TabsTrigger value="auto">自動</TabsTrigger>
+            <TabsTrigger value="auto">èªå</TabsTrigger>
             <TabsTrigger value="desktop">PC</TabsTrigger>
-            <TabsTrigger value="mobile">スマホ</TabsTrigger>
+            <TabsTrigger value="mobile">ã¹ãã</TabsTrigger>
           </TabsList>
         </Tabs>
         <span className="preview-size">
           {mode === "auto"
-            ? "レスポンシブ"
+            ? "ã¬ã¹ãã³ã·ã"
             : mode === "desktop"
               ? "1280 px"
               : "390 px"}
@@ -205,7 +205,7 @@ export function PreviewShell() {
           }}
         >
           <iframe
-            title="サイトプレビュー"
+            title="ãµã¤ããã¬ãã¥ã¼"
             src="/?embed=1"
             allow="camera; microphone"
             style={{
@@ -239,7 +239,7 @@ export default function Notebook({
       return true;
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "操作に失敗しました。",
+        error instanceof Error ? error.message : "æä½ã«å¤±æãã¾ããã",
       );
       return false;
     } finally {
@@ -267,9 +267,9 @@ export default function Notebook({
   const [posts, setPosts] = useState<Post[]>(initialPosts),
     [profile, setProfile] = useState(
       initialProfile ?? {
-        name: "かめさん",
-        icon: "🐢",
-        bio: "つくったものと日々の記録。",
+        name: "ãããã",
+        icon: "ð¢",
+        bio: "ã¤ãã£ããã®ã¨æ¥ãã®è¨é²ã",
       },
     ),
     [liked, setLiked] = useState<string[]>([]),
@@ -325,7 +325,7 @@ export default function Notebook({
           if (!cancelled) setDrafts(saved);
         }
       })
-      .catch(() => toast.error("接続できません。再読み込みしてください。"));
+      .catch(() => toast.error("æ¥ç¶ã§ãã¾ãããåèª­ã¿è¾¼ã¿ãã¦ãã ããã"));
     try {
       const ls = JSON.parse(localStorage.getItem("kamelog-likes") || "[]");
       if (Array.isArray(ls))
@@ -355,6 +355,9 @@ export default function Notebook({
     setView(v);
     setSelected(null);
     setTag("");
+    if (v === "home" && window.location.search) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   };
   const replaceMarkdownSelection = (
     makeReplacement: (selected: string) => {
@@ -509,7 +512,7 @@ export default function Notebook({
       setDrafts((ds) => [saved, ...ds.filter((d) => d.id !== saved.id)]);
       setEditor(false);
       setCloseAsk(false);
-      toast.success("下書きを保存しました");
+      toast.success("ä¸æ¸ããä¿å­ãã¾ãã");
     });
   const discard = () =>
     guard(async () => {
@@ -542,7 +545,7 @@ export default function Notebook({
       setEditor(false);
       nav("home");
       setFilter("all");
-      toast.success(editId ? "更新しました" : "投稿しました");
+      toast.success(editId ? "æ´æ°ãã¾ãã" : "æç¨¿ãã¾ãã");
       if (draftId) {
         try {
           await api("drafts/" + draftId, "DELETE", undefined, {
@@ -550,7 +553,7 @@ export default function Notebook({
           });
           setDrafts((ds) => ds.filter((d) => d.id !== draftId));
         } catch {
-          toast.error("投稿済みです。下書きの削除だけ失敗しました。");
+          toast.error("æç¨¿æ¸ã¿ã§ããä¸æ¸ãã®åé¤ã ãå¤±æãã¾ããã");
         }
       }
     });
@@ -567,7 +570,7 @@ export default function Notebook({
       });
       setPosts((ps) => [saved, ...ps]);
       setInlineBody("");
-      toast.success("投稿しました");
+      toast.success("æç¨¿ãã¾ãã");
     });
   };
   const stopCamera = () => {
@@ -594,7 +597,7 @@ export default function Notebook({
         }),
       );
     } catch {
-      setCameraError("カメラを使えません。動画ファイルは選択できます。");
+      setCameraError("ã«ã¡ã©ãä½¿ãã¾ãããåç»ãã¡ã¤ã«ã¯é¸æã§ãã¾ãã");
     }
   };
   const closeComposer = () => {
@@ -606,7 +609,7 @@ export default function Notebook({
     if (!stream || recording) return;
     if (typeof MediaRecorder === "undefined") {
       setCameraError(
-        "このブラウザでは直接撮影できません。動画ファイルを選んでください。",
+        "ãã®ãã©ã¦ã¶ã§ã¯ç´æ¥æ®å½±ã§ãã¾ãããåç»ãã¡ã¤ã«ãé¸ãã§ãã ããã",
       );
       return;
     }
@@ -671,7 +674,7 @@ export default function Notebook({
       closeComposer();
       nav("home");
       setFilter("all");
-      toast.success("vlogを投稿しました");
+      toast.success("vlogãæç¨¿ãã¾ãã");
     });
   const shown = posts
     .filter(
@@ -698,7 +701,7 @@ export default function Notebook({
     <div className="post-meta">
       <Avatar value={profile.icon} />
       <b>{profile.name}</b>
-      <span>·</span>
+      <span>Â·</span>
       <time>
         {new Date(p.date).toLocaleDateString("ja-JP", {
           month: "numeric",
@@ -727,11 +730,11 @@ export default function Notebook({
       <button
         onClick={async () => {
           await navigator.clipboard.writeText(postUrl(p.id));
-          toast.success("リンクをコピーしました");
+          toast.success("ãªã³ã¯ãã³ãã¼ãã¾ãã");
         }}
       >
         <Share2 size={16} />
-        リンクをコピー
+        ãªã³ã¯ãã³ãã¼
       </button>
       <button
         onClick={() => {
@@ -742,7 +745,7 @@ export default function Notebook({
         }}
       >
         <X size={16} />
-        Xで共有
+        Xã§å±æ
       </button>
       {login && (
         <DropdownMenu>
@@ -754,7 +757,7 @@ export default function Notebook({
           <DropdownMenuContent align="end">
             {p.kind !== "vlog" && (
               <DropdownMenuItem onClick={() => openEditor(p.kind, p)}>
-                編集
+                ç·¨é
               </DropdownMenuItem>
             )}
             <DropdownMenuItem
@@ -774,14 +777,14 @@ export default function Notebook({
               }
             >
               <Pin />
-              固定
+              åºå®
             </DropdownMenuItem>
             <DropdownMenuItem
               className="text-red-600"
               onClick={() => setRemove(p.id)}
             >
               <Trash2 />
-              削除
+              åé¤
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -803,18 +806,18 @@ export default function Notebook({
               onClick={() => nav("home")}
             >
               <Home />
-              <span>ホーム</span>
+              <span>ãã¼ã </span>
             </button>
             <button
               className={view === "projects" ? "active" : ""}
               onClick={() => nav("projects")}
             >
               <Globe />
-              <span>プロジェクト</span>
+              <span>ãã­ã¸ã§ã¯ã</span>
             </button>
           </nav>
           <div className="sidebar-section">
-            <span>コンテンツ</span>
+            <span>ã³ã³ãã³ã</span>
             {(
               [
                 { id: "blog", icon: FileText },
@@ -854,7 +857,7 @@ export default function Notebook({
                 onClick={() => openEditor("tweet")}
               >
                 <Plus />
-                新規投稿
+                æ°è¦æç¨¿
               </Button>
               <button
                 onClick={() => {
@@ -865,22 +868,22 @@ export default function Notebook({
                 }}
               >
                 <Avatar value={profile.icon} />
-                <span>アカウント</span>
+                <span>ã¢ã«ã¦ã³ã</span>
                 <Settings />
               </button>
-              <button onClick={logOut}>ログアウト</button>
+              <button onClick={logOut}>ã­ã°ã¢ã¦ã</button>
             </div>
           )}
           <div className="sidebar-foot">
             {!login ? (
               <details className="admin-access">
-                <summary>•••</summary>
-                <button onClick={logIn}>ログイン</button>
+                <summary>â¢â¢â¢</summary>
+                <button onClick={logIn}>ã­ã°ã¤ã³</button>
               </details>
             ) : (
-              <span>ログイン中</span>
+              <span>ã­ã°ã¤ã³ä¸­</span>
             )}
-            <small>© 2026 {profile.name}</small>
+            <small>Â© 2026 {profile.name}</small>
           </div>
         </aside>
         <div className="workspace">
@@ -890,17 +893,17 @@ export default function Notebook({
             </button>
             <span>
               {selected
-                ? "投稿"
+                ? "æç¨¿"
                 : view === "projects"
-                  ? "プロジェクト"
+                  ? "ãã­ã¸ã§ã¯ã"
                   : view === "account"
-                    ? "アカウント"
-                    : "ホーム"}
+                    ? "ã¢ã«ã¦ã³ã"
+                    : "ãã¼ã "}
             </span>
             {!login ? (
               <details className="mobile-login">
-                <summary>•••</summary>
-                <button onClick={logIn}>ログイン</button>
+                <summary>â¢â¢â¢</summary>
+                <button onClick={logIn}>ã­ã°ã¤ã³</button>
               </details>
             ) : (
               <button
@@ -912,7 +915,7 @@ export default function Notebook({
                   setIcon(profile.icon);
                 }}
               >
-                管理
+                ç®¡ç
               </button>
             )}
           </header>
@@ -920,12 +923,12 @@ export default function Notebook({
             <main className="main-content">
               {view === "account" && login ? (
                 <section className="settings-page">
-                  <h1>アカウント</h1>
+                  <h1>ã¢ã«ã¦ã³ã</h1>
                   <div className="setting-avatar">
                     <Avatar value={icon || profile.icon} large />
                     <label className="upload-label">
                       <Upload size={15} />
-                      画像を変更
+                      ç»åãå¤æ´
                       <input
                         type="file"
                         accept="image/*"
@@ -940,21 +943,21 @@ export default function Notebook({
                     </label>
                   </div>
                   <div className="emoji-options">
-                    {["🐢", "🦦", "🐈", "🌱", "☕", "👾"].map((x) => (
+                    {["ð¢", "ð¦¦", "ð", "ð±", "â", "ð¾"].map((x) => (
                       <button key={x} onClick={() => setIcon(x)}>
                         {x}
                       </button>
                     ))}
                   </div>
                   <label className="field">
-                    名前
+                    åå
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
                   </label>
                   <label className="field">
-                    自己紹介
+                    èªå·±ç´¹ä»
                     <textarea
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
@@ -968,19 +971,19 @@ export default function Notebook({
                         const saved = await api<typeof profile>(
                           "profile",
                           "PUT",
-                          { name: name.trim(), bio, icon: icon || "🐢" },
+                          { name: name.trim(), bio, icon: icon || "ð¢" },
                         );
                         setProfile(saved);
-                        toast.success("保存しました");
+                        toast.success("ä¿å­ãã¾ãã");
                       });
                     }}
                   >
-                    保存
+                    ä¿å­
                   </Button>
                 </section>
               ) : view === "projects" ? (
                 <section className="projects-page">
-                  <h1>プロジェクト</h1>
+                  <h1>ãã­ã¸ã§ã¯ã</h1>
                   <div className="project-grid">
                     <a
                       className="project-tile"
@@ -988,12 +991,12 @@ export default function Notebook({
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <img src="/project-api.svg" alt="kamelogのサムネイル" />
+                      <img src="/project-api.svg" alt="kamelogã®ãµã ãã¤ã«" />
                       <div>
                         <h2>
                           kamelog <ArrowUpRight size={16} />
                         </h2>
-                        <p>ブログ・つぶやき・vlogをまとめる個人サイト</p>
+                        <p>ãã­ã°ã»ã¤ã¶ããã»vlogãã¾ã¨ããåäººãµã¤ã</p>
                         <span>TypeScript</span>
                       </div>
                     </a>
@@ -1003,12 +1006,12 @@ export default function Notebook({
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <img src="/project-tools.svg" alt="Qiitaのサムネイル" />
+                      <img src="/project-tools.svg" alt="Qiitaã®ãµã ãã¤ã«" />
                       <div>
                         <h2>
                           Qiita <ArrowUpRight size={16} />
                         </h2>
-                        <p>技術記事</p>
+                        <p>æè¡è¨äº</p>
                         <span>Qiita</span>
                       </div>
                     </a>
@@ -1021,7 +1024,7 @@ export default function Notebook({
                     onClick={() => setSelected(null)}
                   >
                     <ArrowLeft size={17} />
-                    戻る
+                    æ»ã
                   </button>
                   {meta(item)}
                   {item.kind === "blog" ? (
@@ -1049,14 +1052,14 @@ export default function Notebook({
               ) : (
                 <>
                   <section className="page-heading">
-                    <h1>ホーム</h1>
+                    <h1>ãã¼ã </h1>
                   </section>
                   <label className="home-search mobile-search">
                     <Search size={17} />
                     <input
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
-                      placeholder="投稿を検索"
+                      placeholder="æç¨¿ãæ¤ç´¢"
                     />
                     {query && (
                       <button onClick={() => setQuery("")}>
@@ -1083,7 +1086,7 @@ export default function Notebook({
                               publishInlineTweet();
                             }
                           }}
-                          placeholder="いまどうしてる？"
+                          placeholder="ãã¾ã©ããã¦ãï¼"
                           maxLength={5000}
                           rows={1}
                         />
@@ -1093,13 +1096,13 @@ export default function Notebook({
                           onClick={publishInlineTweet}
                           disabled={!inlineBody.trim()}
                         >
-                          投稿
+                          æç¨¿
                         </Button>
                       </div>
                       <div className="composer-kinds">
                         <button onClick={() => openEditor("blog")}>
                           <FileText />
-                          ブログ
+                          ãã­ã°
                         </button>
                         <button
                           onClick={() =>
@@ -1111,7 +1114,7 @@ export default function Notebook({
                           }
                         >
                           <MessageCircle />
-                          つぶやき
+                          ã¤ã¶ãã
                         </button>
                         <button onClick={() => openEditor("vlog")}>
                           <Video />
@@ -1122,7 +1125,7 @@ export default function Notebook({
                             className="draft-button"
                             onClick={() => setDraftList(true)}
                           >
-                            下書き {drafts.length}
+                            ä¸æ¸ã {drafts.length}
                           </button>
                         )}
                       </div>
@@ -1134,9 +1137,9 @@ export default function Notebook({
                       onValueChange={(v) => setFilter(v as "all" | Kind)}
                     >
                       <TabsList variant="line" className="feed-tabs">
-                        <TabsTrigger value="all">すべて</TabsTrigger>
-                        <TabsTrigger value="blog">ブログ</TabsTrigger>
-                        <TabsTrigger value="tweet">つぶやき</TabsTrigger>
+                        <TabsTrigger value="all">ãã¹ã¦</TabsTrigger>
+                        <TabsTrigger value="blog">ãã­ã°</TabsTrigger>
+                        <TabsTrigger value="tweet">ã¤ã¶ãã</TabsTrigger>
                         <TabsTrigger value="vlog">vlog</TabsTrigger>
                       </TabsList>
                     </Tabs>
@@ -1148,10 +1151,10 @@ export default function Notebook({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => setSort("new")}>
-                          新しい順 {sort === "new" && <Check />}
+                          æ°ããé  {sort === "new" && <Check />}
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => setSort("popular")}>
-                          いいね順 {sort === "popular" && <Check />}
+                          ããã­é  {sort === "popular" && <Check />}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -1170,7 +1173,7 @@ export default function Notebook({
                         {p.pinned && (
                           <div className="pinned">
                             <Pin size={12} />
-                            固定
+                            åºå®
                           </div>
                         )}
                         {meta(p)}
@@ -1181,7 +1184,7 @@ export default function Notebook({
                               className="open-vlog-detail"
                               onClick={() => setSelected(p.id)}
                             >
-                              詳細
+                              è©³ç´°
                             </button>
                           </div>
                         ) : (
@@ -1219,7 +1222,7 @@ export default function Notebook({
                     ))}
                     {!shown.length && (
                       <div className="empty-state">
-                        <p>該当する投稿はありません。</p>
+                        <p>è©²å½ããæç¨¿ã¯ããã¾ããã</p>
                         <Button
                           onClick={() => {
                             setQuery("");
@@ -1227,11 +1230,11 @@ export default function Notebook({
                             setTag("");
                           }}
                         >
-                          解除
+                          è§£é¤
                         </Button>
                       </div>
                     )}
-                    <div className="feed-count">{shown.length}件</div>
+                    <div className="feed-count">{shown.length}ä»¶</div>
                   </div>
                 </>
               )}
@@ -1256,14 +1259,14 @@ export default function Notebook({
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="投稿を検索"
+                  placeholder="æç¨¿ãæ¤ç´¢"
                 />
                 <kbd>/</kbd>
               </label>
               <div className="aside-section">
-                <h3>タグ</h3>
+                <h3>ã¿ã°</h3>
                 <div className="topic-list">
-                  {["Go", "バックエンド", "TDD", "開発日記", "日常"].map(
+                  {["Go", "ããã¯ã¨ã³ã", "TDD", "éçºæ¥è¨", "æ¥å¸¸"].map(
                     (t) => (
                       <button
                         key={t}
@@ -1290,21 +1293,21 @@ export default function Notebook({
               onClick={() => nav("home")}
             >
               <Home />
-              <span>ホーム</span>
+              <span>ãã¼ã </span>
             </button>
             <button
               className={view === "projects" ? "active" : ""}
               onClick={() => nav("projects")}
             >
               <Globe />
-              <span>プロジェクト</span>
+              <span>ãã­ã¸ã§ã¯ã</span>
             </button>
           </nav>
           {login && (
             <button
               className="mobile-create"
               onClick={() => openEditor("tweet")}
-              aria-label="投稿を作成"
+              aria-label="æç¨¿ãä½æ"
             >
               <Plus size={23} />
             </button>
@@ -1334,14 +1337,14 @@ export default function Notebook({
           }}
         >
           <DialogTitle>
-            {editId ? "投稿を編集" : draftId ? "下書きを編集" : "新規投稿"}
+            {editId ? "æç¨¿ãç·¨é" : draftId ? "ä¸æ¸ããç·¨é" : "æ°è¦æç¨¿"}
           </DialogTitle>
           <DialogDescription>
             {kind === "blog"
-              ? "Markdownが使えます。"
+              ? "Markdownãä½¿ãã¾ãã"
               : kind === "tweet"
-                ? "短文を入力します。"
-                : "横長の短い動画を投稿します。"}
+                ? "ç­æãå¥åãã¾ãã"
+                : "æ¨ªé·ã®ç­ãåç»ãæç¨¿ãã¾ãã"}
           </DialogDescription>
           {kind !== "vlog" && drafts.length > 0 && (
             <div className="editor-drafts">
@@ -1350,7 +1353,7 @@ export default function Notebook({
                 aria-expanded={editorDrafts}
                 onClick={() => setEditorDrafts((open) => !open)}
               >
-                下書きから貼り付け
+                ä¸æ¸ãããè²¼ãä»ã
                 <span>{drafts.length}</span>
               </button>
               {editorDrafts && (
@@ -1375,7 +1378,7 @@ export default function Notebook({
                         setEditorDrafts(false);
                       }}
                     >
-                      <b>{draft.title || draft.body.slice(0, 36) || "無題"}</b>
+                      <b>{draft.title || draft.body.slice(0, 36) || "ç¡é¡"}</b>
                       <span>{label[draft.kind]}</span>
                     </button>
                   ))}
@@ -1402,11 +1405,11 @@ export default function Notebook({
             <TabsList className="editor-kinds">
               <TabsTrigger value="blog">
                 <FileText />
-                ブログ
+                ãã­ã°
               </TabsTrigger>
               <TabsTrigger value="tweet">
                 <MessageCircle />
-                つぶやき
+                ã¤ã¶ãã
               </TabsTrigger>
               <TabsTrigger value="vlog">
                 <Video />
@@ -1425,8 +1428,8 @@ export default function Notebook({
                 }}
               >
                 <TabsList className="vlog-tabs">
-                  <TabsTrigger value="camera">今撮る</TabsTrigger>
-                  <TabsTrigger value="upload">動画を選ぶ</TabsTrigger>
+                  <TabsTrigger value="camera">ä»æ®ã</TabsTrigger>
+                  <TabsTrigger value="upload">åç»ãé¸ã¶</TabsTrigger>
                 </TabsList>
               </Tabs>
               <div className="vlog-stage">
@@ -1437,7 +1440,7 @@ export default function Notebook({
                 ) : (
                   <label className="select-video">
                     <Upload />
-                    動画を選ぶ
+                    åç»ãé¸ã¶
                     <input
                       type="file"
                       accept="video/*"
@@ -1452,7 +1455,7 @@ export default function Notebook({
                 {recording && (
                   <div className="recording-mark">
                     <span />
-                    REC · {count}
+                    REC Â· {count}
                   </div>
                 )}
               </div>
@@ -1466,7 +1469,7 @@ export default function Notebook({
                         onClick={() => setSeconds(s)}
                         key={s}
                       >
-                        {s}秒
+                        {s}ç§
                       </button>
                     ))}
                   </div>
@@ -1482,12 +1485,12 @@ export default function Notebook({
               {clip && (
                 <>
                   <label className="caption-field">
-                    キャプション
+                    ã­ã£ãã·ã§ã³
                     <input
                       maxLength={60}
                       value={caption}
                       onChange={(e) => setCaption(e.target.value)}
-                      placeholder="一文だけ（任意）"
+                      placeholder="ä¸æã ãï¼ä»»æï¼"
                     />
                   </label>
                   <div className="vlog-actions">
@@ -1499,16 +1502,16 @@ export default function Notebook({
                         if (vMode === "camera") void prepareVlog();
                       }}
                     >
-                      やり直す
+                      ããç´ã
                     </Button>
                     <Button variant="blue" onClick={postVlog}>
-                      投稿する
+                      æç¨¿ãã
                     </Button>
                   </div>
                 </>
               )}
               {!clip && vMode === "upload" && (
-                <p className="crop-note">公開時は16:9で中央を切り抜きます。</p>
+                <p className="crop-note">å¬éæã¯16:9ã§ä¸­å¤®ãåãæãã¾ãã</p>
               )}
             </>
           ) : (
@@ -1519,106 +1522,106 @@ export default function Notebook({
                   className="title-input"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="タイトル"
+                  placeholder="ã¿ã¤ãã«"
                 />
               )}
               {kind === "blog" && (
                 <div
                   className="editor-tools"
                   role="toolbar"
-                  aria-label="Markdown記法"
+                  aria-label="Markdownè¨æ³"
                 >
                   <div className="editor-tool-list">
                     <button
                       type="button"
-                      aria-label="見出し"
-                      onClick={() => prefixMarkdownLines("## ", "見出し")}
+                      aria-label="è¦åºã"
+                      onClick={() => prefixMarkdownLines("## ", "è¦åºã")}
                     >
-                      見出し
+                      è¦åºã
                     </button>
                     <button
                       type="button"
-                      aria-label="太字"
-                      onClick={() => wrapMarkdown("**", "**", "太字")}
+                      aria-label="å¤ªå­"
+                      onClick={() => wrapMarkdown("**", "**", "å¤ªå­")}
                     >
-                      太字
+                      å¤ªå­
                     </button>
                     <button
                       type="button"
-                      aria-label="斜体"
-                      onClick={() => wrapMarkdown("_", "_", "斜体")}
+                      aria-label="æä½"
+                      onClick={() => wrapMarkdown("_", "_", "æä½")}
                     >
-                      斜体
+                      æä½
                     </button>
                     <button
                       type="button"
-                      aria-label="取り消し線"
-                      onClick={() => wrapMarkdown("~~", "~~", "取り消し")}
+                      aria-label="åãæ¶ãç·"
+                      onClick={() => wrapMarkdown("~~", "~~", "åãæ¶ã")}
                     >
-                      取消
+                      åæ¶
                     </button>
                     <button
                       type="button"
-                      aria-label="引用"
-                      onClick={() => prefixMarkdownLines("> ", "引用文")}
+                      aria-label="å¼ç¨"
+                      onClick={() => prefixMarkdownLines("> ", "å¼ç¨æ")}
                     >
-                      引用
+                      å¼ç¨
                     </button>
                     <button
                       type="button"
-                      aria-label="箇条書き"
-                      onClick={() => prefixMarkdownLines("- ", "項目")}
+                      aria-label="ç®æ¡æ¸ã"
+                      onClick={() => prefixMarkdownLines("- ", "é ç®")}
                     >
-                      ・リスト
+                      ã»ãªã¹ã
                     </button>
                     <button
                       type="button"
-                      aria-label="番号付きリスト"
+                      aria-label="çªå·ä»ããªã¹ã"
                       onClick={() =>
-                        prefixMarkdownLines((index) => `${index + 1}. `, "項目")
+                        prefixMarkdownLines((index) => `${index + 1}. `, "é ç®")
                       }
                     >
-                      1. リスト
+                      1. ãªã¹ã
                     </button>
                     <button
                       type="button"
-                      aria-label="チェックリスト"
-                      onClick={() => prefixMarkdownLines("- [ ] ", "項目")}
+                      aria-label="ãã§ãã¯ãªã¹ã"
+                      onClick={() => prefixMarkdownLines("- [ ] ", "é ç®")}
                     >
-                      ☑ リスト
+                      â ãªã¹ã
                     </button>
                     <button
                       type="button"
-                      aria-label="リンク"
+                      aria-label="ãªã³ã¯"
                       onClick={() =>
-                        wrapMarkdown("[", "](https://example.com)", "リンク")
+                        wrapMarkdown("[", "](https://example.com)", "ãªã³ã¯")
                       }
                     >
-                      リンク
+                      ãªã³ã¯
                     </button>
                     <button
                       type="button"
-                      aria-label="画像"
+                      aria-label="ç»å"
                       onClick={() =>
                         wrapMarkdown(
                           "![",
                           "](https://example.com/image.png)",
-                          "代替テキスト",
+                          "ä»£æ¿ãã­ã¹ã",
                         )
                       }
                     >
-                      画像
+                      ç»å
                     </button>
                     <button
                       type="button"
-                      aria-label="インラインコード"
+                      aria-label="ã¤ã³ã©ã¤ã³ã³ã¼ã"
                       onClick={() => wrapMarkdown("`", "`", "code")}
                     >
                       `code`
                     </button>
                     <button
                       type="button"
-                      aria-label="コードブロック"
+                      aria-label="ã³ã¼ããã­ãã¯"
                       onClick={() =>
                         wrapMarkdownBlock(
                           "```javascript\n",
@@ -1627,34 +1630,34 @@ export default function Notebook({
                         )
                       }
                     >
-                      コード
+                      ã³ã¼ã
                     </button>
                     <button
                       type="button"
-                      aria-label="表"
+                      aria-label="è¡¨"
                       onClick={() =>
                         insertMarkdownBlock(
-                          "| 列1 | 列2 |\n| --- | --- |\n| 値1 | 値2 |",
+                          "| å1 | å2 |\n| --- | --- |\n| å¤1 | å¤2 |",
                         )
                       }
                     >
-                      表
+                      è¡¨
                     </button>
                     <button
                       type="button"
-                      aria-label="区切り線"
+                      aria-label="åºåãç·"
                       onClick={() => insertMarkdownBlock("---")}
                     >
-                      区切り
+                      åºåã
                     </button>
                   </div>
                   <button
                     type="button"
                     className="markdown-help-link"
-                    aria-label="Markdownヘルプ"
+                    aria-label="Markdownãã«ã"
                     onClick={() => setMarkdownHelpOpen(true)}
                   >
-                    ヘルプ
+                    ãã«ã
                   </button>
                   <button
                     type="button"
@@ -1662,7 +1665,7 @@ export default function Notebook({
                     onClick={() => setPreview((x) => !x)}
                   >
                     <Eye size={15} />
-                    {preview ? "編集" : "プレビュー"}
+                    {preview ? "ç·¨é" : "ãã¬ãã¥ã¼"}
                   </button>
                 </div>
               )}
@@ -1676,14 +1679,14 @@ export default function Notebook({
                   className={"body-input " + kind}
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
-                  placeholder="本文"
+                  placeholder="æ¬æ"
                 />
               )}
               <div className="editor-footer">
-                <span>{body.length}文字</span>
-                <Button onClick={askClose}>閉じる</Button>
+                <span>{body.length}æå­</span>
+                <Button onClick={askClose}>éãã</Button>
                 <Button variant="blue" onClick={publish}>
-                  投稿
+                  æç¨¿
                 </Button>
               </div>
             </>
@@ -1692,9 +1695,9 @@ export default function Notebook({
       </Dialog>
       <Dialog open={markdownHelpOpen} onOpenChange={setMarkdownHelpOpen}>
         <DialogContent className="markdown-help-dialog">
-          <DialogTitle>Markdown記法ヘルプ</DialogTitle>
+          <DialogTitle>Markdownè¨æ³ãã«ã</DialogTitle>
           <DialogDescription>
-            ブログで使えるCommonMarkとGFMの記法です。生HTMLは表示されません。
+            ãã­ã°ã§ä½¿ããCommonMarkã¨GFMã®è¨æ³ã§ããçHTMLã¯è¡¨ç¤ºããã¾ããã
           </DialogDescription>
           <div className="markdown-help-list">
             {markdownHelp.map(([name, description, syntax]) => (
@@ -1711,23 +1714,23 @@ export default function Notebook({
       </Dialog>
       <Dialog open={closeAsk} onOpenChange={setCloseAsk}>
         <DialogContent>
-          <DialogTitle>この投稿を保存しますか？</DialogTitle>
+          <DialogTitle>ãã®æç¨¿ãä¿å­ãã¾ããï¼</DialogTitle>
           <DialogDescription>
-            保存しない場合、入力内容は削除されます。
+            ä¿å­ããªãå ´åãå¥ååå®¹ã¯åé¤ããã¾ãã
           </DialogDescription>
           <div className="confirm-actions">
-            <Button onClick={() => setCloseAsk(false)}>編集を続ける</Button>
-            <Button onClick={discard}>削除して閉じる</Button>
+            <Button onClick={() => setCloseAsk(false)}>ç·¨éãç¶ãã</Button>
+            <Button onClick={discard}>åé¤ãã¦éãã</Button>
             <Button variant="blue" onClick={saveDraft}>
-              下書き保存
+              ä¸æ¸ãä¿å­
             </Button>
           </div>
         </DialogContent>
       </Dialog>
       <Dialog open={draftList} onOpenChange={setDraftList}>
         <DialogContent>
-          <DialogTitle>下書き</DialogTitle>
-          <DialogDescription>サーバーに保存されています。</DialogDescription>
+          <DialogTitle>ä¸æ¸ã</DialogTitle>
+          <DialogDescription>ãµã¼ãã¼ã«ä¿å­ããã¦ãã¾ãã</DialogDescription>
           <div className="draft-list">
             {drafts.map((d) => (
               <button
@@ -1737,9 +1740,9 @@ export default function Notebook({
                   openEditor(d.kind, undefined, d);
                 }}
               >
-                <b>{d.title || d.body.slice(0, 36) || "無題"}</b>
+                <b>{d.title || d.body.slice(0, 36) || "ç¡é¡"}</b>
                 <span>
-                  {label[d.kind]} ·{" "}
+                  {label[d.kind]} Â·{" "}
                   {new Date(d.savedAt).toLocaleString("ja-JP", {
                     month: "numeric",
                     day: "numeric",
@@ -1757,12 +1760,12 @@ export default function Notebook({
         onOpenChange={(open) => !open && setRemove(null)}
       >
         <AlertDialogContent className="delete-dialog">
-          <AlertDialogTitle>投稿を削除しますか？</AlertDialogTitle>
+          <AlertDialogTitle>æç¨¿ãåé¤ãã¾ããï¼</AlertDialogTitle>
           <AlertDialogDescription>
-            公開サイトから削除されます。
+            å¬éãµã¤ãããåé¤ããã¾ãã
           </AlertDialogDescription>
           <AlertDialogFooter className="confirm-actions">
-            <Button onClick={() => setRemove(null)}>キャンセル</Button>
+            <Button onClick={() => setRemove(null)}>ã­ã£ã³ã»ã«</Button>
             <Button
               variant="red-fill"
               onClick={() => {
@@ -1777,7 +1780,7 @@ export default function Notebook({
                 });
               }}
             >
-              削除
+              åé¤
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1811,7 +1814,7 @@ function VlogFrame({ post }: { post: Post }) {
       ) : (
         <div className="missing-video">
           <Video />
-          動画なし
+          åç»ãªã
         </div>
       )}
       <div className="vlog-overlay">
@@ -1834,7 +1837,7 @@ function VlogFrame({ post }: { post: Post }) {
             setLooping(false);
           }}
         >
-          ループ再生を停止
+          ã«ã¼ãåçãåæ­¢
         </button>
       )}
     </div>
