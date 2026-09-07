@@ -1,0 +1,32 @@
+.detail-page:has(> .markdown) {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-page:has(> .markdown) > * {
+  order: 3;
+}
+
+.detail-page:has(> .markdown) > .back-button {
+  order: 0;
+}
+
+.detail-page:has(> .markdown) > .post-meta {
+  order: 1;
+  margin-bottom: 14px;
+}
+
+.detail-page:has(> .markdown) > .post-actions {
+  order: 2;
+  margin: 0 0 22px;
+  padding: 0 0 16px;
+  border-top: 0;
+  border-bottom: 1px solid #eee;
+}
+
+@media (max-width: 640px) {
+  .detail-page:has(> .markdown) > .post-actions {
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+  }
+}
