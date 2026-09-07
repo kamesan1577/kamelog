@@ -5,16 +5,17 @@ test("public SEO endpoints expose one production canonical and structured data",
 }) => {
   await page.goto("/");
 
+  const rootUrl = /^https:\/\/kamesan\.org\/?$/;
   const canonical = page.locator('link[rel="canonical"]');
   await expect(canonical).toHaveCount(1);
-  await expect(canonical).toHaveAttribute("href", "https://kamesan.org/");
+  await expect(canonical).toHaveAttribute("href", rootUrl);
   await expect(page.locator('meta[property="og:url"]')).toHaveAttribute(
     "content",
-    "https://kamesan.org/",
+    rootUrl,
   );
   await expect(page.locator('meta[name="twitter:url"]')).toHaveAttribute(
     "content",
-    "https://kamesan.org/",
+    rootUrl,
   );
 
   const structured = await page
