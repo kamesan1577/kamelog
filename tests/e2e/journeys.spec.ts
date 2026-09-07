@@ -194,56 +194,39 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   const mobileMarkdownToolbar = page.getByRole("toolbar", {
     name: "Markdown記法",
   });
-  await expect(
-    mobileMarkdownToolbar.getByRole("button", { name: "Markdownヘルプ" }),
-  ).toBeVisible();
-  await expect(
-    mobileMarkdownToolbar.getByRole("button", { name: "プレビュー" }),
-  ).toBeVisible();
-  const mobileEditorGeometry = await mobileBlogDialog.evaluate((dialog) => {
-    const tools = dialog.querySelector<HTMLElement>(".editor-tools");
-    const help = dialog.querySelector<HTMLElement>(".markdown-help-link");
-    const preview = dialog.querySelector<HTMLElement>(".preview-toggle");
-    if (!tools || !help || !preview)
-      throw new Error("blog editor controls missing");
-    const dialogRect = dialog.getBoundingClientRect();
-    const toolsRect = tools.getBoundingClientRect();
-    const helpRect = help.getBoundingClientRect();
-    const previewRect = preview.getBoundingClientRect();
-    return {
-      viewportWidth: window.innerWidth,
-      dialogClientWidth: dialog.clientWidth,
-      dialogScrollWidth: dialog.scrollWidth,
-      dialogLeft: dialogRect.left,
-      dialogRight: dialogRect.right,
-      toolsLeft: toolsRect.left,
-      toolsRight: toolsRect.right,
-      helpLeft: helpRect.left,
-      helpRight: helpRect.right,
-      previewLeft: previewRect.left,
-      previewRight: previewRect.right,
-    };
+  const markdownHelp = mobileMarkdownToolbar.getByRole("button", {
+    name: "Markdownヘルプ",
   });
-  expect(mobileEditorGeometry.dialogLeft).toBeGreaterThanOrEqual(0);
-  expect(mobileEditorGeometry.dialogRight).toBeLessThanOrEqual(
-    mobileEditorGeometry.viewportWidth,
-  );
-  expect(mobileEditorGeometry.dialogScrollWidth).toBeLessThanOrEqual(
-    mobileEditorGeometry.dialogClientWidth + 1,
-  );
-  for (const edge of [
-    mobileEditorGeometry.toolsLeft,
-    mobileEditorGeometry.helpLeft,
-    mobileEditorGeometry.previewLeft,
-  ]) {
-    expect(edge).toBeGreaterThanOrEqual(mobileEditorGeometry.dialogLeft - 1);
+  const previewToggle = mobileMarkdownToolbar.getByRole("button", {
+    name: "プレビュー",
+  });
+  await expect(markdownHelp).toBeVisible();
+  await expect(previewToggle).toBeVisible();
+  await expect
+    .poll(() =>
+      mobileBlogDialog.evaluate(
+        (dialog) => dialog.scrollWidth <= dialog.clientWidth + 1,
+      ),
+    )
+    .toBe(true);
+  const dialogBox = await mobileBlogDialog.boundingBox();
+  const toolbarBox = await mobileMarkdownToolbar.boundingBox();
+  const helpBox = await markdownHelp.boundingBox();
+  const previewBox = await previewToggle.boundingBox();
+  expect(dialogBox).not.toBeNull();
+  expect(toolbarBox).not.toBeNull();
+  expect(helpBox).not.toBeNull();
+  expect(previewBox).not.toBeNull();
+  if (!dialogBox || !toolbarBox || !helpBox || !previewBox) {
+    throw new Error("mobile editor geometry unavailable");
   }
-  for (const edge of [
-    mobileEditorGeometry.toolsRight,
-    mobileEditorGeometry.helpRight,
-    mobileEditorGeometry.previewRight,
-  ]) {
-    expect(edge).toBeLessThanOrEqual(mobileEditorGeometry.dialogRight + 1);
+  expect(dialogBox.x).toBeGreaterThanOrEqual(0);
+  expect(dialogBox.x + dialogBox.width).toBeLessThanOrEqual(390);
+  for (const box of [toolbarBox, helpBox, previewBox]) {
+    expect(box.x).toBeGreaterThanOrEqual(dialogBox.x - 1);
+    expect(box.x + box.width).toBeLessThanOrEqual(
+      dialogBox.x + dialogBox.width + 1,
+    );
   }
   await page.getByRole("tab", { name: "vlog", exact: true }).last().click();
   await page.getByRole("tab", { name: "動画を選ぶ", exact: true }).click();
