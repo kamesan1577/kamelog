@@ -2,6 +2,7 @@
 
 Issue #14着手前に外部から確認できた状態を記録する。
 
+<!-- prettier-ignore -->
 | item | result |
 | --- | --- |
 | `/robots.txt` | 200 |
