@@ -109,10 +109,11 @@ function isView(value: unknown): value is View {
 }
 function readNavigationState(): NavigationState | null {
   const candidate = baseHistoryState()[navigationStateKey];
-  if (!candidate || typeof candidate !== "object" || Array.isArray(candidate))
-    return null;
+  if (!candidate || typeof candidate !== "object") return null;
+  if (Array.isArray(candidate)) return null;
   const { view, post, internal } = candidate as Partial<NavigationState>;
-  if (!isView(view) || (post != null && typeof post !== "string")) return null;
+  if (!isView(view)) return null;
+  if (post != null && typeof post !== "string") return null;
   return { view, post: post ?? null, internal: internal === true };
 }
 function postFromLocation() {
