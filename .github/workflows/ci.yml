@@ -27,6 +27,24 @@ jobs:
         env:
           KAMELOG_PRIVATE_MARKERS: ${{ secrets.KAMELOG_PRIVATE_MARKERS }}
       - run: npm audit --audit-level=high
+  format-dump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --write app/notebook.tsx spec/current/development.md
+      - uses: actions/upload-artifact@v7
+        with:
+          name: prettier-output
+          path: |
+            app/notebook.tsx
+            spec/current/development.md
+          retention-days: 1
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 20
