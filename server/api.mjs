@@ -333,7 +333,7 @@ export function createAPI(store, config) {
     } catch (error) {
       if (error instanceof Conflict)
         return json(
-          { error: "å¥ã®æä½ã§å¤æ´ããã¾ãããåèª­ã¿è¾¼ã¿ãã¦ãã ããã" },
+          { error: "別の操作で変更されました。再読み込みしてください。" },
           409,
         );
       if (error instanceof RangeError)
@@ -342,7 +342,7 @@ export function createAPI(store, config) {
         return json({ error: "Invalid input" }, 400);
       // No request bodies, tokens or raw exception messages in responses/logs.
       return json(
-        { error: "æä½ã«å¤±æãã¾ãããå¥åãä¿æãã¦åè©¦è¡ãã¦ãã ããã" },
+        { error: "操作に失敗しました。入力を保持して再試行してください。" },
         400,
       );
     }
