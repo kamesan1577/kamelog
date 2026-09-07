@@ -548,7 +548,7 @@ export default function Notebook({
     const syncNavigation = () => {
       const post = postFromLocation();
       const state = readNavigationState();
-      setView(post ? "home" : state?.view ?? "home");
+      setView(post ? "home" : (state?.view ?? "home"));
       setSelected(post);
       if (post) setTag("");
     };
