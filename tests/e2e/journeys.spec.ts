@@ -189,7 +189,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .last();
   await expect(mobileBlogTab).toBeVisible();
   await mobileBlogTab.click();
-  await expect(page.getByPlaceholder("タイトル", { exact: true })).toBeVisible();
+  await expect(
+    page.getByPlaceholder("タイトル", { exact: true }),
+  ).toBeVisible();
   const mobileBlogDialog = page.locator(".editor-dialog");
   const mobileMarkdownToolbar = page.getByRole("toolbar", {
     name: "Markdown記法",
