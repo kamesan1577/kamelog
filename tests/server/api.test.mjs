@@ -80,15 +80,15 @@ test("owner boundary, public projection, CRUD, CSRF, validation", async () => {
         "POST",
         {
           kind: "tweet",
-          title: "#ã¿ã¤ãã«",
-          body: "æ¬æ #Go ã¨ #éçºæ¥è¨ãéè¤ #Go",
-          tags: ["ç¡è¦ãããåºå®ã¿ã°"],
+          title: "#タイトル",
+          body: "本文 #Go と #開発日記、重複 #Go",
+          tags: ["無視される固定タグ"],
         },
         true,
       )
     ).json();
-    assert.deepEqual(tagged.tags, ["ã¿ã¤ãã«", "Go", "éçºæ¥è¨"]);
-    assert.equal((await (await request("posts?q=éçºæ¥è¨")).json()).length, 1);
+    assert.deepEqual(tagged.tags, ["タイトル", "Go", "開発日記"]);
+    assert.equal((await (await request("posts?q=開発日記")).json()).length, 1);
     assert.equal(
       (
         await request(
