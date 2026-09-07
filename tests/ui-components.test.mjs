@@ -48,6 +48,17 @@ test("emits the catalog's animation and scrolling utilities", async () => {
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
 
+test("keeps destructive action buttons visibly filled", async () => {
+  const { buttonVariants } = await vite.ssrLoadModule(
+    "/components/notion/variants.ts",
+  );
+  const classes = buttonVariants({ variant: "red-fill", size: "md" });
+
+  assert.match(classes, /bg-\[#e5484d\]/);
+  assert.match(classes, /text-white/);
+  assert.doesNotMatch(classes, /(?:^|\s)bg-red(?:\s|$)/);
+});
+
 test("forwards progress semantics to the primitive", async () => {
   const { Progress } = await vite.ssrLoadModule("/components/ui/progress.tsx");
   const html = renderToStaticMarkup(

@@ -46,9 +46,9 @@ export const buttonVariants = cva(
         "soft-blue":
           "bg-blue/5 text-blue shadow-xs hover:bg-blue/15 disabled:bg-blue/5",
         hint: "font-medium text-muted",
-        red: "border border-red/50 text-red hover:bg-red/10 focus:bg-red/10",
+        red: "border border-[#e5484d]/50 text-[#e5484d] hover:bg-[#e5484d]/10 focus:bg-[#e5484d]/10",
         "red-fill":
-          "bg-red text-white hover:bg-red/65 disabled:bg-red dark:hover:bg-red/35",
+          "bg-[#e5484d] text-white hover:bg-[#d93d42] disabled:bg-[#e5484d]/40 dark:hover:bg-[#d93d42]",
         white: "border border-white text-white",
         cell: "flex justify-normal rounded-none",
         /**
