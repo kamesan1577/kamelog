@@ -54,23 +54,33 @@ export async function generateMetadata({
   const image = ogImageUrl(post.id);
   const canonical = postUrl(post.id);
   const modified = post.updatedAt || post.date;
+  const openGraph: Metadata["openGraph"] =
+    post.kind === "blog"
+      ? {
+          title,
+          description,
+          siteName: "kamelog",
+          type: "article",
+          url: canonical,
+          publishedTime: post.date,
+          modifiedTime: modified,
+          images: [{ url: image, width: 1200, height: 630, alt: title }],
+        }
+      : {
+          title,
+          description,
+          siteName: "kamelog",
+          type: "website",
+          url: canonical,
+          images: [{ url: image, width: 1200, height: 630, alt: title }],
+        };
 
   return {
     title: `${title} | kamelog`,
     description,
     alternates: { canonical },
     robots: noIndex ? { index: false, follow: false } : undefined,
-    openGraph: {
-      title,
-      description,
-      siteName: "kamelog",
-      type: post.kind === "blog" ? "article" : "website",
-      url: canonical,
-      images: [{ url: image, width: 1200, height: 630, alt: title }],
-      ...(post.kind === "blog"
-        ? { publishedTime: post.date, modifiedTime: modified }
-        : {}),
-    },
+    openGraph,
     twitter: {
       card: "summary_large_image",
       title,
