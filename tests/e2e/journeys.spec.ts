@@ -127,7 +127,8 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     context.fillRect(0, 0, canvas.width, canvas.height);
     const blob = await new Promise<Blob>((resolve, reject) =>
       canvas.toBlob(
-        (value) => (value ? resolve(value) : reject(new Error("png encode failed"))),
+        (value) =>
+          value ? resolve(value) : reject(new Error("png encode failed")),
         "image/png",
       ),
     );
@@ -188,12 +189,15 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     context.fillRect(0, 0, canvas.width, canvas.height);
     const blob = await new Promise<Blob>((resolve, reject) =>
       canvas.toBlob(
-        (value) => (value ? resolve(value) : reject(new Error("png encode failed"))),
+        (value) =>
+          value ? resolve(value) : reject(new Error("png encode failed")),
         "image/png",
       ),
     );
     const transfer = new DataTransfer();
-    transfer.items.add(new File([blob], "clipboard-blog.png", { type: "image/png" }));
+    transfer.items.add(
+      new File([blob], "clipboard-blog.png", { type: "image/png" }),
+    );
     element.dispatchEvent(
       new ClipboardEvent("paste", {
         bubbles: true,
