@@ -72,8 +72,12 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.reload();
   await page.setViewportSize({ width: 1280, height: 900 });
   await expect(page.locator(".desktop-composer")).toBeVisible();
-  await page.getByRole("button", { name: "下書き 1" }).click();
+  await page.keyboard.press("n");
+  const modalBody = page.getByPlaceholder("本文", { exact: true });
+  await expect(modalBody).toBeFocused();
+  await page.getByRole("button", { name: "下書きから貼り付け" }).click();
   await page.getByRole("button", { name: /保存される架空の下書き/ }).click();
+  await expect(modalBody).toHaveValue("保存される架空の下書き");
   await page.getByRole("button", { name: "投稿", exact: true }).click();
   await expect(page.locator(".tweet-body")).toHaveText(
     "保存される架空の下書き",
@@ -82,6 +86,22 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".tweet-body")).toHaveText(
     "保存される架空の下書き",
   );
+  const inlineTweet = page.getByPlaceholder("いまどうしてる？");
+  await inlineTweet.fill("ホームから直接投稿する架空のつぶやき");
+  await inlineTweet.press("Control+Enter");
+  await expect(page.locator(".tweet-body").first()).toHaveText(
+    "ホームから直接投稿する架空のつぶやき",
+  );
+  const directPost = page
+    .locator("article.post")
+    .filter({ hasText: "ホームから直接投稿する架空のつぶやき" });
+  await directPost.locator("button.more").click();
+  await page.getByRole("menuitem", { name: "削除" }).click();
+  const deleteDialog = page.getByRole("alertdialog");
+  await expect(
+    deleteDialog.getByRole("button", { name: "削除" }),
+  ).toBeVisible();
+  await deleteDialog.getByRole("button", { name: "キャンセル" }).click();
   await page
     .locator(".composer-kinds")
     .getByRole("button", { name: "ブログ", exact: true })
@@ -141,6 +161,19 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   );
   await expect(page.locator(".markdown .hljs-keyword")).toHaveText("const");
   await expect(page.locator(".markdown script")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "リンクをコピー" }),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Xで共有" })).toBeVisible();
+  const posts = await (await page.request.get("/api/posts")).json();
+  const blog = posts.find(
+    (post: { title: string }) => post.title === "架空のブログ",
+  );
+  const shared = await page.request.get("/?post=" + blog.id);
+  expect(await shared.text()).toContain('property="og:image"');
+  const og = await page.request.get("/og?post=" + blog.id);
+  expect(og.ok()).toBe(true);
+  expect(og.headers()["content-type"]).toContain("image/png");
   await page.getByRole("button", { name: "ログアウト", exact: true }).click();
   await expect(page.locator(".desktop-composer")).toHaveCount(0);
   await page.locator(".admin-access summary").click();
@@ -168,5 +201,25 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".vlog-overlay p").first()).toHaveText(
     "架空のvlogキャプション",
   );
+  await expect
+    .poll(() =>
+      page
+        .locator(".vlog-frame video")
+        .first()
+        .evaluate((video) => ({
+          muted: (video as HTMLVideoElement).muted,
+          loop: (video as HTMLVideoElement).loop,
+        })),
+    )
+    .toEqual({ muted: true, loop: true });
+  await page.getByRole("button", { name: "ループ再生を停止" }).first().click();
+  await expect
+    .poll(() =>
+      page
+        .locator(".vlog-frame video")
+        .first()
+        .evaluate((video) => (video as HTMLVideoElement).loop),
+    )
+    .toBe(false);
   expect(errors).toEqual([]);
 });

@@ -3,8 +3,22 @@ import "highlight.js/styles/github.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.KAMELOG_ORIGIN || "http://localhost:3000"),
   title: "kamelog",
   description: "ブログ、つぶやき、vlogをまとめる個人サイト。",
+  openGraph: {
+    title: "kamelog",
+    description: "ブログ、つぶやき、vlogをまとめる個人サイト。",
+    siteName: "kamelog",
+    type: "website",
+    images: [{ url: "/og", width: 1200, height: 630, alt: "kamelog" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "kamelog",
+    description: "ブログ、つぶやき、vlogをまとめる個人サイト。",
+    images: ["/og"],
+  },
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",

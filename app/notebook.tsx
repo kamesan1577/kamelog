@@ -34,6 +34,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -45,6 +52,7 @@ import { api, signIn } from "@/lib/api";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
+import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
 
 type Kind = "blog" | "tweet" | "vlog";
 type Post = {
@@ -285,6 +293,8 @@ export default function Notebook({
     [markdownHelpOpen, setMarkdownHelpOpen] = useState(false),
     [closeAsk, setCloseAsk] = useState(false),
     [draftList, setDraftList] = useState(false),
+    [editorDrafts, setEditorDrafts] = useState(false),
+    [inlineBody, setInlineBody] = useState(""),
     [remove, setRemove] = useState<string | null>(null);
   const [name, setName] = useState(""),
     [bio, setBio] = useState(""),
@@ -299,9 +309,10 @@ export default function Notebook({
     [count, setCount] = useState(0),
     [cameraError, setCameraError] = useState("");
   const live = useRef<HTMLVideoElement>(null),
+    bodyInput = useRef<HTMLTextAreaElement>(null),
+    titleInput = useRef<HTMLInputElement>(null),
     rec = useRef<MediaRecorder | null>(null),
     clipData = useRef<Blob | null>(null),
-    bodyInput = useRef<HTMLTextAreaElement>(null),
     urls = useRef<string[]>([]);
   useEffect(() => {
     let cancelled = false;
@@ -440,9 +451,43 @@ export default function Notebook({
     setDraftId(d?.id || null);
     setEditorStart(JSON.stringify({ k, t, b }));
     setPreview(false);
+    setEditorDrafts(false);
     setEditor(true);
     if (k === "vlog") void prepareVlog();
   };
+  useEffect(() => {
+    if (!login || editor) return;
+    const openWithN = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (
+        event.key.toLowerCase() !== "n" ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        target?.matches("input, textarea, [contenteditable=true]") ||
+        !window.matchMedia("(min-width: 641px)").matches
+      )
+        return;
+      event.preventDefault();
+      setKind("tweet");
+      setTitle("");
+      setBody("");
+      setEditId(null);
+      setDraftId(null);
+      setEditorStart(JSON.stringify({ k: "tweet", t: "", b: "" }));
+      setPreview(false);
+      setEditorDrafts(false);
+      setEditor(true);
+    };
+    window.addEventListener("keydown", openWithN);
+    return () => window.removeEventListener("keydown", openWithN);
+  }, [editor, login]);
+  useEffect(() => {
+    if (!editor || kind === "vlog" || preview) return;
+    requestAnimationFrame(() =>
+      (kind === "blog" ? titleInput.current : bodyInput.current)?.focus(),
+    );
+  }, [editor, kind, preview]);
   const dirty = JSON.stringify({ k: kind, t: title, b: body }) !== editorStart;
   const askClose = () => {
     if (kind === "vlog") {
@@ -509,6 +554,22 @@ export default function Notebook({
         }
       }
     });
+  const publishInlineTweet = () => {
+    const text = inlineBody.trim();
+    if (!text) return;
+    void guard(async () => {
+      const saved = await api<Post>("posts", "POST", {
+        kind: "tweet",
+        title: "",
+        body: text,
+        tags: [],
+        pinned: false,
+      });
+      setPosts((ps) => [saved, ...ps]);
+      setInlineBody("");
+      toast.success("投稿しました");
+    });
+  };
   const stopCamera = () => {
     stream?.getTracks().forEach((t) => t.stop());
     setStream(null);
@@ -628,6 +689,11 @@ export default function Notebook({
         : +!!b.pinned - +!!a.pinned || b.date.localeCompare(a.date),
     );
   const item = posts.find((p) => p.id === selected);
+  const postUrl = (id: string) => {
+    const url = new URL("/", location.origin);
+    url.searchParams.set("post", id);
+    return url.toString();
+  };
   const meta = (p: Post) => (
     <div className="post-meta">
       <Avatar value={profile.icon} />
@@ -660,14 +726,23 @@ export default function Notebook({
       </button>
       <button
         onClick={async () => {
-          const u = new URL(location.href);
-          u.searchParams.set("post", p.id);
-          await navigator.clipboard.writeText(u.toString());
+          await navigator.clipboard.writeText(postUrl(p.id));
           toast.success("リンクをコピーしました");
         }}
       >
         <Share2 size={16} />
-        共有
+        リンクをコピー
+      </button>
+      <button
+        onClick={() => {
+          const intent = new URL("https://twitter.com/intent/tweet");
+          intent.searchParams.set("url", postUrl(p.id));
+          intent.searchParams.set("text", socialCopy(p));
+          window.open(intent, "_blank", "noopener,noreferrer");
+        }}
+      >
+        <X size={16} />
+        Xで共有
       </button>
       {login && (
         <DropdownMenu>
@@ -993,16 +1068,32 @@ export default function Notebook({
                     <div className="composer desktop-composer">
                       <div className="composer-start">
                         <Avatar value={profile.icon} />
-                        <button onClick={() => openEditor("tweet")}>
-                          投稿を作成
-                        </button>
+                        <textarea
+                          className="inline-tweet"
+                          value={inlineBody}
+                          onChange={(event) =>
+                            setInlineBody(event.target.value)
+                          }
+                          onKeyDown={(event) => {
+                            if (
+                              (event.ctrlKey || event.metaKey) &&
+                              event.key === "Enter"
+                            ) {
+                              event.preventDefault();
+                              publishInlineTweet();
+                            }
+                          }}
+                          placeholder="いまどうしてる？"
+                          maxLength={5000}
+                          rows={1}
+                        />
                         <Button
-                          className="compose-plus"
-                          size="circle"
-                          onClick={() => openEditor("tweet")}
-                          aria-label="投稿を作成"
+                          variant="blue"
+                          size="sm"
+                          onClick={publishInlineTweet}
+                          disabled={!inlineBody.trim()}
                         >
-                          <Plus />
+                          投稿
                         </Button>
                       </div>
                       <div className="composer-kinds">
@@ -1010,7 +1101,15 @@ export default function Notebook({
                           <FileText />
                           ブログ
                         </button>
-                        <button onClick={() => openEditor("tweet")}>
+                        <button
+                          onClick={() =>
+                            document
+                              .querySelector<HTMLTextAreaElement>(
+                                ".inline-tweet",
+                              )
+                              ?.focus()
+                          }
+                        >
                           <MessageCircle />
                           つぶやき
                         </button>
@@ -1215,6 +1314,16 @@ export default function Notebook({
       <Dialog open={editor} onOpenChange={(o) => !o && askClose()}>
         <DialogContent
           className={"editor-dialog " + (kind === "vlog" ? "vlog-dialog" : "")}
+          onKeyDown={(event) => {
+            if (
+              kind !== "vlog" &&
+              (event.ctrlKey || event.metaKey) &&
+              event.key === "Enter"
+            ) {
+              event.preventDefault();
+              void publish();
+            }
+          }}
           onEscapeKeyDown={(e) => {
             e.preventDefault();
             askClose();
@@ -1234,6 +1343,46 @@ export default function Notebook({
                 ? "短文を入力します。"
                 : "横長の短い動画を投稿します。"}
           </DialogDescription>
+          {kind !== "vlog" && drafts.length > 0 && (
+            <div className="editor-drafts">
+              <button
+                type="button"
+                aria-expanded={editorDrafts}
+                onClick={() => setEditorDrafts((open) => !open)}
+              >
+                下書きから貼り付け
+                <span>{drafts.length}</span>
+              </button>
+              {editorDrafts && (
+                <div className="draft-list">
+                  {drafts.map((draft) => (
+                    <button
+                      type="button"
+                      key={draft.id}
+                      onClick={() => {
+                        setKind(draft.kind);
+                        setTitle(draft.title);
+                        setBody(draft.body);
+                        setEditId(null);
+                        setDraftId(draft.id);
+                        setEditorStart(
+                          JSON.stringify({
+                            k: draft.kind,
+                            t: draft.title,
+                            b: draft.body,
+                          }),
+                        );
+                        setEditorDrafts(false);
+                      }}
+                    >
+                      <b>{draft.title || draft.body.slice(0, 36) || "無題"}</b>
+                      <span>{label[draft.kind]}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
           <Tabs
             value={kind}
             onValueChange={(v) => {
@@ -1366,6 +1515,7 @@ export default function Notebook({
             <>
               {kind === "blog" && (
                 <input
+                  ref={titleInput}
                   className="title-input"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -1602,11 +1752,16 @@ export default function Notebook({
           </div>
         </DialogContent>
       </Dialog>
-      <Dialog open={!!remove} onOpenChange={(o) => !o && setRemove(null)}>
-        <DialogContent>
-          <DialogTitle>投稿を削除しますか？</DialogTitle>
-          <DialogDescription>公開サイトから削除されます。</DialogDescription>
-          <div className="confirm-actions">
+      <AlertDialog
+        open={!!remove}
+        onOpenChange={(open) => !open && setRemove(null)}
+      >
+        <AlertDialogContent className="delete-dialog">
+          <AlertDialogTitle>投稿を削除しますか？</AlertDialogTitle>
+          <AlertDialogDescription>
+            公開サイトから削除されます。
+          </AlertDialogDescription>
+          <AlertDialogFooter className="confirm-actions">
             <Button onClick={() => setRemove(null)}>キャンセル</Button>
             <Button
               variant="red-fill"
@@ -1624,21 +1779,33 @@ export default function Notebook({
             >
               削除
             </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
 function VlogFrame({ post }: { post: Post }) {
+  const video = useRef<HTMLVideoElement>(null);
+  const [looping, setLooping] = useState(false);
+  const startShortLoop = () => {
+    const element = video.current;
+    if (!element || !shouldAutoplayVlog(element.duration)) return;
+    element.muted = true;
+    element.loop = true;
+    setLooping(true);
+    void element.play().catch(() => undefined);
+  };
   return (
     <div className="vlog-frame">
       {post.video ? (
         <video
+          ref={video}
           src={post.video}
           controls
           playsInline
           preload="metadata"
+          onLoadedMetadata={startShortLoop}
           onClick={(e) => e.stopPropagation()}
         />
       ) : (
@@ -1657,6 +1824,19 @@ function VlogFrame({ post }: { post: Post }) {
         </time>
         {post.body && <p>{post.body}</p>}
       </div>
+      {post.video && looping && (
+        <button
+          type="button"
+          className="vlog-loop-toggle"
+          onClick={(event) => {
+            event.stopPropagation();
+            if (video.current) video.current.loop = false;
+            setLooping(false);
+          }}
+        >
+          ループ再生を停止
+        </button>
+      )}
     </div>
   );
 }

@@ -110,3 +110,27 @@ test("renders GFM lists safely and highlights fenced code", async () => {
   assert.match(html, /class="hljs-keyword">const<\/span>/);
   assert.doesNotMatch(html, /<script>/);
 });
+
+test("builds concise social card copy and limits vlog autoplay", async () => {
+  const { socialCopy, shouldAutoplayVlog } =
+    await vite.ssrLoadModule("/lib/social.ts");
+
+  assert.equal(
+    socialCopy({ kind: "blog", title: "記事タイトル", body: "本文" }),
+    "記事タイトル",
+  );
+  assert.equal(
+    socialCopy({
+      kind: "tweet",
+      title: "",
+      body: "最初の一文です。次の文はカードに入りません。",
+    }),
+    "最初の一文です。",
+  );
+  assert.match(
+    socialCopy({ kind: "tweet", title: "", body: "あ".repeat(100) }),
+    /^あ{71}…$/,
+  );
+  assert.equal(shouldAutoplayVlog(10), true);
+  assert.equal(shouldAutoplayVlog(10.01), false);
+});
