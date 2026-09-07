@@ -157,6 +157,26 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.getByText("```javascript")).toBeVisible();
   await page.keyboard.press("Escape");
   const blogBody = page.getByPlaceholder("本文", { exact: true });
+  await expect(page.locator(".blog-dialog")).not.toHaveClass(/is-full-page/);
+  await blogBody.fill("リアルタイムプレビュー");
+  await page.getByRole("button", { name: "フルページで編集" }).click();
+  await expect(page.locator(".blog-dialog")).toHaveClass(/is-full-page/);
+  const viewModes = page.getByRole("group", { name: "エディタ表示" });
+  await viewModes.getByRole("button", { name: "両方" }).click();
+  const livePreview = page.getByLabel("プレビュー");
+  await expect(livePreview).toContainText("リアルタイムプレビュー");
+  const editBox = await blogBody.boundingBox();
+  const splitPreviewBox = await livePreview.boundingBox();
+  expect(editBox).not.toBeNull();
+  expect(splitPreviewBox).not.toBeNull();
+  if (!editBox || !splitPreviewBox)
+    throw new Error("split editor geometry unavailable");
+  expect(splitPreviewBox.x).toBeGreaterThan(editBox.x + editBox.width - 2);
+  await viewModes.getByRole("button", { name: "プレビュー" }).click();
+  await expect(blogBody).toBeHidden();
+  await viewModes.getByRole("button", { name: "編集", exact: true }).click();
+  await expect(blogBody).toBeVisible();
+  await blogBody.fill("");
   await markdownToolbar.getByRole("button", { name: "箇条書き" }).click();
   await expect(blogBody).toHaveValue("- 項目");
   await blogBody.fill(
