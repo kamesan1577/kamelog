@@ -16,6 +16,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 投稿モーダルは最初のテキスト入力欄へ初期フォーカスする。スマホの投稿入力欄は16px以上を維持し、iOS系ブラウザのフォーカス時自動ズームを誘発しない。
 - スマホのブログMarkdownツールバーは記法列だけを横スクロールさせ、ヘルプとプレビュー操作を投稿モーダル内に保持する。
 - 10秒以下vlogの無音ループと即時停止、リンクコピー/X共有、投稿別OGP画像を実装。
+- 投稿詳細の `?post=` と画面状態をHistory APIで同期し、詳細内の「戻る」、ブラウザの戻る/進む、ホーム等のナビゲーションでURLと表示が食い違わないようにする。直接共有URLから開いた詳細の「戻る」はホームへ戻す。
 - revision競合、Origin/CSRF、入力上限、媒体Range、rate limitをAPIで処理。
 - DB/媒体のhash manifest付きbackup/restoreと全パスキー喪失時のoffline reset。
 - Node 24の非root本番image、開発Compose、CIのcheck/e2e/container job。
@@ -41,6 +42,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - GitHub Actions run #34073823834（commit `ec5f3994`）の `check` / `e2e` / `container` がすべて成功。
 - 2026-09-07 画像・埋め込み変更後、`make check`（画像magic/寸法、未公開媒体、4枚上限、Markdown埋め込み、型、lint、本番buildを含む）が成功し、production dependency auditは0件。ローカルE2EはPlaywright Chromium配布元の502/timeoutでブラウザを取得できず未実施。PRのCI `e2e` で確認する。
 - 2026-09-07 Issue #37のブログ全画面・分割エディタ変更後、`make check`（公開検査、UI契約、型、lint、unit、本番buildを含む）が成功。ローカルE2Eは実行環境にChromiumがなく、Playwright配布元からの取得がtimeoutしたため未実施。追加したPC分割配置・リアルタイム反映と既存のPC/390px journeyはPRのCI `e2e` で確認する。
+- 2026-09-07 投稿詳細履歴変更では、実行環境からGitHubをcheckoutできないためローカル `make check` / `make e2e` は未実施。追加した投稿詳細URL・アプリ内戻る・ブラウザ戻る/進む・直接共有URLの回帰はPRのCI `check` / `e2e` / `container` で確認する。
 
 ## 対象サーバーでのみ完了できる項目
 
