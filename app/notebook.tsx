@@ -68,6 +68,7 @@ type Post = {
   title: string;
   body: string;
   date: string;
+  updatedAt?: string;
   tags: string[];
   likes: number;
   video?: string;
@@ -947,12 +948,23 @@ export default function Notebook({
       <Avatar value={profile.icon} />
       <b>{profile.name}</b>
       <span>·</span>
-      <time>
+      <time dateTime={p.date}>
         {new Date(p.date).toLocaleDateString("ja-JP", {
           month: "numeric",
           day: "numeric",
         })}
       </time>
+      {p.kind === "blog" && p.updatedAt && (
+        <>
+          <span>·</span>
+          <time dateTime={p.updatedAt} title="最終更新日">
+            更新 {new Date(p.updatedAt).toLocaleDateString("ja-JP", {
+              month: "numeric",
+              day: "numeric",
+            })}
+          </time>
+        </>
+      )}
       <span className={"type-label " + p.kind}>{label[p.kind]}</span>
     </div>
   );
