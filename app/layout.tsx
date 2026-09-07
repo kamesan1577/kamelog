@@ -5,6 +5,7 @@ import "./mobile-blog-editor.css";
 import "./x-share-logo.css";
 import "./composer-layout.css";
 import "./full-page-blog-editor.css";
+import "./detail-actions.css";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
 
 export const metadata: Metadata = {
