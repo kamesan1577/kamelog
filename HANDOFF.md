@@ -17,6 +17,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - スマホのブログMarkdownツールバーは記法列だけを横スクロールさせ、ヘルプとプレビュー操作を投稿モーダル内に保持する。
 - 10秒以下vlogの無音ループと即時停止、リンクコピー/X共有、投稿別OGP画像を実装。
 - 投稿詳細の `?post=` と画面状態をHistory APIで同期し、詳細内の「戻る」、ブラウザの戻る/進む、ホーム等のナビゲーションでURLと表示が食い違わないようにする。直接共有URLから開いた詳細の「戻る」はホームへ戻す。
+- ブログ詳細のいいね・リンクコピー・X共有は読書中も追従する。1000px以上では本文左側の縦型sticky rail、999px以下では下部floating bar、640px以下ではモバイルナビの上へ固定する。タイムライン側の操作は維持する。
 - revision競合、Origin/CSRF、入力上限、媒体Range、rate limitをAPIで処理。
 - DB/媒体のhash manifest付きbackup/restoreと全パスキー喪失時のoffline reset。
 - Node 24の非root本番image、開発Compose、CIのcheck/e2e/container job。
@@ -45,6 +46,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 2026-09-07 画像・埋め込み変更後、`make check`（画像magic/寸法、未公開媒体、4枚上限、Markdown埋め込み、型、lint、本番buildを含む）が成功し、production dependency auditは0件。ローカルE2EはPlaywright Chromium配布元の502/timeoutでブラウザを取得できず未実施。PRのCI `e2e` で確認する。
 - 2026-09-07 Issue #37のブログ全画面・分割エディタ変更後、`make check`（公開検査、UI契約、型、lint、unit、本番buildを含む）が成功。ローカルE2Eは実行環境にChromiumがなく、Playwright配布元からの取得がtimeoutしたため未実施。追加したPC分割配置・リアルタイム反映と既存のPC/390px journeyはPRのCI `e2e` で確認する。
 - 2026-09-07 投稿詳細履歴変更では、実行環境からGitHubをcheckoutできないためローカル `make check` / `make e2e` は未実施。追加した投稿詳細URL・アプリ内戻る・ブラウザ戻る/進む・直接共有URLの回帰はPRのCI `check` / `e2e` / `container` で確認する。
+- 2026-09-08 Issue #41の追従アクション変更は、CSS契約テストと1280px/390pxのPlaywright回帰で、PCの左sticky railとスマホの下部floating barがスクロール後も同位置に残ることをPR CIで確認する。
 - 2026-09-07 Issue #45のトップページ変更後、`make check`（公開検査、UI契約、型、lint、unit、本番buildを含む）が成功。PCと390pxの匿名表示を実ブラウザで目視し、横方向の見切れがないことを確認した。ローカルE2Eは実行環境にPlaywright Chromiumがないため未実施し、トップからタイムラインへの導線を含むjourneyはPRのCI `e2e` で確認する。
 
 ## 対象サーバーでのみ完了できる項目
