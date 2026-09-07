@@ -7,24 +7,31 @@ import "./composer-layout.css";
 import "./full-page-blog-editor.css";
 import "./detail-actions.css";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
+import { homeUrl, ogImageUrl, siteOrigin } from "@/server/seo.mjs";
+
+const canonical = homeUrl();
+const image = ogImageUrl();
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.KAMELOG_ORIGIN || "http://localhost:3000"),
+  metadataBase: new URL(siteOrigin()),
   title: "kamelog",
   description: "ブログ、つぶやき、vlogをまとめる個人サイト。",
+  alternates: { canonical },
   openGraph: {
     title: "kamelog",
     description: "ブログ、つぶやき、vlogをまとめる個人サイト。",
     siteName: "kamelog",
     type: "website",
-    images: [{ url: "/og", width: 1200, height: 630, alt: "kamelog" }],
+    url: canonical,
+    images: [{ url: image, width: 1200, height: 630, alt: "kamelog" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "kamelog",
     description: "ブログ、つぶやき、vlogをまとめる個人サイト。",
-    images: ["/og"],
+    images: [image],
   },
+  other: { "twitter:url": canonical },
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
