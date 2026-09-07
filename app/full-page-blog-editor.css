@@ -85,6 +85,7 @@
   height: 100dvh;
   max-width: none !important;
   max-height: none;
+  translate: 0 0 !important;
   transform: none !important;
   flex-direction: column;
   overflow: hidden;

@@ -22,6 +22,10 @@ test("blog editor keeps modal mode and offers full-page live split preview", () 
   );
   assert.match(
     css,
+    /\.blog-dialog\.is-full-page\s*\{[^}]*translate:\s*0 0 !important/s,
+  );
+  assert.match(
+    css,
     /\.blog-editor-workspace\.mode-split\s*\{[^}]*grid-template-columns:\s*minmax\(0, 1fr\) minmax\(0, 1fr\)/s,
   );
 });
