@@ -102,9 +102,7 @@ export default async function Page({
   const store = getStore();
   const posts = store.list("posts");
   const selectedPost = params.post
-    ? (posts.find((post: { id: string }) => post.id === params.post) as
-        | PublicPost
-        | undefined)
+    ? posts.find(({ id }: { id: string }) => id === params.post)
     : undefined;
   if (params.post && !selectedPost) notFound();
 
