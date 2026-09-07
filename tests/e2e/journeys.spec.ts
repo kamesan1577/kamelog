@@ -105,6 +105,51 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".desktop-composer .image-grid img")).toHaveCount(
     1,
   );
+  await page
+    .locator(".desktop-composer")
+    .getByRole("button", { name: "画像を取り消す" })
+    .click();
+  await expect(page.locator(".desktop-composer .image-grid img")).toHaveCount(
+    0,
+  );
+  const pastedTweetImage = page.waitForResponse(
+    (response) =>
+      response.url().includes("/api/media?kind=image") &&
+      response.request().method() === "POST",
+  );
+  await inlineTweet.evaluate(async (element) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 3200;
+    canvas.height = 1800;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("canvas unavailable");
+    context.fillStyle = "rgb(30, 120, 210)";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob(
+        (value) =>
+          value ? resolve(value) : reject(new Error("png encode failed")),
+        "image/png",
+      ),
+    );
+    const transfer = new DataTransfer();
+    transfer.items.add(
+      new File([blob], "clipboard-large.png", { type: "image/png" }),
+    );
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData: transfer,
+      }),
+    );
+  });
+  const pastedTweetMeta = await (await pastedTweetImage).json();
+  expect(pastedTweetMeta.type).toBe("image/webp");
+  expect(Math.max(pastedTweetMeta.width, pastedTweetMeta.height)).toBe(2560);
+  await expect(page.locator(".desktop-composer .image-grid img")).toHaveCount(
+    1,
+  );
   await inlineTweet.fill("ホームから直接投稿する架空のつぶやき");
   await inlineTweet.press("Control+Enter");
   await expect(page.locator(".tweet-body").first()).toHaveText(
@@ -128,6 +173,41 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .getByRole("button", { name: "ブログ", exact: true })
     .click();
   await page.getByPlaceholder("タイトル", { exact: true }).fill("架空のブログ");
+  const blogBody = page.getByPlaceholder("本文", { exact: true });
+  const pastedBlogImage = page.waitForResponse(
+    (response) =>
+      response.url().includes("/api/media?kind=image") &&
+      response.request().method() === "POST",
+  );
+  await blogBody.evaluate(async (element) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 1200;
+    canvas.height = 800;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("canvas unavailable");
+    context.fillStyle = "rgb(240, 180, 50)";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob>((resolve, reject) =>
+      canvas.toBlob(
+        (value) =>
+          value ? resolve(value) : reject(new Error("png encode failed")),
+        "image/png",
+      ),
+    );
+    const transfer = new DataTransfer();
+    transfer.items.add(
+      new File([blob], "clipboard-blog.png", { type: "image/png" }),
+    );
+    element.dispatchEvent(
+      new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+        clipboardData: transfer,
+      }),
+    );
+  });
+  const pastedBlogMeta = await (await pastedBlogImage).json();
+  await expect(blogBody).toHaveValue(`![画像1](${pastedBlogMeta.url})`);
   const markdownToolbar = page.getByRole("toolbar", {
     name: "Markdown記法",
   });
@@ -156,7 +236,6 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.getByText("- [ ] 未完了")).toBeVisible();
   await expect(page.getByText("```javascript")).toBeVisible();
   await page.keyboard.press("Escape");
-  const blogBody = page.getByPlaceholder("本文", { exact: true });
   await expect(page.locator(".blog-dialog")).not.toHaveClass(/is-full-page/);
   await blogBody.fill("リアルタイムプレビュー");
   await page.getByRole("button", { name: "フルページで編集" }).click();
