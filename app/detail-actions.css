@@ -62,9 +62,7 @@
     font-size: 11px;
   }
 
-  .detail-page:has(> .markdown)
-    > .post-actions
-    > button:not(:first-child) {
+  .detail-page:has(> .markdown) > .post-actions > button:not(:first-child) {
     font-size: 0;
   }
 
@@ -107,9 +105,7 @@
     font-size: 11px;
   }
 
-  .detail-page:has(> .markdown)
-    > .post-actions
-    > button:not(:first-child) {
+  .detail-page:has(> .markdown) > .post-actions > button:not(:first-child) {
     font-size: 0;
   }
 
