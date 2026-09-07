@@ -86,7 +86,8 @@ export class Store {
         throw new Conflict("Missing revision");
       let persisted = value;
       if (table === "posts" && old?.kind === "blog" && value.kind === "blog") {
-        const contentChanged = old.title !== value.title || old.body !== value.body;
+        const contentChanged =
+          old.title !== value.title || old.body !== value.body;
         persisted = {
           ...value,
           ...(old.updatedAt ? { updatedAt: old.updatedAt } : {}),
