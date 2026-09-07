@@ -204,7 +204,8 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     const tools = dialog.querySelector<HTMLElement>(".editor-tools");
     const help = dialog.querySelector<HTMLElement>(".markdown-help-link");
     const preview = dialog.querySelector<HTMLElement>(".preview-toggle");
-    if (!tools || !help || !preview) throw new Error("blog editor controls missing");
+    if (!tools || !help || !preview)
+      throw new Error("blog editor controls missing");
     const dialogRect = dialog.getBoundingClientRect();
     const toolsRect = tools.getBoundingClientRect();
     const helpRect = help.getBoundingClientRect();
