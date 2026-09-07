@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   Check,
   ChevronDown,
+  Columns2,
   Code2,
   Eye,
   FileText,
@@ -13,7 +14,10 @@ import {
   Home,
   Image as ImageIcon,
   MessageCircle,
+  Minimize2,
   MoreHorizontal,
+  Maximize2,
+  Pencil,
   Pin,
   Plus,
   Search,
@@ -56,6 +60,7 @@ import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
 
 type Kind = "blog" | "tweet" | "vlog";
+type BlogEditorMode = "edit" | "preview" | "split";
 type Post = {
   revision?: number;
   id: string;
@@ -433,7 +438,8 @@ export default function Notebook({
     [editId, setEditId] = useState<string | null>(null),
     [draftId, setDraftId] = useState<string | null>(null),
     [editorStart, setEditorStart] = useState(""),
-    [preview, setPreview] = useState(false),
+    [blogEditorMode, setBlogEditorMode] = useState<BlogEditorMode>("edit"),
+    [fullPageEditor, setFullPageEditor] = useState(false),
     [markdownHelpOpen, setMarkdownHelpOpen] = useState(false),
     [closeAsk, setCloseAsk] = useState(false),
     [draftList, setDraftList] = useState(false),
@@ -603,7 +609,8 @@ export default function Notebook({
     setEditorStart(
       JSON.stringify({ k, t, b, images: p?.images ?? d?.images ?? [] }),
     );
-    setPreview(false);
+    setBlogEditorMode("edit");
+    setFullPageEditor(false);
     setEditorDrafts(false);
     setEditor(true);
     if (k === "vlog") void prepareVlog();
@@ -629,7 +636,8 @@ export default function Notebook({
       setEditId(null);
       setDraftId(null);
       setEditorStart(JSON.stringify({ k: "tweet", t: "", b: "", images: [] }));
-      setPreview(false);
+      setBlogEditorMode("edit");
+      setFullPageEditor(false);
       setEditorDrafts(false);
       setEditor(true);
     };
@@ -637,11 +645,11 @@ export default function Notebook({
     return () => window.removeEventListener("keydown", openWithN);
   }, [editor, login]);
   useEffect(() => {
-    if (!editor || kind === "vlog" || preview) return;
+    if (!editor || kind === "vlog" || blogEditorMode === "preview") return;
     requestAnimationFrame(() =>
       (kind === "blog" ? titleInput.current : bodyInput.current)?.focus(),
     );
-  }, [editor, kind, preview]);
+  }, [editor, kind, blogEditorMode]);
   const dirty =
     JSON.stringify({ k: kind, t: title, b: body, images: editorImages }) !==
     editorStart;
@@ -1591,7 +1599,12 @@ export default function Notebook({
       </div>
       <Dialog open={editor} onOpenChange={(o) => !o && askClose()}>
         <DialogContent
-          className={"editor-dialog " + (kind === "vlog" ? "vlog-dialog" : "")}
+          className={
+            "editor-dialog " +
+            (kind === "vlog" ? "vlog-dialog " : "") +
+            (kind === "blog" ? "blog-dialog " : "") +
+            (kind === "blog" && fullPageEditor ? "is-full-page" : "")
+          }
           onKeyDown={(event) => {
             if (
               kind !== "vlog" &&
@@ -1936,31 +1949,90 @@ export default function Notebook({
                   >
                     ヘルプ
                   </button>
+                  <div
+                    className="editor-view-modes"
+                    role="group"
+                    aria-label="エディタ表示"
+                  >
+                    <button
+                      type="button"
+                      className={blogEditorMode === "edit" ? "active" : ""}
+                      aria-pressed={blogEditorMode === "edit"}
+                      onClick={() => setBlogEditorMode("edit")}
+                    >
+                      <Pencil size={14} />
+                      編集
+                    </button>
+                    <button
+                      type="button"
+                      className={blogEditorMode === "preview" ? "active" : ""}
+                      aria-pressed={blogEditorMode === "preview"}
+                      onClick={() => setBlogEditorMode("preview")}
+                    >
+                      <Eye size={14} />
+                      プレビュー
+                    </button>
+                    <button
+                      type="button"
+                      className={blogEditorMode === "split" ? "active" : ""}
+                      aria-pressed={blogEditorMode === "split"}
+                      onClick={() => {
+                        setBlogEditorMode("split");
+                        setFullPageEditor(true);
+                      }}
+                    >
+                      <Columns2 size={14} />
+                      両方
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    className="preview-toggle"
-                    onClick={() => setPreview((x) => !x)}
+                    className="full-page-toggle"
+                    aria-label={
+                      fullPageEditor ? "モーダル表示に戻す" : "フルページで編集"
+                    }
+                    onClick={() => {
+                      if (fullPageEditor && blogEditorMode === "split")
+                        setBlogEditorMode("edit");
+                      setFullPageEditor((value) => !value);
+                    }}
                   >
-                    <Eye size={15} />
-                    {preview ? "編集" : "プレビュー"}
+                    {fullPageEditor ? (
+                      <Minimize2 size={15} />
+                    ) : (
+                      <Maximize2 size={15} />
+                    )}
                   </button>
                 </div>
               )}
-              {preview && kind === "blog" ? (
-                <div className="editor-preview">
-                  <Markdown text={"# " + title + "\n\n" + body} />
+              {kind === "blog" ? (
+                <div className={"blog-editor-workspace mode-" + blogEditorMode}>
+                  {blogEditorMode !== "preview" && (
+                    <textarea
+                      ref={bodyInput}
+                      className="body-input blog"
+                      value={body}
+                      onChange={(e) => setBody(e.target.value)}
+                      placeholder="本文"
+                      onDragOver={(event) => event.preventDefault()}
+                      onDrop={(event) => droppedImages(event, "blog")}
+                    />
+                  )}
+                  {blogEditorMode !== "edit" && (
+                    <div className="editor-preview" aria-label="プレビュー">
+                      <Markdown text={"# " + title + "\n\n" + body} />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <textarea
                   ref={bodyInput}
-                  className={"body-input " + kind}
+                  className="body-input tweet"
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   placeholder="本文"
                   onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) =>
-                    droppedImages(event, kind === "blog" ? "blog" : "tweet")
-                  }
+                  onDrop={(event) => droppedImages(event, "tweet")}
                 />
               )}
               <div className="editor-media-row">
