@@ -184,9 +184,52 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".desktop-composer")).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator(".mobile-create").click();
+  const mobileBlogTab = page
+    .getByRole("tab", { name: "ブログ", exact: true })
+    .last();
+  await expect(mobileBlogTab).toBeVisible();
+  await mobileBlogTab.click();
   await expect(
-    page.getByRole("tab", { name: "ブログ", exact: true }).last(),
+    page.getByPlaceholder("タイトル", { exact: true }),
   ).toBeVisible();
+  const mobileBlogDialog = page.locator(".editor-dialog");
+  const mobileMarkdownToolbar = page.getByRole("toolbar", {
+    name: "Markdown記法",
+  });
+  const markdownHelp = mobileMarkdownToolbar.getByRole("button", {
+    name: "Markdownヘルプ",
+  });
+  const previewToggle = mobileMarkdownToolbar.getByRole("button", {
+    name: "プレビュー",
+  });
+  await expect(markdownHelp).toBeVisible();
+  await expect(previewToggle).toBeVisible();
+  await expect
+    .poll(() =>
+      mobileBlogDialog.evaluate(
+        (dialog) => dialog.scrollWidth <= dialog.clientWidth + 1,
+      ),
+    )
+    .toBe(true);
+  const dialogBox = await mobileBlogDialog.boundingBox();
+  const toolbarBox = await mobileMarkdownToolbar.boundingBox();
+  const helpBox = await markdownHelp.boundingBox();
+  const previewBox = await previewToggle.boundingBox();
+  expect(dialogBox).not.toBeNull();
+  expect(toolbarBox).not.toBeNull();
+  expect(helpBox).not.toBeNull();
+  expect(previewBox).not.toBeNull();
+  if (!dialogBox || !toolbarBox || !helpBox || !previewBox) {
+    throw new Error("mobile editor geometry unavailable");
+  }
+  expect(dialogBox.x).toBeGreaterThanOrEqual(0);
+  expect(dialogBox.x + dialogBox.width).toBeLessThanOrEqual(390);
+  for (const box of [toolbarBox, helpBox, previewBox]) {
+    expect(box.x).toBeGreaterThanOrEqual(dialogBox.x - 1);
+    expect(box.x + box.width).toBeLessThanOrEqual(
+      dialogBox.x + dialogBox.width + 1,
+    );
+  }
   await page.getByRole("tab", { name: "vlog", exact: true }).last().click();
   await page.getByRole("tab", { name: "動画を選ぶ", exact: true }).click();
   await expect(page.locator(".vlog-stage")).toBeVisible();

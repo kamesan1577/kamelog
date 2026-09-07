@@ -1,0 +1,43 @@
+/* Keep the blog Markdown controls inside the mobile post dialog. */
+.editor-tools {
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.editor-tool-list {
+  flex: 1 1 0;
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+}
+
+@media (max-width: 640px) {
+  .editor-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 6px;
+  }
+
+  .editor-tool-list {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 3px;
+  }
+
+  .editor-tools .markdown-help-link {
+    grid-column: 1;
+    justify-self: start;
+    margin-left: 0;
+  }
+
+  .editor-tools .preview-toggle {
+    grid-column: 2;
+    justify-self: end;
+    margin-left: 0;
+  }
+}
