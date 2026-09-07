@@ -25,7 +25,10 @@ export async function backupStore(store, target) {
   const files = ["kamelog.sqlite"];
   for (const media of store.list("media")) {
     if (!/^[a-f0-9-]{36}$/.test(media.id)) throw new Error("Invalid media id");
-    const file = "media/" + media.id + ".mp4";
+    const extension = media.extension || "mp4";
+    if (!/^(mp4|png|jpg|webp|gif)$/.test(extension))
+      throw new Error("Invalid media extension");
+    const file = "media/" + media.id + "." + extension;
     await copyFile(join(store.directory, file), join(target, file));
     files.push(file);
   }
@@ -52,7 +55,10 @@ export async function restoreBackup(source, target) {
   if (manifest.version !== 1 || !manifest.files?.["kamelog.sqlite"])
     throw new Error("Unsupported backup");
   for (const [file, digest] of Object.entries(manifest.files)) {
-    if (file !== "kamelog.sqlite" && !/^media\/[a-f0-9-]{36}\.mp4$/.test(file))
+    if (
+      file !== "kamelog.sqlite" &&
+      !/^media\/[a-f0-9-]{36}\.(mp4|png|jpg|webp|gif)$/.test(file)
+    )
       throw new Error("Unsafe path");
     if (
       !(await lstat(join(source, file))).isFile() ||
@@ -72,16 +78,21 @@ export async function restoreBackup(source, target) {
     )
       throw new Error("Invalid database");
     for (const media of restored.list("media")) {
+      const extension = media.extension || "mp4";
       if (
         !/^[a-f0-9-]{36}$/.test(media.id) ||
-        !manifest.files["media/" + media.id + ".mp4"]
+        !/^(mp4|png|jpg|webp|gif)$/.test(extension) ||
+        !manifest.files["media/" + media.id + "." + extension]
       )
         throw new Error("Missing media");
-      await stat(join(target, "media", media.id + ".mp4"));
+      await stat(join(target, "media", media.id + "." + extension));
     }
     for (const p of restored.list("posts")) {
       if (p.video && !restored.get("media", p.video.split("/").pop()))
         throw new Error("Dangling media reference");
+      for (const image of p.images || [])
+        if (!restored.get("media", image.split("/").pop()))
+          throw new Error("Dangling media reference");
     }
   } finally {
     restored.close();

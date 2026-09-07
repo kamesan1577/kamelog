@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Store, Conflict } from "../../server/store.mjs";
@@ -23,6 +23,16 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
       }),
     );
     assert.equal(store.get("settings", "temporary"), null);
+    await mkdir(join(root, "source", "media"), { recursive: true });
+    await writeFile(
+      join(root, "source", "media", "11111111-1111-4111-8111-111111111111.png"),
+      "fictional-image",
+    );
+    store.save("media", "11111111-1111-4111-8111-111111111111", {
+      kind: "image",
+      type: "image/png",
+      extension: "png",
+    });
     store.close();
     store = new Store(join(root, "source"));
     assert.equal(store.get("posts", "fictional").body, "fixture");
@@ -30,6 +40,18 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
     await restoreBackup(join(root, "backup"), join(root, "restored"));
     const restored = new Store(join(root, "restored"));
     assert.equal(restored.get("posts", "fictional").body, "fixture");
+    assert.equal(
+      await readFile(
+        join(
+          root,
+          "restored",
+          "media",
+          "11111111-1111-4111-8111-111111111111.png",
+        ),
+        "utf8",
+      ),
+      "fictional-image",
+    );
     restored.close();
     await assert.rejects(
       restoreBackup(join(root, "backup"), join(root, "restored")),

@@ -169,3 +169,71 @@ test("bootstrap token and invalid registration response never authenticate", asy
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test("uploaded images stay private until referenced and tweets accept at most four", async () => {
+  const root = await mkdtemp(join(tmpdir(), "kamelog-image-api-"));
+  const store = new Store(root);
+  const origin = "http://localhost:3000";
+  const api = createAPI(store, configuration({ KAMELOG_ORIGIN: origin }));
+  const session = store.createSession();
+  const png = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+    "base64",
+  );
+  const upload = (owner = true, bytes = png, type = "image/png") =>
+    api(
+      new Request(origin + "/api/media?kind=image", {
+        method: "POST",
+        headers: {
+          origin,
+          "content-type": type,
+          ...(owner ? { cookie: "kamelog-session=" + session } : {}),
+        },
+        body: bytes,
+      }),
+    );
+  try {
+    assert.equal((await upload(false)).status, 401);
+    assert.equal((await upload(true, Buffer.from("fake"))).status, 400);
+    const uploaded = await (await upload()).json();
+    assert.equal((await api(new Request(origin + uploaded.url))).status, 404);
+    const postResponse = await api(
+      new Request(origin + "/api/posts", {
+        method: "POST",
+        headers: {
+          origin,
+          cookie: "kamelog-session=" + session,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          kind: "tweet",
+          title: "",
+          body: "",
+          images: [uploaded.url],
+        }),
+      }),
+    );
+    assert.equal(postResponse.status, 201);
+    assert.equal((await api(new Request(origin + uploaded.url))).status, 200);
+    const tooMany = await api(
+      new Request(origin + "/api/posts", {
+        method: "POST",
+        headers: {
+          origin,
+          cookie: "kamelog-session=" + session,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          kind: "tweet",
+          title: "",
+          body: "five",
+          images: Array(5).fill(uploaded.url),
+        }),
+      }),
+    );
+    assert.equal(tooMany.status, 400);
+  } finally {
+    store.close();
+    await rm(root, { recursive: true, force: true });
+  }
+});

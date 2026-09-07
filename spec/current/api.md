@@ -12,7 +12,8 @@
 | GET / POST / PUT / DELETE | /api/drafts[/id]           | owner限定の下書き                                       |
 | GET / PUT                 | /api/profile               | 公開プロフィール/owner更新                              |
 | POST                      | /api/media?seconds=2       | raw動画、64MiB以下、尺2/5/10/30                         |
-| GET                       | /api/media/:id             | 公開投稿から参照される動画、またはowner専用の未投稿動画 |
+| POST                      | /api/media?kind=image      | PNG/JPEG/WebP/GIF画像、1枚12MiB以下                     |
+| GET                       | /api/media/:id             | 公開投稿から参照される媒体、またはowner専用の未投稿媒体 |
 | GET                       | /api/auth/session          | authenticated booleanのみ                               |
 | POST                      | /api/auth/register/options | 初回token、またはログイン済み追加登録                   |
 | POST                      | /api/auth/register/verify  | WebAuthn登録response検証                                |
@@ -22,9 +23,9 @@
 
 ## 入力
 
-投稿: kind、title（300文字）、body（ブログ100,000/つぶやき5,000/vlog60）、tags（20件、各40文字）、pinned、video、time。
+投稿: kind、title（300文字）、body（ブログ100,000/つぶやき5,000/vlog60）、tags（20件、各40文字）、pinned、video、time、images（つぶやきのみ最大4件）。
 日時・いいね初期値・IDはサーバー生成。API入力で他人のID・過去日時へ差し替えない。
-vlogのvideoは登録済み媒体のAPI pathだけを許可する。timeはHH:mm、captionは改行不可。
+vlogのvideoとつぶやきのimagesは種類が一致する登録済み媒体のAPI pathだけを許可する。timeはHH:mm、captionは改行不可。
 更新はrevisionをbodyに渡す。削除はIf-Matchにrevisionを渡す。競合は409であり無条件上書きしない。
 下書きはkind=blog/tweet、title、body、更新時revision。
 プロフィールはname（80）、bio（500）、icon（短い絵文字または制限された画像data URL）。
