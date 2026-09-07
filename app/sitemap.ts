@@ -19,7 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       .filter((post) => post.kind === "blog")
       .map((post) => ({
         url: postUrl(post.id),
-        ...((post.updatedAt || post.date)
+        ...(post.updatedAt || post.date
           ? { lastModified: post.updatedAt || post.date }
           : {}),
       })),
