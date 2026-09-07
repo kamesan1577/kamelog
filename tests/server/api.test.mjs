@@ -73,6 +73,22 @@ test("owner boundary, public projection, CRUD, CSRF, validation", async () => {
       )
     ).json();
     assert.equal(post.revision, 1);
+    assert.deepEqual(post.tags, []);
+    const tagged = await (
+      await request(
+        "posts",
+        "POST",
+        {
+          kind: "tweet",
+          title: "#ã¿ã¤ãã«",
+          body: "æ¬æ #Go ã¨ #éçºæ¥è¨ãéè¤ #Go",
+          tags: ["ç¡è¦ãããåºå®ã¿ã°"],
+        },
+        true,
+      )
+    ).json();
+    assert.deepEqual(tagged.tags, ["ã¿ã¤ãã«", "Go", "éçºæ¥è¨"]);
+    assert.equal((await (await request("posts?q=éçºæ¥è¨")).json()).length, 1);
     assert.equal(
       (
         await request(
