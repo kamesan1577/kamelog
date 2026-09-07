@@ -5,7 +5,7 @@ import test from "node:test";
 const cssUrl = new URL("../../app/detail-actions.css", import.meta.url);
 const layoutUrl = new URL("../../app/layout.tsx", import.meta.url);
 
-test("keeps blog detail actions ahead of article content", async () => {
+test("keeps blog detail actions visible while reading", async () => {
   const [css, layout] = await Promise.all([
     readFile(cssUrl, "utf8"),
     readFile(layoutUrl, "utf8"),
@@ -14,22 +14,18 @@ test("keeps blog detail actions ahead of article content", async () => {
   assert.match(layout, /import "\.\/detail-actions\.css";/);
   assert.match(
     css,
-    /\.detail-page:has\(> \.markdown\)\s*\{[^}]*display:\s*flex;[^}]*flex-direction:\s*column;/s,
+    /@media \(min-width: 1000px\)[\s\S]*\.detail-page:has\(> \.markdown\) > \.post-actions\s*\{[^}]*position:\s*sticky;[^}]*top:\s*76px;/,
   );
   assert.match(
     css,
-    /\.detail-page:has\(> \.markdown\) > \*\s*\{[^}]*order:\s*3;/s,
+    /grid-template-columns:\s*46px minmax\(0, 1fr\);/,
   );
   assert.match(
     css,
-    /\.detail-page:has\(> \.markdown\) > \.back-button\s*\{[^}]*order:\s*0;/s,
+    /@media \(max-width: 999px\)[\s\S]*\.detail-page:has\(> \.markdown\) > \.post-actions\s*\{[^}]*position:\s*fixed;[^}]*bottom:\s*18px;/,
   );
   assert.match(
     css,
-    /\.detail-page:has\(> \.markdown\) > \.post-meta\s*\{[^}]*order:\s*1;/s,
-  );
-  assert.match(
-    css,
-    /\.detail-page:has\(> \.markdown\) > \.post-actions\s*\{[^}]*order:\s*2;[^}]*border-top:\s*0;[^}]*border-bottom:/s,
+    /@media \(max-width: 640px\)[\s\S]*bottom:\s*calc\(77px \+ env\(safe-area-inset-bottom, 0px\)\);/,
   );
 });
