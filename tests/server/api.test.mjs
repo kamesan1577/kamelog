@@ -73,6 +73,22 @@ test("owner boundary, public projection, CRUD, CSRF, validation", async () => {
       )
     ).json();
     assert.equal(post.revision, 1);
+    assert.deepEqual(post.tags, []);
+    const tagged = await (
+      await request(
+        "posts",
+        "POST",
+        {
+          kind: "tweet",
+          title: "#タイトル",
+          body: "本文 #Go と #開発日記、重複 #Go",
+          tags: ["無視される固定タグ"],
+        },
+        true,
+      )
+    ).json();
+    assert.deepEqual(tagged.tags, ["タイトル", "Go", "開発日記"]);
+    assert.equal((await (await request("posts?q=開発日記")).json()).length, 1);
     assert.equal(
       (
         await request(

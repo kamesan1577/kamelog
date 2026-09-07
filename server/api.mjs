@@ -12,6 +12,7 @@ import {
   draftSchema,
   profileSchema,
   readBounded,
+  extractHashtags,
 } from "./validation.mjs";
 import { Conflict } from "./store.mjs";
 import { convertVideo } from "./media.mjs";
@@ -315,6 +316,9 @@ export function createAPI(store, config) {
               id,
               {
                 ...input,
+                ...(table === "posts"
+                  ? { tags: extractHashtags(input.title, input.body) }
+                  : {}),
                 ...(table === "posts"
                   ? { date: old?.date || now, likes: old?.likes || 0 }
                   : { savedAt: now }),

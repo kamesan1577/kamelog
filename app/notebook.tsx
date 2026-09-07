@@ -355,6 +355,9 @@ export default function Notebook({
     setView(v);
     setSelected(null);
     setTag("");
+    if (v === "home" && window.location.search) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
   };
   const replaceMarkdownSelection = (
     makeReplacement: (selected: string) => {
