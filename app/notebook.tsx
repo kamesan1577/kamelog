@@ -259,9 +259,9 @@ export default function Notebook({
   const [posts, setPosts] = useState<Post[]>(initialPosts),
     [profile, setProfile] = useState(
       initialProfile ?? {
-        name: "デモユーザー",
+        name: "かめさん",
         icon: "🐢",
-        bio: "作ったもの、考えたこと、日々の記録。",
+        bio: "つくったものと日々の記録。",
       },
     ),
     [liked, setLiked] = useState<string[]>([]),
@@ -763,7 +763,7 @@ export default function Notebook({
           </div>
           <a
             className="side-link"
-            href="https://github.com/example"
+            href="https://github.com/kamesan1577"
             target="_blank"
             rel="noreferrer"
           >
@@ -909,38 +909,32 @@ export default function Notebook({
                   <div className="project-grid">
                     <a
                       className="project-tile"
-                      href="https://github.com/example/example-api"
+                      href="https://github.com/kamesan1577/kamelog"
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <img
-                        src="/project-api.svg"
-                        alt="APIプロジェクトのサムネイル"
-                      />
+                      <img src="/project-api.svg" alt="kamelogのサムネイル" />
                       <div>
                         <h2>
-                          Example API <ArrowUpRight size={16} />
+                          kamelog <ArrowUpRight size={16} />
                         </h2>
-                        <p>サンプルのバックエンドAPI</p>
-                        <span>Go</span>
+                        <p>ブログ・つぶやき・vlogをまとめる個人サイト</p>
+                        <span>TypeScript</span>
                       </div>
                     </a>
                     <a
                       className="project-tile"
-                      href="https://github.com/example"
+                      href="https://qiita.com/kamesan1577"
                       target="_blank"
                       rel="noreferrer"
                     >
-                      <img
-                        src="/project-tools.svg"
-                        alt="ツール集のサムネイル"
-                      />
+                      <img src="/project-tools.svg" alt="Qiitaのサムネイル" />
                       <div>
                         <h2>
-                          Developer Tools <ArrowUpRight size={16} />
+                          Qiita <ArrowUpRight size={16} />
                         </h2>
-                        <p>小さな開発ツール集</p>
-                        <span>コード</span>
+                        <p>技術記事</p>
+                        <span>Qiita</span>
                       </div>
                     </a>
                   </div>
@@ -1147,10 +1141,10 @@ export default function Notebook({
               <div className="profile-card">
                 <Avatar value={profile.icon} large />
                 <h2>{profile.name}</h2>
-                <span className="profile-handle">@example</span>
+                <span className="profile-handle">@kamesan1577</span>
                 <p>{profile.bio}</p>
                 <a
-                  href="https://github.com/example"
+                  href="https://github.com/kamesan1577"
                   target="_blank"
                   rel="noreferrer"
                 >

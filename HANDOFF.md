@@ -17,6 +17,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 成功済みmain CIだけを取得するpull型自動deploy、停止backup、health、コードrollback、systemd boot起動。
 - ブログMarkdownはCommonMark/GFMを表示し、記法ツールバー、全記法ヘルプ、言語指定コードのシンタックスハイライトを提供する。パースは `react-markdown` / `remark-gfm`、ハイライトは `rehype-highlight` / `highlight.js` に任せ、生HTMLは無効のまま維持する。
 - AGENTS、仕様、不変条件、ADR、脅威モデル、runbook、リポジトリ固有skillsを整備。
+- 公開プロフィールは `@kamesan1577`、公開リンクはGitHubとQiitaを表示する。投稿・下書き・設定の実データは初期化しない。
 
 ## 検証済み
 

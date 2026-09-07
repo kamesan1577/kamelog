@@ -25,9 +25,9 @@ export class Store {
     this.db.prepare("INSERT OR IGNORE INTO settings VALUES(?, ?)").run(
       "profile",
       JSON.stringify({
-        name: "デモユーザー",
+        name: "かめさん",
         icon: "🐢",
-        bio: "作ったもの、考えたこと、日々の記録。",
+        bio: "つくったものと日々の記録。",
       }),
     );
   }
