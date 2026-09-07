@@ -1,4 +1,22 @@
 import { z } from "zod";
+const hashtagPattern = /#([\p{L}\p{N}_-]+)/gu;
+
+export function extractHashtags(...texts) {
+  const tags = [];
+  const seen = new Set();
+  for (const text of texts) {
+    for (const match of String(text || "").matchAll(hashtagPattern)) {
+      const tag = match[1];
+      if (!seen.has(tag)) {
+        seen.add(tag);
+        tags.push(tag);
+      }
+      if (tags.length === 20) return tags;
+    }
+  }
+  return tags;
+}
+
 const id = z.string().regex(/^[a-zA-Z0-9_-]{1,80}$/);
 export const postSchema = z
   .object({
