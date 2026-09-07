@@ -101,10 +101,10 @@ export default async function Page({
     return <PreviewShell />;
 
   const store = getStore();
-  const posts = store.list("posts") as PublicPost[];
+  const posts = store.list("posts");
   const selectedPost = params.post
-    ? posts.find((post) => post.id === params.post) || null
-    : null;
+    ? (posts.find((post) => post.id === params.post) as PublicPost | undefined)
+    : undefined;
   if (params.post && !selectedPost) notFound();
 
   const profile = store.get("settings", "profile");
@@ -112,7 +112,7 @@ export default async function Page({
     string,
     unknown
   >[];
-  const blogData = blogStructuredData(selectedPost, profile) as Record<
+  const blogData = blogStructuredData(selectedPost || null, profile) as Record<
     string,
     unknown
   > | null;
