@@ -28,10 +28,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 本番Docker imageの非root起動、health、再起動後のデータ永続、Compose構文、開発image buildを確認。
 - production dependency auditはhigh以上0件。
 - 2026-09-07 Markdown変更後、Node 24・FFmpeg環境の `make check`、Playwright Chromiumの全E2E、CI `container` 相当（Compose構文、本番/開発image build、非root、health、再起動後永続）が成功。production dependency auditは0件。
-
-## 今回の変更で未確認
-
-- Markdown変更を含むcommitは未作成・未pushのため、変更後commitに対するGitHub Actionsの `check` / `e2e` / `container` は未実行。ローカル同等ゲートのみ確認済み。
+- GitHub Actions run #34073823834（commit `ec5f3994`）の `check` / `e2e` / `container` がすべて成功。
 
 ## 対象サーバーでのみ完了できる項目
 
