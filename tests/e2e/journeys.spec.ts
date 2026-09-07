@@ -41,9 +41,14 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page).toHaveURL("/");
   await expect(page.locator(".mobile-create")).toBeVisible();
   await page.locator(".mobile-create").click();
-  await page
-    .getByPlaceholder("本文", { exact: true })
-    .fill("保存される架空の下書き");
+  const mobileTweetBody = page.getByPlaceholder("本文", { exact: true });
+  await expect(mobileTweetBody).toBeFocused();
+  await expect
+    .poll(() =>
+      mobileTweetBody.evaluate((element) => getComputedStyle(element).fontSize),
+    )
+    .toBe("16px");
+  await mobileTweetBody.fill("保存される架空の下書き");
   await page.keyboard.press("Escape");
   await expect(
     page.getByRole("heading", { name: "この投稿を保存しますか？" }),
