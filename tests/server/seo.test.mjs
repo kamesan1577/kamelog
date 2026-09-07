@@ -90,7 +90,10 @@ test("structured data uses public profile and post timestamps", () => {
   assert.equal(blog.headline, "架空の記事");
   assert.equal(blog.datePublished, "2026-01-02T03:04:05.000Z");
   assert.equal(blog.dateModified, "2026-02-03T04:05:06.000Z");
-  assert.equal(blog.mainEntityOfPage, "https://example.com/?post=fictional-blog");
+  assert.equal(
+    blog.mainEntityOfPage,
+    "https://example.com/?post=fictional-blog",
+  );
   assert.deepEqual(blog.image, [
     "https://example.com/og?post=fictional-blog",
   ]);
