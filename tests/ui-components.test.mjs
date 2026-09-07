@@ -122,6 +122,31 @@ test("renders GFM lists safely and highlights fenced code", async () => {
   assert.doesNotMatch(html, /<script>/);
 });
 
+test("recognizes safe Mermaid, YouTube and X embeds", async () => {
+  const { Markdown } = await vite.ssrLoadModule("/app/notebook.tsx");
+  const html = renderToStaticMarkup(
+    React.createElement(Markdown, {
+      text: [
+        "```mermaid",
+        "graph TD",
+        "A-->B",
+        "```",
+        "",
+        "https://youtu.be/dQw4w9WgXcQ",
+        "",
+        "https://x.com/example/status/1234567890123456789",
+      ].join("\n"),
+    }),
+  );
+  assert.match(html, /aria-label="Mermaid図"/);
+  assert.doesNotMatch(html, /<pre><div class="mermaid-diagram"/);
+  assert.match(html, /youtube-nocookie\.com\/embed\/dQw4w9WgXcQ/);
+  assert.match(
+    html,
+    /platform\.twitter\.com\/embed\/Tweet\.html\?id=1234567890123456789/,
+  );
+});
+
 test("builds concise social card copy and limits vlog autoplay", async () => {
   const { socialCopy, shouldAutoplayVlog } =
     await vite.ssrLoadModule("/lib/social.ts");

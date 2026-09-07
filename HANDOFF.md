@@ -20,6 +20,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - Node 24の非root本番image、開発Compose、CIのcheck/e2e/container job。
 - 成功済みmain CIだけを取得するpull型自動deploy、停止backup、health、コードrollback、systemd boot起動。
 - ブログMarkdownはCommonMark/GFMを表示し、記法ツールバー、全記法ヘルプ、言語指定コードのシンタックスハイライトを提供する。パースは `react-markdown` / `remark-gfm`、ハイライトは `rehype-highlight` / `highlight.js` に任せ、生HTMLは無効のまま維持する。
+- ブログ本文への画像D&Dと画像追加ボタン、Mermaidコードブロック、単独行のYouTube/X投稿URL埋め込みを実装。つぶやきは画像のみを含め最大4枚をD&D/選択でき、1〜4枚グリッドと拡大表示を提供する。
 - AGENTS、仕様、不変条件、ADR、脅威モデル、runbook、リポジトリ固有skillsを整備。
 - 公開プロフィールは `@kamesan1577`、公開リンクはGitHubとQiitaを表示する。投稿・下書き・設定の実データは初期化しない。
 
@@ -34,6 +35,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - production dependency auditはhigh以上0件。
 - 2026-09-07 Markdown変更後、Node 24・FFmpeg環境の `make check`、Playwright Chromiumの全E2E、CI `container` 相当（Compose構文、本番/開発image build、非root、health、再起動後永続）が成功。production dependency auditは0件。
 - GitHub Actions run #34073823834（commit `ec5f3994`）の `check` / `e2e` / `container` がすべて成功。
+- 2026-09-07 画像・埋め込み変更後、`make check`（画像magic/寸法、未公開媒体、4枚上限、Markdown埋め込み、型、lint、本番buildを含む）が成功し、production dependency auditは0件。ローカルE2EはPlaywright Chromium配布元の502/timeoutでブラウザを取得できず未実施。PRのCI `e2e` で確認する。
 
 ## 対象サーバーでのみ完了できる項目
 

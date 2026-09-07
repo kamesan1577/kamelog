@@ -15,7 +15,7 @@ import {
   extractHashtags,
 } from "./validation.mjs";
 import { Conflict } from "./store.mjs";
-import { convertVideo } from "./media.mjs";
+import { convertVideo, saveImage } from "./media.mjs";
 
 export function configuration(env = process.env) {
   const origin = env.KAMELOG_ORIGIN || "http://localhost:3000";
@@ -232,18 +232,30 @@ export function createAPI(store, config) {
         const id = path[1];
         if (!/^[a-f0-9-]{36}$/.test(id))
           return json({ error: "Not found" }, 404);
+        const mediaPath = "/api/media/" + id;
         if (
           !owner &&
-          !store.list("posts").some((p) => p.video === "/api/media/" + id)
+          !store
+            .list("posts")
+            .some(
+              (p) =>
+                p.video === mediaPath ||
+                p.images?.includes(mediaPath) ||
+                (p.kind === "blog" && p.body.includes(mediaPath)),
+            )
         )
           return json({ error: "Not found" }, 404);
         const metadata = store.get("media", id);
         if (!metadata) return json({ error: "Not found" }, 404);
         const bytes = await readFile(
-          join(store.directory, "media", id + ".mp4"),
+          join(
+            store.directory,
+            "media",
+            id + "." + (metadata.extension || "mp4"),
+          ),
         );
         const headers = {
-          "Content-Type": "video/mp4",
+          "Content-Type": metadata.type || "video/mp4",
           "Cache-Control": "no-store",
           "X-Content-Type-Options": "nosniff",
           "Accept-Ranges": "bytes",
@@ -278,14 +290,23 @@ export function createAPI(store, config) {
       }
       if (!owner) return json({ error: "Unauthorized" }, 401);
       if (path[0] === "media" && method === "POST")
-        return json(
-          await convertVideo(
-            store,
-            await readBounded(req, 64 * 1024 * 1024),
-            Number(url.searchParams.get("seconds")),
-          ),
-          201,
-        );
+        return url.searchParams.get("kind") === "image"
+          ? json(
+              await saveImage(
+                store,
+                await readBounded(req, 12 * 1024 * 1024),
+                req.headers.get("content-type") || "",
+              ),
+              201,
+            )
+          : json(
+              await convertVideo(
+                store,
+                await readBounded(req, 64 * 1024 * 1024),
+                Number(url.searchParams.get("seconds")),
+              ),
+              201,
+            );
       if (path[0] === "profile" && method === "PUT") {
         const value = profileSchema.parse(await body());
         return json(store.save("settings", "profile", value));
@@ -309,6 +330,13 @@ export function createAPI(store, config) {
             return json({ error: "Not found" }, 404);
           if (input.video && !store.get("media", input.video.split("/").pop()))
             return json({ error: "Unknown media" }, 400);
+          if (
+            input.images?.some(
+              (path) =>
+                store.get("media", path.split("/").pop())?.kind !== "image",
+            )
+          )
+            return json({ error: "Unknown image" }, 400);
           const now = new Date().toISOString();
           return json(
             store.save(

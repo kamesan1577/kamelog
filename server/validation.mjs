@@ -35,13 +35,22 @@ export const postSchema = z
       .string()
       .regex(/^\/api\/media\/[a-f0-9-]+$/)
       .optional(),
+    images: z
+      .array(z.string().regex(/^\/api\/media\/[a-f0-9-]+$/))
+      .max(4)
+      .default([]),
   })
   .strict()
   .superRefine((v, c) => {
     if (v.kind === "blog" && (!v.title.trim() || !v.body.trim()))
       c.addIssue({ code: "custom", message: "Title and body required" });
-    if (v.kind === "tweet" && (!v.body.trim() || v.body.length > 5000))
+    if (
+      v.kind === "tweet" &&
+      ((!v.body.trim() && !v.images.length) || v.body.length > 5000)
+    )
       c.addIssue({ code: "custom", message: "Invalid tweet" });
+    if (v.kind !== "tweet" && v.images.length)
+      c.addIssue({ code: "custom", message: "Images only belong to tweets" });
     if (
       v.kind === "vlog" &&
       (!v.video || !v.time || v.body.length > 60 || /[\r\n]/.test(v.body))
@@ -55,6 +64,10 @@ export const draftSchema = z
     kind: z.enum(["blog", "tweet"]),
     title: z.string().max(300),
     body: z.string().max(100_000),
+    images: z
+      .array(z.string().regex(/^\/api\/media\/[a-f0-9-]+$/))
+      .max(4)
+      .default([]),
   })
   .strict();
 export const profileSchema = z

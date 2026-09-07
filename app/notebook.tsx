@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { isValidElement, useEffect, useId, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -11,6 +11,7 @@ import {
   Globe,
   Heart,
   Home,
+  Image as ImageIcon,
   MessageCircle,
   MoreHorizontal,
   Pin,
@@ -67,6 +68,7 @@ type Post = {
   video?: string;
   time?: string;
   pinned?: boolean;
+  images?: string[];
 };
 type Draft = {
   revision?: number;
@@ -75,6 +77,7 @@ type Draft = {
   title: string;
   body: string;
   savedAt: string;
+  images?: string[];
 };
 const label: Record<Kind, string> = {
   blog: "ブログ",
@@ -99,6 +102,83 @@ function Avatar({
     </span>
   );
 }
+function MermaidDiagram({ chart }: { chart: string }) {
+  const id = useId().replaceAll(":", "");
+  const [svg, setSvg] = useState("");
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    let active = true;
+    import("mermaid").then(async ({ default: mermaid }) => {
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: "strict",
+        theme: "neutral",
+      });
+      try {
+        const result = await mermaid.render("mermaid-" + id, chart);
+        if (active) setSvg(result.svg);
+      } catch {
+        if (active) setError(true);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [chart, id]);
+  if (error)
+    return (
+      <pre className="mermaid-error">Mermaidの記法を確認してください。</pre>
+    );
+  return (
+    <div
+      className="mermaid-diagram"
+      aria-label="Mermaid図"
+      dangerouslySetInnerHTML={{ __html: svg }}
+    />
+  );
+}
+
+function EmbeddedLink({ href }: { href: string }) {
+  let url: URL;
+  try {
+    url = new URL(href);
+  } catch {
+    return null;
+  }
+  const youtube = /^(www\.)?(youtube\.com|youtu\.be)$/.test(url.hostname)
+    ? url.hostname.endsWith("youtu.be")
+      ? url.pathname.slice(1)
+      : url.searchParams.get("v") ||
+        url.pathname.match(/^\/shorts\/([^/]+)/)?.[1]
+    : null;
+  if (youtube && /^[\w-]{6,20}$/.test(youtube))
+    return (
+      <div className="social-embed">
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${youtube}`}
+          title="YouTube動画"
+          loading="lazy"
+          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  const tweet = /^(www\.)?(x\.com|twitter\.com)$/.test(url.hostname)
+    ? url.pathname.match(/^\/[^/]+\/status\/(\d+)/)?.[1]
+    : null;
+  if (tweet)
+    return (
+      <div className="social-embed x-embed">
+        <iframe
+          src={`https://platform.twitter.com/embed/Tweet.html?id=${tweet}&theme=light`}
+          title="Xの投稿"
+          loading="lazy"
+        />
+      </div>
+    );
+  return null;
+}
+
 export function Markdown({ text }: { text: string }) {
   return (
     <div className="markdown">
@@ -106,10 +186,74 @@ export function Markdown({ text }: { text: string }) {
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[[rehypeHighlight, { detect: false }]]}
         skipHtml
+        components={{
+          code({ className, children }) {
+            return className?.split(" ").includes("language-mermaid") ? (
+              <MermaidDiagram chart={String(children).trim()} />
+            ) : (
+              <code className={className}>{children}</code>
+            );
+          },
+          pre({ children }) {
+            return isValidElement<{ className?: string; children?: unknown }>(
+              children,
+            ) &&
+              children.props.className
+                ?.split(" ")
+                .includes("language-mermaid") ? (
+              <MermaidDiagram chart={String(children.props.children).trim()} />
+            ) : (
+              <pre>{children}</pre>
+            );
+          },
+          p({ children }) {
+            const child =
+              Array.isArray(children) && children.length === 1
+                ? children[0]
+                : children;
+            if (isValidElement<{ href?: string }>(child) && child.props.href) {
+              const embed = <EmbeddedLink href={child.props.href} />;
+              if (
+                /https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be|x\.com|twitter\.com)\//.test(
+                  child.props.href,
+                )
+              )
+                return embed;
+            }
+            return <p>{children}</p>;
+          },
+        }}
       >
         {text}
       </ReactMarkdown>
     </div>
+  );
+}
+
+function ImageGallery({ images = [] }: { images?: string[] }) {
+  const [large, setLarge] = useState<string | null>(null);
+  if (!images.length) return null;
+  return (
+    <>
+      <div className={`image-grid count-${images.length}`}>
+        {images.map((src, index) => (
+          <button
+            type="button"
+            key={src}
+            onClick={() => setLarge(src)}
+            aria-label={`画像${index + 1}を拡大`}
+          >
+            <img src={src} alt={`添付画像 ${index + 1}`} />
+          </button>
+        ))}
+      </div>
+      <Dialog open={!!large} onOpenChange={(open) => !open && setLarge(null)}>
+        <DialogContent className="image-lightbox">
+          <DialogTitle>添付画像</DialogTitle>
+          {large && <img src={large} alt="拡大した添付画像" />}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
@@ -295,6 +439,9 @@ export default function Notebook({
     [draftList, setDraftList] = useState(false),
     [editorDrafts, setEditorDrafts] = useState(false),
     [inlineBody, setInlineBody] = useState(""),
+    [editorImages, setEditorImages] = useState<string[]>([]),
+    [inlineImages, setInlineImages] = useState<string[]>([]),
+    [uploadingImages, setUploadingImages] = useState(false),
     [remove, setRemove] = useState<string | null>(null);
   const [name, setName] = useState(""),
     [bio, setBio] = useState(""),
@@ -450,9 +597,12 @@ export default function Notebook({
     setKind(k);
     setTitle(t);
     setBody(b);
+    setEditorImages(p?.images ?? d?.images ?? []);
     setEditId(p?.id || null);
     setDraftId(d?.id || null);
-    setEditorStart(JSON.stringify({ k, t, b }));
+    setEditorStart(
+      JSON.stringify({ k, t, b, images: p?.images ?? d?.images ?? [] }),
+    );
     setPreview(false);
     setEditorDrafts(false);
     setEditor(true);
@@ -475,9 +625,10 @@ export default function Notebook({
       setKind("tweet");
       setTitle("");
       setBody("");
+      setEditorImages([]);
       setEditId(null);
       setDraftId(null);
-      setEditorStart(JSON.stringify({ k: "tweet", t: "", b: "" }));
+      setEditorStart(JSON.stringify({ k: "tweet", t: "", b: "", images: [] }));
       setPreview(false);
       setEditorDrafts(false);
       setEditor(true);
@@ -491,13 +642,16 @@ export default function Notebook({
       (kind === "blog" ? titleInput.current : bodyInput.current)?.focus(),
     );
   }, [editor, kind, preview]);
-  const dirty = JSON.stringify({ k: kind, t: title, b: body }) !== editorStart;
+  const dirty =
+    JSON.stringify({ k: kind, t: title, b: body, images: editorImages }) !==
+    editorStart;
   const askClose = () => {
     if (kind === "vlog") {
       closeComposer();
       return;
     }
-    if (dirty && (title.trim() || body.trim())) setCloseAsk(true);
+    if (dirty && (title.trim() || body.trim() || editorImages.length))
+      setCloseAsk(true);
     else setEditor(false);
   };
   const saveDraft = () =>
@@ -507,7 +661,13 @@ export default function Notebook({
       const saved = await api<Draft>(
         "drafts" + (draftId ? "/" + draftId : ""),
         draftId ? "PUT" : "POST",
-        { kind, title, body, ...(old ? { revision: old.revision } : {}) },
+        {
+          kind,
+          title,
+          body,
+          images: kind === "tweet" ? editorImages : [],
+          ...(old ? { revision: old.revision } : {}),
+        },
       );
       setDrafts((ds) => [saved, ...ds.filter((d) => d.id !== saved.id)]);
       setEditor(false);
@@ -538,6 +698,7 @@ export default function Notebook({
           body: body.trim(),
           tags: old?.tags || [],
           pinned: old?.pinned || false,
+          images: kind === "tweet" ? editorImages : [],
           ...(old ? { revision: old.revision } : {}),
         },
       );
@@ -559,7 +720,7 @@ export default function Notebook({
     });
   const publishInlineTweet = () => {
     const text = inlineBody.trim();
-    if (!text) return;
+    if (!text && !inlineImages.length) return;
     void guard(async () => {
       const saved = await api<Post>("posts", "POST", {
         kind: "tweet",
@@ -567,11 +728,87 @@ export default function Notebook({
         body: text,
         tags: [],
         pinned: false,
+        images: inlineImages,
       });
       setPosts((ps) => [saved, ...ps]);
       setInlineBody("");
+      setInlineImages([]);
       toast.success("投稿しました");
     });
+  };
+  const uploadImages = async (
+    files: File[],
+    target: "blog" | "blog-drop" | "tweet" | "inline",
+  ) => {
+    const images = files.filter((file) => file.type.startsWith("image/"));
+    const current = target === "inline" ? inlineImages : editorImages;
+    const allowed = target.startsWith("blog")
+      ? images
+      : images.slice(0, Math.max(0, 4 - current.length));
+    if (!allowed.length) {
+      toast.error(
+        target.startsWith("blog")
+          ? "画像ファイルを選んでください。"
+          : "画像は最大4枚です。",
+      );
+      return;
+    }
+    setUploadingImages(true);
+    try {
+      const uploaded: { url: string }[] = [];
+      for (const file of allowed) {
+        const response = await fetch("/api/media?kind=image", {
+          method: "POST",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+        const result = await response.json();
+        if (!response.ok)
+          throw new Error(
+            result.error || "画像をアップロードできませんでした。",
+          );
+        uploaded.push(result);
+      }
+      if (target.startsWith("blog")) {
+        const markdown = uploaded
+          .map((image, index) => `![画像${index + 1}](${image.url})`)
+          .join("\n\n");
+        if (target === "blog-drop") insertMarkdownBlock(markdown);
+        else
+          setBody(
+            (old) =>
+              old + (old && !old.endsWith("\n") ? "\n\n" : "") + markdown,
+          );
+      } else if (target === "inline")
+        setInlineImages((old) => [
+          ...old,
+          ...uploaded.map((image) => image.url),
+        ]);
+      else
+        setEditorImages((old) => [
+          ...old,
+          ...uploaded.map((image) => image.url),
+        ]);
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "画像をアップロードできませんでした。",
+      );
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+  const droppedImages = (
+    event: React.DragEvent,
+    target: "blog" | "tweet" | "inline",
+  ) => {
+    const files = Array.from(event.dataTransfer.files).filter((file) =>
+      file.type.startsWith("image/"),
+    );
+    if (!files.length) return;
+    event.preventDefault();
+    void uploadImages(files, target === "blog" ? "blog-drop" : target);
   };
   const stopCamera = () => {
     stream?.getTracks().forEach((t) => t.stop());
@@ -771,6 +1008,7 @@ export default function Notebook({
                     pinned: !p.pinned,
                     revision: p.revision,
                     ...(p.video ? { video: p.video, time: p.time } : {}),
+                    images: p.images || [],
                   });
                   await refresh();
                 })
@@ -1040,6 +1278,9 @@ export default function Notebook({
                   ) : (
                     <p className="tweet-body">{item.body}</p>
                   )}
+                  {item.kind === "tweet" && (
+                    <ImageGallery images={item.images} />
+                  )}
                   <div className="tags">
                     {item.tags.map((t) => (
                       <Badge key={t} variant="gray">
@@ -1089,17 +1330,48 @@ export default function Notebook({
                           placeholder="いまどうしてる？"
                           maxLength={5000}
                           rows={1}
+                          onDragOver={(event) => event.preventDefault()}
+                          onDrop={(event) => droppedImages(event, "inline")}
                         />
                         <Button
                           variant="blue"
                           size="sm"
                           onClick={publishInlineTweet}
-                          disabled={!inlineBody.trim()}
+                          disabled={!inlineBody.trim() && !inlineImages.length}
                         >
                           投稿
                         </Button>
                       </div>
+                      {inlineImages.length > 0 && (
+                        <div className="composer-images">
+                          <ImageGallery images={inlineImages} />
+                          <button
+                            type="button"
+                            onClick={() => setInlineImages([])}
+                          >
+                            画像を取り消す
+                          </button>
+                        </div>
+                      )}
                       <div className="composer-kinds">
+                        <label className="image-upload-button">
+                          <ImageIcon />
+                          画像
+                          <input
+                            type="file"
+                            accept="image/png,image/jpeg,image/webp,image/gif"
+                            multiple
+                            disabled={
+                              uploadingImages || inlineImages.length >= 4
+                            }
+                            onChange={(event) =>
+                              void uploadImages(
+                                Array.from(event.target.files || []),
+                                "inline",
+                              )
+                            }
+                          />
+                        </label>
                         <button onClick={() => openEditor("blog")}>
                           <FileText />
                           ブログ
@@ -1205,6 +1477,9 @@ export default function Notebook({
                               <p className="tweet-body">{p.body}</p>
                             )}
                           </button>
+                        )}
+                        {p.kind === "tweet" && (
+                          <ImageGallery images={p.images} />
                         )}
                         {p.tags.length > 0 && (
                           <div className="tags">
@@ -1366,6 +1641,7 @@ export default function Notebook({
                         setKind(draft.kind);
                         setTitle(draft.title);
                         setBody(draft.body);
+                        setEditorImages(draft.images || []);
                         setEditId(null);
                         setDraftId(draft.id);
                         setEditorStart(
@@ -1373,6 +1649,7 @@ export default function Notebook({
                             k: draft.kind,
                             t: draft.title,
                             b: draft.body,
+                            images: draft.images || [],
                           }),
                         );
                         setEditorDrafts(false);
@@ -1680,7 +1957,43 @@ export default function Notebook({
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   placeholder="本文"
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) =>
+                    droppedImages(event, kind === "blog" ? "blog" : "tweet")
+                  }
                 />
+              )}
+              <div className="editor-media-row">
+                <label className="image-upload-button">
+                  <ImageIcon />
+                  {kind === "blog"
+                    ? "画像を本文末尾へ追加"
+                    : `画像を追加（${editorImages.length}/4）`}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp,image/gif"
+                    multiple={kind === "tweet"}
+                    disabled={
+                      uploadingImages ||
+                      (kind === "tweet" && editorImages.length >= 4)
+                    }
+                    onChange={(event) =>
+                      void uploadImages(
+                        Array.from(event.target.files || []),
+                        kind === "blog" ? "blog" : "tweet",
+                      )
+                    }
+                  />
+                </label>
+                {uploadingImages && <span>アップロード中…</span>}
+              </div>
+              {kind === "tweet" && editorImages.length > 0 && (
+                <div className="composer-images">
+                  <ImageGallery images={editorImages} />
+                  <button type="button" onClick={() => setEditorImages([])}>
+                    画像を取り消す
+                  </button>
+                </div>
               )}
               <div className="editor-footer">
                 <span>{body.length}文字</span>

@@ -92,11 +92,27 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     "保存される架空の下書き",
   );
   const inlineTweet = page.getByPlaceholder("いまどうしてる？");
+  await page
+    .locator(".composer-kinds .image-upload-button input")
+    .setInputFiles({
+      name: "fictional.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    });
+  await expect(page.locator(".desktop-composer .image-grid img")).toHaveCount(
+    1,
+  );
   await inlineTweet.fill("ホームから直接投稿する架空のつぶやき");
   await inlineTweet.press("Control+Enter");
   await expect(page.locator(".tweet-body").first()).toHaveText(
     "ホームから直接投稿する架空のつぶやき",
   );
+  await page.locator("article.post .image-grid button").first().click();
+  await expect(page.locator(".image-lightbox img")).toBeVisible();
+  await page.keyboard.press("Escape");
   const directPost = page
     .locator("article.post")
     .filter({ hasText: "ホームから直接投稿する架空のつぶやき" });
@@ -144,7 +160,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await markdownToolbar.getByRole("button", { name: "箇条書き" }).click();
   await expect(blogBody).toHaveValue("- 項目");
   await blogBody.fill(
-    "## 見出し\n\n**太字**\n\n- 箇条書き\n- [ ] 未完了\n- [x] 完了\n\n```javascript\nconst answer = 42;\n```\n\n<script>alert(1)</script>",
+    "## 見出し\n\n**太字**\n\n- 箇条書き\n- [ ] 未完了\n- [x] 完了\n\n```javascript\nconst answer = 42;\n```\n\n```mermaid\ngraph TD\nA-->B\n```\n\nhttps://www.youtube.com/watch?v=dQw4w9WgXcQ\n\nhttps://x.com/example/status/1234567890123456789\n\n<script>alert(1)</script>",
   );
   await page.getByRole("button", { name: "投稿", exact: true }).click();
   await page
@@ -165,6 +181,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     "const answer = 42;",
   );
   await expect(page.locator(".markdown .hljs-keyword")).toHaveText("const");
+  await expect(page.locator(".mermaid-diagram svg")).toBeVisible();
+  await expect(page.getByTitle("YouTube動画")).toBeVisible();
+  await expect(page.getByTitle("Xの投稿")).toBeVisible();
   await expect(page.locator(".markdown script")).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "リンクをコピー" }),
