@@ -27,24 +27,30 @@ jobs:
         env:
           KAMELOG_PRIVATE_MARKERS: ${{ secrets.KAMELOG_PRIVATE_MARKERS }}
       - run: npm audit --audit-level=high
-  format-dump:
+  format-fix:
+    if: github.event_name == 'pull_request'
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
       - uses: actions/setup-node@v7
         with:
           node-version: "24"
           cache: npm
       - run: npm ci
-      - run: npx prettier --write app/notebook.tsx spec/current/development.md
-      - uses: actions/upload-artifact@v7
-        with:
-          name: prettier-output
-          path: |
-            app/notebook.tsx
-            spec/current/development.md
-          retention-days: 1
+      - name: Apply Prettier and push
+        run: |
+          npx prettier --write app/notebook.tsx spec/current/development.md
+          git config user.name "kamesan1577"
+          git config user.email "kamesan1577@gmail.com"
+          git add app/notebook.tsx spec/current/development.md
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "style: apply prettier formatting"
+          git push origin HEAD:${{ github.head_ref }}
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 20
