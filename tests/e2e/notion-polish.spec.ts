@@ -34,6 +34,6 @@ test("landing polish keeps desktop and mobile controls readable", async ({
   );
   await page.screenshot({
     path: testInfo.outputPath("landing-mobile.png"),
-    fullPage: true,
+    fullPage: false,
   });
 });
