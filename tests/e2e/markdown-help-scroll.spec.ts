@@ -1,6 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-test("mobile Markdown help dialog can scroll to hidden content", async ({ page }) => {
+test("mobile Markdown help dialog can scroll to hidden content", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
@@ -11,7 +13,11 @@ test("mobile Markdown help dialog can scroll to hidden content", async ({ page }
       <h2>Markdown記法ヘルプ</h2>
       <p>ブログで使える記法です。</p>
       <div class="markdown-help-list">
-        ${Array.from({ length: 40 }, (_, index) => `<section><h3>項目${index + 1}</h3><p>説明</p><pre><code>syntax</code></pre></section>`).join("")}
+        ${Array.from(
+          { length: 40 },
+          (_, index) =>
+            `<section><h3>項目${index + 1}</h3><p>説明</p><pre><code>syntax</code></pre></section>`,
+        ).join("")}
       </div>
     `;
     document.body.append(dialog);
