@@ -45,26 +45,32 @@ async function expectGeneratedToc(page: Page) {
   );
 }
 
-test("blog detail generates a table of contents from h2-h6 headings", async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto("/");
-  await addBlogDetailFixture(page);
-  await expectGeneratedToc(page);
+test(
+  "blog detail generates a table of contents from h2-h6 headings",
+  async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto("/");
+    await addBlogDetailFixture(page);
+    await expectGeneratedToc(page);
 
-  await page.evaluate(() => document.getElementById("toc-fixture")?.remove());
-  await expect(page.getByRole("navigation", { name: "目次" })).toHaveCount(0);
-});
+    await page.evaluate(() => document.getElementById("toc-fixture")?.remove());
+    await expect(page.getByRole("navigation", { name: "目次" })).toHaveCount(0);
+  },
+);
 
-test("blog table of contents stays inside a 390px viewport", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/");
-  await addBlogDetailFixture(page);
-  await expectGeneratedToc(page);
+test(
+  "blog table of contents stays inside a 390px viewport",
+  async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+    await addBlogDetailFixture(page);
+    await expectGeneratedToc(page);
 
-  const box = await page.getByRole("navigation", { name: "目次" }).boundingBox();
-  expect(box).not.toBeNull();
-  expect(box!.x).toBeGreaterThanOrEqual(0);
-  expect(box!.x + box!.width).toBeLessThanOrEqual(390);
-});
+    const box = await page
+      .getByRole("navigation", { name: "目次" })
+      .boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(390);
+  },
+);
