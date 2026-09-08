@@ -55,7 +55,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 2026-09-08 Issue #45のデザイン修正では、利用者の指示に従い大きなコピー、状態表示風の装飾、走査アニメーション、過剰な影と引用表現を削除した。`make check`が成功し、PCと390pxの匿名表示を実ブラウザで確認した。ローカルE2E用Chromiumは取得がtimeoutしたため、更新したjourneyはPRのCI `e2e` で確認する。
 - 2026-09-08 Issue #45の経歴・閲覧数変更では、既存DBへの追加migration、閲覧数の永続・復元・投稿削除時消去、同一Origin拒否、公開API、閲覧数による人気投稿選択をunit/E2Eへ追加し、`make check`が成功した。PCと390pxの匿名表示を実ブラウザで確認した。ローカル `make e2e` はPlaywright Chromiumが未導入で起動前に失敗したため、PRのCI `e2e` で確認する。
 - 2026-09-08 Issue #14 SEO変更では、実行環境からGitHubをcheckoutできないためローカル `make check` / `make e2e` は未実施。canonical・JSON-LD・robots・sitemap・404の回帰をunit/E2Eへ追加し、PRのCI `check` / `e2e` / `container` で確認する。公開環境の性能値はデプロイ後に `runbooks/seo.md` で再計測する。
-- 2026-09-08 Issue #56のUI調整では、`make check`（公開検査、UI契約、型、lint、unit、本番buildを含む）が成功した。共通ボタンとトップページのhover/active状態、PC表示、390px表示の回帰をE2Eへ追加した。ローカル `make e2e` はPlaywright Chromiumを取得できず起動前に失敗したため、PRのCI `e2e` で確認する。
+- 2026-09-08 Issue #56のUI調整では、`make check`（公開検査、UI契約、型、lint、unit、本番buildを含む）が成功した。共通ボタンとトップページのhover/active状態、PC表示、390px表示の回帰をE2Eへ追加し、GitHub Actions run #184の `check` / `e2e` / `container` がすべて成功した。ローカル `make e2e` はPlaywright Chromiumを取得できず起動前に失敗した。
 
 ## 対象サーバーでのみ完了できる項目
 
