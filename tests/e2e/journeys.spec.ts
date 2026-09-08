@@ -8,11 +8,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
   await expect(
-    page.getByRole("heading", {
-      name: "考えたことを、 散らかしたまま残す。",
-    }),
+    page.getByRole("heading", { name: "かめさんの個人サイト" }),
   ).toBeVisible();
-  await expect(page.getByText("このサイトを書いている人")).toBeVisible();
+  await expect(page.getByText("プロフィール", { exact: true })).toBeVisible();
   await expect(
     page.locator(".content-cards").getByRole("button", { name: /ブログ/ }),
   ).toBeVisible();
@@ -317,9 +315,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
 
   await page.locator(".site-name").click();
   await expect(
-    page.getByRole("heading", {
-      name: "考えたことを、 散らかしたまま残す。",
-    }),
+    page.getByRole("heading", { name: "かめさんの個人サイト" }),
   ).toBeVisible();
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page.goBack();
@@ -330,9 +326,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".detail-page")).toBeVisible();
   await page.getByRole("button", { name: "戻る", exact: true }).click();
   await expect(
-    page.getByRole("heading", {
-      name: "考えたことを、 散らかしたまま残す。",
-    }),
+    page.getByRole("heading", { name: "かめさんの個人サイト" }),
   ).toBeVisible();
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page

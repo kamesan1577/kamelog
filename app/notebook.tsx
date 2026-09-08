@@ -1445,17 +1445,9 @@ export default function Notebook({
                 <section className="landing-page">
                   <div className="landing-intro">
                     <div className="landing-copy">
-                      <p className="landing-kicker">
-                        <span aria-hidden="true" /> 個人の記録 / 公開中
-                      </p>
-                      <h1>
-                        考えたことを、
-                        <br />
-                        散らかしたまま残す。
-                      </h1>
+                      <h1>かめさんの個人サイト</h1>
                       <p className="landing-lead">
-                        かめさんが書いたブログ、短いつぶやき、数秒のvlog、
-                        作ったものを一つにまとめた個人サイトです。
+                        ブログ、つぶやき、短い動画、個人制作をまとめています。
                       </p>
                       <div className="landing-actions">
                         <button
@@ -1473,11 +1465,11 @@ export default function Notebook({
                     <aside className="landing-profile">
                       <Avatar value={profile.icon} large />
                       <div>
-                        <span>このサイトを書いている人</span>
+                        <span>プロフィール</span>
                         <h2>{profile.name}</h2>
                         <p>@kamesan1577 · Webバックエンドエンジニア</p>
                       </div>
-                      <blockquote>{profile.bio}</blockquote>
+                      <p className="landing-bio">{profile.bio}</p>
                       <a
                         href="https://github.com/kamesan1577"
                         target="_blank"
@@ -1491,8 +1483,7 @@ export default function Notebook({
                   <div className="landing-lower">
                     <div className="content-index">
                       <div className="landing-section-title">
-                        <span>01</span>
-                        <h2>ここにあるもの</h2>
+                        <h2>コンテンツ</h2>
                       </div>
                       <div className="content-cards">
                         {(
@@ -1501,19 +1492,19 @@ export default function Notebook({
                               id: "blog",
                               icon: FileText,
                               title: "ブログ",
-                              text: "技術と制作の過程を、あとから辿れる長さで。",
+                              text: "技術、開発、個人制作についての記事",
                             },
                             {
                               id: "tweet",
                               icon: MessageCircle,
                               title: "つぶやき",
-                              text: "まとまる前の考えや、日々の小さな発見。",
+                              text: "日々の短いメモ",
                             },
                             {
                               id: "vlog",
                               icon: Video,
                               title: "vlog",
-                              text: "その場の空気を残す、数秒の映像メモ。",
+                              text: "数秒から30秒までの動画",
                             },
                           ] as const
                         ).map(({ id, icon: Icon, title: cardTitle, text }) => (
@@ -1539,7 +1530,6 @@ export default function Notebook({
 
                     <div className="featured-area">
                       <div className="landing-section-title">
-                        <span>02</span>
                         <h2>いま読まれている</h2>
                       </div>
                       {featuredPost ? (
@@ -1547,9 +1537,6 @@ export default function Notebook({
                           className="featured-post"
                           onClick={() => openPost(featuredPost.id)}
                         >
-                          <span className="featured-signal" aria-hidden="true">
-                            <i />
-                          </span>
                           <span className="featured-meta">
                             {label[featuredPost.kind]}
                             <span>·</span>
@@ -1557,6 +1544,8 @@ export default function Notebook({
                               "ja-JP",
                               { month: "numeric", day: "numeric" },
                             )}
+                            <span>·</span>
+                            <Heart size={12} /> {featuredPost.likes}
                           </span>
                           <strong>
                             {featuredPost.kind === "blog"

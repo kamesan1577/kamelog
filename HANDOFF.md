@@ -49,6 +49,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 2026-09-07 投稿詳細履歴変更では、実行環境からGitHubをcheckoutできないためローカル `make check` / `make e2e` は未実施。追加した投稿詳細URL・アプリ内戻る・ブラウザ戻る/進む・直接共有URLの回帰はPRのCI `check` / `e2e` / `container` で確認する。
 - 2026-09-08 Issue #41の追従アクション変更は、CSS契約テストと1280px/390pxのPlaywright回帰で、PCの左sticky railとスマホの下部floating barがスクロール後も同位置に残ることをPR CIで確認する。
 - 2026-09-07 Issue #45のトップページ変更後、`make check`（公開検査、UI契約、型、lint、unit、本番buildを含む）が成功。PCと390pxの匿名表示を実ブラウザで目視し、横方向の見切れがないことを確認した。ローカルE2Eは実行環境にPlaywright Chromiumがないため未実施し、トップからタイムラインへの導線を含むjourneyはPRのCI `e2e` で確認する。
+- 2026-09-08 Issue #45のデザイン修正では、利用者の指示に従い大きなコピー、状態表示風の装飾、走査アニメーション、過剰な影と引用表現を削除した。`make check`が成功し、PCと390pxの匿名表示を実ブラウザで確認した。ローカルE2E用Chromiumは取得がtimeoutしたため、更新したjourneyはPRのCI `e2e` で確認する。
 - 2026-09-08 Issue #14 SEO変更では、実行環境からGitHubをcheckoutできないためローカル `make check` / `make e2e` は未実施。canonical・JSON-LD・robots・sitemap・404の回帰をunit/E2Eへ追加し、PRのCI `check` / `e2e` / `container` で確認する。公開環境の性能値はデプロイ後に `runbooks/seo.md` で再計測する。
 
 ## 対象サーバーでのみ完了できる項目
