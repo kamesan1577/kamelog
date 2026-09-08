@@ -42,25 +42,24 @@
   }
 
   /*
-   * The help dialog is taller than the mobile viewport. DialogContent is a
-   * grid with overflow hidden, so the auto-sized help list used to grow to
-   * its full content height and get clipped instead of becoming scrollable.
-   * Give the dialog a definite mobile height and let the list consume the
-   * remaining space so touch scrolling has an actual scroll container.
+   * Scroll the whole help dialog on mobile instead of nesting the scroll
+   * inside the help list. This keeps touch scrolling reliable even when the
+   * dialog primitive applies its own sizing/layout constraints.
    */
   .markdown-help-dialog {
     display: flex;
-    height: 92dvh;
-    max-height: 92dvh;
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 16px);
     flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 
   .markdown-help-list {
     min-height: 0;
-    flex: 1 1 auto;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
+    flex: 0 0 auto;
+    overflow-y: visible;
   }
 }
