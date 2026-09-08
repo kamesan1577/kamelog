@@ -40,7 +40,7 @@ PCホームの画像添付は現在のつぶやきへ媒体を追加する操作
 ## 技術構成と境界
 
 Next.js / React / TypeScript、Node.js 24、SQLite、ローカル媒体、FFmpeg。
-API契約: [api.md](api.md)。検証: [development.md](development.md)。
+API契約: [api.md](api.md)。検証: [development.md](development.md)。SEO / 検索公開仕様: [seo.md](seo.md)。
 パスキーの暗号検証は保守されたWebAuthnライブラリへ任せ、自作しない。
 配布はDocker Compose。開発はホットリロード。本番はHTTPS reverse proxyの背後で動かす。
 本番デプロイ可否は [deployment.md](../../runbooks/deployment.md) とHANDOFFの検証証跡で判断する。
