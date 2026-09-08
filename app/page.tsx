@@ -34,6 +34,36 @@ function StructuredData({ value }: { value: Record<string, unknown> }) {
   );
 }
 
+function SourceFooter() {
+  return (
+    <footer
+      aria-label="kamelogの開発情報"
+      className="border-t border-[#eceae5] px-5 pt-5 pb-24 text-xs text-[#858078] md:ml-[222px] md:px-10 md:pb-6"
+    >
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="font-medium text-[#625e56]">kamelog の開発情報</span>
+        <a
+          className="text-[#277dae] underline decoration-[#277dae]/35 underline-offset-4 hover:decoration-[#277dae]"
+          href="https://github.com/kamesan1577/kamelog"
+          target="_blank"
+          rel="noreferrer"
+        >
+          ソースコード
+        </a>
+        <span aria-hidden="true">·</span>
+        <a
+          className="text-[#277dae] underline decoration-[#277dae]/35 underline-offset-4 hover:decoration-[#277dae]"
+          href="https://github.com/kamesan1577/kamelog/issues/new"
+          target="_blank"
+          rel="noreferrer"
+        >
+          不具合・要望をIssueで報告
+        </a>
+      </div>
+    </footer>
+  );
+}
+
 export async function generateMetadata({
   searchParams,
 }: {
@@ -127,6 +157,7 @@ export default async function Page({
         initialProfile={profile}
         initialSelected={params.post || null}
       />
+      <SourceFooter />
     </>
   );
 }
