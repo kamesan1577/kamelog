@@ -3,10 +3,13 @@ import test from "node:test";
 
 import { buildTocEntries, tocSlug } from "../../lib/blog-toc.mjs";
 
-test("tocSlug keeps Japanese text and normalizes punctuation and spaces", () => {
-  assert.equal(tocSlug("  導入：まず やること！ "), "導入まず-やること");
-  assert.equal(tocSlug("API / HTTP"), "api-http");
-});
+test(
+  "tocSlug keeps Japanese text and normalizes punctuation and spaces",
+  () => {
+    assert.equal(tocSlug("  導入：まず やること！ "), "導入まず-やること");
+    assert.equal(tocSlug("API / HTTP"), "api-http");
+  },
+);
 
 test(
   "buildTocEntries skips empty headings and gives duplicates unique ids",
