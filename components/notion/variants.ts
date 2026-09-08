@@ -31,7 +31,7 @@ export const typography = (type: Typography) => typographyVariants({ type });
 export const buttonVariants = cva(
   [
     "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-[4px] text-sm font-medium whitespace-nowrap select-none transition-colors duration-75",
-    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2383e2]",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#37352f]",
     "disabled:cursor-not-allowed disabled:bg-transparent disabled:opacity-40",
     "[&_svg]:block [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   ],
@@ -43,9 +43,10 @@ export const buttonVariants = cva(
         icon: "size-9 rounded-md border border-[#e3e2de] text-[#787774] hover:bg-black/5 active:bg-black/10",
         "nav-icon": "size-7 text-[#787774] hover:bg-black/5 active:bg-black/10",
         link: "text-foreground underline-offset-4 hover:bg-transparent hover:underline",
-        blue: "border border-[#1b76c5] bg-[#2383e2] text-white shadow-[0_1px_1px_rgba(15,15,15,0.08)] hover:bg-[#1b78d0] hover:text-white active:bg-[#1668b2] disabled:bg-[#2383e2]/40",
+        solid:
+          "border border-[#37352f] bg-[#37352f] text-white shadow-[0_1px_1px_rgba(15,15,15,0.08)] hover:bg-[#292824] hover:text-white active:bg-[#1f1e1b] disabled:bg-[#37352f]/40",
         "soft-blue":
-          "bg-blue/5 text-blue shadow-xs hover:bg-blue/15 disabled:bg-blue/5",
+          "bg-[#efefed] text-[#37352f] shadow-xs hover:bg-[#e3e2df] disabled:bg-[#efefed]",
         hint: "font-medium text-muted",
         red: "border border-[#e5484d]/50 text-[#e5484d] hover:bg-[#e5484d]/10 focus:bg-[#e5484d]/10",
         "red-fill":
@@ -76,7 +77,7 @@ export type ButtonVariants = VariantProps<typeof buttonVariants>;
 
 export const menuItemVariants = cva(
   [
-    "mx-1 flex min-h-7 w-[calc(100%-8px)] animate-bg-in cursor-pointer items-center rounded-md px-2 text-sm/tight select-none hover:bg-black/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2383e2]",
+    "mx-1 flex min-h-7 w-[calc(100%-8px)] animate-bg-in cursor-pointer items-center rounded-md px-2 text-sm/tight select-none hover:bg-black/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#37352f]",
     "fill-menu-icon [&_svg]:block [&_svg]:shrink-0",
     "data-highlighted:bg-default/10",
     "data-disabled:pointer-events-none data-disabled:cursor-not-allowed data-disabled:opacity-40",

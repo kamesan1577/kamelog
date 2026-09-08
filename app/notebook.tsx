@@ -1258,7 +1258,7 @@ export default function Notebook({
           {login && (
             <div className="admin-nav">
               <Button
-                variant="blue"
+                variant="solid"
                 size="sm"
                 onClick={() => openEditor("tweet")}
               >
@@ -1376,7 +1376,7 @@ export default function Notebook({
                     />
                   </label>
                   <Button
-                    variant="blue"
+                    variant="solid"
                     onClick={() => {
                       if (!name.trim()) return;
                       void guard(async () => {
@@ -1655,7 +1655,7 @@ export default function Notebook({
                           onDrop={(event) => droppedImages(event, "inline")}
                         />
                         <Button
-                          variant="blue"
+                          variant="solid"
                           size="sm"
                           onClick={publishInlineTweet}
                           disabled={!inlineBody.trim() && !inlineImages.length}
@@ -2125,7 +2125,7 @@ export default function Notebook({
                     >
                       やり直す
                     </Button>
-                    <Button variant="blue" onClick={postVlog}>
+                    <Button variant="solid" onClick={postVlog}>
                       投稿する
                     </Button>
                   </div>
@@ -2401,7 +2401,7 @@ export default function Notebook({
               <div className="editor-footer">
                 <span>{body.length}文字</span>
                 <Button onClick={askClose}>閉じる</Button>
-                <Button variant="blue" onClick={publish}>
+                <Button variant="solid" onClick={publish}>
                   投稿
                 </Button>
               </div>
@@ -2437,7 +2437,7 @@ export default function Notebook({
           <div className="confirm-actions">
             <Button onClick={() => setCloseAsk(false)}>編集を続ける</Button>
             <Button onClick={discard}>削除して閉じる</Button>
-            <Button variant="blue" onClick={saveDraft}>
+            <Button variant="solid" onClick={saveDraft}>
               下書き保存
             </Button>
           </div>

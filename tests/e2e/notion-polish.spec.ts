@@ -9,10 +9,14 @@ test("landing polish keeps desktop and mobile controls readable", async ({
   const primary = page.getByRole("button", {
     name: /タイムラインを見る/,
   });
-  await expect(primary).toHaveCSS("background-color", "rgb(35, 131, 226)");
+  await expect(primary).toHaveCSS("background-color", "rgb(55, 53, 47)");
+  await expect(page.locator("body")).toHaveCSS(
+    "background-color",
+    "rgb(246, 245, 244)",
+  );
   await expect(page.locator(".landing-profile")).toHaveCSS(
     "background-color",
-    "rgb(247, 247, 245)",
+    "rgb(243, 242, 239)",
   );
   await page.screenshot({
     path: testInfo.outputPath("landing-desktop.png"),

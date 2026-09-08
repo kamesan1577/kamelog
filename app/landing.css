@@ -3,7 +3,7 @@
   --landing-text: #5f5e5b;
   --landing-muted: #787774;
   --landing-faint: #9b9a97;
-  --landing-line: #e9e9e7;
+  --landing-line: #dededb;
   --landing-hover: #f7f7f5;
   --landing-pressed: #efefed;
   max-width: 1040px;
@@ -16,8 +16,10 @@
   grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
   gap: 44px;
   align-items: center;
-  padding: 24px 0 38px;
-  border-bottom: 1px solid var(--landing-line);
+  padding: 30px 32px;
+  border: 1px solid var(--landing-line);
+  border-radius: 12px;
+  background: #fff;
 }
 
 .landing-copy h1 {
@@ -74,20 +76,20 @@
 }
 
 .landing-actions .landing-primary {
-  border-color: #1b76c5;
-  background: #2383e2;
+  border-color: var(--landing-ink);
+  background: var(--landing-ink);
   box-shadow: 0 1px 1px rgb(15 15 15 / 8%);
   color: #fff;
 }
 
 .landing-actions .landing-primary:hover {
-  border-color: #176daf;
-  background: #1b78d0;
+  border-color: #292824;
+  background: #292824;
   color: #fff;
 }
 
 .landing-actions .landing-primary:active {
-  background: #1668b2;
+  background: #1f1e1b;
 }
 
 .landing-profile {
@@ -95,9 +97,9 @@
   grid-template-columns: 52px minmax(0, 1fr);
   gap: 14px;
   padding: 20px;
-  border: 1px solid var(--landing-line);
-  border-radius: 6px;
-  background: #f7f7f5;
+  border: 0;
+  border-radius: 10px;
+  background: #f3f2ef;
 }
 
 .landing-profile > .avatar {
@@ -138,7 +140,7 @@
   align-items: center;
   gap: 5px;
   width: fit-content;
-  color: #2383e2;
+  color: var(--landing-ink);
   font-size: 13px;
   text-underline-offset: 3px;
 }
@@ -150,12 +152,21 @@
 .landing-lower {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
-  gap: 44px;
-  padding-top: 32px;
+  gap: 16px;
+  padding-top: 16px;
 }
 
 .landing-about {
-  margin-top: 34px;
+  margin-top: 16px;
+}
+
+.content-index,
+.featured-area,
+.landing-about {
+  padding: 20px 22px;
+  border: 1px solid var(--landing-line);
+  border-radius: 12px;
+  background: #fff;
 }
 
 .career-list {
@@ -168,12 +179,20 @@
   display: grid;
   grid-template-columns: 74px minmax(0, 1fr);
   gap: 18px;
-  padding: 15px 9px;
+  padding: 15px 8px;
   border-bottom: 1px solid var(--landing-line);
 }
 
 .career-list time {
-  color: var(--landing-muted);
+  display: inline-flex;
+  align-items: center;
+  align-self: start;
+  justify-content: center;
+  width: fit-content;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: var(--landing-ink);
+  color: #fff;
   font-size: 13px;
   font-weight: 650;
 }
@@ -194,12 +213,12 @@
 .landing-section-title {
   margin-bottom: 12px;
   padding-bottom: 9px;
-  border-bottom: 1px solid var(--landing-line);
+  border-bottom: 1px solid var(--landing-ink);
 }
 
 .landing-section-title h2 {
   margin: 0;
-  color: var(--landing-muted);
+  color: var(--landing-ink);
   font-size: 14px;
   font-weight: 650;
 }
@@ -243,8 +262,8 @@
   height: 34px;
   border: 0;
   border-radius: 4px;
-  background: #efefed;
-  color: var(--landing-text);
+  background: var(--landing-ink);
+  color: #fff;
 }
 
 .content-card-copy {
@@ -284,8 +303,9 @@
   align-items: flex-start;
   padding: 18px 19px 16px;
   border: 1px solid #dededb;
-  border-radius: 6px;
-  background: #fff;
+  border-left: 3px solid var(--landing-ink);
+  border-radius: 8px;
+  background: #fafaf9;
   box-shadow: 0 1px 2px rgb(15 15 15 / 3%);
   color: var(--landing-ink);
   text-align: left;
@@ -343,8 +363,9 @@
   min-height: 150px;
   padding: 20px;
   border: 1px solid var(--landing-line);
-  border-radius: 6px;
-  background: #f7f7f5;
+  border-left: 3px solid var(--landing-ink);
+  border-radius: 8px;
+  background: #fafaf9;
   color: var(--landing-muted);
   font-size: 14px;
 }
@@ -365,7 +386,7 @@
   }
 
   .landing-lower {
-    gap: 28px;
+    gap: 16px;
   }
 }
 
@@ -377,11 +398,11 @@
 
   .landing-intro {
     gap: 28px;
-    padding-top: 10px;
+    padding: 24px;
   }
 
   .landing-lower {
-    gap: 30px;
+    gap: 16px;
   }
 
   .content-card-copy small {
@@ -396,7 +417,7 @@
   }
 
   .landing-intro {
-    padding-bottom: 30px;
+    padding: 22px 18px;
   }
 
   .landing-copy h1 {
@@ -424,11 +445,18 @@
   }
 
   .landing-lower {
-    padding-top: 27px;
+    gap: 12px;
+    padding-top: 12px;
   }
 
   .landing-about {
-    margin-top: 30px;
+    margin-top: 12px;
+  }
+
+  .content-index,
+  .featured-area,
+  .landing-about {
+    padding: 18px;
   }
 
   .career-list li {
