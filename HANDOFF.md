@@ -18,6 +18,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 10秒以下vlogの無音ループと即時停止、リンクコピー/X共有、投稿別OGP画像を実装。
 - 投稿詳細の `?post=` と画面状態をHistory APIで同期し、詳細内の「戻る」、ブラウザの戻る/進む、ホーム等のナビゲーションでURLと表示が食い違わないようにする。直接共有URLから開いた詳細の「戻る」はホームへ戻す。
 - ブログ詳細のいいね・リンクコピー・X共有は読書中も追従する。1000px以上では本文左側の縦型sticky rail、999px以下では下部floating bar、640px以下ではモバイルナビの上へ固定する。タイムライン側の操作は維持する。
+- `robots.txt` / 動的sitemap / canonical / OGP・Twitter URL / WebSite・Person・BlogPosting JSON-LDを公開originへ統一し、本番メタデータへlocalhostを出さない。sitemapはホームと公開ブログだけを列挙し、存在しない投稿詳細は404にする。
 - revision競合、Origin/CSRF、入力上限、媒体Range、rate limitをAPIで処理。
 - DB/媒体のhash manifest付きbackup/restoreと全パスキー喪失時のoffline reset。
 - Node 24の非root本番image、開発Compose、CIのcheck/e2e/container job。
@@ -48,6 +49,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 2026-09-07 投稿詳細履歴変更では、実行環境からGitHubをcheckoutできないためローカル `make check` / `make e2e` は未実施。追加した投稿詳細URL・アプリ内戻る・ブラウザ戻る/進む・直接共有URLの回帰はPRのCI `check` / `e2e` / `container` で確認する。
 - 2026-09-08 Issue #41の追従アクション変更は、CSS契約テストと1280px/390pxのPlaywright回帰で、PCの左sticky railとスマホの下部floating barがスクロール後も同位置に残ることをPR CIで確認する。
 - 2026-09-07 Issue #45のトップページ変更後、`make check`（公開検査、UI契約、型、lint、unit、本番buildを含む）が成功。PCと390pxの匿名表示を実ブラウザで目視し、横方向の見切れがないことを確認した。ローカルE2Eは実行環境にPlaywright Chromiumがないため未実施し、トップからタイムラインへの導線を含むjourneyはPRのCI `e2e` で確認する。
+- 2026-09-08 Issue #14 SEO変更では、実行環境からGitHubをcheckoutできないためローカル `make check` / `make e2e` は未実施。canonical・JSON-LD・robots・sitemap・404の回帰をunit/E2Eへ追加し、PRのCI `check` / `e2e` / `container` で確認する。公開環境の性能値はデプロイ後に `runbooks/seo.md` で再計測する。
 
 ## 対象サーバーでのみ完了できる項目
 
@@ -56,6 +58,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 永続volumeから別ディレクトリへの復元訓練とオフホスト暗号化backup。
 - GitHub required checks `check` / `e2e` / `container` の有効化。
 - 対象ホストへのsystemd unit導入、初回timer実行、Cloudflare Tunnelを含む再起動試験。
+- SEO変更後の公開originでmobile / desktop LighthouseとCrUX INP、公開/直結TTFBを再計測する。
 
 ## 既知の制約
 
