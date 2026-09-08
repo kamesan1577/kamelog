@@ -6,6 +6,8 @@ import "./x-share-logo.css";
 import "./composer-layout.css";
 import "./full-page-blog-editor.css";
 import "./detail-actions.css";
+import "./blog-toc.css";
+import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
 import { homeUrl, ogImageUrl, siteOrigin } from "@/server/seo.mjs";
 
@@ -47,6 +49,7 @@ export default function RootLayout({
     <html lang="ja">
       <body className="antialiased">
         <ImageUploadBridge />
+        <BlogTableOfContentsBridge />
         {children}
       </body>
     </html>
