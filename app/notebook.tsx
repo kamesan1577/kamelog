@@ -558,14 +558,17 @@ export default function Notebook({
       setSelected(post);
       if (post) setTag("");
     };
-    if (!readNavigationState()) {
-      const post = postFromLocation();
-      window.history.replaceState(
-        navigationHistoryState({ view: "home", post, internal: false }),
-        "",
-        navigationUrl(post),
-      );
-    }
+    const initialPost = postFromLocation();
+    const initialState = readNavigationState();
+    window.history.replaceState(
+      navigationHistoryState({
+        view: initialPost ? "home" : (initialState?.view ?? "home"),
+        post: initialPost,
+        internal: false,
+      }),
+      "",
+      navigationUrl(initialPost),
+    );
     syncNavigation();
     window.addEventListener("popstate", syncNavigation);
     return () => window.removeEventListener("popstate", syncNavigation);
