@@ -6,7 +6,7 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "node scripts/dev.mjs",
     "build": "next build --webpack",
     "start": "next start",
     "test": "node --test tests/server/*.test.mjs",

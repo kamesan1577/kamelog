@@ -58,10 +58,11 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
+import "./landing.css";
 
 type Kind = "blog" | "tweet" | "vlog";
-type View = "home" | "projects" | "account";
 type BlogEditorMode = "edit" | "preview" | "split";
+type View = "home" | "timeline" | "projects" | "account";
 type Post = {
   revision?: number;
   id: string;
@@ -72,6 +73,7 @@ type Post = {
   updatedAt?: string;
   tags: string[];
   likes: number;
+  views?: number;
   video?: string;
   time?: string;
   pinned?: boolean;
@@ -105,7 +107,12 @@ function baseHistoryState(): Record<string, unknown> {
     : {};
 }
 function isView(value: unknown): value is View {
-  return value === "home" || value === "projects" || value === "account";
+  return (
+    value === "home" ||
+    value === "timeline" ||
+    value === "projects" ||
+    value === "account"
+  );
 }
 function readNavigationState(): NavigationState | null {
   const candidate = baseHistoryState()[navigationStateKey];
@@ -542,6 +549,25 @@ export default function Notebook({
       } catch {}
   }, [liked, ready]);
   useEffect(() => {
+    if (!selected) return;
+    const key = `kamelog-viewed:${selected}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {}
+    void api<Post>(`posts/${selected}/view`, "POST", {})
+      .then((viewed) =>
+        setPosts((current) =>
+          current.map((post) => (post.id === viewed.id ? viewed : post)),
+        ),
+      )
+      .catch(() => {
+        try {
+          sessionStorage.removeItem(key);
+        } catch {}
+      });
+  }, [selected]);
+  useEffect(() => {
     if (live.current && stream) live.current.srcObject = stream;
   }, [stream, editor, kind, vMode]);
   useEffect(() => {
@@ -552,14 +578,17 @@ export default function Notebook({
       setSelected(post);
       if (post) setTag("");
     };
-    if (!readNavigationState()) {
-      const post = postFromLocation();
-      window.history.replaceState(
-        navigationHistoryState({ view: "home", post, internal: false }),
-        "",
-        navigationUrl(post),
-      );
-    }
+    const initialPost = postFromLocation();
+    const initialState = readNavigationState();
+    window.history.replaceState(
+      navigationHistoryState({
+        view: initialPost ? "home" : (initialState?.view ?? "home"),
+        post: initialPost,
+        internal: false,
+      }),
+      "",
+      navigationUrl(initialPost),
+    );
     syncNavigation();
     window.addEventListener("popstate", syncNavigation);
     return () => window.removeEventListener("popstate", syncNavigation);
@@ -810,7 +839,7 @@ export default function Notebook({
       );
       setPosts((ps) => [saved, ...ps.filter((p) => p.id !== saved.id)]);
       setEditor(false);
-      nav("home");
+      nav("timeline");
       setFilter("all");
       toast.success(editId ? "更新しました" : "投稿しました");
       if (draftId) {
@@ -1015,7 +1044,7 @@ export default function Notebook({
       });
       setPosts((ps) => [saved, ...ps]);
       closeComposer();
-      nav("home");
+      nav("timeline");
       setFilter("all");
       toast.success("vlogを投稿しました");
     });
@@ -1045,6 +1074,9 @@ export default function Notebook({
     .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ja"));
   const visibleTags = tags.slice(0, visibleTagCount);
+  const featuredPost = [...posts].sort(
+    (a, b) => (b.views ?? 0) - (a.views ?? 0) || b.date.localeCompare(a.date),
+  )[0];
   const item = posts.find((p) => p.id === selected);
   const postUrl = (id: string) => {
     const url = new URL("/", location.origin);
@@ -1176,6 +1208,13 @@ export default function Notebook({
               <span>ホーム</span>
             </button>
             <button
+              className={view === "timeline" ? "active" : ""}
+              onClick={() => nav("timeline")}
+            >
+              <MessageCircle />
+              <span>タイムライン</span>
+            </button>
+            <button
               className={view === "projects" ? "active" : ""}
               onClick={() => nav("projects")}
             >
@@ -1196,7 +1235,7 @@ export default function Notebook({
                 key={id}
                 className={filter === id ? "active" : ""}
                 onClick={() => {
-                  nav("home");
+                  nav("timeline");
                   setFilter(id);
                 }}
               >
@@ -1263,9 +1302,11 @@ export default function Notebook({
                 ? "投稿"
                 : view === "projects"
                   ? "プロジェクト"
-                  : view === "account"
-                    ? "アカウント"
-                    : "ホーム"}
+                  : view === "timeline"
+                    ? "タイムライン"
+                    : view === "account"
+                      ? "アカウント"
+                      : "ホーム"}
             </span>
             {!login ? (
               <details className="mobile-login">
@@ -1286,7 +1327,11 @@ export default function Notebook({
               </button>
             )}
           </header>
-          <div className="content-grid">
+          <div
+            className={
+              "content-grid " + (view === "home" ? "landing-layout" : "")
+            }
+          >
             <main className="main-content">
               {view === "account" && login ? (
                 <section className="settings-page">
@@ -1416,10 +1461,160 @@ export default function Notebook({
                   </div>
                   {actions(item)}
                 </section>
+              ) : view === "home" ? (
+                <section className="landing-page">
+                  <div className="landing-intro">
+                    <div className="landing-copy">
+                      <h1>kamelog</h1>
+                      <p className="landing-lead">
+                        ブログ、つぶやき、短い動画、個人制作をまとめています。
+                      </p>
+                      <div className="landing-actions">
+                        <button
+                          className="landing-primary"
+                          onClick={() => nav("timeline")}
+                        >
+                          タイムラインを見る
+                          <ArrowUpRight size={16} />
+                        </button>
+                        <button onClick={() => nav("projects")}>
+                          作ったもの
+                        </button>
+                      </div>
+                    </div>
+                    <aside className="landing-profile">
+                      <Avatar value={profile.icon} large />
+                      <div>
+                        <span>プロフィール</span>
+                        <h2>{profile.name}</h2>
+                        <p>@kamesan1577 · Webバックエンドエンジニア</p>
+                      </div>
+                      <p className="landing-bio">{profile.bio}</p>
+                      <a
+                        href="https://github.com/kamesan1577"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        GitHubでコードを見る <ArrowUpRight size={14} />
+                      </a>
+                    </aside>
+                  </div>
+
+                  <div className="landing-lower">
+                    <div className="content-index">
+                      <div className="landing-section-title">
+                        <h2>コンテンツ</h2>
+                      </div>
+                      <div className="content-cards">
+                        {(
+                          [
+                            {
+                              id: "blog",
+                              icon: FileText,
+                              title: "ブログ",
+                              text: "技術、開発、個人制作についての記事",
+                            },
+                            {
+                              id: "tweet",
+                              icon: MessageCircle,
+                              title: "つぶやき",
+                              text: "日々の短いメモ",
+                            },
+                            {
+                              id: "vlog",
+                              icon: Video,
+                              title: "vlog",
+                              text: "数秒から30秒までの動画",
+                            },
+                          ] as const
+                        ).map(({ id, icon: Icon, title: cardTitle, text }) => (
+                          <button
+                            key={id}
+                            onClick={() => {
+                              nav("timeline");
+                              setFilter(id);
+                            }}
+                          >
+                            <span className={`content-icon ${id}`}>
+                              <Icon size={18} />
+                            </span>
+                            <span className="content-card-copy">
+                              <strong>{cardTitle}</strong>
+                              <small>{text}</small>
+                            </span>
+                            <b>{posts.filter((p) => p.kind === id).length}</b>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="featured-area">
+                      <div className="landing-section-title">
+                        <h2>いま読まれている</h2>
+                      </div>
+                      {featuredPost ? (
+                        <button
+                          className="featured-post"
+                          onClick={() => openPost(featuredPost.id)}
+                        >
+                          <span className="featured-meta">
+                            {label[featuredPost.kind]}
+                            <span>·</span>
+                            {new Date(featuredPost.date).toLocaleDateString(
+                              "ja-JP",
+                              { month: "numeric", day: "numeric" },
+                            )}
+                            <span>·</span>
+                            <Eye size={12} /> {featuredPost.views ?? 0}
+                          </span>
+                          <strong>
+                            {featuredPost.kind === "blog"
+                              ? featuredPost.title
+                              : featuredPost.body || "映像の記録"}
+                          </strong>
+                          <span className="featured-open">
+                            読む <ArrowUpRight size={14} />
+                          </span>
+                        </button>
+                      ) : (
+                        <div className="featured-empty">
+                          最初の記録を準備しています。
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <section
+                    className="landing-about"
+                    aria-labelledby="about-title"
+                  >
+                    <div className="landing-section-title">
+                      <h2 id="about-title">About me</h2>
+                    </div>
+                    <ol className="career-list">
+                      <li>
+                        <time dateTime="2021">2021</time>
+                        <div>
+                          <strong>大学入学</strong>
+                          <p>
+                            情報系の学部で、ソフトウェア開発と情報技術を学ぶ。
+                          </p>
+                        </div>
+                      </li>
+                      <li>
+                        <time dateTime="2025">2025</time>
+                        <div>
+                          <strong>大学卒業・エンタメ系企業へ入社</strong>
+                          <p>自社Webサービスの開発に携わる。</p>
+                        </div>
+                      </li>
+                    </ol>
+                  </section>
+                </section>
               ) : (
                 <>
                   <section className="page-heading">
-                    <h1>ホーム</h1>
+                    <h1>タイムライン</h1>
                   </section>
                   <label className="home-search mobile-search">
                     <Search size={17} />
@@ -1640,7 +1835,11 @@ export default function Notebook({
                 </>
               )}
             </main>
-            <aside className="right-sidebar">
+            <aside
+              className={
+                "right-sidebar " + (view === "home" ? "landing-hidden" : "")
+              }
+            >
               <div className="profile-card">
                 <Avatar value={profile.icon} large />
                 <h2>{profile.name}</h2>
@@ -1673,7 +1872,7 @@ export default function Notebook({
                         key={name}
                         className={tag === name ? "active" : ""}
                         onClick={() => {
-                          nav("home");
+                          nav("timeline");
                           setTag(name);
                           setFilter("all");
                         }}
@@ -1702,6 +1901,13 @@ export default function Notebook({
             >
               <Home />
               <span>ホーム</span>
+            </button>
+            <button
+              className={view === "timeline" ? "active" : ""}
+              onClick={() => nav("timeline")}
+            >
+              <MessageCircle />
+              <span>タイムライン</span>
             </button>
             <button
               className={view === "projects" ? "active" : ""}

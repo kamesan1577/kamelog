@@ -8,10 +8,23 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "ホーム", exact: true }),
+    page.getByRole("heading", { name: "kamelog", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText("プロフィール", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "About me" })).toBeVisible();
+  await expect(page.getByText("大学卒業・エンタメ系企業へ入社")).toBeVisible();
+  await expect(
+    page.locator(".content-cards").getByRole("button", { name: /ブログ/ }),
   ).toBeVisible();
   await expect(page.locator(".desktop-composer")).toHaveCount(0);
   await expect(page.locator(".mobile-create")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "タイムライン", exact: true }),
+  ).toBeVisible();
   await expect(page.locator(".side-search")).toBeVisible();
   await expect(page.locator(".public-sidebar nav svg").first()).toBeVisible();
   await expect(page.locator(".preview-shell")).toHaveCount(0);
@@ -76,6 +89,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.reload();
   await page.setViewportSize({ width: 1280, height: 900 });
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
+    .click();
   await expect(page.locator(".desktop-composer")).toBeVisible();
   await page.keyboard.press("n");
   const modalBody = page.getByPlaceholder("本文", { exact: true });
@@ -88,6 +105,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     "保存される架空の下書き",
   );
   await page.reload();
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
+    .click();
   await expect(page.locator(".tweet-body")).toHaveText(
     "保存される架空の下書き",
   );
@@ -268,9 +289,17 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
 
   const openedPostId = new URL(page.url()).searchParams.get("post");
   expect(openedPostId).toBeTruthy();
+  await expect
+    .poll(async () =>
+      page.evaluate(async (id) => {
+        const response = await fetch(`/api/posts/${id}`);
+        return ((await response.json()) as { views: number }).views;
+      }, openedPostId),
+    )
+    .toBe(1);
   await page.getByRole("button", { name: "戻る", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "ホーム", exact: true }),
+    page.getByRole("heading", { name: "タイムライン", exact: true }),
   ).toBeVisible();
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page.goForward();
@@ -278,7 +307,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   expect(new URL(page.url()).searchParams.get("post")).toBe(openedPostId);
   await page.goBack();
   await expect(
-    page.getByRole("heading", { name: "ホーム", exact: true }),
+    page.getByRole("heading", { name: "タイムライン", exact: true }),
   ).toBeVisible();
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
 
@@ -287,7 +316,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .click();
   await page.goBack();
   await expect(
-    page.getByRole("heading", { name: "ホーム", exact: true }),
+    page.getByRole("heading", { name: "タイムライン", exact: true }),
   ).toBeVisible();
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page.goForward();
@@ -296,8 +325,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
 
   await page.locator(".site-name").click();
   await expect(
-    page.getByRole("heading", { name: "ホーム", exact: true }),
+    page.getByRole("heading", { name: "kamelog", exact: true }),
   ).toBeVisible();
+  await expect(page.locator(".featured-post")).toContainText("架空のブログ");
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page.goBack();
   await expect(page.locator(".detail-page")).toBeVisible();
@@ -307,9 +337,13 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".detail-page")).toBeVisible();
   await page.getByRole("button", { name: "戻る", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "ホーム", exact: true }),
+    page.getByRole("heading", { name: "kamelog", exact: true }),
   ).toBeVisible();
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
+    .click();
   await page
     .getByRole("heading", { name: "架空のブログ", exact: true })
     .click();
@@ -353,6 +387,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page
     .locator(".admin-access")
     .getByRole("button", { name: "ログイン", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
     .click();
   await expect(page.locator(".desktop-composer")).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
