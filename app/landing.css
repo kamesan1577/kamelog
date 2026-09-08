@@ -129,6 +129,43 @@
   padding-top: 32px;
 }
 
+.landing-about {
+  margin-top: 34px;
+}
+
+.career-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.career-list li {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 18px;
+  padding: 15px 9px;
+  border-bottom: 1px solid #eceae5;
+}
+
+.career-list time {
+  color: #777269;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.career-list strong {
+  color: #37352f;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.career-list p {
+  margin: 4px 0 0;
+  color: #858078;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
 .landing-section-title {
   margin-bottom: 12px;
   padding-bottom: 9px;
@@ -350,6 +387,16 @@
 
   .landing-lower {
     padding-top: 27px;
+  }
+
+  .landing-about {
+    margin-top: 30px;
+  }
+
+  .career-list li {
+    grid-template-columns: 58px minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px 2px;
   }
 
   .content-cards > button {

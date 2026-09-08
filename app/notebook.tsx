@@ -73,6 +73,7 @@ type Post = {
   updatedAt?: string;
   tags: string[];
   likes: number;
+  views?: number;
   video?: string;
   time?: string;
   pinned?: boolean;
@@ -547,6 +548,25 @@ export default function Notebook({
         localStorage.setItem("kamelog-likes", JSON.stringify(liked));
       } catch {}
   }, [liked, ready]);
+  useEffect(() => {
+    if (!selected) return;
+    const key = `kamelog-viewed:${selected}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {}
+    void api<Post>(`posts/${selected}/view`, "POST", {})
+      .then((viewed) =>
+        setPosts((current) =>
+          current.map((post) => (post.id === viewed.id ? viewed : post)),
+        ),
+      )
+      .catch(() => {
+        try {
+          sessionStorage.removeItem(key);
+        } catch {}
+      });
+  }, [selected]);
   useEffect(() => {
     if (live.current && stream) live.current.srcObject = stream;
   }, [stream, editor, kind, vMode]);
@@ -1055,7 +1075,7 @@ export default function Notebook({
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ja"));
   const visibleTags = tags.slice(0, visibleTagCount);
   const featuredPost = [...posts].sort(
-    (a, b) => b.likes - a.likes || b.date.localeCompare(a.date),
+    (a, b) => (b.views ?? 0) - (a.views ?? 0) || b.date.localeCompare(a.date),
   )[0];
   const item = posts.find((p) => p.id === selected);
   const postUrl = (id: string) => {
@@ -1445,7 +1465,7 @@ export default function Notebook({
                 <section className="landing-page">
                   <div className="landing-intro">
                     <div className="landing-copy">
-                      <h1>かめさんの個人サイト</h1>
+                      <h1>kamelog</h1>
                       <p className="landing-lead">
                         ブログ、つぶやき、短い動画、個人制作をまとめています。
                       </p>
@@ -1545,7 +1565,7 @@ export default function Notebook({
                               { month: "numeric", day: "numeric" },
                             )}
                             <span>·</span>
-                            <Heart size={12} /> {featuredPost.likes}
+                            <Eye size={12} /> {featuredPost.views ?? 0}
                           </span>
                           <strong>
                             {featuredPost.kind === "blog"
@@ -1563,6 +1583,33 @@ export default function Notebook({
                       )}
                     </div>
                   </div>
+
+                  <section
+                    className="landing-about"
+                    aria-labelledby="about-title"
+                  >
+                    <div className="landing-section-title">
+                      <h2 id="about-title">About me</h2>
+                    </div>
+                    <ol className="career-list">
+                      <li>
+                        <time dateTime="2021">2021</time>
+                        <div>
+                          <strong>大学入学</strong>
+                          <p>
+                            情報系の学部で、ソフトウェア開発と情報技術を学ぶ。
+                          </p>
+                        </div>
+                      </li>
+                      <li>
+                        <time dateTime="2025">2025</time>
+                        <div>
+                          <strong>大学卒業・エンタメ系企業へ入社</strong>
+                          <p>自社Webサービスの開発に携わる。</p>
+                        </div>
+                      </li>
+                    </ol>
+                  </section>
                 </section>
               ) : (
                 <>
