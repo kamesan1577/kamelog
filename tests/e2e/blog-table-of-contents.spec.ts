@@ -66,9 +66,7 @@ test(
     await addBlogDetailFixture(page);
     await expectGeneratedToc(page);
 
-    const box = await page
-      .getByRole("navigation", { name: "目次" })
-      .boundingBox();
+    const box = await page.getByRole("navigation", { name: "目次" }).boundingBox();
     expect(box).not.toBeNull();
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(390);
