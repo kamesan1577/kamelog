@@ -15,6 +15,14 @@ export function findShiryuBannerUrl(html) {
     const src = readAttribute(tag, "src");
     if (!src) continue;
 
+    let url;
+    try {
+      url = new URL(src, `${SHIRYU_ORIGIN}/`);
+    } catch {
+      continue;
+    }
+    if (url.origin !== SHIRYU_ORIGIN) continue;
+
     const alt = readAttribute(tag, "alt");
     const title = readAttribute(tag, "title");
     const width = readAttribute(tag, "width");
@@ -26,16 +34,8 @@ export function findShiryuBannerUrl(html) {
     if (height === "40") score += 2;
     if (/banner|bnr/i.test(src)) score += 2;
 
-    if (!best || score > best.score) best = { score, src };
+    if (!best || score > best.score) best = { score, url: url.href };
   }
 
-  if (!best || best.score < 4) return null;
-
-  try {
-    const url = new URL(best.src, `${SHIRYU_ORIGIN}/`);
-    if (url.origin !== SHIRYU_ORIGIN) return null;
-    return url.href;
-  } catch {
-    return null;
-  }
+  return best && best.score >= 6 ? best.url : null;
 }
