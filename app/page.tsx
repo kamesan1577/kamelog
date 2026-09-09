@@ -38,7 +38,7 @@ function StructuredData({ value }: { value: Record<string, unknown> }) {
 function SourceFooter() {
   return (
     <footer
-      aria-label="kamelogの開発情報と相互リンク"
+      aria-label="kamelogの開発情報"
       className="site-source-footer border-t border-[#eceae5] px-5 pt-5 pb-24 text-xs text-[#858078] md:ml-[222px] md:px-10 md:pb-6"
     >
       <div className="mx-auto max-w-5xl">
