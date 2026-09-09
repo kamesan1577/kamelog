@@ -1,5 +1,12 @@
 import { expect, test } from "@playwright/test";
 
+const githubMarkUrl =
+  "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png";
+const xLogoUrl =
+  "https://about.x.com/content/dam/about-twitter/x/brand-toolkit/logo-black.png.twimg.1920.png";
+const qiitaLogoUrl =
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Qiita_Logo.svg/330px-Qiita_Logo.svg.png";
+
 test("project cards stay inside narrow viewports without cropping thumbnails", async ({
   page,
 }) => {
@@ -17,36 +24,31 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
     await expect(cards).toHaveCount(2);
 
     for (let index = 0; index < 2; index += 1) {
-      const box = await cards.nth(index).boundingBox();
+      const card = cards.nth(index);
+      const box = await card.boundingBox();
+      const imageBox = await card.locator("img").boundingBox();
       expect(box).not.toBeNull();
-      if (!box) throw new Error("project card geometry unavailable");
+      expect(imageBox).not.toBeNull();
+      if (!box || !imageBox)
+        throw new Error("project card geometry unavailable");
       expect(box.x).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width).toBeLessThanOrEqual(width + 0.5);
-      await expect(cards.nth(index).locator("img")).toHaveCSS(
-        "object-fit",
-        "contain",
+      expect(imageBox.x).toBeGreaterThanOrEqual(box.x - 0.5);
+      expect(imageBox.x + imageBox.width).toBeLessThanOrEqual(
+        box.x + box.width + 0.5,
       );
+      await expect(card.locator("img")).toHaveCSS("object-fit", "contain");
     }
 
     const qiitaImage = projects.locator(
       'a.project-tile[href="https://qiita.com/kamesan1577"] img',
     );
-    await expect(qiitaImage).toHaveAttribute("src", "/qiita-project.svg");
+    await expect(qiitaImage).toHaveAttribute("src", qiitaLogoUrl);
     await expect(qiitaImage).toHaveAttribute("alt", "Qiita");
-
-    if (width === 320) {
-      const cardBox = await cards.first().boundingBox();
-      const imageBox = await cards.first().locator("img").boundingBox();
-      expect(cardBox).not.toBeNull();
-      expect(imageBox).not.toBeNull();
-      if (!cardBox || !imageBox)
-        throw new Error("project image geometry unavailable");
-      expect(imageBox.width).toBeGreaterThan(cardBox.width - 4);
-    }
   }
 });
 
-test("profile exposes GitHub, X and Qiita as brand-icon links", async ({
+test("profile exposes GitHub, X and Qiita as brand-image links", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -77,11 +79,11 @@ test("profile exposes GitHub, X and Qiita as brand-icon links", async ({
   await expect(x).toHaveText("");
   await expect(qiita).toHaveText("");
 
-  await expect(github.locator("img")).toHaveAttribute(
-    "src",
-    "/github-mark.svg",
-  );
-  await expect(x.locator("img")).toHaveAttribute("src", "/x-logo.svg");
-  await expect(qiita.locator("img")).toHaveAttribute("src", "/qiita-icon.svg");
-  await expect(qiita).toHaveCSS("background-color", "rgb(61, 64, 64)");
+  await expect(github.locator("img")).toHaveAttribute("src", githubMarkUrl);
+  await expect(x.locator("img")).toHaveAttribute("src", xLogoUrl);
+  await expect(qiita.locator("img")).toHaveAttribute("src", qiitaLogoUrl);
+  for (const link of [github, x, qiita]) {
+    await expect(link).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(link).toHaveCSS("border-top-width", "0px");
+  }
 });
