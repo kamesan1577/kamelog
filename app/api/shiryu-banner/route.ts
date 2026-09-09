@@ -2,6 +2,13 @@ import { findShiryuBannerUrl } from "@/server/shiryu-banner.mjs";
 
 const SHIRYU_HOME = "https://shiryu.win/";
 const CACHE_CONTROL = "public, max-age=86400, stale-while-revalidate=604800";
+const ALLOWED_IMAGE_TYPES = new Set([
+  "image/gif",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+]);
+const MAX_BANNER_BYTES = 1024 * 1024;
 
 export async function GET() {
   try {
@@ -10,6 +17,7 @@ export async function GET() {
         "user-agent": "kamelog/1.0 (+https://kamesan.org)",
       },
       next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(5000),
     });
 
     if (!page.ok) return new Response(null, { status: 502 });
@@ -19,15 +27,24 @@ export async function GET() {
 
     const banner = await fetch(bannerUrl, {
       next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(5000),
     });
     if (!banner.ok) return new Response(null, { status: 502 });
 
-    const contentType = banner.headers.get("content-type") || "";
-    if (!contentType.startsWith("image/")) {
+    const contentType = (banner.headers.get("content-type") || "")
+      .split(";", 1)[0]
+      .trim()
+      .toLowerCase();
+    if (!ALLOWED_IMAGE_TYPES.has(contentType)) {
       return new Response(null, { status: 502 });
     }
 
-    return new Response(await banner.arrayBuffer(), {
+    const bytes = await banner.arrayBuffer();
+    if (bytes.byteLength > MAX_BANNER_BYTES) {
+      return new Response(null, { status: 502 });
+    }
+
+    return new Response(bytes, {
       headers: {
         "cache-control": CACHE_CONTROL,
         "content-type": contentType,
