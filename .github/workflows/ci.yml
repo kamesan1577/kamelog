@@ -21,7 +21,13 @@ jobs:
         with:
           node-version: "24"
           cache: npm
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install FFmpeg
+        run: |
+          if test -f /etc/apt/sources.list.d/google-chrome.list; then
+            sudo mv /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.list.disabled
+          fi
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
       - run: npm ci
       - run: make check
         env:
@@ -36,7 +42,13 @@ jobs:
         with:
           node-version: "24"
           cache: npm
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install FFmpeg
+        run: |
+          if test -f /etc/apt/sources.list.d/google-chrome.list; then
+            sudo mv /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.list.disabled
+          fi
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run build
