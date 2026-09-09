@@ -85,3 +85,23 @@ test("profile exposes GitHub, X and Qiita as brand-icon links", async ({
   await expect(qiita.locator("img")).toHaveAttribute("src", "/qiita-icon.svg");
   await expect(qiita).toHaveCSS("background-color", "rgb(61, 64, 64)");
 });
+
+test("landing profile exposes social links on mobile", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+
+  const profile = page.locator(".landing-profile");
+  await expect(profile).toBeVisible();
+  const row = profile.locator("[data-kamelog-profile-social-links]");
+  await expect(row).toBeVisible();
+  await expect(row.locator("a")).toHaveCount(3);
+  await expect(
+    row.getByRole("link", { name: "GitHub (@kamesan1577)" }),
+  ).toHaveAttribute("href", "https://github.com/kamesan1577");
+  await expect(
+    row.getByRole("link", { name: "X (@kamesaniniad)" }),
+  ).toHaveAttribute("href", "https://x.com/kamesaniniad");
+  await expect(
+    row.getByRole("link", { name: "Qiita (@kamesan1577)" }),
+  ).toHaveAttribute("href", "https://qiita.com/kamesan1577");
+});
