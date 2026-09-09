@@ -1,4 +1,4 @@
-/* Public profile account links: brand marks only, with accessible labels supplied by the bridge. */
+/* Public profile account links: keep the existing profile layout and replace only the text link. */
 .profile-card > a[data-kamelog-profile-social-source] {
   display: none;
 }
@@ -6,46 +6,51 @@
 .profile-social-links {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 13px;
+  min-height: 28px;
 }
 
 .profile-card .profile-social-links .profile-social-link {
-  width: 36px;
-  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 36px;
-  border: 1px solid #e4e2dd;
-  border-radius: 6px;
-  background: #fff;
+  min-width: 28px;
+  min-height: 28px;
   padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .profile-card .profile-social-links .profile-social-link:hover {
-  background: #f7f7f5;
-  border-color: #d8d5cf;
+  background: transparent;
 }
 
 .profile-card .profile-social-links .profile-social-link img {
   display: block;
-  width: 18px;
-  height: 18px;
   object-fit: contain;
 }
 
-/* Qiita requires the green brand icon and sufficient contrast/clear space. */
+.profile-card .profile-social-links .profile-social-link-github img {
+  width: 20px;
+  height: 20px;
+}
+
+.profile-card .profile-social-links .profile-social-link-x img {
+  width: 18px;
+  height: 18px;
+}
+
 .profile-card .profile-social-links .profile-social-link-qiita {
-  background: #3d4040;
-  border-color: #3d4040;
+  min-width: 50px;
 }
 
-.profile-card .profile-social-links .profile-social-link-qiita:hover {
-  background: #3d4040;
-  border-color: #292b2b;
+.profile-card .profile-social-links .profile-social-link-qiita img {
+  width: 48px;
+  height: auto;
+  max-height: 18px;
 }
 
-/* Project thumbnails are artwork/logos, so never crop them to satisfy card geometry. */
+/* Preserve the original card composition while allowing narrow layouts to shrink cleanly. */
 .projects-page,
 .project-grid,
 .project-tile,
@@ -53,8 +58,10 @@
   min-width: 0;
 }
 
-.project-grid {
+.project-grid,
+.project-tile {
   width: 100%;
+  max-width: 100%;
 }
 
 .project-tile img {
@@ -62,22 +69,14 @@
 }
 
 .project-tile img[data-kamelog-qiita-thumbnail] {
-  background: #3d4040;
+  box-sizing: border-box;
+  padding: clamp(18px, 5vw, 42px);
+  background: #fff;
 }
 
 @media (max-width: 640px) {
-  .site-layout .content-grid,
-  .main-content,
-  .projects-page,
-  .project-grid,
   .project-tile {
-    width: 100%;
-    max-width: 100%;
-    min-width: 0;
-  }
-
-  .project-tile {
-    grid-template-columns: minmax(118px, 40%) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 41%) minmax(0, 1fr);
   }
 
   .project-tile img {
@@ -87,19 +86,12 @@
     object-fit: contain;
   }
 
+  .project-tile img[data-kamelog-qiita-thumbnail] {
+    padding: 18px;
+  }
+
   .project-tile h2,
   .project-tile p {
     overflow-wrap: anywhere;
-  }
-}
-
-@media (max-width: 360px) {
-  .project-tile {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .project-tile img {
-    height: auto;
-    aspect-ratio: 16 / 9;
   }
 }
