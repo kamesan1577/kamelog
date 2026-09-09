@@ -8,6 +8,7 @@
 | GET                       | /api/health                | 生存とschema version                                    |
 | GET                       | /api/posts?kind=&q=        | 公開投稿。kind省略で全種別                              |
 | GET                       | /api/posts/:id             | 公開詳細、存在しなければ404                             |
+| POST                      | /api/posts/:id/view        | 公開詳細の閲覧数を加算                                  |
 | POST / PUT / DELETE       | /api/posts[/id]            | ownerの投稿作成・更新・削除                             |
 | GET / POST / PUT / DELETE | /api/drafts[/id]           | owner限定の下書き                                       |
 | GET / PUT                 | /api/profile               | 公開プロフィール/owner更新                              |
@@ -25,6 +26,8 @@
 
 投稿: kind、title（300文字）、body（ブログ100,000/つぶやき5,000/vlog60）、tags（20件、各40文字）、pinned、video、time、images（つぶやきのみ最大4件）。
 日時・いいね初期値・IDはサーバー生成。API入力で他人のID・過去日時へ差し替えない。
+閲覧数はサーバー生成であり、投稿作成・更新APIから変更できない。閲覧APIは同一Originを要求し、投稿別の合計値だけを保存する。
+公開投稿の `date` は初回公開日時として保持する。公開済みブログのtitleまたはbodyが変更された場合だけ、サーバー生成の `updatedAt` を保存して応答する。固定/解除など本文以外の変更では既存 `updatedAt` を維持する。
 vlogのvideoとつぶやきのimagesは種類が一致する登録済み媒体のAPI pathだけを許可する。timeはHH:mm、captionは改行不可。
 更新はrevisionをbodyに渡す。削除はIf-Matchにrevisionを渡す。競合は409であり無条件上書きしない。
 下書きはkind=blog/tweet、title、body、更新時revision。

@@ -1,0 +1,33 @@
+/* The inline image picker attaches media to the current tweet; it is not a post type. */
+.desktop-composer .composer-kinds {
+  display: grid;
+  grid-template-columns: max-content max-content max-content minmax(0, 1fr);
+  column-gap: 23px;
+  row-gap: 0;
+  align-items: center;
+  margin: 0 16px;
+  padding: 0 0 11px;
+  border-top: 1px solid #f0efec;
+}
+
+.desktop-composer .composer-kinds > .image-upload-button {
+  grid-column: 1 / -1;
+  min-height: 42px;
+  margin: 0 0 10px;
+  padding: 0;
+  border-bottom: 1px solid #f0efec;
+  color: #777168;
+}
+
+/* The legacy composer rule in globals.css makes every direct button flex: 1.
+   The inline submit button must stay at its intrinsic width, including disabled state. */
+.desktop-composer .composer-start > [data-slot="button"] {
+  flex: 0 0 auto;
+  text-align: center;
+  color: #fff;
+}
+
+.desktop-composer .composer-kinds > .draft-button {
+  justify-self: end;
+  margin-left: 0;
+}

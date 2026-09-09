@@ -1,0 +1,14 @@
+@media (max-width: 640px) {
+  .mobile-nav {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: initial;
+  }
+
+  .mobile-nav button {
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+    justify-content: center;
+  }
+}

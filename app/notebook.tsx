@@ -5,6 +5,7 @@ import {
   ArrowUpRight,
   Check,
   ChevronDown,
+  Columns2,
   Code2,
   Eye,
   FileText,
@@ -13,7 +14,10 @@ import {
   Home,
   Image as ImageIcon,
   MessageCircle,
+  Minimize2,
   MoreHorizontal,
+  Maximize2,
+  Pencil,
   Pin,
   Plus,
   Search,
@@ -54,8 +58,11 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
+import "./landing.css";
 
 type Kind = "blog" | "tweet" | "vlog";
+type BlogEditorMode = "edit" | "preview" | "split";
+type View = "home" | "timeline" | "projects" | "account";
 type Post = {
   revision?: number;
   id: string;
@@ -63,8 +70,10 @@ type Post = {
   title: string;
   body: string;
   date: string;
+  updatedAt?: string;
   tags: string[];
   likes: number;
+  views?: number;
   video?: string;
   time?: string;
   pinned?: boolean;
@@ -79,11 +88,53 @@ type Draft = {
   savedAt: string;
   images?: string[];
 };
+type NavigationState = {
+  view: View;
+  post: string | null;
+  internal: boolean;
+};
 const label: Record<Kind, string> = {
   blog: "ブログ",
   tweet: "つぶやき",
   vlog: "vlog",
 };
+const navigationStateKey = "__kamelogNavigation";
+
+function baseHistoryState(): Record<string, unknown> {
+  const state = window.history.state;
+  return state && typeof state === "object" && !Array.isArray(state)
+    ? (state as Record<string, unknown>)
+    : {};
+}
+function isView(value: unknown): value is View {
+  return (
+    value === "home" ||
+    value === "timeline" ||
+    value === "projects" ||
+    value === "account"
+  );
+}
+function readNavigationState(): NavigationState | null {
+  const candidate = baseHistoryState()[navigationStateKey];
+  if (!candidate || typeof candidate !== "object") return null;
+  if (Array.isArray(candidate)) return null;
+  const { view, post, internal } = candidate as Partial<NavigationState>;
+  if (!isView(view)) return null;
+  if (post != null && typeof post !== "string") return null;
+  return { view, post: post ?? null, internal: internal === true };
+}
+function postFromLocation() {
+  return new URL(window.location.href).searchParams.get("post");
+}
+function navigationUrl(post: string | null) {
+  const url = new URL(window.location.href);
+  if (post) url.searchParams.set("post", post);
+  else url.searchParams.delete("post");
+  return url.pathname + url.search + url.hash;
+}
+function navigationHistoryState(next: NavigationState) {
+  return { ...baseHistoryState(), [navigationStateKey]: next };
+}
 
 function Avatar({
   value = "🐢",
@@ -420,12 +471,13 @@ export default function Notebook({
     [drafts, setDrafts] = useState<Draft[]>([]),
     [ready, setReady] = useState(false);
   const [login, setLogin] = useState(false),
-    [view, setView] = useState<"home" | "projects" | "account">("home"),
+    [view, setView] = useState<View>("home"),
     [filter, setFilter] = useState<"all" | Kind>("all"),
     [query, setQuery] = useState(""),
     [tag, setTag] = useState(""),
     [sort, setSort] = useState<"new" | "popular">("new"),
-    [selected, setSelected] = useState<string | null>(initialSelected);
+    [selected, setSelected] = useState<string | null>(initialSelected),
+    [visibleTagCount, setVisibleTagCount] = useState(5);
   const [editor, setEditor] = useState(false),
     [kind, setKind] = useState<Kind>("tweet"),
     [title, setTitle] = useState(""),
@@ -433,7 +485,8 @@ export default function Notebook({
     [editId, setEditId] = useState<string | null>(null),
     [draftId, setDraftId] = useState<string | null>(null),
     [editorStart, setEditorStart] = useState(""),
-    [preview, setPreview] = useState(false),
+    [blogEditorMode, setBlogEditorMode] = useState<BlogEditorMode>("edit"),
+    [fullPageEditor, setFullPageEditor] = useState(false),
     [markdownHelpOpen, setMarkdownHelpOpen] = useState(false),
     [closeAsk, setCloseAsk] = useState(false),
     [draftList, setDraftList] = useState(false),
@@ -496,15 +549,95 @@ export default function Notebook({
       } catch {}
   }, [liked, ready]);
   useEffect(() => {
+    if (!selected) return;
+    const key = `kamelog-viewed:${selected}`;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, "1");
+    } catch {}
+    void api<Post>(`posts/${selected}/view`, "POST", {})
+      .then((viewed) =>
+        setPosts((current) =>
+          current.map((post) => (post.id === viewed.id ? viewed : post)),
+        ),
+      )
+      .catch(() => {
+        try {
+          sessionStorage.removeItem(key);
+        } catch {}
+      });
+  }, [selected]);
+  useEffect(() => {
     if (live.current && stream) live.current.srcObject = stream;
   }, [stream, editor, kind, vMode]);
-  const nav = (v: "home" | "projects" | "account") => {
+  useEffect(() => {
+    const syncNavigation = () => {
+      const post = postFromLocation();
+      const state = readNavigationState();
+      setView(post ? "home" : (state?.view ?? "home"));
+      setSelected(post);
+      if (post) setTag("");
+    };
+    const initialPost = postFromLocation();
+    const initialState = readNavigationState();
+    window.history.replaceState(
+      navigationHistoryState({
+        view: initialPost ? "home" : (initialState?.view ?? "home"),
+        post: initialPost,
+        internal: false,
+      }),
+      "",
+      navigationUrl(initialPost),
+    );
+    syncNavigation();
+    window.addEventListener("popstate", syncNavigation);
+    return () => window.removeEventListener("popstate", syncNavigation);
+  }, []);
+  const nav = (v: View) => {
+    const post = postFromLocation();
+    const state = readNavigationState();
+    if (post || (state?.view ?? "home") !== v) {
+      window.history.pushState(
+        navigationHistoryState({ view: v, post: null, internal: true }),
+        "",
+        navigationUrl(null),
+      );
+    }
     setView(v);
     setSelected(null);
     setTag("");
-    if (v === "home" && window.location.search) {
-      window.history.replaceState({}, "", window.location.pathname);
+  };
+  const openPost = (id: string) => {
+    if (postFromLocation() !== id) {
+      window.history.pushState(
+        navigationHistoryState({ view: "home", post: id, internal: true }),
+        "",
+        navigationUrl(id),
+      );
     }
+    setView("home");
+    setSelected(id);
+    setTag("");
+  };
+  const closePost = () => {
+    const post = postFromLocation();
+    if (!post) {
+      setSelected(null);
+      return;
+    }
+    const state = readNavigationState();
+    if (state?.internal && state.post === post) {
+      window.history.back();
+      return;
+    }
+    window.history.replaceState(
+      navigationHistoryState({ view: "home", post: null, internal: false }),
+      "",
+      navigationUrl(null),
+    );
+    setView("home");
+    setSelected(null);
+    setTag("");
   };
   const replaceMarkdownSelection = (
     makeReplacement: (selected: string) => {
@@ -603,7 +736,8 @@ export default function Notebook({
     setEditorStart(
       JSON.stringify({ k, t, b, images: p?.images ?? d?.images ?? [] }),
     );
-    setPreview(false);
+    setBlogEditorMode("edit");
+    setFullPageEditor(false);
     setEditorDrafts(false);
     setEditor(true);
     if (k === "vlog") void prepareVlog();
@@ -629,7 +763,8 @@ export default function Notebook({
       setEditId(null);
       setDraftId(null);
       setEditorStart(JSON.stringify({ k: "tweet", t: "", b: "", images: [] }));
-      setPreview(false);
+      setBlogEditorMode("edit");
+      setFullPageEditor(false);
       setEditorDrafts(false);
       setEditor(true);
     };
@@ -637,11 +772,11 @@ export default function Notebook({
     return () => window.removeEventListener("keydown", openWithN);
   }, [editor, login]);
   useEffect(() => {
-    if (!editor || kind === "vlog" || preview) return;
+    if (!editor || kind === "vlog" || blogEditorMode === "preview") return;
     requestAnimationFrame(() =>
       (kind === "blog" ? titleInput.current : bodyInput.current)?.focus(),
     );
-  }, [editor, kind, preview]);
+  }, [editor, kind, blogEditorMode]);
   const dirty =
     JSON.stringify({ k: kind, t: title, b: body, images: editorImages }) !==
     editorStart;
@@ -704,7 +839,7 @@ export default function Notebook({
       );
       setPosts((ps) => [saved, ...ps.filter((p) => p.id !== saved.id)]);
       setEditor(false);
-      nav("home");
+      nav("timeline");
       setFilter("all");
       toast.success(editId ? "更新しました" : "投稿しました");
       if (draftId) {
@@ -909,7 +1044,7 @@ export default function Notebook({
       });
       setPosts((ps) => [saved, ...ps]);
       closeComposer();
-      nav("home");
+      nav("timeline");
       setFilter("all");
       toast.success("vlogを投稿しました");
     });
@@ -928,6 +1063,20 @@ export default function Notebook({
         ? b.likes - a.likes
         : +!!b.pinned - +!!a.pinned || b.date.localeCompare(a.date),
     );
+  const tags = Object.entries(
+    posts.reduce<Record<string, number>>((counts, post) => {
+      for (const postTag of post.tags) {
+        counts[postTag] = (counts[postTag] || 0) + 1;
+      }
+      return counts;
+    }, {}),
+  )
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ja"));
+  const visibleTags = tags.slice(0, visibleTagCount);
+  const featuredPost = [...posts].sort(
+    (a, b) => (b.views ?? 0) - (a.views ?? 0) || b.date.localeCompare(a.date),
+  )[0];
   const item = posts.find((p) => p.id === selected);
   const postUrl = (id: string) => {
     const url = new URL("/", location.origin);
@@ -939,12 +1088,24 @@ export default function Notebook({
       <Avatar value={profile.icon} />
       <b>{profile.name}</b>
       <span>·</span>
-      <time>
+      <time dateTime={p.date}>
         {new Date(p.date).toLocaleDateString("ja-JP", {
           month: "numeric",
           day: "numeric",
         })}
       </time>
+      {p.kind === "blog" && p.updatedAt && (
+        <>
+          <span>·</span>
+          <time dateTime={p.updatedAt} title="最終更新日">
+            更新{" "}
+            {new Date(p.updatedAt).toLocaleDateString("ja-JP", {
+              month: "numeric",
+              day: "numeric",
+            })}
+          </time>
+        </>
+      )}
       <span className={"type-label " + p.kind}>{label[p.kind]}</span>
     </div>
   );
@@ -1047,6 +1208,13 @@ export default function Notebook({
               <span>ホーム</span>
             </button>
             <button
+              className={view === "timeline" ? "active" : ""}
+              onClick={() => nav("timeline")}
+            >
+              <MessageCircle />
+              <span>タイムライン</span>
+            </button>
+            <button
               className={view === "projects" ? "active" : ""}
               onClick={() => nav("projects")}
             >
@@ -1067,7 +1235,7 @@ export default function Notebook({
                 key={id}
                 className={filter === id ? "active" : ""}
                 onClick={() => {
-                  nav("home");
+                  nav("timeline");
                   setFilter(id);
                 }}
               >
@@ -1090,7 +1258,7 @@ export default function Notebook({
           {login && (
             <div className="admin-nav">
               <Button
-                variant="blue"
+                variant="solid"
                 size="sm"
                 onClick={() => openEditor("tweet")}
               >
@@ -1134,9 +1302,11 @@ export default function Notebook({
                 ? "投稿"
                 : view === "projects"
                   ? "プロジェクト"
-                  : view === "account"
-                    ? "アカウント"
-                    : "ホーム"}
+                  : view === "timeline"
+                    ? "タイムライン"
+                    : view === "account"
+                      ? "アカウント"
+                      : "ホーム"}
             </span>
             {!login ? (
               <details className="mobile-login">
@@ -1157,7 +1327,11 @@ export default function Notebook({
               </button>
             )}
           </header>
-          <div className="content-grid">
+          <div
+            className={
+              "content-grid " + (view === "home" ? "landing-layout" : "")
+            }
+          >
             <main className="main-content">
               {view === "account" && login ? (
                 <section className="settings-page">
@@ -1202,7 +1376,7 @@ export default function Notebook({
                     />
                   </label>
                   <Button
-                    variant="blue"
+                    variant="solid"
                     onClick={() => {
                       if (!name.trim()) return;
                       void guard(async () => {
@@ -1257,10 +1431,7 @@ export default function Notebook({
                 </section>
               ) : item ? (
                 <section className="detail-page">
-                  <button
-                    className="back-button"
-                    onClick={() => setSelected(null)}
-                  >
+                  <button className="back-button" onClick={closePost}>
                     <ArrowLeft size={17} />
                     戻る
                   </button>
@@ -1290,10 +1461,160 @@ export default function Notebook({
                   </div>
                   {actions(item)}
                 </section>
+              ) : view === "home" ? (
+                <section className="landing-page">
+                  <div className="landing-intro">
+                    <div className="landing-copy">
+                      <h1>kamelog</h1>
+                      <p className="landing-lead">
+                        ブログ、つぶやき、短い動画、個人制作をまとめています。
+                      </p>
+                      <div className="landing-actions">
+                        <button
+                          className="landing-primary"
+                          onClick={() => nav("timeline")}
+                        >
+                          タイムラインを見る
+                          <ArrowUpRight size={16} />
+                        </button>
+                        <button onClick={() => nav("projects")}>
+                          作ったもの
+                        </button>
+                      </div>
+                    </div>
+                    <aside className="landing-profile">
+                      <Avatar value={profile.icon} large />
+                      <div>
+                        <span>プロフィール</span>
+                        <h2>{profile.name}</h2>
+                        <p>@kamesan1577 · Webバックエンドエンジニア</p>
+                      </div>
+                      <p className="landing-bio">{profile.bio}</p>
+                      <a
+                        href="https://github.com/kamesan1577"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        GitHubでコードを見る <ArrowUpRight size={14} />
+                      </a>
+                    </aside>
+                  </div>
+
+                  <div className="landing-lower">
+                    <div className="content-index">
+                      <div className="landing-section-title">
+                        <h2>コンテンツ</h2>
+                      </div>
+                      <div className="content-cards">
+                        {(
+                          [
+                            {
+                              id: "blog",
+                              icon: FileText,
+                              title: "ブログ",
+                              text: "技術、開発、個人制作についての記事",
+                            },
+                            {
+                              id: "tweet",
+                              icon: MessageCircle,
+                              title: "つぶやき",
+                              text: "日々の短いメモ",
+                            },
+                            {
+                              id: "vlog",
+                              icon: Video,
+                              title: "vlog",
+                              text: "数秒から30秒までの動画",
+                            },
+                          ] as const
+                        ).map(({ id, icon: Icon, title: cardTitle, text }) => (
+                          <button
+                            key={id}
+                            onClick={() => {
+                              nav("timeline");
+                              setFilter(id);
+                            }}
+                          >
+                            <span className={`content-icon ${id}`}>
+                              <Icon size={18} />
+                            </span>
+                            <span className="content-card-copy">
+                              <strong>{cardTitle}</strong>
+                              <small>{text}</small>
+                            </span>
+                            <b>{posts.filter((p) => p.kind === id).length}</b>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="featured-area">
+                      <div className="landing-section-title">
+                        <h2>いま読まれている</h2>
+                      </div>
+                      {featuredPost ? (
+                        <button
+                          className="featured-post"
+                          onClick={() => openPost(featuredPost.id)}
+                        >
+                          <span className="featured-meta">
+                            {label[featuredPost.kind]}
+                            <span>·</span>
+                            {new Date(featuredPost.date).toLocaleDateString(
+                              "ja-JP",
+                              { month: "numeric", day: "numeric" },
+                            )}
+                            <span>·</span>
+                            <Eye size={12} /> {featuredPost.views ?? 0}
+                          </span>
+                          <strong>
+                            {featuredPost.kind === "blog"
+                              ? featuredPost.title
+                              : featuredPost.body || "映像の記録"}
+                          </strong>
+                          <span className="featured-open">
+                            読む <ArrowUpRight size={14} />
+                          </span>
+                        </button>
+                      ) : (
+                        <div className="featured-empty">
+                          最初の記録を準備しています。
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <section
+                    className="landing-about"
+                    aria-labelledby="about-title"
+                  >
+                    <div className="landing-section-title">
+                      <h2 id="about-title">About me</h2>
+                    </div>
+                    <ol className="career-list">
+                      <li>
+                        <time dateTime="2021">2021</time>
+                        <div>
+                          <strong>大学入学</strong>
+                          <p>
+                            情報系の学部で、ソフトウェア開発と情報技術を学ぶ。
+                          </p>
+                        </div>
+                      </li>
+                      <li>
+                        <time dateTime="2025">2025</time>
+                        <div>
+                          <strong>大学卒業・エンタメ系企業へ入社</strong>
+                          <p>自社Webサービスの開発に携わる。</p>
+                        </div>
+                      </li>
+                    </ol>
+                  </section>
+                </section>
               ) : (
                 <>
                   <section className="page-heading">
-                    <h1>ホーム</h1>
+                    <h1>タイムライン</h1>
                   </section>
                   <label className="home-search mobile-search">
                     <Search size={17} />
@@ -1334,7 +1655,7 @@ export default function Notebook({
                           onDrop={(event) => droppedImages(event, "inline")}
                         />
                         <Button
-                          variant="blue"
+                          variant="solid"
                           size="sm"
                           onClick={publishInlineTweet}
                           disabled={!inlineBody.trim() && !inlineImages.length}
@@ -1454,7 +1775,7 @@ export default function Notebook({
                             <VlogFrame post={p} />
                             <button
                               className="open-vlog-detail"
-                              onClick={() => setSelected(p.id)}
+                              onClick={() => openPost(p.id)}
                             >
                               詳細
                             </button>
@@ -1462,7 +1783,7 @@ export default function Notebook({
                         ) : (
                           <button
                             className="post-focus"
-                            onClick={() => setSelected(p.id)}
+                            onClick={() => openPost(p.id)}
                           >
                             {p.kind === "blog" ? (
                               <>
@@ -1514,7 +1835,11 @@ export default function Notebook({
                 </>
               )}
             </main>
-            <aside className="right-sidebar">
+            <aside
+              className={
+                "right-sidebar " + (view === "home" ? "landing-hidden" : "")
+              }
+            >
               <div className="profile-card">
                 <Avatar value={profile.icon} large />
                 <h2>{profile.name}</h2>
@@ -1538,28 +1863,35 @@ export default function Notebook({
                 />
                 <kbd>/</kbd>
               </label>
-              <div className="aside-section">
-                <h3>タグ</h3>
-                <div className="topic-list">
-                  {["Go", "バックエンド", "TDD", "開発日記", "日常"].map(
-                    (t) => (
+              {tags.length > 0 && (
+                <div className="aside-section">
+                  <h3>タグ</h3>
+                  <div className="topic-list">
+                    {visibleTags.map(({ name, count }) => (
                       <button
-                        key={t}
+                        key={name}
+                        className={tag === name ? "active" : ""}
                         onClick={() => {
-                          nav("home");
-                          setTag(t);
+                          nav("timeline");
+                          setTag(name);
                           setFilter("all");
                         }}
                       >
-                        #{t}
-                        <small>
-                          {posts.filter((p) => p.tags.includes(t)).length}
-                        </small>
+                        #{name}
+                        <small>{count}</small>
                       </button>
-                    ),
+                    ))}
+                  </div>
+                  {visibleTagCount < tags.length && (
+                    <button
+                      className="tag-load-more"
+                      onClick={() => setVisibleTagCount((count) => count + 5)}
+                    >
+                      もっと見る
+                    </button>
                   )}
                 </div>
-              </div>
+              )}
             </aside>
           </div>
           <nav className="mobile-nav">
@@ -1569,6 +1901,13 @@ export default function Notebook({
             >
               <Home />
               <span>ホーム</span>
+            </button>
+            <button
+              className={view === "timeline" ? "active" : ""}
+              onClick={() => nav("timeline")}
+            >
+              <MessageCircle />
+              <span>タイムライン</span>
             </button>
             <button
               className={view === "projects" ? "active" : ""}
@@ -1591,7 +1930,12 @@ export default function Notebook({
       </div>
       <Dialog open={editor} onOpenChange={(o) => !o && askClose()}>
         <DialogContent
-          className={"editor-dialog " + (kind === "vlog" ? "vlog-dialog" : "")}
+          className={
+            "editor-dialog " +
+            (kind === "vlog" ? "vlog-dialog " : "") +
+            (kind === "blog" ? "blog-dialog " : "") +
+            (kind === "blog" && fullPageEditor ? "is-full-page" : "")
+          }
           onKeyDown={(event) => {
             if (
               kind !== "vlog" &&
@@ -1781,7 +2125,7 @@ export default function Notebook({
                     >
                       やり直す
                     </Button>
-                    <Button variant="blue" onClick={postVlog}>
+                    <Button variant="solid" onClick={postVlog}>
                       投稿する
                     </Button>
                   </div>
@@ -1936,31 +2280,90 @@ export default function Notebook({
                   >
                     ヘルプ
                   </button>
+                  <div
+                    className="editor-view-modes"
+                    role="group"
+                    aria-label="エディタ表示"
+                  >
+                    <button
+                      type="button"
+                      className={blogEditorMode === "edit" ? "active" : ""}
+                      aria-pressed={blogEditorMode === "edit"}
+                      onClick={() => setBlogEditorMode("edit")}
+                    >
+                      <Pencil size={14} />
+                      編集
+                    </button>
+                    <button
+                      type="button"
+                      className={blogEditorMode === "preview" ? "active" : ""}
+                      aria-pressed={blogEditorMode === "preview"}
+                      onClick={() => setBlogEditorMode("preview")}
+                    >
+                      <Eye size={14} />
+                      プレビュー
+                    </button>
+                    <button
+                      type="button"
+                      className={blogEditorMode === "split" ? "active" : ""}
+                      aria-pressed={blogEditorMode === "split"}
+                      onClick={() => {
+                        setBlogEditorMode("split");
+                        setFullPageEditor(true);
+                      }}
+                    >
+                      <Columns2 size={14} />
+                      両方
+                    </button>
+                  </div>
                   <button
                     type="button"
-                    className="preview-toggle"
-                    onClick={() => setPreview((x) => !x)}
+                    className="full-page-toggle"
+                    aria-label={
+                      fullPageEditor ? "モーダル表示に戻す" : "フルページで編集"
+                    }
+                    onClick={() => {
+                      if (fullPageEditor && blogEditorMode === "split")
+                        setBlogEditorMode("edit");
+                      setFullPageEditor((value) => !value);
+                    }}
                   >
-                    <Eye size={15} />
-                    {preview ? "編集" : "プレビュー"}
+                    {fullPageEditor ? (
+                      <Minimize2 size={15} />
+                    ) : (
+                      <Maximize2 size={15} />
+                    )}
                   </button>
                 </div>
               )}
-              {preview && kind === "blog" ? (
-                <div className="editor-preview">
-                  <Markdown text={"# " + title + "\n\n" + body} />
+              {kind === "blog" ? (
+                <div className={"blog-editor-workspace mode-" + blogEditorMode}>
+                  {blogEditorMode !== "preview" && (
+                    <textarea
+                      ref={bodyInput}
+                      className="body-input blog"
+                      value={body}
+                      onChange={(e) => setBody(e.target.value)}
+                      placeholder="本文"
+                      onDragOver={(event) => event.preventDefault()}
+                      onDrop={(event) => droppedImages(event, "blog")}
+                    />
+                  )}
+                  {blogEditorMode !== "edit" && (
+                    <div className="editor-preview" aria-label="プレビュー">
+                      <Markdown text={"# " + title + "\n\n" + body} />
+                    </div>
+                  )}
                 </div>
               ) : (
                 <textarea
                   ref={bodyInput}
-                  className={"body-input " + kind}
+                  className="body-input tweet"
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   placeholder="本文"
                   onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) =>
-                    droppedImages(event, kind === "blog" ? "blog" : "tweet")
-                  }
+                  onDrop={(event) => droppedImages(event, "tweet")}
                 />
               )}
               <div className="editor-media-row">
@@ -1998,7 +2401,7 @@ export default function Notebook({
               <div className="editor-footer">
                 <span>{body.length}文字</span>
                 <Button onClick={askClose}>閉じる</Button>
-                <Button variant="blue" onClick={publish}>
+                <Button variant="solid" onClick={publish}>
                   投稿
                 </Button>
               </div>
@@ -2034,7 +2437,7 @@ export default function Notebook({
           <div className="confirm-actions">
             <Button onClick={() => setCloseAsk(false)}>編集を続ける</Button>
             <Button onClick={discard}>削除して閉じる</Button>
-            <Button variant="blue" onClick={saveDraft}>
+            <Button variant="solid" onClick={saveDraft}>
               下書き保存
             </Button>
           </div>

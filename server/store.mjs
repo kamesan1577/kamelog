@@ -21,7 +21,12 @@ export class Store {
       CREATE TABLE IF NOT EXISTS challenges(id TEXT PRIMARY KEY, data TEXT NOT NULL, expires INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS media(id TEXT PRIMARY KEY, data TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS rates(id TEXT PRIMARY KEY, count INTEGER NOT NULL, expires INTEGER NOT NULL);
-      INSERT OR IGNORE INTO migrations VALUES(1);`);
+      CREATE TABLE IF NOT EXISTS post_views(
+        post_id TEXT PRIMARY KEY REFERENCES posts(id) ON DELETE CASCADE,
+        count INTEGER NOT NULL CHECK(count >= 0)
+      );
+      INSERT OR IGNORE INTO migrations VALUES(1);
+      INSERT OR IGNORE INTO migrations VALUES(2);`);
     this.db.prepare("INSERT OR IGNORE INTO settings VALUES(?, ?)").run(
       "profile",
       JSON.stringify({
@@ -44,23 +49,38 @@ export class Store {
   }
   list(table) {
     this.table(table);
-    return this.db
-      .prepare(`SELECT * FROM ${table}`)
-      .all()
-      .map((row) => ({
-        ...JSON.parse(row.data),
-        id: row.id,
-        ...(row.revision ? { revision: row.revision } : {}),
-      }));
+    const rows = this.db
+      .prepare(
+        table === "posts"
+          ? `SELECT posts.*, COALESCE(post_views.count, 0) AS views
+             FROM posts LEFT JOIN post_views ON post_views.post_id = posts.id`
+          : `SELECT * FROM ${table}`,
+      )
+      .all();
+    return rows.map((row) => ({
+      ...JSON.parse(row.data),
+      id: row.id,
+      ...(row.revision ? { revision: row.revision } : {}),
+      ...(table === "posts" ? { views: Number(row.views) } : {}),
+    }));
   }
   get(table, id) {
     this.table(table);
-    const row = this.db.prepare(`SELECT * FROM ${table} WHERE id=?`).get(id);
+    const row = this.db
+      .prepare(
+        table === "posts"
+          ? `SELECT posts.*, COALESCE(post_views.count, 0) AS views
+             FROM posts LEFT JOIN post_views ON post_views.post_id = posts.id
+             WHERE posts.id=?`
+          : `SELECT * FROM ${table} WHERE id=?`,
+      )
+      .get(id);
     return row
       ? {
           ...JSON.parse(row.data),
           id: row.id,
           ...(row.revision ? { revision: row.revision } : {}),
+          ...(table === "posts" ? { views: Number(row.views) } : {}),
         }
       : null;
   }
@@ -84,13 +104,27 @@ export class Store {
         throw new Conflict("Revision conflict");
       if (!old && revision !== undefined && revision !== 0)
         throw new Conflict("Missing revision");
-      const next = { ...value, id, revision: (old?.revision || 0) + 1 };
+      let persisted = value;
+      if (table === "posts" && old?.kind === "blog" && value.kind === "blog") {
+        const contentChanged =
+          old.title !== value.title || old.body !== value.body;
+        persisted = {
+          ...value,
+          ...(old.updatedAt ? { updatedAt: old.updatedAt } : {}),
+          ...(contentChanged ? { updatedAt: new Date().toISOString() } : {}),
+        };
+      }
+      const next = {
+        ...persisted,
+        id,
+        revision: (old?.revision || 0) + 1,
+      };
       this.db
         .prepare(
           `INSERT INTO ${table} VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data, revision=excluded.revision`,
         )
         .run(id, JSON.stringify(next), next.revision);
-      return next;
+      return this.get(table, id);
     });
   }
   remove(table, id, revision) {
@@ -101,6 +135,24 @@ export class Store {
         .run(id, revision);
       if (!result.changes) throw new Conflict("Revision conflict");
     } else this.db.prepare(`DELETE FROM ${table} WHERE id=?`).run(id);
+  }
+  recordView(id) {
+    return this.transaction(() => {
+      if (!this.get("posts", id)) return null;
+      this.db
+        .prepare(
+          `INSERT INTO post_views(post_id,count) VALUES(?,1)
+           ON CONFLICT(post_id) DO UPDATE SET count=count+1`,
+        )
+        .run(id);
+      return this.get("posts", id);
+    });
+  }
+  schemaVersion() {
+    return Number(
+      this.db.prepare("SELECT MAX(version) AS version FROM migrations").get()
+        .version,
+    );
   }
   credentials() {
     return this.list("credentials");

@@ -73,7 +73,22 @@ test("owner boundary, public projection, CRUD, CSRF, validation", async () => {
       )
     ).json();
     assert.equal(post.revision, 1);
+    assert.equal(post.views, 0);
     assert.deepEqual(post.tags, []);
+    assert.equal(
+      (
+        await request("posts/" + post.id + "/view", "POST", {}, false, {
+          origin: "https://evil.example",
+        })
+      ).status,
+      403,
+    );
+    const viewed = await (
+      await request("posts/" + post.id + "/view", "POST", {})
+    ).json();
+    assert.equal(viewed.views, 1);
+    assert.equal((await (await request("posts/" + post.id)).json()).views, 1);
+    assert.equal((await request("posts/missing/view", "POST", {})).status, 404);
     const tagged = await (
       await request(
         "posts",

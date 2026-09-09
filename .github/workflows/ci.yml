@@ -42,6 +42,13 @@ jobs:
       - run: npm run build
       - run: make e2e
       - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: landing-visual-${{ github.run_id }}
+          path: test-results/**/landing-*.png
+          if-no-files-found: ignore
+          retention-days: 3
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: fictional-e2e-diagnostics

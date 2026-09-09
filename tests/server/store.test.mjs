@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { Store, Conflict } from "../../server/store.mjs";
 import { backupStore, restoreBackup } from "../../server/backup.mjs";
 test("persistence, revision conflicts, rollback and backup restore", async () => {
@@ -15,6 +16,10 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
       tags: [],
     });
     assert.equal(post.revision, 1);
+    assert.equal(post.views, 0);
+    assert.equal(store.recordView("fictional").views, 1);
+    assert.equal(store.recordView("fictional").views, 2);
+    assert.equal(store.recordView("missing"), null);
     assert.throws(() => store.save("posts", "fictional", {}, 0), Conflict);
     assert.throws(() =>
       store.transaction(() => {
@@ -36,10 +41,12 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
     store.close();
     store = new Store(join(root, "source"));
     assert.equal(store.get("posts", "fictional").body, "fixture");
+    assert.equal(store.get("posts", "fictional").views, 2);
     await backupStore(store, join(root, "backup"));
     await restoreBackup(join(root, "backup"), join(root, "restored"));
     const restored = new Store(join(root, "restored"));
     assert.equal(restored.get("posts", "fictional").body, "fixture");
+    assert.equal(restored.get("posts", "fictional").views, 2);
     assert.equal(
       await readFile(
         join(
@@ -53,6 +60,13 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
       "fictional-image",
     );
     restored.close();
+    store.remove("posts", "fictional", 1);
+    assert.equal(
+      store.db
+        .prepare("SELECT count(*) AS count FROM post_views WHERE post_id=?")
+        .get("fictional").count,
+      0,
+    );
     await assert.rejects(
       restoreBackup(join(root, "backup"), join(root, "restored")),
     );
@@ -62,6 +76,32 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
     );
   } finally {
     store.close();
+    await rm(root, { recursive: true, force: true });
+  }
+});
+test("adds view counts to an existing schema without rewriting posts", async () => {
+  const root = await mkdtemp(join(tmpdir(), "kamelog-view-migration-"));
+  try {
+    const database = new DatabaseSync(join(root, "kamelog.sqlite"));
+    database.exec(`
+      CREATE TABLE migrations(version INTEGER PRIMARY KEY);
+      CREATE TABLE posts(id TEXT PRIMARY KEY, data TEXT NOT NULL, revision INTEGER NOT NULL);
+      INSERT INTO migrations VALUES(1);
+      INSERT INTO posts VALUES(
+        'legacy-post',
+        '{"kind":"tweet","title":"","body":"legacy fixture","tags":[],"date":"2026-01-01T00:00:00.000Z","likes":0}',
+        1
+      );
+    `);
+    database.close();
+
+    const migrated = new Store(root);
+    assert.equal(migrated.schemaVersion(), 2);
+    assert.equal(migrated.get("posts", "legacy-post").views, 0);
+    assert.equal(migrated.recordView("legacy-post").views, 1);
+    assert.equal(migrated.get("posts", "legacy-post").body, "legacy fixture");
+    migrated.close();
+  } finally {
     await rm(root, { recursive: true, force: true });
   }
 });

@@ -1,0 +1,99 @@
+.tweet-body {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.tweet-inline-link {
+  color: #37352f;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.tweet-inline-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.tweet-link-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  width: 100%;
+  margin: 10px 0 4px;
+  overflow: hidden;
+  border: 1px solid #dedbd4;
+  border-radius: 7px;
+  background: #fff;
+  color: #37352f;
+}
+
+.tweet-link-card.has-image {
+  grid-template-columns: 132px minmax(0, 1fr);
+  min-height: 92px;
+}
+
+.tweet-link-card > img {
+  width: 132px;
+  height: 100%;
+  min-height: 92px;
+  object-fit: cover;
+  background: #f2f1ee;
+}
+
+.tweet-link-card-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 12px 13px;
+}
+
+.tweet-link-card-copy small {
+  overflow: hidden;
+  color: #98948b;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tweet-link-card-copy strong {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.tweet-link-card-description {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #817c72;
+  font-size: 12px;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.tweet-link-card:hover {
+  background: #faf9f7;
+}
+
+@media (max-width: 640px) {
+  .tweet-link-card.has-image {
+    grid-template-columns: 104px minmax(0, 1fr);
+    min-height: 84px;
+  }
+
+  .tweet-link-card > img {
+    width: 104px;
+    min-height: 84px;
+  }
+
+  .tweet-link-card-copy {
+    padding: 10px 11px;
+  }
+}

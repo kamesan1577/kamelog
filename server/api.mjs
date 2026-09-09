@@ -68,14 +68,25 @@ export function createAPI(store, config) {
         method = req.method;
       const jar = cookies(req),
         owner = store.authenticated(jar[sessionName]);
+      const publicView =
+        path[0] === "posts" &&
+        Boolean(path[1]) &&
+        path[2] === "view" &&
+        method === "POST";
       if (method !== "GET" && method !== "HEAD") {
         if (req.headers.get("origin") !== config.origin)
           return json({ error: "Origin rejected" }, 403);
-        if (!store.rate("write-global", 120))
+        if (
+          !store.rate(
+            publicView ? "view-global" : "write-global",
+            publicView ? 600 : 120,
+          )
+        )
           return json({ error: "Try later" }, 429);
       }
       const body = async () => JSON.parse((await readBounded(req)).toString());
-      if (path[0] === "health") return json({ status: "ok", schema: 1 });
+      if (path[0] === "health")
+        return json({ status: "ok", schema: store.schemaVersion() });
       if (path[0] === "auth") {
         if (path[1] === "session" && method === "GET")
           return json({ authenticated: owner });
@@ -225,6 +236,10 @@ export function createAPI(store, config) {
                 b.date.localeCompare(a.date),
             ),
         );
+      }
+      if (publicView) {
+        const post = store.recordView(path[1]);
+        return post ? json(post) : json({ error: "Not found" }, 404);
       }
       if (path[0] === "profile" && method === "GET")
         return json(store.get("settings", "profile"));
