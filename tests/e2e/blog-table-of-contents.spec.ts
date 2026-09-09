@@ -78,7 +78,9 @@ test("blog table of contents renders above the article on desktop", async ({
   const tocBox = await page
     .getByRole("navigation", { name: "目次" })
     .boundingBox();
-  const markdownBox = await page.locator("#toc-fixture .markdown").boundingBox();
+  const markdownBox = await page
+    .locator("#toc-fixture .markdown")
+    .boundingBox();
   expect(tocBox).not.toBeNull();
   expect(markdownBox).not.toBeNull();
   if (!tocBox || !markdownBox) throw new Error("TOC geometry unavailable");
