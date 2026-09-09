@@ -1,0 +1,173 @@
+:root {
+  --kamelog-ink: #37352f;
+  --kamelog-ink-hover: #292824;
+  --kamelog-paper: #f6f5f4;
+  --kamelog-panel: #ffffff;
+  --kamelog-soft: #efefed;
+  --kamelog-line: #dededb;
+}
+
+body,
+.site-layout > .workspace {
+  background: var(--kamelog-paper);
+}
+
+button:focus-visible,
+a:focus-visible {
+  outline-color: var(--kamelog-ink);
+}
+
+input:focus,
+textarea:focus {
+  border-color: var(--kamelog-ink);
+}
+
+.public-sidebar {
+  border-right-color: #d8d6d0;
+  background: #eeede9;
+}
+
+.site-name {
+  color: var(--kamelog-ink);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.public-sidebar nav button,
+.sidebar-section button,
+.admin-nav > button:not([data-slot="button"]) {
+  transition:
+    background-color 80ms ease,
+    color 80ms ease;
+}
+
+.public-sidebar nav button:hover,
+.sidebar-section button:hover,
+.admin-nav > button:hover {
+  background: #e1dfda;
+  color: var(--kamelog-ink);
+}
+
+.public-sidebar button.active {
+  background: var(--kamelog-ink);
+  color: #fff;
+}
+
+.public-sidebar button.active small {
+  color: #d8d6d0;
+}
+
+.public-header {
+  border-bottom-color: var(--kamelog-line);
+  background: var(--kamelog-panel);
+  color: #6f6e69;
+}
+
+.content-grid:not(.landing-layout) > .main-content,
+.content-grid:not(.landing-layout) > .right-sidebar {
+  border-radius: 12px;
+  background: var(--kamelog-panel);
+}
+
+.content-grid:not(.landing-layout) > .main-content {
+  padding: 26px 30px 34px;
+  border: 1px solid var(--kamelog-line);
+}
+
+.content-grid:not(.landing-layout) > .right-sidebar {
+  height: fit-content;
+  padding: 22px;
+  border: 1px solid var(--kamelog-line);
+}
+
+.home-search:focus-within,
+.side-search:focus-within {
+  border-color: var(--kamelog-ink);
+  box-shadow: 0 0 0 2px rgb(55 53 47 / 10%);
+}
+
+.timeline-toolbar {
+  border-bottom-color: var(--kamelog-ink);
+}
+
+.feed-tabs [data-slot="tabs-trigger"][data-state="active"]::after {
+  background: var(--kamelog-ink);
+}
+
+.profile-card a,
+.markdown a,
+.filter-active,
+.draft-button,
+.desktop-composer .draft-button,
+.editor-tools .active,
+.editor-tools .markdown-help-link,
+.video-upload > button,
+.site-source-footer a {
+  color: var(--kamelog-ink);
+}
+
+.site-source-footer {
+  border-top-color: var(--kamelog-line);
+  background: var(--kamelog-paper);
+}
+
+.site-source-footer a:hover,
+.profile-card a:hover,
+.markdown a:hover {
+  color: var(--kamelog-ink-hover);
+  text-decoration-thickness: 2px;
+}
+
+.tag-load-more:hover,
+.topic-list button:hover,
+.topic-list .active {
+  color: var(--kamelog-ink);
+}
+
+.emoji-options .chosen {
+  border-color: var(--kamelog-ink);
+  background: var(--kamelog-soft);
+}
+
+.markdown .task-list-item input {
+  accent-color: var(--kamelog-ink);
+}
+
+.project-tile {
+  border-color: var(--kamelog-line);
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+.project-tile:hover {
+  border-color: #b8b6b0;
+  box-shadow: none;
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  .site-layout > .workspace {
+    background: var(--kamelog-paper);
+  }
+
+  .content-grid:not(.landing-layout) > .main-content {
+    padding: 20px 18px 96px;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .mobile-nav {
+    border-top-color: var(--kamelog-line);
+    background: rgb(255 255 255 / 96%);
+  }
+
+  .mobile-nav button.active {
+    color: var(--kamelog-ink);
+    font-weight: 650;
+  }
+
+  .mobile-create {
+    border-color: var(--kamelog-ink);
+    background: var(--kamelog-ink);
+  }
+}
