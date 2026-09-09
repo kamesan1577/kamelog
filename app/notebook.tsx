@@ -1955,6 +1955,34 @@ export default function Notebook({
             askClose();
           }}
         >
+          <header className="mobile-editor-header">
+            <button
+              type="button"
+              className="mobile-editor-close"
+              onClick={askClose}
+              aria-label="投稿画面を閉じる"
+            >
+              <X size={22} />
+            </button>
+            <strong>
+              {editId ? "投稿を編集" : draftId ? "下書きを編集" : "新規投稿"}
+            </strong>
+            <div className="mobile-editor-actions">
+              {kind !== "vlog" && (
+                <button type="button" onClick={saveDraft}>
+                  下書き保存
+                </button>
+              )}
+              <Button
+                type="button"
+                variant="solid"
+                onClick={kind === "vlog" ? postVlog : publish}
+                disabled={uploadingImages || (kind === "vlog" && !clip)}
+              >
+                {editId ? "更新" : "投稿"}
+              </Button>
+            </div>
+          </header>
           <DialogTitle>
             {editId ? "投稿を編集" : draftId ? "下書きを編集" : "新規投稿"}
           </DialogTitle>

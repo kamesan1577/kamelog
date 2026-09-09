@@ -4,6 +4,7 @@ import "./globals.css";
 import "./mobile-blog-editor.css";
 import "./x-share-logo.css";
 import "./composer-layout.css";
+import "./mobile-composer.css";
 import "./full-page-blog-editor.css";
 import "./detail-actions.css";
 import "./blog-toc.css";

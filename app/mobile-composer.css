@@ -1,0 +1,74 @@
+.mobile-editor-header {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .editor-dialog {
+    overscroll-behavior: contain;
+  }
+
+  .mobile-editor-header {
+    position: sticky;
+    top: -21px;
+    z-index: 4;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    min-height: 58px;
+    margin: -21px -21px 0;
+    padding: 8px 12px;
+    border-bottom: 1px solid #ebe9e3;
+    background: #fff;
+  }
+
+  .mobile-editor-header > strong {
+    overflow: hidden;
+    font-size: 15px;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-editor-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-left: -8px;
+    border-radius: 50%;
+    color: #625e54;
+  }
+
+  .mobile-editor-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mobile-editor-actions > button:not([data-slot="button"]) {
+    min-height: 40px;
+    padding: 0 7px;
+    color: #625e54;
+    font-size: 12px;
+  }
+
+  .mobile-editor-actions > [data-slot="button"] {
+    min-width: 58px;
+    min-height: 40px;
+    padding: 0 15px;
+    border-radius: 20px;
+  }
+
+  .editor-dialog > [data-slot="dialog-close"],
+  .editor-dialog > [data-slot="dialog-title"],
+  .editor-dialog > [data-slot="dialog-description"],
+  .editor-footer > [data-slot="button"] {
+    display: none;
+  }
+
+  .editor-footer {
+    min-height: 20px;
+    padding-top: 8px;
+  }
+}

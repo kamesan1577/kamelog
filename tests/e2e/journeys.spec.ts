@@ -61,6 +61,23 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
       mobileTweetBody.evaluate((element) => getComputedStyle(element).fontSize),
     )
     .toBe("16px");
+  const mobileEditorHeader = page.locator(".mobile-editor-header");
+  const mobilePublish = mobileEditorHeader.getByRole("button", {
+    name: "投稿",
+    exact: true,
+  });
+  await expect(mobileEditorHeader).toBeVisible();
+  await expect(mobilePublish).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 520 });
+  await expect(mobileTweetBody).toBeFocused();
+  await expect(mobilePublish).toBeInViewport();
+  await expect(
+    page.locator(".editor-footer").getByRole("button", {
+      name: "投稿",
+      exact: true,
+    }),
+  ).toBeHidden();
+  await page.setViewportSize({ width: 390, height: 844 });
   await mobileTweetBody.fill("保存される架空の下書き");
   await page.keyboard.press("Escape");
   await expect(
