@@ -8,7 +8,6 @@ import "./full-page-blog-editor.css";
 import "./detail-actions.css";
 import "./blog-toc.css";
 import "./brand-theme.css";
-import "./brand-logo.css";
 import "./mobile-nav-layout.css";
 import "./tweet-link-preview.css";
 import "./project-social-links.css";
