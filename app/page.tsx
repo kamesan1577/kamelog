@@ -60,6 +60,18 @@ function SourceFooter() {
           不具合・要望をIssueで報告
         </a>
       </div>
+      <div className="mx-auto mt-5 max-w-5xl border-t border-[#eceae5] pt-4">
+        <p className="mb-2 font-medium text-[#625e56]">相互リンク</p>
+        <a href="https://shiryu.win/" target="_blank" rel="noreferrer">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://shiryu.win/banner.png"
+            alt="Shiryu のホームページ"
+            width="200"
+            height="40"
+          />
+        </a>
+      </div>
     </footer>
   );
 }
