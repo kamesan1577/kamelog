@@ -63,15 +63,22 @@ function renderToc(markdown: HTMLElement) {
     current?.remove();
     return;
   }
-  if (
-    current?.dataset.signature === signature &&
-    current.parentElement === markdown.parentElement
-  )
-    return;
 
-  removeGeneratedToc();
   const parent = markdown.parentElement;
   if (!parent) return;
+
+  if (
+    current &&
+    current.dataset.signature === signature &&
+    current.parentElement === parent
+  ) {
+    if (current.nextElementSibling !== markdown) {
+      parent.insertBefore(current, markdown);
+    }
+    return;
+  }
+
+  removeGeneratedToc();
 
   const nav = document.createElement("nav");
   nav.className = "blog-table-of-contents";

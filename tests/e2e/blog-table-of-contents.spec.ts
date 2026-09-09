@@ -22,6 +22,15 @@ async function addBlogDetailFixture(page: Page) {
   });
 }
 
+async function tocImmediatelyPrecedesMarkdown(page: Page) {
+  return page.evaluate(() => {
+    const fixture = document.getElementById("toc-fixture");
+    const toc = fixture?.querySelector("[data-kamelog-blog-toc]");
+    const markdown = fixture?.querySelector(".markdown");
+    return toc?.nextElementSibling === markdown;
+  });
+}
+
 async function expectGeneratedToc(page: Page) {
   const toc = page.getByRole("navigation", { name: "目次" });
   await expect(toc).toBeVisible();
@@ -43,6 +52,7 @@ async function expectGeneratedToc(page: Page) {
     "id",
     "kamelog-toc-導入",
   );
+  await expect.poll(() => tocImmediatelyPrecedesMarkdown(page)).toBe(true);
 }
 
 test("blog detail generates a table of contents from h2-h6 headings", async ({
@@ -55,6 +65,26 @@ test("blog detail generates a table of contents from h2-h6 headings", async ({
 
   await page.evaluate(() => document.getElementById("toc-fixture")?.remove());
   await expect(page.getByRole("navigation", { name: "目次" })).toHaveCount(0);
+});
+
+test("blog table of contents renders above the article on desktop", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/");
+  await addBlogDetailFixture(page);
+  await expectGeneratedToc(page);
+
+  const tocBox = await page
+    .getByRole("navigation", { name: "目次" })
+    .boundingBox();
+  const markdownBox = await page
+    .locator("#toc-fixture .markdown")
+    .boundingBox();
+  expect(tocBox).not.toBeNull();
+  expect(markdownBox).not.toBeNull();
+  if (!tocBox || !markdownBox) throw new Error("TOC geometry unavailable");
+  expect(tocBox.y + tocBox.height).toBeLessThanOrEqual(markdownBox.y + 1);
 });
 
 test("blog table of contents stays inside a 390px viewport", async ({

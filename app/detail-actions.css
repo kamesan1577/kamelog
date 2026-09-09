@@ -21,17 +21,21 @@
     grid-row: 2;
   }
 
-  .detail-page:has(> .markdown) > .markdown {
+  .detail-page:has(> .markdown) > .blog-table-of-contents {
     grid-row: 3;
   }
 
-  .detail-page:has(> .markdown) > .tags {
+  .detail-page:has(> .markdown) > .markdown {
     grid-row: 4;
+  }
+
+  .detail-page:has(> .markdown) > .tags {
+    grid-row: 5;
   }
 
   .detail-page:has(> .markdown) > .post-actions {
     grid-column: 1;
-    grid-row: 1 / 5;
+    grid-row: 1 / 6;
     align-self: start;
     position: sticky;
     top: 76px;
