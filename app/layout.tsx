@@ -8,6 +8,7 @@ import "./full-page-blog-editor.css";
 import "./detail-actions.css";
 import "./blog-toc.css";
 import "./brand-theme.css";
+import "./mobile-nav-layout.css";
 import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
 import { homeUrl, ogImageUrl, siteOrigin } from "@/server/seo.mjs";
