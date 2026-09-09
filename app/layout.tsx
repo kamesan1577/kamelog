@@ -10,8 +10,10 @@ import "./blog-toc.css";
 import "./brand-theme.css";
 import "./mobile-nav-layout.css";
 import "./tweet-link-preview.css";
+import "./project-social-links.css";
 import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
+import { ProfileSocialLinksBridge } from "@/components/profile-social-links-bridge";
 import { TweetLinkPreviewBridge } from "@/components/tweet-link-preview-bridge";
 import { homeUrl, ogImageUrl, siteOrigin } from "@/server/seo.mjs";
 
@@ -55,6 +57,7 @@ export default function RootLayout({
         <ImageUploadBridge />
         <BlogTableOfContentsBridge />
         <TweetLinkPreviewBridge />
+        <ProfileSocialLinksBridge />
         {children}
       </body>
     </html>
