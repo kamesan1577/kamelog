@@ -9,8 +9,10 @@ import "./detail-actions.css";
 import "./blog-toc.css";
 import "./brand-theme.css";
 import "./mobile-nav-layout.css";
+import "./tweet-link-preview.css";
 import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
+import { TweetLinkPreviewBridge } from "@/components/tweet-link-preview-bridge";
 import { homeUrl, ogImageUrl, siteOrigin } from "@/server/seo.mjs";
 
 const canonical = homeUrl();
@@ -52,6 +54,7 @@ export default function RootLayout({
       <body className="antialiased">
         <ImageUploadBridge />
         <BlogTableOfContentsBridge />
+        <TweetLinkPreviewBridge />
         {children}
       </body>
     </html>
