@@ -40,25 +40,41 @@ function SourceFooter() {
       aria-label="kamelogの開発情報"
       className="site-source-footer border-t border-[#eceae5] px-5 pt-5 pb-24 text-xs text-[#858078] md:ml-[222px] md:px-10 md:pb-6"
     >
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="font-medium text-[#625e56]">kamelog の開発情報</span>
-        <a
-          className="underline underline-offset-4"
-          href="https://github.com/kamesan1577/kamelog"
-          target="_blank"
-          rel="noreferrer"
-        >
-          ソースコード
-        </a>
-        <span aria-hidden="true">·</span>
-        <a
-          className="underline underline-offset-4"
-          href="https://github.com/kamesan1577/kamelog/issues/new"
-          target="_blank"
-          rel="noreferrer"
-        >
-          不具合・要望をIssueで報告
-        </a>
+      <div className="mx-auto max-w-5xl">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span className="font-medium text-[#625e56]">kamelog の開発情報</span>
+          <a
+            className="underline underline-offset-4"
+            href="https://github.com/kamesan1577/kamelog"
+            target="_blank"
+            rel="noreferrer"
+          >
+            ソースコード
+          </a>
+          <span aria-hidden="true">·</span>
+          <a
+            className="underline underline-offset-4"
+            href="https://github.com/kamesan1577/kamelog/issues/new"
+            target="_blank"
+            rel="noreferrer"
+          >
+            不具合・要望をIssueで報告
+          </a>
+        </div>
+
+        <div className="mt-5 border-t border-[#eceae5] pt-4">
+          <p className="mb-2 font-medium text-[#625e56]">相互リンク</p>
+          <a href="https://shiryu.win/" target="_blank" rel="noreferrer">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://shiryu.win/banner.png"
+              alt="Shiryu のホームページ"
+              width="200"
+              height="40"
+              className="block"
+            />
+          </a>
+        </div>
       </div>
     </footer>
   );
