@@ -46,7 +46,9 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
   }
 });
 
-test("profile exposes GitHub, X and Qiita as brand-icon links", async ({ page }) => {
+test("profile exposes GitHub, X and Qiita as brand-icon links", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
   await page
@@ -65,14 +67,20 @@ test("profile exposes GitHub, X and Qiita as brand-icon links", async ({ page })
   const x = row.getByRole("link", { name: "X (@kamesaniniad)" });
   const qiita = row.getByRole("link", { name: "Qiita (@kamesan1577)" });
 
-  await expect(github).toHaveAttribute("href", "https://github.com/kamesan1577");
+  await expect(github).toHaveAttribute(
+    "href",
+    "https://github.com/kamesan1577",
+  );
   await expect(x).toHaveAttribute("href", "https://x.com/kamesaniniad");
   await expect(qiita).toHaveAttribute("href", "https://qiita.com/kamesan1577");
   await expect(github).toHaveText("");
   await expect(x).toHaveText("");
   await expect(qiita).toHaveText("");
 
-  await expect(github.locator("img")).toHaveAttribute("src", "/github-mark.svg");
+  await expect(github.locator("img")).toHaveAttribute(
+    "src",
+    "/github-mark.svg",
+  );
   await expect(x.locator("img")).toHaveAttribute("src", "/x-logo.svg");
   await expect(qiita.locator("img")).toHaveAttribute("src", "/qiita-icon.svg");
   await expect(qiita).toHaveCSS("background-color", "rgb(61, 64, 64)");
