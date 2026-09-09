@@ -1,0 +1,65 @@
+.site-name,
+.mobile-name {
+  align-items: center;
+}
+
+.site-name::before,
+.mobile-name::before {
+  content: "";
+  display: block;
+  flex: 0 0 auto;
+  background: url("/kamelog-logo.svg") left center / contain no-repeat;
+}
+
+.site-name::before {
+  width: 142px;
+  height: 38px;
+}
+
+.mobile-name::before {
+  width: 118px;
+  height: 30px;
+}
+
+.site-name strong,
+.mobile-name b {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.site-name > svg {
+  margin-left: auto;
+}
+
+.landing-page .landing-copy h1 {
+  width: min(350px, 100%);
+  height: 90px;
+  margin: 0 !important;
+  background: url("/kamelog-logo.svg") left center / contain no-repeat;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+.site-source-footer .mx-auto::before {
+  content: "";
+  display: block;
+  width: 38px;
+  height: 22px;
+  flex: 0 0 auto;
+  background: url("/kamelog-mark.svg") center / contain no-repeat;
+}
+
+@media (max-width: 640px) {
+  .landing-page .landing-copy h1 {
+    width: min(300px, 100%);
+    height: 76px;
+  }
+}
