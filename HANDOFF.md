@@ -56,7 +56,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 2026-09-08 Issue #45のデザイン修正では、利用者の指示に従い大きなコピー、状態表示風の装飾、走査アニメーション、過剰な影と引用表現を削除した。`make check`が成功し、PCと390pxの匿名表示を実ブラウザで確認した。ローカルE2E用Chromiumは取得がtimeoutしたため、更新したjourneyはPRのCI `e2e` で確認する。
 - 2026-09-08 Issue #45の経歴・閲覧数変更では、既存DBへの追加migration、閲覧数の永続・復元・投稿削除時消去、同一Origin拒否、公開API、閲覧数による人気投稿選択をunit/E2Eへ追加し、`make check`が成功した。PCと390pxの匿名表示を実ブラウザで確認した。ローカル `make e2e` はPlaywright Chromiumが未導入で起動前に失敗したため、PRのCI `e2e` で確認する。
 - 2026-09-08 Issue #14 SEO変更では、実行環境からGitHubをcheckoutできないためローカル `make check` / `make e2e` は未実施。canonical・JSON-LD・robots・sitemap・404の回帰をunit/E2Eへ追加し、PRのCI `check` / `e2e` / `container` で確認する。公開環境の性能値はデプロイ後に `runbooks/seo.md` で再計測する。
-- 2026-09-08 Issue #56の再調整では、青を主要色から外し、元の「タイムラインを見る」の墨色 `#37352f` を共通ボタン・選択状態・focus・リンクへ展開した。暖色の地と白い情報面、1px罫線でトップページとタイムラインを再構成し、`make check` とGitHub Actions run #187の `check` / `e2e` / `container` がすべて成功した。CIのPlaywright ChromiumでPC/390px表示を撮影し、PRのスクリーンショットを更新した。
+- 2026-09-09 Issue #56の再調整では、青を主要色から外し、元の「タイムラインを見る」の墨色 `#37352f` を共通ボタン・選択状態・focus・リンクへ展開した。暖色の地と白い情報面、1px罫線でトップページとタイムラインを再構成し、コンテンツアイコンと年表示を元の控えめな表現へ戻して片側だけの強調罫線を削除した。`make check` とGitHub Actions run #192の `check` / `e2e` / `container` がすべて成功し、CIのPlaywright ChromiumでPC/390px表示を撮影してPRのスクリーンショットを更新した。
 
 ## 対象サーバーでのみ完了できる項目
 
