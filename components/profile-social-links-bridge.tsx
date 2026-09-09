@@ -55,7 +55,9 @@ function createSocialLink({ href, label, icon, brand }: SocialLink) {
 }
 
 function syncProfileSocialLinks() {
-  for (const card of document.querySelectorAll<HTMLElement>(".profile-card")) {
+  for (const card of document.querySelectorAll<HTMLElement>(
+    ".profile-card, .landing-profile",
+  )) {
     const source = card.querySelector<HTMLAnchorElement>(
       `:scope > a[href="${GITHUB_URL}"]`,
     );
