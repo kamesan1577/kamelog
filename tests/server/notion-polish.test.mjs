@@ -12,6 +12,7 @@ test("keeps the landing polish restrained and stateful", () => {
   assert.match(landing, /\.content-cards > button:active/);
   assert.match(landing, /\.featured-post:active/);
   assert.match(landing, /background:\s*var\(--landing-ink\)/);
+  assert.doesNotMatch(landing, /border-left:/);
   assert.doesNotMatch(landing, /@keyframes/);
 });
 

@@ -184,15 +184,7 @@
 }
 
 .career-list time {
-  display: inline-flex;
-  align-items: center;
-  align-self: start;
-  justify-content: center;
-  width: fit-content;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: var(--landing-ink);
-  color: #fff;
+  color: var(--landing-muted);
   font-size: 13px;
   font-weight: 650;
 }
@@ -260,10 +252,10 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border: 0;
+  border: 1px solid #e5e2dc;
   border-radius: 4px;
-  background: var(--landing-ink);
-  color: #fff;
+  background: #f7f7f5;
+  color: var(--landing-text);
 }
 
 .content-card-copy {
@@ -303,7 +295,6 @@
   align-items: flex-start;
   padding: 18px 19px 16px;
   border: 1px solid #dededb;
-  border-left: 3px solid var(--landing-ink);
   border-radius: 8px;
   background: #fafaf9;
   box-shadow: 0 1px 2px rgb(15 15 15 / 3%);
@@ -363,7 +354,6 @@
   min-height: 150px;
   padding: 20px;
   border: 1px solid var(--landing-line);
-  border-left: 3px solid var(--landing-ink);
   border-radius: 8px;
   background: #fafaf9;
   color: var(--landing-muted);
