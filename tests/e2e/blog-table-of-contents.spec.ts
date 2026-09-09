@@ -22,6 +22,15 @@ async function addBlogDetailFixture(page: Page) {
   });
 }
 
+async function tocImmediatelyPrecedesMarkdown(page: Page) {
+  return page.evaluate(() => {
+    const fixture = document.getElementById("toc-fixture");
+    const toc = fixture?.querySelector("[data-kamelog-blog-toc]");
+    const markdown = fixture?.querySelector(".markdown");
+    return toc?.nextElementSibling === markdown;
+  });
+}
+
 async function expectGeneratedToc(page: Page) {
   const toc = page.getByRole("navigation", { name: "目次" });
   await expect(toc).toBeVisible();
@@ -43,16 +52,7 @@ async function expectGeneratedToc(page: Page) {
     "id",
     "kamelog-toc-導入",
   );
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const fixture = document.getElementById("toc-fixture");
-        const toc = fixture?.querySelector("[data-kamelog-blog-toc]");
-        const markdown = fixture?.querySelector(".markdown");
-        return toc?.nextElementSibling === markdown;
-      }),
-    )
-    .toBe(true);
+  await expect.poll(() => tocImmediatelyPrecedesMarkdown(page)).toBe(true);
 }
 
 test("blog detail generates a table of contents from h2-h6 headings", async ({
@@ -85,16 +85,7 @@ test(
       fixture.insertBefore(markdown, toc);
     });
 
-    await expect
-      .poll(() =>
-        page.evaluate(() => {
-          const fixture = document.getElementById("toc-fixture");
-          const toc = fixture?.querySelector("[data-kamelog-blog-toc]");
-          const markdown = fixture?.querySelector(".markdown");
-          return toc?.nextElementSibling === markdown;
-        }),
-      )
-      .toBe(true);
+    await expect.poll(() => tocImmediatelyPrecedesMarkdown(page)).toBe(true);
   },
 );
 
