@@ -84,7 +84,7 @@ curl --fail http://127.0.0.1:3000/api/health
 ## 自動更新
 
 `kamelog-update.timer` は約5分ごとに公開GitHub APIと `origin/main` を照合する。
-main先頭と成功済みpush CIのSHAが一致した場合だけ、アプリ停止、backup、直前release再開、checkout、build、切替、health確認を行う。build中は直前releaseを提供し、停止時間は整合backupとコンテナ切替に限定する。
+main先頭と成功済みpush CIのSHAが一致した場合だけ、オンラインbackup、checkout、build、blue/greenの順次切替、health確認を行う。常駐gatewayは片系の更新中に正常な他方へretryする。
 GitHub Actionsから本番サーバーへの接続や受信ポートの追加は不要。
 
 初回は手動で実行し、ログと状態を確認する。
@@ -103,18 +103,18 @@ deploy script自体とsystemd unitはroot所有の固定コピーであり、Git
 
 ## 更新・ロールバック
 
-更新前にアプリを停止しbackupを取得した後、直前releaseを再開してから更新imageをbuildする。通常の停止で `down -v` を使わない。
-更新imageへ切り替え、healthと匿名閲覧・ログイン・投稿を確認する。
+更新前にオンラインbackupを取得してから更新imageをbuildする。blue、greenを1系統ずつ更新し、各系統のhealth成功前に次へ進まない。通常の停止で `down -v` を使わない。
+gatewayのhealthと匿名閲覧・ログイン・投稿を確認する。
 schema非互換変更時は古いimageだけに戻さず、更新前backupを空volumeへ復元する。
 旧volumeは検証完了まで保持する。
 
 ## バックアップ
 
-DBと媒体を同じ停止期間に取得する。停止せず取得する運用は現在サポートしない。
+SQLite backup APIのsnapshotを先に作り、DB登録前に確定して以後不変の媒体を同じbackupへコピーする。通常backupでアプリを停止しない。媒体の変更・削除を実装する場合はこの前提を再設計する。
 ホストで `node scripts/admin.mjs backup SOURCE_DATA EMPTY_BACKUP_DIR` を実行する。
 復元: `node scripts/admin.mjs restore BACKUP_DIR EMPTY_DATA_DIR`。
 既存の宛先には上書きできない。manifestを変更して検査を迂回しない。
-日次の保守時間に停止→backup→起動をschedulerへ登録する。失敗時の通知も設定する。
+日次backupをschedulerへ登録する。失敗時の通知も設定する。
 日次30世代、月次の復元訓練を標準とする。自動削除は復元成功後に運用者が設定する。
 バックアップは0700の場所に置き、オフホスト転送前に暗号化する。復号鍵は別保管する。
 
@@ -126,3 +126,11 @@ DBと媒体を同じ停止期間に取得する。停止せず取得する運用
 登録完了後はtokenを環境から削除し、再起動してログインを確認する。
 この操作は全パスキー・session・未完了challengeを削除するが、投稿・下書き・媒体には触れない。
 media内の未参照ファイルは容量を占有する。孤児媒体の自動GCは未実装のため、監視しても手作業で削除しない。
+
+## 対象ホストのリソースと初回移行
+
+2026-09-10の実測は4論理CPU、RAM 7.7GiB（available 5.0GiB）、swap 4.0GiB、root空き15GiB。appはidle時約66MiB/12 PIDであり、分離環境での実測は2 app＋gatewayで約113MiB（現状比約47MiB）、設定上限は2.125GiB。動画変換が2件重なると4論理CPUを使い切り得る。
+
+ディスク使用率は86%で、deployは空き10GiB未満ならbuild前に停止する。2026-09-10時点のDocker build cacheは37.48GB（29.7GB回収可能）だった。自動pruneは行わず、`docker system df` で対象を確認してから運用者が整理する。
+
+このreleaseはcompose service名と公開portの所有者を変更するため、旧固定scriptでは自動適用できない。初回だけtimerを止め、backupを確認し、追跡済み `ops/kamelog-update` とsystemd unitをroot領域へ再設置してから新composeを起動する。この実サーバー操作は別途承認を得て行う。以後の通常更新は片系ずつ行う。

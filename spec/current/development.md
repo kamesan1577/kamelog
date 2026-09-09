@@ -3,17 +3,17 @@
 人間の詳細レビューなしでも、同じコマンドで合否を再現できることを目標とする。
 チェックリストの存在だけを品質保証としない。
 
-| 境界         | 必須の回帰ケース                                                                          | ゲート            |
-| ------------ | ----------------------------------------------------------------------------------------- | ----------------- |
-| I01/I02 認証 | 未ログイン書込拒否、下書き非公開、偽署名、challenge再利用、Origin不一致、session失効      | APIテスト・E2E    |
-| I03/I04 UI   | PC/スマホ、ナビアイコン、検索位置、投稿導線・ショートカット、公開画面に管理UIなし         | CSS契約・E2E      |
-| I05 下書き   | 外タップ/Esc確認、保存と復元、失敗時入力保持                                              | API・E2E          |
-| I06 媒体     | 不正形式、過大upload、path traversal、画像magic/寸法、4枚上限、実16:9変換、投稿参照整合性 | 媒体テスト        |
-| 閲覧・共有   | 短尺vlog、画像グリッド/拡大、Mermaid、YouTube/X埋め込み、共有分離、投稿別OGP              | unit・E2E         |
-| I08/I09 保存 | 再起動、更新競合、migration、整合バックアップ、空の別ディレクトリ復元、破損拒否           | storeテスト       |
-| I10 公開     | 秘密値・実データ・私的マーカー・コミット名義、検査自身のnegative fixture                  | public-repo-check |
-| I11 配布     | 空DB起動、health、非root、永続volume、再起動後保存                                        | container         |
-| I12 自動更新 | main先頭と成功CIの一致、排他、停止backup、health、失敗時rollback、volume非削除            | deploy契約テスト  |
+| 境界         | 必須の回帰ケース                                                                               | ゲート            |
+| ------------ | ---------------------------------------------------------------------------------------------- | ----------------- |
+| I01/I02 認証 | 未ログイン書込拒否、下書き非公開、偽署名、challenge再利用、Origin不一致、session失効           | APIテスト・E2E    |
+| I03/I04 UI   | PC/スマホ、ナビアイコン、検索位置、投稿導線・ショートカット、公開画面に管理UIなし              | CSS契約・E2E      |
+| I05 下書き   | 外タップ/Esc確認、保存と復元、失敗時入力保持                                                   | API・E2E          |
+| I06 媒体     | 不正形式、過大upload、path traversal、画像magic/寸法、4枚上限、実16:9変換、投稿参照整合性      | 媒体テスト        |
+| 閲覧・共有   | 短尺vlog、画像グリッド/拡大、Mermaid、YouTube/X埋め込み、共有分離、投稿別OGP                   | unit・E2E         |
+| I08/I09 保存 | 再起動、更新競合、migration、整合バックアップ、空の別ディレクトリ復元、破損拒否                | storeテスト       |
+| I10 公開     | 秘密値・実データ・私的マーカー・コミット名義、検査自身のnegative fixture                       | public-repo-check |
+| I11 配布     | 空DB起動、health、非root、永続volume、再起動後保存                                             | container         |
+| I12 自動更新 | main先頭と成功CIの一致、排他、オンラインbackup、片系ずつのhealth、失敗時rollback、volume非削除 | deploy契約テスト  |
 
 `make check` は公開検査・型検査・lint・テスト・本番buildを集約する。
 `make e2e` は実アプリに対してブラウザjourneyを実行する。retryは0、fixtureは固定、テスト間でデータを隔離する。
@@ -24,5 +24,5 @@ branch protectionの設定は管理権限が必要。設定されていないな
 本番配布はADR 0005のpull方式を採用する。
 systemdがアプリのboot起動と更新timerを管理し、更新scriptは成功済みpush CIのSHAとmain先頭が一致するまでdeployしない。
 GitHub Actions runnerへ本番サーバー資格情報を渡さない。
-自動更新は停止状態の整合backupを先に作る。backup後は直前コードを再開した状態で新imageをbuildし、切替停止時間を起動に必要な範囲へ限定する。health失敗時は直前コードを再起動する。
+自動更新はオンライン整合backup後に新imageをbuildし、常駐gateway配下のblue/greenを個別health確認しながら1系統ずつ更新する。片系更新中は他方が応答し、health失敗時は直前コードへ戻す。
 schema非互換時のデータrollbackは自動化せず、runbookに従い別volumeへ復元する。

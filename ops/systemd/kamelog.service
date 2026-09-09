@@ -11,8 +11,8 @@ User=kamelog
 Group=kamelog
 SupplementaryGroups=docker
 WorkingDirectory=/srv/kamelog
-ExecStart=/usr/bin/docker compose --env-file /etc/kamelog/env -f /srv/kamelog/compose.yaml up -d app
-ExecStop=/usr/bin/docker compose --env-file /etc/kamelog/env -f /srv/kamelog/compose.yaml stop app
+ExecStart=/usr/bin/docker compose --env-file /etc/kamelog/env -f /srv/kamelog/compose.yaml up -d
+ExecStop=/usr/bin/docker compose --env-file /etc/kamelog/env -f /srv/kamelog/compose.yaml stop gateway app-blue app-green
 TimeoutStartSec=10min
 TimeoutStopSec=1min
 

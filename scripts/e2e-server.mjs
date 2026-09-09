@@ -2,6 +2,7 @@ import { cp, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
+const port = process.env.KAMELOG_E2E_PORT || "3000";
 const directory = await mkdtemp(join(tmpdir(), "kamelog-e2e-"));
 await cp(".next/static", ".next/standalone/.next/static", {
   recursive: true,
@@ -13,10 +14,10 @@ const child = spawn(process.execPath, ["server.js"], {
   env: {
     ...process.env,
     KAMELOG_DATA_DIR: directory,
-    KAMELOG_ORIGIN: "http://localhost:3000",
+    KAMELOG_ORIGIN: `http://localhost:${port}`,
     KAMELOG_BOOTSTRAP_TOKEN: "fictional-e2e-bootstrap-token-not-a-secret",
     HOSTNAME: "127.0.0.1",
-    PORT: "3000",
+    PORT: port,
   },
 });
 for (const signal of ["SIGINT", "SIGTERM"])

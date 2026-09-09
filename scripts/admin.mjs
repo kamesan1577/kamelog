@@ -2,7 +2,7 @@ import { Store } from "../server/store.mjs";
 import { backupStore, restoreBackup } from "../server/backup.mjs";
 const [action, source, target] = process.argv.slice(2);
 const usage =
-  "Usage:\n  node scripts/admin.mjs backup SOURCE_DATA EMPTY_BACKUP_DIR\n  node scripts/admin.mjs restore BACKUP_DIR EMPTY_DATA_DIR\n  node scripts/admin.mjs reset-auth SOURCE_DATA --confirm-reset-auth\n\nStop the application before running any command.";
+  "Usage:\n  node scripts/admin.mjs backup SOURCE_DATA EMPTY_BACKUP_DIR\n  node scripts/admin.mjs restore BACKUP_DIR EMPTY_DATA_DIR\n  node scripts/admin.mjs reset-auth SOURCE_DATA --confirm-reset-auth\n\nRestore and reset-auth require the application to be stopped.";
 if (!source || !["backup", "restore", "reset-auth"].includes(action)) {
   console.error(usage);
   process.exit(1);
