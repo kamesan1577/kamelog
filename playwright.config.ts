@@ -1,4 +1,6 @@
 import { defineConfig } from "@playwright/test";
+const port = process.env.KAMELOG_E2E_PORT || "3000";
+const baseURL = `http://localhost:${port}`;
 export default defineConfig({
   testDir: "tests/e2e",
   fullyParallel: false,
@@ -6,13 +8,13 @@ export default defineConfig({
   retries: 0,
   timeout: 60000,
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
   webServer: {
     command: "node scripts/e2e-server.mjs",
-    url: "http://localhost:3000/api/health",
+    url: `${baseURL}/api/health`,
     reuseExistingServer: false,
     timeout: 120000,
   },

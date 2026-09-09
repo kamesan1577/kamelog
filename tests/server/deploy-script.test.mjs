@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-
 const script = await readFile(
   new URL("../../ops/kamelog-update", import.meta.url),
   "utf8",
@@ -10,43 +9,57 @@ const installer = await readFile(
   new URL("../../ops/install-host.sh", import.meta.url),
   "utf8",
 );
-
 test("deployment is serialized and restricted to a successful main CI commit", () => {
   assert.match(script, /flock -n/);
   assert.match(script, /status=success/);
   assert.match(script, /remote_sha" != "\$ci_sha/);
 });
-
-test("deployment takes a stopped backup and restores service before building", () => {
-  const stop = script.indexOf('"${compose[@]}" stop app');
+test("deployment backs up online and rolls the two app replicas one at a time", () => {
   const backup = script.indexOf("scripts/admin.mjs backup");
-  const resumeLog = script.indexOf(
-    'log "backup completed; restarting current release before build"',
-    backup,
-  );
-  const restart = script.indexOf('"${compose[@]}" up -d app', resumeLog);
   const checkout = script.indexOf(
     'git checkout --quiet --detach "$remote_sha"',
   );
-  const build = script.indexOf('"${compose[@]}" build app', checkout);
-
+  const build = script.indexOf('"${compose[@]}" build app-blue', checkout);
+  const blue = script.indexOf("deploy_replica app-blue", build);
+  const green = script.indexOf("deploy_replica app-green", blue);
   assert.ok(
-    stop >= 0 &&
-      backup > stop &&
-      resumeLog > backup &&
-      restart > resumeLog &&
-      checkout > restart &&
-      build > checkout,
+    backup >= 0 &&
+      checkout > backup &&
+      build > checkout &&
+      blue > build &&
+      green > blue,
   );
+  assert.doesNotMatch(script, /stop app/);
   assert.doesNotMatch(script, /down\s+(?:[^\n]*\s)?-v/);
 });
-
-test("deployment health checks and attempts a code rollback", () => {
+test("deployment health checks, disk space and attempts a code rollback", () => {
   assert.match(script, /curl --fail --silent --show-error "\$HEALTH_URL"/);
+  assert.match(script, /healthcheck_replica/);
+  assert.match(
+    script,
+    /docker image tag "\$previous_image" kamelog-app:current/,
+  );
+  assert.match(script, /MIN_FREE_KIB/);
   assert.match(script, /git checkout --quiet --detach "\$current_sha"/);
   assert.match(script, /backup retained/);
 });
-
+test("compose keeps a gateway in front of two application replicas", async () => {
+  const compose = await readFile(
+    new URL("../../compose.yaml", import.meta.url),
+    "utf8",
+  );
+  const gateway = await readFile(
+    new URL("../../ops/nginx.conf", import.meta.url),
+    "utf8",
+  );
+  assert.match(compose, /gateway:/);
+  assert.match(compose, /app-blue:/);
+  assert.match(compose, /app-green:/);
+  assert.match(compose, /127\.0\.0\.1:3000:3000/);
+  assert.match(gateway, /server app-blue:3000 resolve/);
+  assert.match(gateway, /server app-green:3000 resolve/);
+  assert.match(gateway, /proxy_next_upstream/);
+});
 test("host installer preserves data and writes reproducible systemd overrides", () => {
   assert.match(installer, /test -r "\$ENV_FILE"/);
   assert.match(installer, /KAMELOG_APP_DIR=\$APP_DIR/);

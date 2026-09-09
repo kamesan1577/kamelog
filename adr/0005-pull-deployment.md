@@ -8,7 +8,7 @@
 
 本番ホストはsystemd timerでGitHubを定期確認し、`main` の先頭と成功済みCI runのcommitが一致した場合だけ更新する。
 GitHub Actionsから本番ホストへのSSH接続やself-hosted runnerは使用しない。
-更新は停止、整合バックアップ、直前releaseの再開、新image build、切替、health確認の順に行う。build中は直前releaseを提供し、失敗時は直前のコードrevisionを再buildして起動する。
+更新順序と無停止化はADR 0011へ移管する。成功済みcommitだけを取得し、失敗時は直前のコードrevisionへ戻す。
 
 本番checkout、秘密値、backup、deploy状態をそれぞれ `/srv/kamelog`、`/etc/kamelog`、`/var/backups/kamelog`、`/var/lib/kamelog-deploy` に分離する。
 deployプロセスは対話ログイン不能な専用ユーザーで実行する。

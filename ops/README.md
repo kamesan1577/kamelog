@@ -1,6 +1,6 @@
 # Production operations
 
-`kamelog-update` は、成功済みのmain CI commitだけを本番ホストへpullするdeploy script。
+`kamelog-update` は、成功済みのmain CI commitだけを本番ホストへpullし、常駐gateway配下のblue/greenを1系統ずつ更新するdeploy script。
 `systemd/` はアプリのboot起動と約5分ごとの更新確認を定義する。
 
 導入、検証、rollback、backup、復旧の手順は [`runbooks/deployment.md`](../runbooks/deployment.md) を正本とする。
