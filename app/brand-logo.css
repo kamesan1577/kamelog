@@ -1,0 +1,65 @@
+.site-name,
+.mobile-name {
+  align-items: center;
+  color: #37352f;
+}
+
+.site-name::before,
+.mobile-name::before {
+  content: "";
+  display: block;
+  flex: 0 0 auto;
+  background: url("/kamelog-header-mark.png") center / contain no-repeat;
+}
+
+.site-name::before {
+  width: 34px;
+  height: 24px;
+}
+
+.mobile-name::before {
+  width: 30px;
+  height: 21px;
+}
+
+.site-name strong,
+.mobile-name b {
+  color: #37352f;
+}
+
+.site-name > svg {
+  margin-left: auto;
+}
+
+.landing-page .landing-copy h1 {
+  width: min(350px, 100%);
+  height: 90px;
+  margin: 0 !important;
+  background: url("/kamelog-logo.png") left center / contain no-repeat;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+.site-source-footer .mx-auto::before {
+  content: "";
+  display: block;
+  width: 38px;
+  height: 26px;
+  flex: 0 0 auto;
+  background: url("/kamelog-header-mark.png") center / contain no-repeat;
+}
+
+.project-tile[href="https://github.com/kamesan1577/kamelog"] > img {
+  content: url("/kamelog-logo.png");
+  object-fit: contain;
+  padding: 9% 8%;
+  background: #f6f5f4;
+}
+
+@media (max-width: 640px) {
+  .landing-page .landing-copy h1 {
+    width: min(300px, 100%);
+    height: 76px;
+  }
+}
