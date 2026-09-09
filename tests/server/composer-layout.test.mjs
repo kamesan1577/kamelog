@@ -21,3 +21,12 @@ test("keeps the inline image attachment separate from post-type actions", async 
     /\.desktop-composer \.composer-kinds > \.image-upload-button\s*\{[^}]*grid-column:\s*1\s*\/\s*-1;[^}]*border-bottom:/s,
   );
 });
+
+test("keeps the inline publish button compact when disabled", async () => {
+  const css = await readFile(cssUrl, "utf8");
+
+  assert.match(
+    css,
+    /\.desktop-composer \.composer-start > \[data-slot="button"\]\s*\{[^}]*flex:\s*0\s+0\s+auto;[^}]*text-align:\s*center;[^}]*color:\s*#fff;/s,
+  );
+});
