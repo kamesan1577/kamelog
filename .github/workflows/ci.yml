@@ -23,9 +23,11 @@ jobs:
           cache: npm
       - name: Install FFmpeg
         run: |
-          if test -f /etc/apt/sources.list.d/google-chrome.list; then
-            sudo mv /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.list.disabled
-          fi
+          for source in /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources; do
+            if test -f "$source"; then
+              sudo mv "$source" "$source.disabled"
+            fi
+          done
           sudo apt-get update
           sudo apt-get install -y ffmpeg
       - run: npm ci
@@ -44,9 +46,11 @@ jobs:
           cache: npm
       - name: Install FFmpeg
         run: |
-          if test -f /etc/apt/sources.list.d/google-chrome.list; then
-            sudo mv /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.list.disabled
-          fi
+          for source in /etc/apt/sources.list.d/google-chrome.list /etc/apt/sources.list.d/google-chrome.sources; do
+            if test -f "$source"; then
+              sudo mv "$source" "$source.disabled"
+            fi
+          done
           sudo apt-get update
           sudo apt-get install -y ffmpeg
       - run: npm ci
