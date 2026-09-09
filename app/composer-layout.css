@@ -19,6 +19,14 @@
   color: #777168;
 }
 
+/* The legacy composer rule in globals.css makes every direct button flex: 1.
+   The inline submit button must stay at its intrinsic width, including disabled state. */
+.desktop-composer .composer-start > [data-slot="button"] {
+  flex: 0 0 auto;
+  text-align: center;
+  color: #fff;
+}
+
 .desktop-composer .composer-kinds > .draft-button {
   justify-self: end;
   margin-left: 0;
