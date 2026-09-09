@@ -1,0 +1,105 @@
+/* Public profile account links: brand marks only, with accessible labels supplied by the bridge. */
+.profile-card > a[data-kamelog-profile-social-source] {
+  display: none;
+}
+
+.profile-social-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-card .profile-social-links .profile-social-link {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 36px;
+  border: 1px solid #e4e2dd;
+  border-radius: 6px;
+  background: #fff;
+  padding: 0;
+}
+
+.profile-card .profile-social-links .profile-social-link:hover {
+  background: #f7f7f5;
+  border-color: #d8d5cf;
+}
+
+.profile-card .profile-social-links .profile-social-link img {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Qiita requires the green brand icon and sufficient contrast/clear space. */
+.profile-card .profile-social-links .profile-social-link-qiita {
+  background: #3d4040;
+  border-color: #3d4040;
+}
+
+.profile-card .profile-social-links .profile-social-link-qiita:hover {
+  background: #3d4040;
+  border-color: #292b2b;
+}
+
+/* Project thumbnails are artwork/logos, so never crop them to satisfy card geometry. */
+.projects-page,
+.project-grid,
+.project-tile,
+.project-tile > div {
+  min-width: 0;
+}
+
+.project-grid {
+  width: 100%;
+}
+
+.project-tile img {
+  object-fit: contain;
+}
+
+.project-tile img[data-kamelog-qiita-thumbnail] {
+  background: #3d4040;
+}
+
+@media (max-width: 640px) {
+  .site-layout .content-grid,
+  .main-content,
+  .projects-page,
+  .project-grid,
+  .project-tile {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .project-tile {
+    grid-template-columns: minmax(118px, 40%) minmax(0, 1fr);
+  }
+
+  .project-tile img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    object-fit: contain;
+  }
+
+  .project-tile h2,
+  .project-tile p {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 360px) {
+  .project-tile {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .project-tile img {
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+}
