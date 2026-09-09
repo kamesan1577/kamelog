@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 
+// Keep binary brand assets valid and browser-decodable.
 const assets = [
   "public/favicon.png",
   "public/kamelog-header-mark.png",
