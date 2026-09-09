@@ -5,6 +5,14 @@ import { useEffect } from "react";
 const GITHUB_URL = "https://github.com/kamesan1577";
 const X_URL = "https://x.com/kamesaniniad";
 const QIITA_URL = "https://qiita.com/kamesan1577";
+
+const GITHUB_MARK_URL =
+  "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png";
+const X_LOGO_URL =
+  "https://about.x.com/content/dam/about-twitter/x/brand-toolkit/logo-black.png.twimg.1920.png";
+const QIITA_LOGO_URL =
+  "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Qiita_Logo.svg/330px-Qiita_Logo.svg.png";
+
 const SOCIAL_ROW_ATTRIBUTE = "data-kamelog-profile-social-links";
 const SOURCE_ATTRIBUTE = "data-kamelog-profile-social-source";
 const QIITA_THUMBNAIL_ATTRIBUTE = "data-kamelog-qiita-thumbnail";
@@ -12,7 +20,7 @@ const QIITA_THUMBNAIL_ATTRIBUTE = "data-kamelog-qiita-thumbnail";
 type SocialLink = {
   href: string;
   label: string;
-  icon: string;
+  image: string;
   brand: "github" | "x" | "qiita";
 };
 
@@ -20,24 +28,24 @@ const socialLinks: SocialLink[] = [
   {
     href: GITHUB_URL,
     label: "GitHub (@kamesan1577)",
-    icon: "/github-mark.svg",
+    image: GITHUB_MARK_URL,
     brand: "github",
   },
   {
     href: X_URL,
     label: "X (@kamesaniniad)",
-    icon: "/x-logo.svg",
+    image: X_LOGO_URL,
     brand: "x",
   },
   {
     href: QIITA_URL,
     label: "Qiita (@kamesan1577)",
-    icon: "/qiita-icon.svg",
+    image: QIITA_LOGO_URL,
     brand: "qiita",
   },
 ];
 
-function createSocialLink({ href, label, icon, brand }: SocialLink) {
+function createSocialLink({ href, label, image, brand }: SocialLink) {
   const anchor = document.createElement("a");
   anchor.href = href;
   anchor.target = "_blank";
@@ -46,11 +54,12 @@ function createSocialLink({ href, label, icon, brand }: SocialLink) {
   anchor.setAttribute("aria-label", label);
   anchor.title = label;
 
-  const image = document.createElement("img");
-  image.src = icon;
-  image.alt = "";
-  image.setAttribute("aria-hidden", "true");
-  anchor.append(image);
+  const logo = document.createElement("img");
+  logo.src = image;
+  logo.alt = "";
+  logo.decoding = "async";
+  logo.setAttribute("aria-hidden", "true");
+  anchor.append(logo);
   return anchor;
 }
 
@@ -78,8 +87,9 @@ function syncQiitaProjectThumbnail() {
     `a.project-tile[href="${QIITA_URL}"] img`,
   );
   if (!image) return;
-  image.src = "/qiita-project.svg";
+  image.src = QIITA_LOGO_URL;
   image.alt = "Qiita";
+  image.decoding = "async";
   image.setAttribute(QIITA_THUMBNAIL_ATTRIBUTE, "");
 }
 
