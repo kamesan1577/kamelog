@@ -65,9 +65,7 @@ function attribute(tag, name) {
     new RegExp(`\\b${name}\\s*=\\s*(["'])(.*?)\\1`, "i"),
   );
   if (quoted) return decodeHtml(quoted[2].trim());
-  const unquoted = tag.match(
-    new RegExp(`\\b${name}\\s*=\\s*([^\\s>]+)`, "i"),
-  );
+  const unquoted = tag.match(new RegExp(`\\b${name}\\s*=\\s*([^\\s>]+)`, "i"));
   return unquoted ? decodeHtml(unquoted[1].trim()) : "";
 }
 
