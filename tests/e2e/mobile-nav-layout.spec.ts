@@ -21,8 +21,8 @@ test("mobile bottom navigation is split into three equal tap areas", async ({
     expect(box).not.toBeNull();
     if (!box) throw new Error("mobile nav item geometry unavailable");
     expect(Math.abs(box.width - expectedWidth)).toBeLessThanOrEqual(1);
-    expect(Math.abs(box.x - (navBox.x + expectedWidth * index))).toBeLessThanOrEqual(
-      1,
-    );
+    expect(
+      Math.abs(box.x - (navBox.x + expectedWidth * index)),
+    ).toBeLessThanOrEqual(1);
   }
 });
