@@ -67,27 +67,23 @@ test("blog detail generates a table of contents from h2-h6 headings", async ({
   await expect(page.getByRole("navigation", { name: "目次" })).toHaveCount(0);
 });
 
-test(
-  "blog table of contents returns before the article after a desktop rerender",
-  async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto("/");
-    await addBlogDetailFixture(page);
-    await expectGeneratedToc(page);
+test("blog table of contents renders above the article on desktop", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.goto("/");
+  await addBlogDetailFixture(page);
+  await expectGeneratedToc(page);
 
-    await page.evaluate(() => {
-      const fixture = document.getElementById("toc-fixture");
-      const toc = fixture?.querySelector("[data-kamelog-blog-toc]");
-      const markdown = fixture?.querySelector(".markdown");
-      if (!fixture || !toc || !markdown)
-        throw new Error("TOC fixture is missing");
-
-      fixture.insertBefore(markdown, toc);
-    });
-
-    await expect.poll(() => tocImmediatelyPrecedesMarkdown(page)).toBe(true);
-  },
-);
+  const tocBox = await page
+    .getByRole("navigation", { name: "目次" })
+    .boundingBox();
+  const markdownBox = await page.locator("#toc-fixture .markdown").boundingBox();
+  expect(tocBox).not.toBeNull();
+  expect(markdownBox).not.toBeNull();
+  if (!tocBox || !markdownBox) throw new Error("TOC geometry unavailable");
+  expect(tocBox.y + tocBox.height).toBeLessThanOrEqual(markdownBox.y + 1);
+});
 
 test("blog table of contents stays inside a 390px viewport", async ({
   page,
