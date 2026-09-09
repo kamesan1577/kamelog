@@ -8,6 +8,7 @@ import "./full-page-blog-editor.css";
 import "./detail-actions.css";
 import "./blog-toc.css";
 import "./brand-theme.css";
+import "./brand-logo.css";
 import "./mobile-nav-layout.css";
 import "./tweet-link-preview.css";
 import "./project-social-links.css";
@@ -41,8 +42,9 @@ export const metadata: Metadata = {
   },
   other: { "twitter:url": canonical },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
 };
 
