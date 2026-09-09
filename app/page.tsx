@@ -60,6 +60,27 @@ function SourceFooter() {
           不具合・要望をIssueで報告
         </a>
       </div>
+      <div className="mx-auto mt-5 max-w-5xl border-t border-[#eceae5] pt-4">
+        <p className="mb-2 font-medium text-[#625e56]">相互リンク</p>
+        <a href="https://shiryu.win/" target="_blank" rel="noreferrer">
+          <span
+            style={{
+              display: "inline-block",
+              width: "200px",
+              height: "40px",
+              border: "2px outset #c0c0c0",
+              background: "linear-gradient(135deg,#000080,#4000a0)",
+              color: "#ffff00",
+              textAlign: "center",
+              lineHeight: "40px",
+              fontWeight: "bold",
+              fontSize: "13px",
+            }}
+          >
+            Shiryu のホームページ
+          </span>
+        </a>
+      </div>
     </footer>
   );
 }
