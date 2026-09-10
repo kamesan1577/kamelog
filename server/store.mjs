@@ -25,8 +25,39 @@ export class Store {
         post_id TEXT PRIMARY KEY REFERENCES posts(id) ON DELETE CASCADE,
         count INTEGER NOT NULL CHECK(count >= 0)
       );
+      CREATE TABLE IF NOT EXISTS post_tags(
+        post_id TEXT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+        tag TEXT NOT NULL,
+        source TEXT NOT NULL CHECK(source IN ('manual', 'auto')),
+        confidence REAL NOT NULL CHECK(confidence >= 0 AND confidence <= 1),
+        model_version TEXT NOT NULL,
+        content_hash TEXT NOT NULL,
+        training_hash TEXT NOT NULL,
+        PRIMARY KEY(post_id, tag, source)
+      );
+      CREATE TABLE IF NOT EXISTS post_tag_runs(
+        post_id TEXT PRIMARY KEY REFERENCES posts(id) ON DELETE CASCADE,
+        content_hash TEXT NOT NULL,
+        model_version TEXT NOT NULL,
+        training_hash TEXT NOT NULL
+      );
       INSERT OR IGNORE INTO migrations VALUES(1);
-      INSERT OR IGNORE INTO migrations VALUES(2);`);
+      INSERT OR IGNORE INTO migrations VALUES(2);
+      INSERT OR IGNORE INTO migrations VALUES(3);`);
+    this.db
+      .prepare("SELECT id, data FROM posts")
+      .all()
+      .forEach(({ id, data }) => {
+        const post = JSON.parse(data);
+        for (const tag of post.tags || [])
+          this.db
+            .prepare(
+              `INSERT OR IGNORE INTO post_tags
+               (post_id, tag, source, confidence, model_version, content_hash, training_hash)
+               VALUES (?, ?, 'manual', 1, 'manual', '', '')`,
+            )
+            .run(id, tag);
+      });
     this.db.prepare("INSERT OR IGNORE INTO settings VALUES(?, ?)").run(
       "profile",
       JSON.stringify({
@@ -57,12 +88,17 @@ export class Store {
           : `SELECT * FROM ${table}`,
       )
       .all();
-    return rows.map((row) => ({
-      ...JSON.parse(row.data),
-      id: row.id,
-      ...(row.revision ? { revision: row.revision } : {}),
-      ...(table === "posts" ? { views: Number(row.views) } : {}),
-    }));
+    return rows.map((row) =>
+      this.#withPostTags(
+        {
+          ...JSON.parse(row.data),
+          id: row.id,
+          ...(row.revision ? { revision: row.revision } : {}),
+          ...(table === "posts" ? { views: Number(row.views) } : {}),
+        },
+        table,
+      ),
+    );
   }
   get(table, id) {
     this.table(table);
@@ -76,13 +112,46 @@ export class Store {
       )
       .get(id);
     return row
-      ? {
-          ...JSON.parse(row.data),
-          id: row.id,
-          ...(row.revision ? { revision: row.revision } : {}),
-          ...(table === "posts" ? { views: Number(row.views) } : {}),
-        }
+      ? this.#withPostTags(
+          {
+            ...JSON.parse(row.data),
+            id: row.id,
+            ...(row.revision ? { revision: row.revision } : {}),
+            ...(table === "posts" ? { views: Number(row.views) } : {}),
+          },
+          table,
+        )
       : null;
+  }
+  #withPostTags(value, table) {
+    if (table !== "posts") return value;
+    const rows = this.db
+      .prepare(
+        "SELECT tag, source, confidence, model_version, content_hash FROM post_tags WHERE post_id=? ORDER BY rowid",
+      )
+      .all(value.id);
+    const manual = rows
+      .filter((row) => row.source === "manual")
+      .map((row) => row.tag);
+    const fallbackManual = manual.length ? manual : value.tags || [];
+    const autoTags = rows
+      .filter((row) => row.source === "auto")
+      .map(({ tag, confidence, model_version, content_hash }) => ({
+        tag,
+        confidence: Number(confidence),
+        modelVersion: model_version,
+        contentHash: content_hash,
+      }));
+    return {
+      ...value,
+      tags: [
+        ...fallbackManual,
+        ...autoTags
+          .map(({ tag }) => tag)
+          .filter((tag) => !fallbackManual.includes(tag)),
+      ],
+      ...(autoTags.length ? { autoTags } : {}),
+    };
   }
   table(name) {
     if (!["posts", "drafts", "settings", "credentials", "media"].includes(name))
@@ -124,6 +193,19 @@ export class Store {
           `INSERT INTO ${table} VALUES(?,?,?) ON CONFLICT(id) DO UPDATE SET data=excluded.data, revision=excluded.revision`,
         )
         .run(id, JSON.stringify(next), next.revision);
+      if (table === "posts") {
+        this.db
+          .prepare("DELETE FROM post_tags WHERE post_id=? AND source='manual'")
+          .run(id);
+        for (const tag of next.tags || [])
+          this.db
+            .prepare(
+              `INSERT INTO post_tags
+               (post_id, tag, source, confidence, model_version, content_hash, training_hash)
+               VALUES (?, ?, 'manual', 1, 'manual', '', '')`,
+            )
+            .run(id, tag);
+      }
       return this.get(table, id);
     });
   }
@@ -145,6 +227,47 @@ export class Store {
            ON CONFLICT(post_id) DO UPDATE SET count=count+1`,
         )
         .run(id);
+      return this.get("posts", id);
+    });
+  }
+  autoTagState(id) {
+    return (
+      this.db.prepare("SELECT * FROM post_tag_runs WHERE post_id=?").get(id) ||
+      null
+    );
+  }
+  replaceAutoTags(id, tags, run) {
+    return this.transaction(() => {
+      if (!this.db.prepare("SELECT id FROM posts WHERE id=?").get(id))
+        return null;
+      this.db
+        .prepare("DELETE FROM post_tags WHERE post_id=? AND source='auto'")
+        .run(id);
+      for (const tag of tags)
+        this.db
+          .prepare(
+            `INSERT INTO post_tags
+             (post_id, tag, source, confidence, model_version, content_hash, training_hash)
+             VALUES (?, ?, 'auto', ?, ?, ?, ?)`,
+          )
+          .run(
+            id,
+            tag.tag,
+            tag.confidence,
+            run.modelVersion,
+            run.contentHash,
+            run.trainingHash,
+          );
+      this.db
+        .prepare(
+          `INSERT INTO post_tag_runs(post_id, content_hash, model_version, training_hash)
+           VALUES (?, ?, ?, ?)
+           ON CONFLICT(post_id) DO UPDATE SET
+             content_hash=excluded.content_hash,
+             model_version=excluded.model_version,
+             training_hash=excluded.training_hash`,
+        )
+        .run(id, run.contentHash, run.modelVersion, run.trainingHash);
       return this.get("posts", id);
     });
   }

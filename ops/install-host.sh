@@ -31,7 +31,7 @@ install -o root -g root -m 0755 "$APP_DIR/ops/kamelog-update" /usr/local/sbin/ka
 temporary="$(mktemp -d)"
 trap 'rm -rf -- "$temporary"' EXIT
 
-for unit in kamelog.service kamelog-update.service kamelog-update.timer; do
+for unit in kamelog.service kamelog-update.service kamelog-update.timer kamelog-auto-tag.service kamelog-auto-tag.timer; do
   sed \
     -e "s|User=kamelog|User=$SERVICE_USER|" \
     -e "s|Group=kamelog|Group=$SERVICE_USER|" \
@@ -54,7 +54,7 @@ install -o root -g root -m 0644 "$temporary/host.conf" /etc/systemd/system/kamel
 rm -f /etc/systemd/system/kamelog-update.service.d/path.conf
 
 systemctl daemon-reload
-systemctl enable --now kamelog.service kamelog-update.timer
+systemctl enable --now kamelog.service kamelog-update.timer kamelog-auto-tag.timer
 systemctl reset-failed kamelog-update.service
 systemctl start kamelog-update.service
 

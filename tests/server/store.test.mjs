@@ -96,10 +96,16 @@ test("adds view counts to an existing schema without rewriting posts", async () 
     database.close();
 
     const migrated = new Store(root);
-    assert.equal(migrated.schemaVersion(), 2);
+    assert.equal(migrated.schemaVersion(), 3);
     assert.equal(migrated.get("posts", "legacy-post").views, 0);
     assert.equal(migrated.recordView("legacy-post").views, 1);
     assert.equal(migrated.get("posts", "legacy-post").body, "legacy fixture");
+    assert.deepEqual(
+      migrated.db
+        .prepare("SELECT tag, source FROM post_tags WHERE post_id=?")
+        .all("legacy-post"),
+      [],
+    );
     migrated.close();
   } finally {
     await rm(root, { recursive: true, force: true });

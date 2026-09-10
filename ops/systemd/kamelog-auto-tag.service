@@ -1,0 +1,18 @@
+[Unit]
+Description=Classify kamelog posts with the local auto-tagger
+After=docker.service kamelog.service
+Wants=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=kamelog
+Group=kamelog
+SupplementaryGroups=docker
+WorkingDirectory=/srv/kamelog
+ExecStart=/usr/bin/docker compose --env-file /etc/kamelog/env -f /srv/kamelog/compose.yaml run --rm --no-deps app-blue node scripts/auto-tag.mjs
+TimeoutStartSec=20min
+Nice=15
+
+[Install]
+WantedBy=multi-user.target
