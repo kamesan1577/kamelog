@@ -1,0 +1,194 @@
+.before,
+.after {
+  margin-top: 14px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  color: #78736b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.card {
+  display: block;
+  width: calc(100% - var(--thread-indent, 0px));
+  padding: 12px 14px;
+  border: 1px solid #e7e4de;
+  border-radius: 10px;
+  background: #fff;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.card:hover {
+  background: #faf9f7;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  color: #8b867e;
+  font-size: 12px;
+}
+
+.cardBody {
+  display: block;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.65;
+}
+
+.images {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.images img {
+  width: 100%;
+  max-height: 180px;
+  border-radius: 7px;
+  object-fit: cover;
+}
+
+.connector {
+  width: 2px;
+  height: 14px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: #ddd9d1;
+}
+
+.children {
+  margin-top: 4px;
+}
+
+.append {
+  margin-top: 16px;
+}
+
+.appendButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #dedbd4;
+  border-radius: 8px;
+  background: #fff;
+  color: #4f4b45;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.appendButton:hover {
+  background: #f7f6f3;
+}
+
+.composer {
+  padding: 12px;
+  border: 1px solid #dedbd4;
+  border-radius: 10px;
+  background: #faf9f7;
+}
+
+.composerHeader,
+.composerActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.composerHeader {
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.composerHeader button {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.composerHeader button:hover {
+  background: #eeece8;
+}
+
+.composer textarea {
+  width: 100%;
+  min-height: 112px;
+  resize: vertical;
+  padding: 10px 11px;
+  border: 1px solid #d8d5cf;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.55;
+  outline: none;
+}
+
+.composer textarea:focus {
+  border-color: #aaa59c;
+  box-shadow: 0 0 0 2px rgba(80, 76, 70, 0.08);
+}
+
+.composerActions {
+  margin-top: 8px;
+}
+
+.composerActions span {
+  color: #8b867e;
+  font-size: 11px;
+}
+
+.composerActions button {
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid #2f2d2a;
+  border-radius: 8px;
+  background: #2f2d2a;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.composerActions button:disabled {
+  border-color: #d2cfc9;
+  background: #d2cfc9;
+  cursor: default;
+}
+
+@media (max-width: 640px) {
+  .before,
+  .after {
+    margin-top: 12px;
+  }
+
+  .card {
+    padding: 11px 12px;
+  }
+
+  .images img {
+    max-height: 140px;
+  }
+
+  .appendButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
