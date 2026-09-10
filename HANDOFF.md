@@ -21,6 +21,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - ブログ詳細のいいね・リンクコピー・X共有は読書中も追従する。1000px以上では本文左側の縦型sticky rail、999px以下では下部floating bar、640px以下ではモバイルナビの上へ固定する。タイムライン側の操作は維持する。
 - `robots.txt` / 動的sitemap / canonical / OGP・Twitter URL / WebSite・Person・BlogPosting JSON-LDを公開originへ統一し、本番メタデータへlocalhostを出さない。sitemapはホームと公開ブログだけを列挙し、存在しない投稿詳細は404にする。
 - revision競合、Origin/CSRF、入力上限、媒体Range、rate limitをAPIで処理。
+- つぶやきのリンクプレビューはDOM更新ごとに所有元を検証し、詳細から他ページへ移動した際の孤立カードを除去して、再表示を繰り返しても1投稿1枚に保つ。
 - DB/媒体のhash manifest付きbackup/restoreと全パスキー喪失時のoffline reset。
 - Node 24の非root本番image、開発Compose、CIのcheck/e2e/container job。
 - 成功済みmain CIだけを取得するpull型自動deploy、停止backup、health、コードrollback、systemd boot起動。
@@ -44,6 +45,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 2026-09-10 スマホ投稿ヘッダー変更後、`make check`（公開検査、既存UI契約、型、lint、unit、本番build）が成功。390px幅・表示高520pxで入力フォーカス中も投稿ボタンがviewport内に残り、PCでは新ヘッダーを表示しないE2Eを追加した。ローカルE2EはPlaywright Chromium配布元のtimeout/502でブラウザを取得できず未実施のため、PR CIの `e2e` で確認する。
 - ローカル `make check`: public-repo check、UI契約、型、lint、unit/API/media/backup test、本番build。
 - 実FFmpegによる縦動画fixtureの16:9変換。
+- 2026-09-11 リンクプレビュー画面遷移修正後、Node 24・FFmpeg環境の `make check` とPlaywright 1.63の全16 E2E、CI `container` 相当（Compose構文、本番/開発image build、非root、health、再起動後永続）が成功。つぶやき詳細からプロジェクトへ移動してブラウザで戻る操作を3回繰り返し、別ページでは0枚、投稿詳細では常に1枚となる回帰を追加した。1280pxのChromiumで確認し、390px既存journeyも成功。実機確認は未実施。
 - 不正WebAuthn応答、未ログイン書込、Origin不一致、revision競合、破損backup拒否。
 - GitHub Actions run #52（commit `ed946978372062b7db871617a91959005ac66ea9`）の `check` / `e2e` / `container` がすべて成功。
 - Playwright Chromiumで匿名表示、PC/スマホ、仮想パスキー、下書き保護・復元、投稿永続化、Markdown無害化、再ログイン、実動画vlog投稿を確認。
