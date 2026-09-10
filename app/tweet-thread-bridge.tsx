@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { MessageCircle, Plus, X } from "lucide-react";
@@ -109,7 +110,14 @@ function ThreadCard({ post, depth = 0 }: { post: ThreadPost; depth?: number }) {
       {!!post.images?.length && (
         <span className={styles.images}>
           {post.images.slice(0, 4).map((image, index) => (
-            <img key={image} src={image} alt={`添付画像 ${index + 1}`} />
+            <Image
+              key={image}
+              src={image}
+              alt={`添付画像 ${index + 1}`}
+              width={480}
+              height={270}
+              unoptimized
+            />
           ))}
         </span>
       )}
@@ -201,12 +209,16 @@ export default function TweetThreadBridge({
   }, []);
 
   useEffect(() => {
-    setComposing(false);
-    setBody("");
     if (!selectedId) return;
+    let cancelled = false;
     void api<ThreadPost[]>("posts")
-      .then(setPosts)
+      .then((nextPosts) => {
+        if (!cancelled) setPosts(nextPosts);
+      })
       .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
   }, [selectedId]);
 
   const selected = posts.find((post) => post.id === selectedId);
