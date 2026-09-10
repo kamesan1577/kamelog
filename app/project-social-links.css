@@ -1,5 +1,6 @@
 /* Public profile account links: brand marks only, with accessible labels supplied by the bridge. */
-.profile-card > a[data-kamelog-profile-social-source] {
+.profile-card > a[data-kamelog-profile-social-source],
+.landing-profile > a[data-kamelog-profile-social-source] {
   display: none;
 }
 
@@ -9,7 +10,8 @@
   gap: 8px;
 }
 
-.profile-card .profile-social-links .profile-social-link {
+.profile-card .profile-social-links .profile-social-link,
+.landing-profile .profile-social-links .profile-social-link {
   width: 36px;
   height: 36px;
   display: inline-flex;
@@ -22,12 +24,14 @@
   padding: 0;
 }
 
-.profile-card .profile-social-links .profile-social-link:hover {
+.profile-card .profile-social-links .profile-social-link:hover,
+.landing-profile .profile-social-links .profile-social-link:hover {
   background: #f7f7f5;
   border-color: #d8d5cf;
 }
 
-.profile-card .profile-social-links .profile-social-link img {
+.profile-card .profile-social-links .profile-social-link img,
+.landing-profile .profile-social-links .profile-social-link img {
   display: block;
   width: 18px;
   height: 18px;
@@ -35,12 +39,14 @@
 }
 
 /* Qiita requires the green brand icon and sufficient contrast/clear space. */
-.profile-card .profile-social-links .profile-social-link-qiita {
+.profile-card .profile-social-links .profile-social-link-qiita,
+.landing-profile .profile-social-links .profile-social-link-qiita {
   background: #3d4040;
   border-color: #3d4040;
 }
 
-.profile-card .profile-social-links .profile-social-link-qiita:hover {
+.profile-card .profile-social-links .profile-social-link-qiita:hover,
+.landing-profile .profile-social-links .profile-social-link-qiita:hover {
   background: #3d4040;
   border-color: #292b2b;
 }
