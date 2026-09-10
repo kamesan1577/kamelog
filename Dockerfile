@@ -15,6 +15,7 @@ COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/server ./server
 COPY --from=build --chown=node:node /app/scripts/admin.mjs ./scripts/admin.mjs
+COPY --from=build --chown=node:node /app/scripts/auto-tag.mjs ./scripts/auto-tag.mjs
 RUN mkdir /data && chown node:node /data
 USER node
 EXPOSE 3000
