@@ -125,7 +125,13 @@ function ThreadCard({ post, depth = 0 }: { post: ThreadPost; depth?: number }) {
   );
 }
 
-function ThreadTree({ nodes, depth = 0 }: { nodes: ThreadNode[]; depth?: number }) {
+function ThreadTree({
+  nodes,
+  depth = 0,
+}: {
+  nodes: ThreadNode[];
+  depth?: number;
+}) {
   return nodes.map((node, index) => (
     <Fragment key={node.post.id}>
       {(index > 0 || depth === 0) && <div className={styles.connector} />}
@@ -227,8 +233,7 @@ export default function TweetThreadBridge({
     [posts, selected],
   );
   const children = useMemo(
-    () =>
-      selected?.kind === "tweet" ? buildChildren(posts, selected.id) : [],
+    () => (selected?.kind === "tweet" ? buildChildren(posts, selected.id) : []),
     [posts, selected],
   );
 
@@ -265,7 +270,10 @@ export default function TweetThreadBridge({
   const before = hosts.before
     ? createPortal(
         ancestors.length > 0 ? (
-          <section className={styles.before} aria-label="このつぶやきの前の投稿">
+          <section
+            className={styles.before}
+            aria-label="このつぶやきの前の投稿"
+          >
             <span className={styles.label}>スレッド</span>
             {ancestors.map((post) => (
               <Fragment key={post.id}>
