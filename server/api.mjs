@@ -14,7 +14,7 @@ import {
   readBounded,
   extractHashtags,
 } from "./validation.mjs";
-import { Conflict } from "./store.mjs";
+import { Conflict, SESSION_TTL_SECONDS } from "./store.mjs";
 import { convertVideo, saveImage } from "./media.mjs";
 
 export function configuration(env = process.env) {
@@ -207,7 +207,7 @@ export function createAPI(store, config) {
             sessionName,
             store.createSession(),
             config.secure,
-            12 * 3600,
+            SESSION_TTL_SECONDS,
           ),
         });
       }
@@ -343,6 +343,20 @@ export function createAPI(store, config) {
           const old = store.get(table, id);
           if (method === "PUT" && !old)
             return json({ error: "Not found" }, 404);
+          let parentId = table === "posts" ? input.parentId : undefined;
+          if (table === "posts" && method === "PUT") {
+            if (
+              input.parentId !== undefined &&
+              input.parentId !== old?.parentId
+            )
+              return json({ error: "Thread parent cannot be changed" }, 400);
+            parentId = old?.parentId;
+          }
+          if (parentId) {
+            const parent = store.get("posts", parentId);
+            if (!parent || parent.kind !== "tweet")
+              return json({ error: "Invalid thread parent" }, 400);
+          }
           if (input.video && !store.get("media", input.video.split("/").pop()))
             return json({ error: "Unknown media" }, 400);
           if (
@@ -359,6 +373,7 @@ export function createAPI(store, config) {
               id,
               {
                 ...input,
+                ...(table === "posts" && parentId ? { parentId } : {}),
                 ...(table === "posts"
                   ? { tags: extractHashtags(input.title, input.body) }
                   : {}),

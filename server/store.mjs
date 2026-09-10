@@ -4,6 +4,8 @@ import { resolve, join } from "node:path";
 import { randomUUID, createHash } from "node:crypto";
 
 export const hash = (value) => createHash("sha256").update(value).digest("hex");
+export const SESSION_TTL_SECONDS = 30 * 24 * 3600;
+const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000;
 export class Conflict extends Error {}
 export class Store {
   constructor(directory) {
@@ -285,7 +287,7 @@ export class Store {
     this.db.prepare("DELETE FROM sessions WHERE expires < ?").run(Date.now());
     this.db
       .prepare("INSERT INTO sessions VALUES(?,?)")
-      .run(hash(token), Date.now() + 12 * 3600_000);
+      .run(hash(token), Date.now() + SESSION_TTL_MS);
     return token;
   }
   authenticated(token) {
