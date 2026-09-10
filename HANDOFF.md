@@ -52,6 +52,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - GitHub Actions run #34073823834（commit `ec5f3994`）の `check` / `e2e` / `container` がすべて成功。
 - 2026-09-07 画像・埋め込み変更後、`make check`（画像magic/寸法、未公開媒体、4枚上限、Markdown埋め込み、型、lint、本番buildを含む）が成功し、production dependency auditは0件。ローカルE2EはPlaywright Chromium配布元の502/timeoutでブラウザを取得できず未実施。PRのCI `e2e` で確認する。
 - 2026-09-10 無停止deploy変更後、Node 24.20.0・FFmpeg環境の `make check`、Playwright 1.63の全E2Eが成功。分離Composeでオンラインbackup、blue再作成中120回の連続health、blue/green個別healthを確認し、2 app＋gatewayは合計約113MiBだった。
+- 2026-09-10 対象ホストへ固定script/unitとblue/green＋gatewayを導入。main SHA `6f2369f` をtimerが自動取得し、オンラインbackup、blue/green個別更新、公開healthまで成功した。稼働時は2 app＋gatewayで約110MiB。旧appコンテナだけを削除し、永続volumeとbackupを保持した。
 - 2026-09-07 Issue #37のブログ全画面・分割エディタ変更後、`make check`（公開検査、UI契約、型、lint、unit、本番buildを含む）が成功。ローカルE2Eは実行環境にChromiumがなく、Playwright配布元からの取得がtimeoutしたため未実施。追加したPC分割配置・リアルタイム反映と既存のPC/390px journeyはPRのCI `e2e` で確認する。
 - 2026-09-07 投稿詳細履歴変更では、実行環境からGitHubをcheckoutできないためローカル `make check` / `make e2e` は未実施。追加した投稿詳細URL・アプリ内戻る・ブラウザ戻る/進む・直接共有URLの回帰はPRのCI `check` / `e2e` / `container` で確認する。
 - 2026-09-08 Issue #41の追従アクション変更は、CSS契約テストと1280px/390pxのPlaywright回帰で、PCの左sticky railとスマホの下部floating barがスクロール後も同位置に残ることをPR CIで確認する。
@@ -67,7 +68,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 実機iOS/Androidでのパスキー、投稿モーダル初期フォーカス・ソフトウェアキーボード・フォーカス時自動ズームなし、横向き撮影、既存動画upload。
 - 永続volumeから別ディレクトリへの復元訓練とオフホスト暗号化backup。
 - GitHub required checks `check` / `e2e` / `container` の有効化。
-- 対象ホストへのsystemd unit導入、初回timer実行、Cloudflare Tunnelを含む再起動試験。
+- Cloudflare Tunnelを含むホスト再起動試験。
 - SEO変更後の公開originでmobile / desktop LighthouseとCrUX INP、公開/直結TTFBを再計測する。
 
 ## 既知の制約
