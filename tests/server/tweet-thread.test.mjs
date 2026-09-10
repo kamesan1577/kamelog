@@ -105,7 +105,10 @@ test("tweets can form persistent parent/child threads", async () => {
     assert.equal(changedParent.status, 400);
 
     const posts = await (await request("posts")).json();
-    assert.equal(posts.find((post) => post.id === child.id).parentId, rootTweet.id);
+    assert.equal(
+      posts.find((post) => post.id === child.id).parentId,
+      rootTweet.id,
+    );
     assert.equal(
       posts.find((post) => post.id === grandchild.id).parentId,
       child.id,
