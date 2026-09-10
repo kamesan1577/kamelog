@@ -20,4 +20,10 @@ test("public site exposes source code and issue-report links", async ({
     "href",
     "https://github.com/kamesan1577/kamelog/issues/new",
   );
+
+  const mutualLinks = footer.getByRole("region", { name: "相互リンク" });
+  await expect(mutualLinks).toBeVisible();
+  await expect(
+    mutualLinks.getByRole("link", { name: "Shiryu のホームページを開く" }),
+  ).toHaveAttribute("href", "https://shiryu.win/");
 });

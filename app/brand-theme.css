@@ -118,6 +118,32 @@ textarea:focus {
   text-decoration-thickness: 2px;
 }
 
+.site-mutual-links {
+  color: #625e56;
+}
+
+.shiryu-banner {
+  display: inline-flex;
+  width: 200px;
+  max-width: 100%;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: 2px outset #c0c0c0;
+  background: linear-gradient(135deg, #000080, #4000a0);
+  color: #ffff00 !important;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none !important;
+  text-shadow: 1px 1px #000;
+}
+
+.shiryu-banner:hover {
+  color: #ffff80 !important;
+  text-decoration: none !important;
+}
+
 .tag-load-more:hover,
 .topic-list button:hover,
 .topic-list .active {

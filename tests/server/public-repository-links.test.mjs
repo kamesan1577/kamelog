@@ -12,3 +12,10 @@ test("public page exposes source and issue links for kamelog", () => {
   );
   assert.match(page, /kamelog の開発情報/);
 });
+
+test("public page exposes the Shiryu mutual link in the source footer", () => {
+  assert.match(page, /site-mutual-links/);
+  assert.match(page, /aria-labelledby="mutual-links-title"/);
+  assert.match(page, /https:\/\/shiryu\.win\//);
+  assert.match(page, /className="shiryu-banner"/);
+});
