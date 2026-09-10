@@ -87,11 +87,15 @@ function openThreadPost(id: string) {
 }
 
 function ThreadCard({ post, depth = 0 }: { post: ThreadPost; depth?: number }) {
+  const indent = Math.min(depth, 3) * 14;
   return (
     <button
       type="button"
       className={styles.card}
-      style={{ marginInlineStart: Math.min(depth, 3) * 14 }}
+      style={{
+        marginInlineStart: indent,
+        width: `calc(100% - ${indent}px)`,
+      }}
       onClick={() => openThreadPost(post.id)}
     >
       <span className={styles.cardMeta}>
