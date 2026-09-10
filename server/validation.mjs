@@ -27,6 +27,7 @@ export const postSchema = z
     body: z.string().max(100_000),
     tags: z.array(z.string().min(1).max(40)).max(20).default([]),
     pinned: z.boolean().default(false),
+    parentId: id.optional(),
     time: z
       .string()
       .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
@@ -49,6 +50,8 @@ export const postSchema = z
       ((!v.body.trim() && !v.images.length) || v.body.length > 5000)
     )
       c.addIssue({ code: "custom", message: "Invalid tweet" });
+    if (v.parentId && v.kind !== "tweet")
+      c.addIssue({ code: "custom", message: "Only tweets can join threads" });
     if (v.kind !== "tweet" && v.images.length)
       c.addIssue({ code: "custom", message: "Images only belong to tweets" });
     if (
