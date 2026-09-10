@@ -53,6 +53,31 @@ function removeExistingCards(body: HTMLElement) {
     card.remove();
   }
 }
+function owningTweetBody(card: HTMLElement) {
+  const host = card.previousElementSibling;
+  if (!(host instanceof HTMLElement)) return null;
+  if (host.classList.contains("tweet-body")) return host;
+  if (!host.classList.contains("post-focus")) return null;
+  return host.querySelector<HTMLElement>(".tweet-body");
+}
+
+function removeOrphanedCards() {
+  document
+    .querySelectorAll<HTMLElement>(
+      '.tweet-link-card[data-preview-owner="tweet-link-preview"]',
+    )
+    .forEach((card) => {
+      const body = owningTweetBody(card);
+      const source = body?.dataset.linkifiedSource ?? body?.textContent ?? "";
+      if (
+        !body ||
+        previewHost(body) !== card.previousElementSibling ||
+        firstHttpUrl(source) !== card.dataset.previewUrl
+      ) {
+        card.remove();
+      }
+    });
+}
 
 function removeDuplicateCards(body: HTMLElement) {
   const host = previewHost(body);
@@ -181,6 +206,7 @@ function enhanceTweet(body: HTMLElement) {
 }
 
 function scanTweets() {
+  removeOrphanedCards();
   document.querySelectorAll<HTMLElement>(".tweet-body").forEach(enhanceTweet);
 }
 

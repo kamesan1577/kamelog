@@ -3,6 +3,21 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   page,
   context,
 }) => {
+  await page.route("**/api/link-preview?*", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        url: "https://example.test/navigation-preview",
+        title: "画面遷移用の架空プレビュー",
+        description: "投稿にだけ表示されるプレビューです。",
+        image: null,
+        siteName: "Example Test",
+      }),
+    });
+  });
+  const draftBody =
+    "保存される架空の下書き https://example.test/navigation-preview";
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -78,7 +93,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     }),
   ).toBeHidden();
   await page.setViewportSize({ width: 390, height: 844 });
-  await mobileTweetBody.fill("保存される架空の下書き");
+  await mobileTweetBody.fill(draftBody);
   await page.keyboard.press("Escape");
   await expect(
     page.getByRole("heading", { name: "この投稿を保存しますか？" }),
@@ -88,7 +103,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     page.getByRole("dialog").filter({ hasText: "この投稿を保存しますか？" }),
   ).toHaveCount(0);
   await expect(page.getByPlaceholder("本文", { exact: true })).toHaveValue(
-    "保存される架空の下書き",
+    draftBody,
   );
   await page.keyboard.press("Escape");
   const saveDraft = page.getByRole("button", {
@@ -116,19 +131,33 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(modalBody).toBeFocused();
   await page.getByRole("button", { name: "下書きから貼り付け" }).click();
   await page.getByRole("button", { name: /保存される架空の下書き/ }).click();
-  await expect(modalBody).toHaveValue("保存される架空の下書き");
+  await expect(modalBody).toHaveValue(draftBody);
   await page.getByRole("button", { name: "投稿", exact: true }).click();
-  await expect(page.locator(".tweet-body")).toHaveText(
-    "保存される架空の下書き",
-  );
+  await expect(page.locator(".tweet-body")).toHaveText(draftBody);
   await page.reload();
   await page
     .getByRole("button", { name: "タイムライン", exact: true })
     .first()
     .click();
-  await expect(page.locator(".tweet-body")).toHaveText(
-    "保存される架空の下書き",
-  );
+  await expect(page.locator(".tweet-body")).toHaveText(draftBody);
+  await expect(page.locator(".tweet-link-card")).toHaveCount(1);
+  await page
+    .locator(".post-focus")
+    .filter({ hasText: draftBody })
+    .evaluate((button: HTMLButtonElement) => button.click());
+  await expect(page.locator(".detail-page .tweet-link-card")).toHaveCount(1);
+  for (let index = 0; index < 3; index += 1) {
+    await page
+      .getByRole("button", { name: "プロジェクト", exact: true })
+      .first()
+      .click();
+    await expect(page.locator(".projects-page")).toBeVisible();
+    await expect(page.locator(".tweet-link-card")).toHaveCount(0);
+    await page.goBack();
+    await expect(page.locator(".detail-page")).toBeVisible();
+    await expect(page.locator(".detail-page .tweet-link-card")).toHaveCount(1);
+  }
+  await page.getByRole("button", { name: "戻る", exact: true }).click();
   const inlineTweet = page.getByPlaceholder("いまどうしてる？");
   await page
     .locator(".composer-kinds .image-upload-button input")
