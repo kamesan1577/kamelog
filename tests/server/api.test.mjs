@@ -104,6 +104,27 @@ test("owner boundary, public projection, CRUD, CSRF, validation", async () => {
     ).json();
     assert.deepEqual(tagged.tags, ["タイトル", "Go", "開発日記"]);
     assert.equal((await (await request("posts?q=開発日記")).json()).length, 1);
+    store.replaceAutoTags(
+      tagged.id,
+      [{ tag: "データベース", confidence: 0.8123 }],
+      {
+        modelVersion: "local-tfidf-v1",
+        contentHash: "content-hash",
+        trainingHash: "training-hash",
+      },
+    );
+    const projected = await (await request("posts/" + tagged.id)).json();
+    assert.deepEqual(projected.tags, [
+      "タイトル",
+      "Go",
+      "開発日記",
+      "データベース",
+    ]);
+    assert.equal(projected.autoTags[0].tag, "データベース");
+    assert.equal(
+      (await (await request("posts?q=データベース")).json()).length,
+      1,
+    );
     assert.equal(
       (
         await request(

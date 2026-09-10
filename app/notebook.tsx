@@ -72,6 +72,12 @@ type Post = {
   date: string;
   updatedAt?: string;
   tags: string[];
+  autoTags?: {
+    tag: string;
+    confidence: number;
+    modelVersion: string;
+    contentHash: string;
+  }[];
   likes: number;
   views?: number;
   video?: string;
