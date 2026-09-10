@@ -65,6 +65,23 @@ test("tweet URLs become working links and render a compact OGP card without over
   await expect(card).toContainText("Example Test");
   await expect(card).toContainText("架空の説明文です。");
 
+  // A navigation/remount can leave stale cards beside the same tweet. The
+  // bridge must collapse them back to one card when it re-enhances the body.
+  await page.evaluate(() => {
+    const body = document.querySelector<HTMLElement>(".tweet-body");
+    const host = body?.closest<HTMLElement>(".post-focus") ?? body;
+    const existing = host?.nextElementSibling;
+    if (!body || !host || !(existing instanceof HTMLElement)) return;
+    for (let index = 0; index < 2; index += 1) {
+      host.insertAdjacentElement(
+        "afterend",
+        existing.cloneNode(true) as HTMLElement,
+      );
+    }
+    body.textContent = `${body.textContent ?? ""} `;
+  });
+  await expect(page.locator(".tweet-link-card")).toHaveCount(1);
+
   const popupPromise = context.waitForEvent("page");
   await link.click();
   const popup = await popupPromise;
