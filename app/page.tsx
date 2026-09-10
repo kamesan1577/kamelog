@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Notebook, { PreviewShell } from "./notebook";
+import TweetThreadBridge from "./tweet-thread-bridge";
 import { getStore } from "@/server/runtime.mjs";
 import {
   blogStructuredData,
@@ -178,6 +179,7 @@ export default async function Page({
         initialProfile={profile}
         initialSelected={params.post || null}
       />
+      <TweetThreadBridge initialPosts={posts} />
       <SourceFooter />
     </>
   );
