@@ -82,9 +82,13 @@ test("automatic tags are explicitly identified on desktop and mobile", async ({
   await expect(autoTag).toBeVisible();
   await expect(autoTag).toHaveText("AI · 自動タグ候補");
   await expect(autoTag).toHaveAttribute("title", "自動で付与されたタグ");
-  await expect(postArticle.getByText("手動タグ", { exact: true })).toBeVisible();
+  await expect(
+    postArticle.getByText("手動タグ", { exact: true }),
+  ).toBeVisible();
 
-  await postArticle.getByRole("button", { name: /AI · 自動タグ候補/ }).click();
+  await postArticle
+    .getByRole("button", { name: /AI · 自動タグ候補/ })
+    .click();
   await expect(page.locator(".filter-active")).toContainText("#自動タグ候補");
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -93,7 +97,9 @@ test("automatic tags are explicitly identified on desktop and mobile", async ({
 
   await page.locator(".filter-active button").click();
   await postArticle.locator(".post-focus").click();
-  await expect(page.locator(".detail-page").getByLabel("自動タグ 自動タグ候補")).toBeVisible();
+  await expect(
+    page.locator(".detail-page").getByLabel("自動タグ 自動タグ候補"),
+  ).toBeVisible();
   await expect(
     page.locator(".detail-page").getByText("手動タグ", { exact: true }),
   ).toBeVisible();
