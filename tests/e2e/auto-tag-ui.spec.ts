@@ -59,13 +59,14 @@ test("automatic tag labels", async ({ page }) => {
   const post = page
     .locator("article.post")
     .filter({ hasText: taggedPost.body });
-  const autoTag = page.getByLabel("自動タグ 自動タグ候補");
+  const autoTagName = "自動タグ 自動タグ候補";
+  const autoTag = page.getByLabel(autoTagName);
   await expect(autoTag).toBeVisible();
   await expect(autoTag).toHaveText("AI · 自動タグ候補");
   await expect(autoTag).toHaveAttribute("title", "自動で付与されたタグ");
   await expect(post.getByText("手動タグ", { exact: true })).toBeVisible();
 
-  await post.getByRole("button", { name: /AI · 自動タグ候補/ }).click();
+  await post.getByRole("button", { name: autoTagName }).click();
   await expect(page.locator(".filter-active")).toContainText("#自動タグ候補");
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -75,6 +76,6 @@ test("automatic tag labels", async ({ page }) => {
   await page.locator(".filter-active button").click();
   await post.locator(".post-focus").click();
   const detail = page.locator(".detail-page");
-  await expect(detail.getByLabel("自動タグ 自動タグ候補")).toBeVisible();
+  await expect(detail.getByLabel(autoTagName)).toBeVisible();
   await expect(detail.getByText("手動タグ", { exact: true })).toBeVisible();
 });
