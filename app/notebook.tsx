@@ -1459,11 +1459,21 @@ export default function Notebook({
                     <ImageGallery images={item.images} />
                   )}
                   <div className="tags">
-                    {item.tags.map((t) => (
-                      <Badge key={t} variant="gray">
-                        {t}
-                      </Badge>
-                    ))}
+                    {item.tags.map((t) => {
+                      const automatic = item.autoTags?.some(
+                        (autoTag) => autoTag.tag === t,
+                      );
+                      return (
+                        <Badge
+                          key={t}
+                          variant="gray"
+                          title={automatic ? "自動で付与されたタグ" : undefined}
+                          aria-label={automatic ? `自動タグ ${t}` : undefined}
+                        >
+                          {automatic ? `AI · ${t}` : t}
+                        </Badge>
+                      );
+                    })}
                   </div>
                   {actions(item)}
                 </section>
@@ -1810,13 +1820,28 @@ export default function Notebook({
                         )}
                         {p.tags.length > 0 && (
                           <div className="tags">
-                            {p.tags.map((t) => (
-                              <button key={t} onClick={() => setTag(t)}>
-                                <Badge variant={t === "Go" ? "blue" : "gray"}>
-                                  {t}
-                                </Badge>
-                              </button>
-                            ))}
+                            {p.tags.map((t) => {
+                              const automatic = p.autoTags?.some(
+                                (autoTag) => autoTag.tag === t,
+                              );
+                              return (
+                                <button key={t} onClick={() => setTag(t)}>
+                                  <Badge
+                                    variant={t === "Go" ? "blue" : "gray"}
+                                    title={
+                                      automatic
+                                        ? "自動で付与されたタグ"
+                                        : undefined
+                                    }
+                                    aria-label={
+                                      automatic ? `自動タグ ${t}` : undefined
+                                    }
+                                  >
+                                    {automatic ? `AI · ${t}` : t}
+                                  </Badge>
+                                </button>
+                              );
+                            })}
                           </div>
                         )}
                         {actions(p)}
