@@ -61,6 +61,10 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
     .filter({ hasText: "スレッドの架空ルート投稿" });
   await expect(rootPost).toBeVisible();
   await rootPost.locator(".post-focus").click();
+  await expect(page.getByRole("heading", { name: "スレッド" })).toBeVisible();
+  await expect(page.getByText("1件", { exact: true })).toBeVisible();
+  await expect(page.getByText("表示中の投稿", { exact: true })).toBeVisible();
+  await expect(page.getByText("この先の投稿", { exact: true })).toHaveCount(0);
   await expect(
     page.getByRole("button", { name: "続きをつなげる" }),
   ).toBeVisible();
@@ -71,12 +75,13 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
   await page.getByRole("button", { name: "つなげる" }).click();
 
   await expect(page).toHaveURL(/\?post=/);
-  await expect(page.locator(".detail-page > .tweet-body")).toHaveText(
+  await expect(page.locator(".detail-page .tweet-body")).toHaveText(
     "スレッドの架空の続き",
   );
   await expect(
     page.getByText("スレッドの架空ルート投稿", { exact: true }),
   ).toBeVisible();
+  await expect(page.getByText("2件", { exact: true })).toBeVisible();
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.reload();
