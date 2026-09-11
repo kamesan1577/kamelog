@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { MessageCircle, Plus, X } from "lucide-react";
+import { ChevronRight, MessageCircle, Plus, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import styles from "./tweet-thread-bridge.module.css";
@@ -66,6 +66,13 @@ function buildChildren(
     });
 }
 
+function countNodes(nodes: ThreadNode[]): number {
+  return nodes.reduce(
+    (count, node) => count + 1 + countNodes(node.children),
+    0,
+  );
+}
+
 function postHref(id: string) {
   const url = new URL(window.location.href);
   url.searchParams.set("post", id);
@@ -88,7 +95,7 @@ function openThreadPost(id: string) {
 }
 
 function ThreadCard({ post, depth = 0 }: { post: ThreadPost; depth?: number }) {
-  const indent = Math.min(depth, 3) * 14;
+  const indent = Math.min(depth, 3) * 18;
   return (
     <button
       type="button"
@@ -107,6 +114,9 @@ function ThreadCard({ post, depth = 0 }: { post: ThreadPost; depth?: number }) {
         })}
       </span>
       <span className={styles.cardBody}>{post.body || "画像のつぶやき"}</span>
+      <span className={styles.openLabel}>
+        この投稿を開く <ChevronRight size={14} />
+      </span>
       {!!post.images?.length && (
         <span className={styles.images}>
           {post.images.slice(0, 4).map((image, index) => (
@@ -132,9 +142,8 @@ function ThreadTree({
   nodes: ThreadNode[];
   depth?: number;
 }) {
-  return nodes.map((node, index) => (
+  return nodes.map((node) => (
     <Fragment key={node.post.id}>
-      {(index > 0 || depth === 0) && <div className={styles.connector} />}
       <ThreadCard post={node.post} depth={depth} />
       {node.children.length > 0 && (
         <ThreadTree nodes={node.children} depth={depth + 1} />
@@ -269,20 +278,27 @@ export default function TweetThreadBridge({
 
   const before = hosts.before
     ? createPortal(
-        ancestors.length > 0 ? (
-          <section
-            className={styles.before}
-            aria-label="このつぶやきの前の投稿"
-          >
-            <span className={styles.label}>スレッド</span>
-            {ancestors.map((post) => (
-              <Fragment key={post.id}>
-                <ThreadCard post={post} />
-                <div className={styles.connector} />
-              </Fragment>
-            ))}
-          </section>
-        ) : null,
+        <section
+          className={styles.before}
+          aria-label="スレッドの概要と前の投稿"
+        >
+          <header className={styles.header}>
+            <div>
+              <span className={styles.eyebrow}>THREAD</span>
+              <h1>スレッド</h1>
+            </div>
+            <span className={styles.count}>
+              {ancestors.length + 1 + countNodes(children)}件
+            </span>
+          </header>
+          {ancestors.length > 0 && (
+            <div className={styles.ancestors}>
+              {ancestors.map((post) => (
+                <ThreadCard key={post.id} post={post} />
+              ))}
+            </div>
+          )}
+        </section>,
         hosts.before,
       )
     : null;
@@ -291,7 +307,8 @@ export default function TweetThreadBridge({
     ? createPortal(
         <section className={styles.after} aria-label="このつぶやきの続き">
           {children.length > 0 && (
-            <div className={styles.children}>
+            <div className={styles.children} aria-label="続きの投稿">
+              <span className={styles.sectionLabel}>この先の投稿</span>
               <ThreadTree nodes={children} />
             </div>
           )}

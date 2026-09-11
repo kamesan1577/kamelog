@@ -58,6 +58,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
+import threadStyles from "./tweet-thread-bridge.module.css";
 import "./landing.css";
 
 type Kind = "blog" | "tweet" | "vlog";
@@ -1436,46 +1437,69 @@ export default function Notebook({
                   </div>
                 </section>
               ) : item ? (
-                <section className="detail-page">
+                <section
+                  className={`detail-page${
+                    item.kind === "tweet" ? " tweet-thread-detail" : ""
+                  }`}
+                >
                   <button className="back-button" onClick={closePost}>
                     <ArrowLeft size={17} />
                     戻る
                   </button>
-                  {meta(item)}
-                  {item.kind === "blog" ? (
-                    <Markdown
-                      text={
-                        item.body.startsWith("# ")
-                          ? item.body
-                          : "# " + item.title + "\n\n" + item.body
-                      }
-                    />
-                  ) : item.kind === "vlog" ? (
-                    <VlogFrame post={item} />
-                  ) : (
-                    <p className="tweet-body">{item.body}</p>
-                  )}
                   {item.kind === "tweet" && (
-                    <ImageGallery images={item.images} />
+                    <div data-kamelog-thread-before="true" />
                   )}
-                  <div className="tags">
-                    {item.tags.map((t) => {
-                      const automatic = item.autoTags?.some(
-                        (autoTag) => autoTag.tag === t,
-                      );
-                      return (
-                        <Badge
-                          key={t}
-                          variant="gray"
-                          title={automatic ? "自動で付与されたタグ" : undefined}
-                          aria-label={automatic ? `自動タグ ${t}` : undefined}
-                        >
-                          {automatic ? `AI · ${t}` : t}
-                        </Badge>
-                      );
-                    })}
+                  <div
+                    className={
+                      item.kind === "tweet" ? threadStyles.current : undefined
+                    }
+                  >
+                    {item.kind === "tweet" && (
+                      <span className={threadStyles.currentLabel}>
+                        表示中の投稿
+                      </span>
+                    )}
+                    {meta(item)}
+                    {item.kind === "blog" ? (
+                      <Markdown
+                        text={
+                          item.body.startsWith("# ")
+                            ? item.body
+                            : "# " + item.title + "\n\n" + item.body
+                        }
+                      />
+                    ) : item.kind === "vlog" ? (
+                      <VlogFrame post={item} />
+                    ) : (
+                      <p className="tweet-body">{item.body}</p>
+                    )}
+                    {item.kind === "tweet" && (
+                      <ImageGallery images={item.images} />
+                    )}
+                    <div className="tags">
+                      {item.tags.map((t) => {
+                        const automatic = item.autoTags?.some(
+                          (autoTag) => autoTag.tag === t,
+                        );
+                        return (
+                          <Badge
+                            key={t}
+                            variant="gray"
+                            title={
+                              automatic ? "自動で付与されたタグ" : undefined
+                            }
+                            aria-label={automatic ? `自動タグ ${t}` : undefined}
+                          >
+                            {automatic ? `AI · ${t}` : t}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                    {actions(item)}
                   </div>
-                  {actions(item)}
+                  {item.kind === "tweet" && (
+                    <div data-kamelog-thread-after="true" />
+                  )}
                 </section>
               ) : view === "home" ? (
                 <section className="landing-page">
