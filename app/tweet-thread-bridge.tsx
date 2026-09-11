@@ -228,7 +228,7 @@ export default function TweetThreadBridge({
     let cancelled = false;
     void api<ThreadPost[]>("posts")
       .then((nextPosts) => {
-        if (!cancelled) setPosts(nextPosts);
+        if (!cancelled && Array.isArray(nextPosts)) setPosts(nextPosts);
       })
       .catch(() => undefined);
     return () => {
