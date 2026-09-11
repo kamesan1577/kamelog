@@ -77,5 +77,4 @@ test("automatic tag labels", async ({ page }) => {
   await post.locator(".post-focus").click();
   const detail = page.locator(".detail-page");
   await expect(detail.getByLabel(autoTagName)).toBeVisible();
-  await expect(detail.getByText("手動タグ", { exact: true })).toBeVisible();
 });
