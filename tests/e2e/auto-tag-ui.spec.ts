@@ -43,6 +43,13 @@ test("automatic tag labels", async ({ page }) => {
       body: JSON.stringify(taggedPost),
     });
   });
+  await page.route("**/api/posts/**", async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(taggedPost),
+    });
+  });
 
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
