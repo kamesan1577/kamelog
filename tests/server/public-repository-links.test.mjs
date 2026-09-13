@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const page = readFileSync("app/page.tsx", "utf8");
+const nextConfig = readFileSync("next.config.ts", "utf8");
 
 test("public page exposes source and issue links for kamelog", () => {
   assert.match(page, /https:\/\/github\.com\/kamesan1577\/kamelog["']/);
@@ -17,4 +18,8 @@ test("public page uses Shiryu's current mutual-link banner", () => {
   assert.match(page, /https:\/\/shiryu\.win\//);
   assert.match(page, /https:\/\/shiryu\.win\/banner\.png/);
   assert.doesNotMatch(page, /linear-gradient\(135deg,#000080,#4000a0\)/);
+});
+
+test("CSP allows the Shiryu banner image source", () => {
+  assert.match(nextConfig, /img-src 'self' data: https:\/\/shiryu\.win;/);
 });
