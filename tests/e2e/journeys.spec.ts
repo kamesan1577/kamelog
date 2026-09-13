@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   page,
   context,
-}) => {
+}, testInfo) => {
   await page.route("**/api/link-preview?*", async (route) => {
     await route.fulfill({
       status: 200,
@@ -93,6 +93,17 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     }),
   ).toBeHidden();
   await page.setViewportSize({ width: 390, height: 844 });
+  const xSwitch = page.getByRole("switch", { name: "Xにも投稿" });
+  await expect(xSwitch).toBeChecked();
+  await page.locator(".editor-dialog").screenshot({
+    path: testInfo.outputPath("landing-x-intent-mobile.png"),
+  });
+  await xSwitch.uncheck();
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem("kamelog:x-intent:tweet")),
+    )
+    .toBe("false");
   await mobileTweetBody.fill(draftBody);
   await page.keyboard.press("Escape");
   await expect(
@@ -126,6 +137,14 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .first()
     .click();
   await expect(page.locator(".desktop-composer")).toBeVisible();
+  await page.locator(".desktop-composer").screenshot({
+    path: testInfo.outputPath("landing-x-intent-desktop.png"),
+  });
+  await expect(
+    page
+      .locator(".desktop-composer")
+      .getByRole("switch", { name: "Xにも投稿" }),
+  ).not.toBeChecked();
   await page.keyboard.press("n");
   const modalBody = page.getByPlaceholder("本文", { exact: true });
   await expect(modalBody).toBeFocused();
@@ -218,7 +237,18 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     1,
   );
   await inlineTweet.fill("ホームから直接投稿する架空のつぶやき");
+  await page
+    .locator(".desktop-composer")
+    .getByRole("switch", { name: "Xにも投稿" })
+    .check();
+  const xPopup = page.waitForEvent("popup");
   await inlineTweet.press("Control+Enter");
+  const xTab = await xPopup;
+  await expect(xTab).toHaveURL(/x\.com\/intent\/tweet\?text=/);
+  expect(new URL(xTab.url()).searchParams.get("text")).toContain(
+    "ホームから直接投稿する架空のつぶやき\n",
+  );
+  await xTab.close();
   await expect(page.locator(".tweet-body").first()).toHaveText(
     "ホームから直接投稿する架空のつぶやき",
   );

@@ -31,3 +31,63 @@
   justify-self: end;
   margin-left: 0;
 }
+
+.x-intent-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  min-height: 48px;
+  padding: 5px 12px;
+  cursor: pointer;
+  color: #49463f;
+  font-size: 13px;
+}
+.x-intent-toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.x-intent-track {
+  width: 42px;
+  height: 24px;
+  border-radius: 14px;
+  background: #c8c5be;
+  padding: 3px;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.x-intent-track span {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.15s;
+}
+.x-intent-toggle input:checked + .x-intent-track {
+  background: #37352f;
+}
+.x-intent-toggle input:checked + .x-intent-track span {
+  transform: translateX(18px);
+}
+.x-intent-toggle input:focus-visible + .x-intent-track {
+  outline: 2px solid #37352f;
+  outline-offset: 3px;
+}
+.desktop-composer .composer-kinds > .x-intent-toggle {
+  grid-column: 1 / -1;
+  border-top: 1px solid #f0efec;
+}
+.x-intent-fallback {
+  position: fixed;
+  z-index: 100;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  border-radius: 22px;
+  background: #37352f;
+  color: white;
+  box-shadow: 0 3px 14px #0003;
+}

@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-13 Issue #96: X Web Intentを新規投稿に追加。つぶやき・ブログは初回ON、vlogはOFF、端末で種別ごとに保存。公式twitter-textで280 weighted charactersを検証し、保存失敗時の空タブ閉鎖とポップアップ遮断時の手動リンクを実装。CIおよび実機確認はPRで追跡する。
+
 ## 入口
 
 `AGENTS.md` → `spec/invariants/` → `spec/current/` → 関連ADR → テスト/実装の順に読む。
