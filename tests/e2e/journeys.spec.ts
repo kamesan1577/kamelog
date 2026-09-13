@@ -69,14 +69,6 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page).toHaveURL("/");
   await expect(page.locator(".mobile-create")).toBeVisible();
   await page.locator(".mobile-create").click();
-  const xSwitch = page.getByRole("switch", { name: "Xにも投稿" });
-  await expect(xSwitch).toBeChecked();
-  await xSwitch.uncheck();
-  await expect
-    .poll(() =>
-      page.evaluate(() => localStorage.getItem("kamelog:x-intent:tweet")),
-    )
-    .toBe("false");
   const mobileTweetBody = page.getByPlaceholder("本文", { exact: true });
   await expect(mobileTweetBody).toBeFocused();
   await expect
@@ -101,6 +93,14 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     }),
   ).toBeHidden();
   await page.setViewportSize({ width: 390, height: 844 });
+  const xSwitch = page.getByRole("switch", { name: "Xにも投稿" });
+  await expect(xSwitch).toBeChecked();
+  await xSwitch.uncheck();
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem("kamelog:x-intent:tweet")),
+    )
+    .toBe("false");
   await mobileTweetBody.fill(draftBody);
   await page.keyboard.press("Escape");
   await expect(
