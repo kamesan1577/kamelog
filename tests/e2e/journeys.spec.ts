@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   page,
   context,
-}) => {
+}, testInfo) => {
   await page.route("**/api/link-preview?*", async (route) => {
     await route.fulfill({
       status: 200,
@@ -95,6 +95,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   const xSwitch = page.getByRole("switch", { name: "Xにも投稿" });
   await expect(xSwitch).toBeChecked();
+  await page.locator(".editor-dialog").screenshot({
+    path: testInfo.outputPath("landing-x-intent-mobile.png"),
+  });
   await xSwitch.uncheck();
   await expect
     .poll(() =>
@@ -134,6 +137,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .first()
     .click();
   await expect(page.locator(".desktop-composer")).toBeVisible();
+  await page.locator(".desktop-composer").screenshot({
+    path: testInfo.outputPath("landing-x-intent-desktop.png"),
+  });
   await expect(
     page
       .locator(".desktop-composer")
