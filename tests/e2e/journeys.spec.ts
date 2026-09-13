@@ -69,6 +69,14 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page).toHaveURL("/");
   await expect(page.locator(".mobile-create")).toBeVisible();
   await page.locator(".mobile-create").click();
+  const xSwitch = page.getByRole("switch", { name: "Xにも投稿" });
+  await expect(xSwitch).toBeChecked();
+  await xSwitch.uncheck();
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem("kamelog:x-intent:tweet")),
+    )
+    .toBe("false");
   const mobileTweetBody = page.getByPlaceholder("本文", { exact: true });
   await expect(mobileTweetBody).toBeFocused();
   await expect
@@ -126,6 +134,11 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .first()
     .click();
   await expect(page.locator(".desktop-composer")).toBeVisible();
+  await expect(
+    page
+      .locator(".desktop-composer")
+      .getByRole("switch", { name: "Xにも投稿" }),
+  ).not.toBeChecked();
   await page.keyboard.press("n");
   const modalBody = page.getByPlaceholder("本文", { exact: true });
   await expect(modalBody).toBeFocused();
@@ -218,7 +231,18 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     1,
   );
   await inlineTweet.fill("ホームから直接投稿する架空のつぶやき");
+  await page
+    .locator(".desktop-composer")
+    .getByRole("switch", { name: "Xにも投稿" })
+    .check();
+  const xPopup = page.waitForEvent("popup");
   await inlineTweet.press("Control+Enter");
+  const xTab = await xPopup;
+  await expect(xTab).toHaveURL(/x\.com\/intent\/tweet\?text=/);
+  expect(new URL(xTab.url()).searchParams.get("text")).toContain(
+    "ホームから直接投稿する架空のつぶやき\n",
+  );
+  await xTab.close();
   await expect(page.locator(".tweet-body").first()).toHaveText(
     "ホームから直接投稿する架空のつぶやき",
   );

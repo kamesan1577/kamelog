@@ -58,6 +58,7 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
+import { buildXIntentUrl } from "@/lib/x-intent.mjs";
 import threadStyles from "./tweet-thread-bridge.module.css";
 import "./landing.css";
 
@@ -501,6 +502,12 @@ export default function Notebook({
     [inlineBody, setInlineBody] = useState(""),
     [editorImages, setEditorImages] = useState<string[]>([]),
     [inlineImages, setInlineImages] = useState<string[]>([]),
+    [xIntent, setXIntent] = useState<Record<Kind, boolean>>({
+      blog: true,
+      tweet: true,
+      vlog: false,
+    }),
+    [xFallback, setXFallback] = useState<string | null>(null),
     [uploadingImages, setUploadingImages] = useState(false),
     [remove, setRemove] = useState<string | null>(null);
   const [name, setName] = useState(""),
@@ -521,6 +528,83 @@ export default function Notebook({
     rec = useRef<MediaRecorder | null>(null),
     clipData = useRef<Blob | null>(null),
     urls = useRef<string[]>([]);
+  useEffect(() => {
+    const stored = {
+      blog:
+        localStorage.getItem("kamelog:x-intent:blog") === null
+          ? true
+          : localStorage.getItem("kamelog:x-intent:blog") === "true",
+      tweet:
+        localStorage.getItem("kamelog:x-intent:tweet") === null
+          ? true
+          : localStorage.getItem("kamelog:x-intent:tweet") === "true",
+      vlog:
+        localStorage.getItem("kamelog:x-intent:vlog") === null
+          ? false
+          : localStorage.getItem("kamelog:x-intent:vlog") === "true",
+    };
+    queueMicrotask(() => setXIntent(stored));
+  }, []);
+  const toggleXIntent = (target: Kind) => {
+    const next = !xIntent[target];
+    setXIntent((current) => ({ ...current, [target]: next }));
+    try {
+      localStorage.setItem(`kamelog:x-intent:${target}`, String(next));
+    } catch {
+      /* Browser storage may be disabled. */
+    }
+  };
+  const prepareX = (target: Kind) => {
+    if (!xIntent[target]) return null;
+    setXFallback(null);
+    try {
+      const popup = window.open("about:blank", "_blank");
+      if (popup) popup.opener = null;
+      return popup;
+    } catch {
+      return null;
+    }
+  };
+  const completeX = (post: Post, popup: Window | null) => {
+    if (!xIntent[post.kind]) return;
+    const url = new URL("/", window.location.origin);
+    url.searchParams.set("post", post.id);
+    const intent = buildXIntentUrl(post, url.toString());
+    try {
+      if (popup && !popup.closed) {
+        popup.location.href = intent;
+        return;
+      }
+    } catch {
+      /* Show the manual action when the tab is unavailable. */
+    }
+    setXFallback(intent);
+  };
+  const xToggle = (target: Kind) => (
+    <label className="x-intent-toggle">
+      <span>Xにも投稿</span>
+      <input
+        type="checkbox"
+        role="switch"
+        checked={xIntent[target]}
+        onChange={() => toggleXIntent(target)}
+      />
+      <span className="x-intent-track" aria-hidden="true">
+        <span />
+      </span>
+    </label>
+  );
+  const xFallbackAction = xFallback && (
+    <a
+      className="x-intent-fallback"
+      href={xFallback}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={() => setXFallback(null)}
+    >
+      Xで開く
+    </a>
+  );
   useEffect(() => {
     let cancelled = false;
     api<{ authenticated: boolean }>("auth/session")
@@ -827,55 +911,73 @@ export default function Notebook({
       setEditor(false);
       setCloseAsk(false);
     });
-  const publish = () =>
-    guard(async () => {
-      if (kind === "vlog") return;
-      const old = posts.find((p) => p.id === editId);
-      const saved = await api<Post>(
-        "posts" + (editId ? "/" + editId : ""),
-        editId ? "PUT" : "POST",
-        {
-          kind,
-          title: title.trim(),
-          body: body.trim(),
-          tags: old?.tags || [],
-          pinned: old?.pinned || false,
-          images: kind === "tweet" ? editorImages : [],
-          ...(old ? { revision: old.revision } : {}),
-        },
-      );
-      setPosts((ps) => [saved, ...ps.filter((p) => p.id !== saved.id)]);
-      setEditor(false);
-      nav("timeline");
-      setFilter("all");
-      toast.success(editId ? "更新しました" : "投稿しました");
-      if (draftId) {
-        try {
-          await api("drafts/" + draftId, "DELETE", undefined, {
-            "If-Match": String(drafts.find((d) => d.id === draftId)?.revision),
-          });
-          setDrafts((ds) => ds.filter((d) => d.id !== draftId));
-        } catch {
-          toast.error("投稿済みです。下書きの削除だけ失敗しました。");
+  const publish = () => {
+    if (inFlight.current || kind === "vlog") return;
+    const popup = !editId ? prepareX(kind) : null;
+    return guard(async () => {
+      try {
+        const old = posts.find((p) => p.id === editId);
+        const saved = await api<Post>(
+          "posts" + (editId ? "/" + editId : ""),
+          editId ? "PUT" : "POST",
+          {
+            kind,
+            title: title.trim(),
+            body: body.trim(),
+            tags: old?.tags || [],
+            pinned: old?.pinned || false,
+            images: kind === "tweet" ? editorImages : [],
+            ...(old ? { revision: old.revision } : {}),
+          },
+        );
+        setPosts((ps) => [saved, ...ps.filter((p) => p.id !== saved.id)]);
+        setEditor(false);
+        nav("timeline");
+        setFilter("all");
+        toast.success(editId ? "更新しました" : "投稿しました");
+        if (!editId) completeX(saved, popup);
+        if (draftId) {
+          try {
+            await api("drafts/" + draftId, "DELETE", undefined, {
+              "If-Match": String(
+                drafts.find((d) => d.id === draftId)?.revision,
+              ),
+            });
+            setDrafts((ds) => ds.filter((d) => d.id !== draftId));
+          } catch {
+            toast.error("投稿済みです。下書きの削除だけ失敗しました。");
+          }
         }
+      } catch (error) {
+        popup?.close();
+        throw error;
       }
     });
+  };
   const publishInlineTweet = () => {
+    if (inFlight.current) return;
     const text = inlineBody.trim();
     if (!text && !inlineImages.length) return;
+    const popup = prepareX("tweet");
     void guard(async () => {
-      const saved = await api<Post>("posts", "POST", {
-        kind: "tweet",
-        title: "",
-        body: text,
-        tags: [],
-        pinned: false,
-        images: inlineImages,
-      });
-      setPosts((ps) => [saved, ...ps]);
-      setInlineBody("");
-      setInlineImages([]);
-      toast.success("投稿しました");
+      try {
+        const saved = await api<Post>("posts", "POST", {
+          kind: "tweet",
+          title: "",
+          body: text,
+          tags: [],
+          pinned: false,
+          images: inlineImages,
+        });
+        setPosts((ps) => [saved, ...ps]);
+        setInlineBody("");
+        setInlineImages([]);
+        toast.success("投稿しました");
+        completeX(saved, popup);
+      } catch (error) {
+        popup?.close();
+        throw error;
+      }
     });
   };
   const uploadImages = async (
@@ -1032,29 +1134,38 @@ export default function Notebook({
     setClip(u);
     stopCamera();
   };
-  const postVlog = () =>
-    guard(async () => {
-      if (!clip || !clipData.current) return;
-      const upload = await fetch("/api/media?seconds=" + seconds, {
-        method: "POST",
-        body: clipData.current,
-      });
-      const result = await upload.json();
-      if (!upload.ok) throw new Error(result.error);
-      const saved = await api<Post>("posts", "POST", {
-        kind: "vlog",
-        title: "",
-        body: caption.trim(),
-        time: vtime,
-        tags: [],
-        video: result.video,
-      });
-      setPosts((ps) => [saved, ...ps]);
-      closeComposer();
-      nav("timeline");
-      setFilter("all");
-      toast.success("vlogを投稿しました");
+  const postVlog = () => {
+    if (inFlight.current || !clip || !clipData.current) return;
+    const popup = prepareX("vlog");
+    return guard(async () => {
+      try {
+        if (!clip || !clipData.current) return;
+        const upload = await fetch("/api/media?seconds=" + seconds, {
+          method: "POST",
+          body: clipData.current,
+        });
+        const result = await upload.json();
+        if (!upload.ok) throw new Error(result.error);
+        const saved = await api<Post>("posts", "POST", {
+          kind: "vlog",
+          title: "",
+          body: caption.trim(),
+          time: vtime,
+          tags: [],
+          video: result.video,
+        });
+        setPosts((ps) => [saved, ...ps]);
+        closeComposer();
+        nav("timeline");
+        setFilter("all");
+        toast.success("vlogを投稿しました");
+        completeX(saved, popup);
+      } catch (error) {
+        popup?.close();
+        throw error;
+      }
     });
+  };
   const shown = posts
     .filter(
       (p) =>
@@ -1200,6 +1311,7 @@ export default function Notebook({
   return (
     <div className="notebook">
       <Toaster position="bottom-center" theme="light" />
+      {xFallbackAction}
       <div className="site-layout">
         <aside className="public-sidebar">
           <button className="site-name" onClick={() => nav("home")}>
@@ -1715,6 +1827,7 @@ export default function Notebook({
                         </div>
                       )}
                       <div className="composer-kinds">
+                        {xToggle("tweet")}
                         <label className="image-upload-button">
                           <ImageIcon />
                           画像
@@ -2121,6 +2234,7 @@ export default function Notebook({
               </TabsTrigger>
             </TabsList>
           </Tabs>
+          {xToggle(kind)}
           {kind === "vlog" ? (
             <>
               <Tabs
