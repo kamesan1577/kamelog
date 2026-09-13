@@ -12,3 +12,9 @@ test("public page exposes source and issue links for kamelog", () => {
   );
   assert.match(page, /kamelog の開発情報/);
 });
+
+test("public page uses Shiryu's current mutual-link banner", () => {
+  assert.match(page, /https:\/\/shiryu\.win\//);
+  assert.match(page, /https:\/\/shiryu\.win\/banner\.png/);
+  assert.doesNotMatch(page, /linear-gradient\(135deg,#000080,#4000a0\)/);
+});

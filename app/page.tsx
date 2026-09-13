@@ -63,23 +63,23 @@ function SourceFooter() {
       </div>
       <div className="mx-auto mt-5 max-w-5xl border-t border-[#eceae5] pt-4">
         <p className="mb-2 font-medium text-[#625e56]">相互リンク</p>
-        <a href="https://shiryu.win/" target="_blank" rel="noreferrer">
+        <a
+          href="https://shiryu.win/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Shiryu のホームページを開く"
+        >
           <span
+            aria-hidden="true"
             style={{
-              display: "inline-block",
+              display: "block",
               width: "200px",
               height: "40px",
-              border: "2px outset #c0c0c0",
-              background: "linear-gradient(135deg,#000080,#4000a0)",
-              color: "#ffff00",
-              textAlign: "center",
-              lineHeight: "40px",
-              fontWeight: "bold",
-              fontSize: "13px",
+              backgroundImage: 'url("https://shiryu.win/banner.png")',
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "200px 40px",
             }}
-          >
-            Shiryu のホームページ
-          </span>
+          />
         </a>
       </div>
     </footer>
