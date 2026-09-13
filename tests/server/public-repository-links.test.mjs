@@ -21,8 +21,5 @@ test("public page uses Shiryu's current mutual-link banner", () => {
 });
 
 test("CSP allows the Shiryu banner image source", () => {
-  assert.match(
-    nextConfig,
-    /img-src 'self' data: https:\/\/shiryu\.win;/,
-  );
+  assert.match(nextConfig, /img-src 'self' data: https:\/\/shiryu\.win;/);
 });
