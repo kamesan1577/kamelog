@@ -72,7 +72,8 @@
   gap: 12px;
   margin: 14px 0;
 }
-.engineering-works a {
+.engineering-works a,
+.engineering-works > div {
   border: 1px solid #dededb;
   border-radius: 6px;
   padding: 14px;
