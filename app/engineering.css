@@ -1,0 +1,217 @@
+.engineering-role {
+  display: block;
+  font-size: 0.48em;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: #787774;
+  margin-top: 4px;
+}
+.engineering-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 16px 0 0;
+}
+.engineering-links a,
+.engineering-email,
+.engineering-more {
+  color: #37352f;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-size: 13px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+}
+.engineering-profile {
+  margin-top: 20px;
+  background: #fff;
+  border: 1px solid #dededb;
+  border-radius: 10px;
+  padding: 8px 28px 24px;
+  color: #5f5e5b;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.engineering-profile section {
+  padding: 20px 0;
+  border-bottom: 1px solid #dededb;
+}
+.engineering-profile section:last-child {
+  border: 0;
+  padding-bottom: 0;
+}
+.engineering-profile h2,
+.project-article h2 {
+  color: #37352f;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+.engineering-profile h3 {
+  color: #37352f;
+  font-size: 15px;
+  font-weight: 700;
+  margin: 16px 0 8px;
+}
+.engineering-profile p {
+  margin: 5px 0 10px;
+}
+.engineering-profile ul,
+.project-article ul {
+  padding-left: 20px;
+  margin: 9px 0;
+}
+.engineering-profile li,
+.project-article li {
+  margin: 5px 0;
+}
+.engineering-works {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 14px 0;
+}
+.engineering-works a {
+  border: 1px solid #dededb;
+  border-radius: 6px;
+  padding: 14px;
+  color: #37352f;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.engineering-works a:hover,
+.engineering-works a:focus-visible {
+  background: #f7f7f5;
+}
+.engineering-works span {
+  color: #5f5e5b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.engineering-works small {
+  margin-top: auto;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.engineering-outcomes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+.engineering-outcomes strong,
+.engineering-skills strong {
+  color: #37352f;
+}
+.engineering-outcomes p {
+  font-size: 13px;
+}
+.engineering-skills {
+  margin: 0;
+}
+.engineering-skills > div,
+.project-article dl > div {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  padding: 9px 0;
+  border-bottom: 1px solid #eeede9;
+  gap: 12px;
+}
+.engineering-skills dt,
+.project-article dt {
+  color: #787774;
+}
+.engineering-skills dd,
+.project-article dd {
+  margin: 0;
+}
+.engineering-skills dd span {
+  display: block;
+  font-size: 13px;
+}
+.project-article {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 60px 28px 100px;
+  color: #5f5e5b;
+  line-height: 1.8;
+  background: #fff;
+  min-height: 100dvh;
+}
+.project-article > a {
+  color: #37352f;
+  text-underline-offset: 4px;
+}
+.project-article h1 {
+  font-size: 32px;
+  color: #37352f;
+  margin: 24px 0 4px;
+}
+.project-article section {
+  border-top: 1px solid #dededb;
+  padding-top: 24px;
+  margin-top: 28px;
+}
+.project-summary {
+  font-size: 17px;
+}
+.project-architecture {
+  padding: 14px;
+  background: #f7f7f5;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 700px) {
+  .engineering-profile {
+    padding: 4px 18px 18px;
+  }
+  .engineering-works,
+  .engineering-outcomes {
+    grid-template-columns: 1fr;
+  }
+  .engineering-skills > div,
+  .project-article dl > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .project-article {
+    padding: 28px 20px 90px;
+  }
+}
+.engineering-career {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.engineering-career li {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 16px;
+  padding: 15px 0;
+  margin: 0;
+  border-top: 1px solid #eeede9;
+}
+.engineering-career li:first-child {
+  border-top: 0;
+}
+.engineering-career time {
+  color: #787774;
+  font-size: 13px;
+  padding-top: 2px;
+}
+.engineering-career strong {
+  color: #37352f;
+}
+.engineering-career p {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+@media (max-width: 700px) {
+  .engineering-career li {
+    grid-template-columns: 48px 1fr;
+    gap: 12px;
+  }
+}

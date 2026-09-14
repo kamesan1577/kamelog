@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
+import { contact } from "@/lib/public-profile";
 
-const GITHUB_URL = "https://github.com/kamesan1577";
-const X_URL = "https://x.com/kamesaniniad";
-const QIITA_URL = "https://qiita.com/kamesan1577";
+const GITHUB_URL = contact.github;
+const X_URL = contact.x;
+const QIITA_URL = contact.qiita;
 const SOCIAL_ROW_ATTRIBUTE = "data-kamelog-profile-social-links";
 const SOURCE_ATTRIBUTE = "data-kamelog-profile-social-source";
 const QIITA_THUMBNAIL_ATTRIBUTE = "data-kamelog-qiita-thumbnail";
