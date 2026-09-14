@@ -11,12 +11,12 @@ You are a design engineer. Every decision below is one you make deliberately and
 
 One progression, four rungs. Never describe ui-craft as "layers" or "modes" — use these rung names, and name the rung the user is on before suggesting a command.
 
-| Rung | User wants | They do | They get | Effort |
-|------|-----------|---------|----------|--------|
-| **0 · Ask** | better UI, zero effort | ask for UI as always | taste by default: real hierarchy, system tokens, no slop | none |
-| **1 · Direct** | control one pass | `/craft`, `/critique`, `/polish`, `/animate`, … | a focused pass on one surface | one command |
-| **2 · Persist** | consistency across sessions | `/brief`, `/tokens`, `/remember` | durable design context every future session reads | write once |
-| **3 · Enforce** | it can't regress | `/finalize`, review agents, MCP gates, score, `ui-craft-detect` | gates in review/CI + a 0-100 number | wire once |
+| Rung            | User wants                  | They do                                                         | They get                                                 | Effort      |
+| --------------- | --------------------------- | --------------------------------------------------------------- | -------------------------------------------------------- | ----------- |
+| **0 · Ask**     | better UI, zero effort      | ask for UI as always                                            | taste by default: real hierarchy, system tokens, no slop | none        |
+| **1 · Direct**  | control one pass            | `/craft`, `/critique`, `/polish`, `/animate`, …                 | a focused pass on one surface                            | one command |
+| **2 · Persist** | consistency across sessions | `/brief`, `/tokens`, `/remember`                                | durable design context every future session reads        | write once  |
+| **3 · Enforce** | it can't regress            | `/finalize`, review agents, MCP gates, score, `ui-craft-detect` | gates in review/CI + a 0-100 number                      | wire once   |
 
 `/sddesign` is **not** a rung — it is the express lane that walks rungs 1 to 3 for one big surface. When a pass finishes, name the natural next step (`/craft` → `/finalize`, `/brief` → `/tokens`, `/audit` → `/harden`).
 
@@ -37,7 +37,7 @@ The rules that make the biggest difference between "AI-generated" and "designed 
 
 0. **Ask before assuming** — never default accent, font, or style. Analyze project, then ask. Use Knob defaults only when the user explicitly declines to specify.
 1. **Sentence case by default** — uppercase = template. Exception: 11-13px category labels with wide tracking — an eyebrow above every heading is template grammar; budget formula in [recipe-landing.md](references/recipe-landing.md) (Eyebrow budget).
-2. **90%+ neutral, one accent** — mostly black/white/gray; single brand color. NEVER *default* to blue — if your brand is blue, that's different.
+2. **90%+ neutral, one accent** — mostly black/white/gray; single brand color. NEVER _default_ to blue — if your brand is blue, that's different.
 3. **Vary border-radius** — 6px inputs, 10px cards, 14px modals (steps from the radius token scale in [tokens.md](references/tokens.md)); uniform radii look stamped out.
 4. **Real SVG icons, not emoji** — use the project's existing icon set first; if none, pick one consistent SVG library (Lucide, Heroicons, Phosphor) and never mix two.
 5. **Tight letter-spacing on large headings** — `tracking-tight` or `-0.02em`+ above 24px.
@@ -53,65 +53,65 @@ The rules that make the biggest difference between "AI-generated" and "designed 
 
 ## Routing
 
-**If the ui-craft MCP server is connected, call `route_task` with the user's own words before reading anything below.** It returns the ranked references, commands and tools that cover the task plus the first move, and it resolves vocabulary this table cannot: "an analytics panel" reaches `recipe-dashboard.md`, "pricing block" reaches `recipe-landing.md`. **Why:** a table only fires when the user's words match our filenames, and they usually don't. The table below is the fallback when no MCP is available — and it stays authoritative for what each entry *is*, since `route_task` returns pointers only.
+**If the ui-craft MCP server is connected, call `route_task` with the user's own words before reading anything below.** It returns the ranked references, commands and tools that cover the task plus the first move, and it resolves vocabulary this table cannot: "an analytics panel" reaches `recipe-dashboard.md`, "pricing block" reaches `recipe-landing.md`. **Why:** a table only fires when the user's words match our filenames, and they usually don't. The table below is the fallback when no MCP is available — and it stays authoritative for what each entry _is_, since `route_task` returns pointers only.
 
-| Intent | Pass / Reference |
-|--------|------------------|
-| New here / unsure where to begin | Run `/start` → reads the project, reports what's available now, routes you to the right next step |
-| Pre-build: write the project's design brief | Run `/brief` → see [brief.md](references/brief.md) |
-| Pre-build: establish or audit token spine | Run `/tokens` → see [tokens.md](references/tokens.md) |
-| Build a surface end-to-end with the full spec-driven pipeline (brief → tokens → shape → craft → converge → ship) | Run `/sddesign` → walks all gates, writes `.ui-craft/spec.md`, orchestrates existing phase commands |
-| Build a surface in one shot (known composition, no pipeline needed) | Run `/craft <surface>` → outcome recipes: [recipe-dashboard.md](references/recipe-dashboard.md), [recipe-landing.md](references/recipe-landing.md), [recipe-auth.md](references/recipe-auth.md) |
-| Pick a ready-made theme (no token system exists) | [themes.md](references/themes.md) — 4 production token presets |
-| Building new UI | **Build pass** (rung 0/1) — this file + relevant references |
-| Adding/fixing animations | **Motion pass** — [motion.md](references/motion.md) |
-| Reviewing existing UI | **Review pass** — [review.md](references/review.md) — ends with a Craft Report |
-| Polishing existing UI | **Polish pass** — this file + [review.md](references/review.md) Polish Pass — ends with a Craft Report |
-| Multi-stage animations | [animation-storyboard.md](../../examples/animation-storyboard.md) |
-| Layout / spacing | [layout.md](references/layout.md) |
-| Typography (focused pass: `/typeset`) | [typography.md](references/typography.md) |
-| Color / theming / dark mode (focused pass: `/colorize`) | [color.md](references/color.md) |
-| Accessibility / a11y audit (technical audit: `/audit`) | [accessibility.md](references/accessibility.md) |
-| UX critique, no code changes | Run `/critique` — [review.md](references/review.md) + [inspiration.md](references/inspiration.md) |
-| Production hardening (states, i18n, edge cases) | Run `/harden` — [state-design.md](references/state-design.md) + [coverage.md](references/coverage.md) |
-| "What's missing from this screen?" / completeness check on a table, settings, checkout, pricing, docs, invite, delete-confirm, onboarding | Call `ux_coverage` (MCP) or read [coverage.md](references/coverage.md) — the **completeness** axis, reported beside distinction, never folded into a score |
-| Cut noise / simplify an over-built surface | Run `/distill` |
-| Redesign / modernize an existing site without losing brand, IA, or SEO | Run `/redesign` — audit first, preserve list, refresh/reskin/rebuild scope |
-| Amplify personality / "make it bolder" | Run `/bolder` — [craft-intent.md](references/craft-intent.md) |
-| Tone down / "quieter", "more restrained" | Run `/quieter` — [craft-intent.md](references/craft-intent.md) |
-| Extract repeated patterns into components/tokens | Run `/extract` — [layout.md](references/layout.md), [typography.md](references/typography.md), [color.md](references/color.md) |
-| Purposeful micro-interactions | Run `/delight` — [motion.md](references/motion.md) |
-| Animation performance | [motion.md](references/motion.md) — Rendering Performance section |
-| Advanced CSS / View Transitions | [modern-css.md](references/modern-css.md) |
-| Sound design | [sound.md](references/sound.md) |
-| UX copy / voice / tone / microcopy (focused pass: `/clarify`) | [copy.md](references/copy.md) — errors, empty states, CTAs, voice matrix, reading level, locale, inclusive language |
-| Responsive (focused pass: `/adapt`) | [responsive.md](references/responsive.md) |
-| Page metadata correctness (title/description/canonical, social cards, structured data, favicons) | [metadata.md](references/metadata.md) |
-| Three.js / GSAP / Motion | [stack.md](references/stack.md) — **OPT-IN ONLY — do not load unless user chose Motion/GSAP/Three.js in Discovery Step 2** |
-| Scored critique / PM-ready audit | [heuristics.md](references/heuristics.md) + [personas.md](references/personas.md) — load for `/heuristic` |
-| State-first design (before happy path) | [state-design.md](references/state-design.md) — load for `/unhappy` |
-| Data visualization / charts / dashboards | [dataviz.md](references/dataviz.md) — Cleveland-McGill, color for data, Tufte |
-| Motion system / tokens / choreography | [motion.md](references/motion.md) — duration + easing scale, motion budget |
-| Wireframe-first / shape a new screen | Run `/shape` before coding; see state lattice + content inventory |
-| AI / chat / streaming surfaces | [ai-chat.md](references/ai-chat.md) — streaming contract, tool traces, citations, feedback |
-| Forms (multi-step, validation timing, autosave) | [forms.md](references/forms.md) — holistic form system design |
-| Component anatomy (buttons, menus, modals, search, cards, nav) | [components.md](references/components.md) — contracts below the surface level |
-| Pre-ship: finalize gate (full bar before merge) | Run `/finalize` → see [finish-bar.md](references/finish-bar.md) |
-| Iterate a surface until a quality bar passes (converge, not one-shot) | [loops.md](references/loops.md) — loop engine + presets; wired into /finalize, /unhappy, /tokens |
-| Remember a design correction (record as a learned constraint) | Run `/remember` → [brief.md](references/brief.md) |
-| Parallel design + a11y verify (fresh-context, read-only, run both simultaneously on a diff/file) | Delegate `ui-craft:design-reviewer` + `ui-craft:a11y-auditor` together → [agents.md](references/agents.md). Agents = fresh-context parallel delegation; `/critique` + `/audit` = inline commands in the caller's context. Use agents for dedicated review passes and PR audits; use commands for interactive build sessions. |
-| Ambiguous | Ask which mode |
+| Intent                                                                                                                                    | Pass / Reference                                                                                                                                                                                                                                                                                                             |
+| ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| New here / unsure where to begin                                                                                                          | Run `/start` → reads the project, reports what's available now, routes you to the right next step                                                                                                                                                                                                                            |
+| Pre-build: write the project's design brief                                                                                               | Run `/brief` → see [brief.md](references/brief.md)                                                                                                                                                                                                                                                                           |
+| Pre-build: establish or audit token spine                                                                                                 | Run `/tokens` → see [tokens.md](references/tokens.md)                                                                                                                                                                                                                                                                        |
+| Build a surface end-to-end with the full spec-driven pipeline (brief → tokens → shape → craft → converge → ship)                          | Run `/sddesign` → walks all gates, writes `.ui-craft/spec.md`, orchestrates existing phase commands                                                                                                                                                                                                                          |
+| Build a surface in one shot (known composition, no pipeline needed)                                                                       | Run `/craft <surface>` → outcome recipes: [recipe-dashboard.md](references/recipe-dashboard.md), [recipe-landing.md](references/recipe-landing.md), [recipe-auth.md](references/recipe-auth.md)                                                                                                                              |
+| Pick a ready-made theme (no token system exists)                                                                                          | [themes.md](references/themes.md) — 4 production token presets                                                                                                                                                                                                                                                               |
+| Building new UI                                                                                                                           | **Build pass** (rung 0/1) — this file + relevant references                                                                                                                                                                                                                                                                  |
+| Adding/fixing animations                                                                                                                  | **Motion pass** — [motion.md](references/motion.md)                                                                                                                                                                                                                                                                          |
+| Reviewing existing UI                                                                                                                     | **Review pass** — [review.md](references/review.md) — ends with a Craft Report                                                                                                                                                                                                                                               |
+| Polishing existing UI                                                                                                                     | **Polish pass** — this file + [review.md](references/review.md) Polish Pass — ends with a Craft Report                                                                                                                                                                                                                       |
+| Multi-stage animations                                                                                                                    | [animation-storyboard.md](../../examples/animation-storyboard.md)                                                                                                                                                                                                                                                            |
+| Layout / spacing                                                                                                                          | [layout.md](references/layout.md)                                                                                                                                                                                                                                                                                            |
+| Typography (focused pass: `/typeset`)                                                                                                     | [typography.md](references/typography.md)                                                                                                                                                                                                                                                                                    |
+| Color / theming / dark mode (focused pass: `/colorize`)                                                                                   | [color.md](references/color.md)                                                                                                                                                                                                                                                                                              |
+| Accessibility / a11y audit (technical audit: `/audit`)                                                                                    | [accessibility.md](references/accessibility.md)                                                                                                                                                                                                                                                                              |
+| UX critique, no code changes                                                                                                              | Run `/critique` — [review.md](references/review.md) + [inspiration.md](references/inspiration.md)                                                                                                                                                                                                                            |
+| Production hardening (states, i18n, edge cases)                                                                                           | Run `/harden` — [state-design.md](references/state-design.md) + [coverage.md](references/coverage.md)                                                                                                                                                                                                                        |
+| "What's missing from this screen?" / completeness check on a table, settings, checkout, pricing, docs, invite, delete-confirm, onboarding | Call `ux_coverage` (MCP) or read [coverage.md](references/coverage.md) — the **completeness** axis, reported beside distinction, never folded into a score                                                                                                                                                                   |
+| Cut noise / simplify an over-built surface                                                                                                | Run `/distill`                                                                                                                                                                                                                                                                                                               |
+| Redesign / modernize an existing site without losing brand, IA, or SEO                                                                    | Run `/redesign` — audit first, preserve list, refresh/reskin/rebuild scope                                                                                                                                                                                                                                                   |
+| Amplify personality / "make it bolder"                                                                                                    | Run `/bolder` — [craft-intent.md](references/craft-intent.md)                                                                                                                                                                                                                                                                |
+| Tone down / "quieter", "more restrained"                                                                                                  | Run `/quieter` — [craft-intent.md](references/craft-intent.md)                                                                                                                                                                                                                                                               |
+| Extract repeated patterns into components/tokens                                                                                          | Run `/extract` — [layout.md](references/layout.md), [typography.md](references/typography.md), [color.md](references/color.md)                                                                                                                                                                                               |
+| Purposeful micro-interactions                                                                                                             | Run `/delight` — [motion.md](references/motion.md)                                                                                                                                                                                                                                                                           |
+| Animation performance                                                                                                                     | [motion.md](references/motion.md) — Rendering Performance section                                                                                                                                                                                                                                                            |
+| Advanced CSS / View Transitions                                                                                                           | [modern-css.md](references/modern-css.md)                                                                                                                                                                                                                                                                                    |
+| Sound design                                                                                                                              | [sound.md](references/sound.md)                                                                                                                                                                                                                                                                                              |
+| UX copy / voice / tone / microcopy (focused pass: `/clarify`)                                                                             | [copy.md](references/copy.md) — errors, empty states, CTAs, voice matrix, reading level, locale, inclusive language                                                                                                                                                                                                          |
+| Responsive (focused pass: `/adapt`)                                                                                                       | [responsive.md](references/responsive.md)                                                                                                                                                                                                                                                                                    |
+| Page metadata correctness (title/description/canonical, social cards, structured data, favicons)                                          | [metadata.md](references/metadata.md)                                                                                                                                                                                                                                                                                        |
+| Three.js / GSAP / Motion                                                                                                                  | [stack.md](references/stack.md) — **OPT-IN ONLY — do not load unless user chose Motion/GSAP/Three.js in Discovery Step 2**                                                                                                                                                                                                   |
+| Scored critique / PM-ready audit                                                                                                          | [heuristics.md](references/heuristics.md) + [personas.md](references/personas.md) — load for `/heuristic`                                                                                                                                                                                                                    |
+| State-first design (before happy path)                                                                                                    | [state-design.md](references/state-design.md) — load for `/unhappy`                                                                                                                                                                                                                                                          |
+| Data visualization / charts / dashboards                                                                                                  | [dataviz.md](references/dataviz.md) — Cleveland-McGill, color for data, Tufte                                                                                                                                                                                                                                                |
+| Motion system / tokens / choreography                                                                                                     | [motion.md](references/motion.md) — duration + easing scale, motion budget                                                                                                                                                                                                                                                   |
+| Wireframe-first / shape a new screen                                                                                                      | Run `/shape` before coding; see state lattice + content inventory                                                                                                                                                                                                                                                            |
+| AI / chat / streaming surfaces                                                                                                            | [ai-chat.md](references/ai-chat.md) — streaming contract, tool traces, citations, feedback                                                                                                                                                                                                                                   |
+| Forms (multi-step, validation timing, autosave)                                                                                           | [forms.md](references/forms.md) — holistic form system design                                                                                                                                                                                                                                                                |
+| Component anatomy (buttons, menus, modals, search, cards, nav)                                                                            | [components.md](references/components.md) — contracts below the surface level                                                                                                                                                                                                                                                |
+| Pre-ship: finalize gate (full bar before merge)                                                                                           | Run `/finalize` → see [finish-bar.md](references/finish-bar.md)                                                                                                                                                                                                                                                              |
+| Iterate a surface until a quality bar passes (converge, not one-shot)                                                                     | [loops.md](references/loops.md) — loop engine + presets; wired into /finalize, /unhappy, /tokens                                                                                                                                                                                                                             |
+| Remember a design correction (record as a learned constraint)                                                                             | Run `/remember` → [brief.md](references/brief.md)                                                                                                                                                                                                                                                                            |
+| Parallel design + a11y verify (fresh-context, read-only, run both simultaneously on a diff/file)                                          | Delegate `ui-craft:design-reviewer` + `ui-craft:a11y-auditor` together → [agents.md](references/agents.md). Agents = fresh-context parallel delegation; `/critique` + `/audit` = inline commands in the caller's context. Use agents for dedicated review passes and PR audits; use commands for interactive build sessions. |
+| Ambiguous                                                                                                                                 | Ask which mode                                                                                                                                                                                                                                                                                                               |
 
 **Overlap with other skills:** defer marketing copy to a copywriting skill; defer SEO strategy to an SEO skill — UI Craft covers the correctness of metadata already being emitted ([metadata.md](references/metadata.md)), not keyword or ranking strategy. UI Craft is the visual and interaction layer.
 
 **Out of scope.** These are surface classes the recipes do not help with. Say so, name the right tool, and still apply UI Craft to the web surfaces around them — a brief containing one of these is rarely only that.
 
-| Not this | Use instead |
-|---|---|
-| Code editor surfaces (syntax, gutters, diff views) | Monaco or CodeMirror with their own theming API |
-| Native mobile apps | Apple HIG or Material directly — UI Craft covers web |
+| Not this                                                            | Use instead                                                                                  |
+| ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Code editor surfaces (syntax, gutters, diff views)                  | Monaco or CodeMirror with their own theming API                                              |
+| Native mobile apps                                                  | Apple HIG or Material directly — UI Craft covers web                                         |
 | Realtime collaboration UI (presence, live cursors, conflict states) | Liveblocks, or Yjs / Automerge if you own the sync layer — the recipes assume a single actor |
-| HTML email | MJML or a dedicated email framework — the CSS rules here are void in mail clients |
+| HTML email                                                          | MJML or a dedicated email framework — the CSS rules here are void in mail clients            |
 
 Refusing with a pointer beats confident bad output. Silence produces the second one.
 
@@ -133,17 +133,19 @@ Detect the styling approach from signals: Tailwind (`tailwind.config.*`, `@tailw
 
 ## Discovery Phase (Always Run First)
 
-Before applying any design decisions, discover what the project has and what the user wants. Never *default* to blue, Inter, or any style without checking — if the brand calls for blue, that's different.
+Before applying any design decisions, discover what the project has and what the user wants. Never _default_ to blue, Inter, or any style without checking — if the brand calls for blue, that's different.
 
 ### Step 1: Project Analysis
 
 **Design Memory (`.ui-craft/` directory).** This is the project's typed design context. It replaces the single `brief.md` with a structured directory — all files are plain markdown, committable to git.
 
 **Always-load on every UI task** (small, define project taste/tokens):
+
 - `.ui-craft/brief.md` — product identity, design intent, audience, voice, constraints. See [references/brief.md](references/brief.md) for the format guide.
 - `.ui-craft/tokens.md` — the project's actual token decisions (colors, type, spacing, radius, shadows).
 
 **Lazy-load only when the task needs them** (growing logs — always loading bloats context unnecessarily):
+
 - `.ui-craft/decisions.md` — append-only date-stamped design decision log. Load when the user asks to reference prior rationale or past decisions.
 - `.ui-craft/patterns.md` — validated component/layout compositions. Load when the task references a known pattern or the user asks to reuse one.
 - `.ui-craft/surfaces/<name>.md` — per-surface notes (layout, components, edge cases). Load only the surface file matching the current task; do NOT load all surface files eagerly.
@@ -172,9 +174,9 @@ The project's own code becomes the source of truth — no external config file. 
 
 When building a complete surface (dashboard, landing, auth, settings shell, portfolio page) — including `/craft` — output the **Craft Read** before writing code, in exactly this form:
 
-> **Craft Read:** *[surface kind] for [audience], [product | marketing] language, [theme/accent hint], variance [N], signature bet: [choice].*
+> **Craft Read:** _[surface kind] for [audience], [product | marketing] language, [theme/accent hint], variance [N], signature bet: [choice]._
 
-The template is here rather than only in [craft-intent.md](references/craft-intent.md) on purpose. **Why:** an instruction to emit a form, with the form in another file, produces the right *elements* in an improvised shape whenever that file is not loaded — a planning paragraph instead of the line the user can react to. A pointer to a form is not the form.
+The template is here rather than only in [craft-intent.md](references/craft-intent.md) on purpose. **Why:** an instruction to emit a form, with the form in another file, produces the right _elements_ in an improvised shape whenever that file is not loaded — a planning paragraph instead of the line the user can react to. A pointer to a form is not the form.
 
 Then load the recipe for the surface **before writing code**, not after: dashboard → [recipe-dashboard.md](references/recipe-dashboard.md), landing → [recipe-landing.md](references/recipe-landing.md), auth → [recipe-auth.md](references/recipe-auth.md). **Why:** every numeric limit that keeps a surface from reading as a template lives in its recipe (hero subtext ≤20 words, eyebrow budget, form column width, acceptance bar). Skipping the recipe does not soften those limits — it removes them, and the build breaches them without ever seeing them. If the MCP server is connected, `route_task` names the recipe for you.
 
@@ -189,6 +191,7 @@ Pick **DESIGN_VARIANCE** and a **signature bet** in that line; full rationale, v
 Before shipping any UI, ask: "If someone said AI made this, would they believe it immediately?" If yes, start over.
 
 **Critical (immediately reads as AI):**
+
 - Identical card grids (icon + heading + text, 3-6x repeated)
 - ALL CAPS on headings, labels, tables, nav, buttons (exception: 11-13px category labels)
 - Purple/cyan gradient everything
@@ -197,6 +200,7 @@ Before shipping any UI, ask: "If someone said AI made this, would they believe i
 - Glassmorphism on dark + neon accents
 
 **Major (designers notice):**
+
 - Colored pills on trend percentages — use plain secondary text
 - Thick colored left/top borders on cards — use elevation or bg tint
 - Uniform border-radius on everything — vary by element
@@ -226,18 +230,21 @@ Before shipping any UI, ask: "If someone said AI made this, would they believe i
 Anti-slop says what to avoid. Craft says what to aim for.
 
 **General craft:**
+
 - One accent, 3-5 placements per above-the-fold viewport. Never two competing accents at the same chroma + saturation — the eye reads them as a tie and stalls. Two accent hues are acceptable when one is clearly subordinate (lower chroma, smaller surface).
 - White backgrounds with barely-there borders or whitespace. Numbers large, undecorated, `tabular-nums`.
 - Comparisons plain secondary text. One chart color at different opacities. Area fill fades ~15% → 0%.
 - Functional color only — dots for status, flags for countries. Real content, not placeholders.
 
 **Landing pages** (detail in [inspiration.md](references/inspiration.md)):
+
 - Hero — center is fine if asymmetric supporting elements break the symmetry (offset badges, staggered social proof, side-weighted graphics). Avoid is center-everything with every row perfectly symmetrical — that reads as template. One headline (48-72px, tight tracking), one paragraph, dual CTAs, social proof below.
 - Features: 2-3 asymmetric rows with real visuals (chart, timeline, funnel). NEVER uniform 3-column icon grids.
 - Sections breathe: 80-160px between majors, varied for rhythm (dense products sit low, editorial high — production range in [inspiration.md](references/inspiration.md)). Every section answers one question.
 - Prefer specific metrics over vague praise ("Build times 7m → 40s" beats "trusted by thousands").
 
 **Dashboards** (detail in [dashboard.md](references/dashboard.md)):
+
 - Sidebar: subtle bg tint, NOT full dark (common AI pattern).
 - Metric cards: primary gets accent tint; others neutral. Sparklines on all. NEVER identical colored top borders.
 - At least 3 content types per dashboard viewport (e.g., chart + table + metric). **Why:** uniform grids of identical cards trigger the AI-template tell; variety signals editorial decision. Chart type matches data story (area/horizontal bar/sparkline). Never pie or 3D.
@@ -281,13 +288,14 @@ Layered shadows (ambient + direct). Semi-transparent borders + shadows for crisp
 
 When reviewing UI code, use a markdown table. Never use "Before:"/"After:" on separate lines.
 
-| Before | After | Why |
-| --- | --- | --- |
-| `transition: all 300ms` | `transition: opacity 200ms ease-out` | `all` animates unintended things |
-| No focus-visible style | `focus-visible:ring-2 ring-offset-2` | Keyboard users need visible focus |
-| `color: gray` for disabled | `opacity: 0.5` + `cursor: not-allowed` | Multiple signals, not just color |
+| Before                     | After                                  | Why                               |
+| -------------------------- | -------------------------------------- | --------------------------------- |
+| `transition: all 300ms`    | `transition: opacity 200ms ease-out`   | `all` animates unintended things  |
+| No focus-visible style     | `focus-visible:ring-2 ring-offset-2`   | Keyboard users need visible focus |
+| `color: gray` for disabled | `opacity: 0.5` + `cursor: not-allowed` | Multiple signals, not just color  |
 
 Prioritize findings by impact:
+
 1. **Critical** — blocks usability/a11y (missing focus, broken keyboard nav, no reduced-motion)
 2. **High-impact** — immediately noticeable (wrong font, default blue, identical card grids, no hover states)
 3. **Quick wins** — big polish (tabular-nums, letter-spacing, curly quotes, `&nbsp;`)
@@ -298,20 +306,20 @@ Prioritize findings by impact:
 
 ### Should This Animate?
 
-| Frequency | Decision |
-|-----------|----------|
+| Frequency                        | Decision                            |
+| -------------------------------- | ----------------------------------- |
 | High (keyboard, toggles, typing) | No animation. Speed is the feature. |
-| Medium (hover, list nav) | Minimal — under 150ms or remove |
-| Low (modals, page transitions) | Standard — 200-300ms, clear purpose |
-| One-time (onboarding) | Can be expressive — tell a story |
+| Medium (hover, list nav)         | Minimal — under 150ms or remove     |
+| Low (modals, page transitions)   | Standard — 200-300ms, clear purpose |
+| One-time (onboarding)            | Can be expressive — tell a story    |
 
 ### Motion Budget
 
-| Element | Budget |
-|---------|--------|
-| Color/opacity | 100-150ms |
-| Small UI (tooltips, dropdowns) | 150-200ms |
-| Medium UI (modals, panels) | 200-300ms |
+| Element                              | Budget    |
+| ------------------------------------ | --------- |
+| Color/opacity                        | 100-150ms |
+| Small UI (tooltips, dropdowns)       | 150-200ms |
+| Medium UI (modals, panels)           | 200-300ms |
 | Large UI (page transitions, drawers) | 300-400ms |
 
 Full easing curves, spring configs, stagger rules, and interaction rules → [motion.md](references/motion.md).
@@ -326,23 +334,23 @@ Tiered by signal. Tier 1 is required reading before writing any UI; lower tiers 
 
 Two entries, because two is what a build actually loads. This list used to hold seven; build evals showed a passing dashboard opened one of them and a passing landing opened two, while both reached for the surface recipe that was filed a tier below. A required list that nobody reads is not a standard, it is a wish — so the list now names what carries the build, and everything else below states the trigger that pulls it in.
 
-| Reference | When to Read |
-|-----------|--------------|
-| [craft-intent.md](references/craft-intent.md) | Craft Read, DESIGN_VARIANCE, signature bets, product + marketing build patterns. The one reference every full-surface build needs. |
-| **The surface recipe** | [recipe-dashboard.md](references/recipe-dashboard.md) · [recipe-landing.md](references/recipe-landing.md) · [recipe-auth.md](references/recipe-auth.md) — whichever matches what you are building. Every numeric limit that keeps a surface off template grammar lives here (hero subtext ≤20 words, eyebrow budget, form column width, acceptance bar). Skipping it does not soften those limits, it removes them. |
+| Reference                                     | When to Read                                                                                                                                                                                                                                                                                                                                                                                                        |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [craft-intent.md](references/craft-intent.md) | Craft Read, DESIGN_VARIANCE, signature bets, product + marketing build patterns. The one reference every full-surface build needs.                                                                                                                                                                                                                                                                                  |
+| **The surface recipe**                        | [recipe-dashboard.md](references/recipe-dashboard.md) · [recipe-landing.md](references/recipe-landing.md) · [recipe-auth.md](references/recipe-auth.md) — whichever matches what you are building. Every numeric limit that keeps a surface off template grammar lives here (hero subtext ≤20 words, eyebrow budget, form column width, acceptance bar). Skipping it does not soften those limits, it removes them. |
 
 ### Tier 1b — Load on trigger
 
 Same references as before, same weight when their trigger fires. Only the claim changed: these are conditional, and pretending otherwise made the whole Tier-1 label unreliable — including for the two above.
 
-| Reference | Trigger |
-|-----------|---------|
-| [brief.md](references/brief.md) | `.ui-craft/brief.md` exists — then read it first, it anchors every decision and its learned constraints override skill defaults. Absent: run `/brief` or proceed from Discovery. |
-| [tokens.md](references/tokens.md) | The project has a token system to respect or extend, or you are establishing one. With neither, [themes.md](references/themes.md) gives a production preset in one step. |
-| [accessibility.md](references/accessibility.md) | Any form, any custom interactive control, any focus or keyboard work. The a11y floor in Core Rules is the minimum; this is the detail. |
-| [color.md](references/color.md) | Choosing or changing a palette, building dark mode, or auditing accent budget. Not needed to apply a preset. |
-| [layout.md](references/layout.md) | Composing a surface from scratch, or a spacing/hierarchy pass. Not needed when a recipe already prescribes the composition. |
-| [inspiration.md](references/inspiration.md) | Highest-signal reference in the skill. Read it when the build needs an archetype or a signature detail, and whenever the result feels generic. |
+| Reference                                       | Trigger                                                                                                                                                                          |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [brief.md](references/brief.md)                 | `.ui-craft/brief.md` exists — then read it first, it anchors every decision and its learned constraints override skill defaults. Absent: run `/brief` or proceed from Discovery. |
+| [tokens.md](references/tokens.md)               | The project has a token system to respect or extend, or you are establishing one. With neither, [themes.md](references/themes.md) gives a production preset in one step.         |
+| [accessibility.md](references/accessibility.md) | Any form, any custom interactive control, any focus or keyboard work. The a11y floor in Core Rules is the minimum; this is the detail.                                           |
+| [color.md](references/color.md)                 | Choosing or changing a palette, building dark mode, or auditing accent budget. Not needed to apply a preset.                                                                     |
+| [layout.md](references/layout.md)               | Composing a surface from scratch, or a spacing/hierarchy pass. Not needed when a recipe already prescribes the composition.                                                      |
+| [inspiration.md](references/inspiration.md)     | Highest-signal reference in the skill. Read it when the build needs an archetype or a signature detail, and whenever the result feels generic.                                   |
 
 > **What this measured, and what it did not.** The evidence is greenfield builds — an empty
 > sandbox with no brief and no tokens, so `brief` and `tokens` could not have been read
@@ -353,40 +361,40 @@ Same references as before, same weight when their trigger fires. Only the claim 
 
 ### Tier 2 — Surface-specific (read when building this surface)
 
-| Reference | When to Read |
-|-----------|--------------|
-| [spec.md](references/spec.md) | Durable composition spec at `.ui-craft/spec.md` — the "what". Written by `/shape` Step 6, walked by `/sddesign`. Read after `brief.md` when a spec exists for the surface being built. |
-| **Outcome recipes** | Promoted to Tier 1 — see *Always load*. Listed there and not here so the recipe has one home; two descriptions of the same requirement is how one of them goes stale. |
-| [themes.md](references/themes.md) | 4 named production token presets (Graphite, Porcelain, Carbon, Signal). Load when no token system exists. |
-| [dashboard.md](references/dashboard.md) | Dashboards, metric cards, charts, tables, sidebar, filters. |
-| [forms.md](references/forms.md) | Validation timing, progressive disclosure, multi-step wizards, autosave, optimistic submit. |
-| [components.md](references/components.md) | Component anatomy contracts: buttons (padding ratio, icon-side semantics), menus (5-option threshold, scroll affordance), modals (verb labels, ways out), search, content cards, nav bar. |
-| [ai-chat.md](references/ai-chat.md) | Streaming contract, 7-state affordance model for AI surfaces, tool traces, citations, generative UI. |
-| [review.md](references/review.md) | Critique methodology, Polish Pass, common issues, component craft. Load when reviewing or refining. |
-| [finish-bar.md](references/finish-bar.md) | 10-pass finishing protocol. Load on `/finalize` or CRAFT_LEVEL ≥ 8. |
-| [loops.md](references/loops.md) | Loop engine: read→evaluate→fix-one→re-evaluate→stop contract + 3 presets. Load when converging /finalize, /unhappy, or /tokens audit. |
-| [principles-catalog.md](references/principles-catalog.md) | 42 example design principles across 8 product categories. Load during `/brief` principles workshop branch as conversation seed. |
+| Reference                                                 | When to Read                                                                                                                                                                              |
+| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [spec.md](references/spec.md)                             | Durable composition spec at `.ui-craft/spec.md` — the "what". Written by `/shape` Step 6, walked by `/sddesign`. Read after `brief.md` when a spec exists for the surface being built.    |
+| **Outcome recipes**                                       | Promoted to Tier 1 — see _Always load_. Listed there and not here so the recipe has one home; two descriptions of the same requirement is how one of them goes stale.                     |
+| [themes.md](references/themes.md)                         | 4 named production token presets (Graphite, Porcelain, Carbon, Signal). Load when no token system exists.                                                                                 |
+| [dashboard.md](references/dashboard.md)                   | Dashboards, metric cards, charts, tables, sidebar, filters.                                                                                                                               |
+| [forms.md](references/forms.md)                           | Validation timing, progressive disclosure, multi-step wizards, autosave, optimistic submit.                                                                                               |
+| [components.md](references/components.md)                 | Component anatomy contracts: buttons (padding ratio, icon-side semantics), menus (5-option threshold, scroll affordance), modals (verb labels, ways out), search, content cards, nav bar. |
+| [ai-chat.md](references/ai-chat.md)                       | Streaming contract, 7-state affordance model for AI surfaces, tool traces, citations, generative UI.                                                                                      |
+| [review.md](references/review.md)                         | Critique methodology, Polish Pass, common issues, component craft. Load when reviewing or refining.                                                                                       |
+| [finish-bar.md](references/finish-bar.md)                 | 10-pass finishing protocol. Load on `/finalize` or CRAFT_LEVEL ≥ 8.                                                                                                                       |
+| [loops.md](references/loops.md)                           | Loop engine: read→evaluate→fix-one→re-evaluate→stop contract + 3 presets. Load when converging /finalize, /unhappy, or /tokens audit.                                                     |
+| [principles-catalog.md](references/principles-catalog.md) | 42 example design principles across 8 product categories. Load during `/brief` principles workshop branch as conversation seed.                                                           |
 
 ### Tier 3 — Foundations (read for the relevant discipline)
 
-| Reference | When to Read |
-|-----------|--------------|
-| [typography.md](references/typography.md) | Scale, font choice, readability, weight — scoped per script and role. |
-| [motion.md](references/motion.md) | Decision ladder, duration + easing scales with perceptual grounding, interaction rules, motion-gap audit. |
-| [modern-css.md](references/modern-css.md) | View Transitions, scroll timelines, container queries, `@starting-style`. |
-| [responsive.md](references/responsive.md) | Mobile/tablet/desktop, breakpoints, touch zones. |
-| [metadata.md](references/metadata.md) | Title/description/canonical consistency, deterministic metadata, social cards, noindex on staging, structured data honesty, favicons. |
-| [copy.md](references/copy.md) | Voice/tone matrix, reading level (Flesch ≥70), terminology, inclusive language, errors, empty states, CTAs. |
-| [sound.md](references/sound.md) | Web Audio, UI sound, appropriateness matrix. Rare — load when explicitly building audio feedback. |
+| Reference                                 | When to Read                                                                                                                          |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| [typography.md](references/typography.md) | Scale, font choice, readability, weight — scoped per script and role.                                                                 |
+| [motion.md](references/motion.md)         | Decision ladder, duration + easing scales with perceptual grounding, interaction rules, motion-gap audit.                             |
+| [modern-css.md](references/modern-css.md) | View Transitions, scroll timelines, container queries, `@starting-style`.                                                             |
+| [responsive.md](references/responsive.md) | Mobile/tablet/desktop, breakpoints, touch zones.                                                                                      |
+| [metadata.md](references/metadata.md)     | Title/description/canonical consistency, deterministic metadata, social cards, noindex on staging, structured data honesty, favicons. |
+| [copy.md](references/copy.md)             | Voice/tone matrix, reading level (Flesch ≥70), terminology, inclusive language, errors, empty states, CTAs.                           |
+| [sound.md](references/sound.md)           | Web Audio, UI sound, appropriateness matrix. Rare — load when explicitly building audio feedback.                                     |
 
 ### Tier 4 — Opt-in (only on explicit request or specific commands)
 
-| Reference | When to Read |
-|-----------|--------------|
-| [stack.md](references/stack.md) | Three.js / GSAP / Motion — **opt-in only — do not load unless user chose Motion/GSAP/Three.js in Discovery Step 2.** |
-| [heuristics.md](references/heuristics.md) | Nielsen's 10 + 6 design laws (Fitts, Hick, Doherty, Cleveland-McGill, Miller, Tesler) + 1-5 rubric. Load for `/heuristic`. |
-| [personas.md](references/personas.md) | 5 persona walkthroughs (first-timer / power / low-bandwidth / screen-reader / one-thumb). Load for `/heuristic --persona=<name>`. |
-| [state-design.md](references/state-design.md) | State lattice — idle / loading / empty / error / partial / conflict / offline. Load for `/unhappy`. |
-| [coverage.md](references/coverage.md) | UX coverage — the parts 12 screen archetypes need to be complete (data table, settings, search, detail view, first-run, billing, pricing, docs, checkout, onboarding, destructive confirm, invite). The **completeness** axis, not distinction. Load for `/harden`, or when asked what a screen is missing. **Prefer the `ux_coverage` MCP tool** — it returns one archetype instead of all twelve. Generated from `mcp/src/coverage-data.mjs`; do not edit by hand. |
-| [dataviz.md](references/dataviz.md) | Cleveland-McGill perceptual hierarchy, chart selection matrix, ColorBrewer/Okabe-Ito palettes, Tufte, direct labeling. Load when designing charts. |
-| [agents.md](references/agents.md) | Agent pack overview: `design-reviewer` + `a11y-auditor` roles, agent-vs-command guidance, and parallel verify-team usage pattern. Load when setting up or describing the verify team. |
+| Reference                                     | When to Read                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [stack.md](references/stack.md)               | Three.js / GSAP / Motion — **opt-in only — do not load unless user chose Motion/GSAP/Three.js in Discovery Step 2.**                                                                                                                                                                                                                                                                                                                                                 |
+| [heuristics.md](references/heuristics.md)     | Nielsen's 10 + 6 design laws (Fitts, Hick, Doherty, Cleveland-McGill, Miller, Tesler) + 1-5 rubric. Load for `/heuristic`.                                                                                                                                                                                                                                                                                                                                           |
+| [personas.md](references/personas.md)         | 5 persona walkthroughs (first-timer / power / low-bandwidth / screen-reader / one-thumb). Load for `/heuristic --persona=<name>`.                                                                                                                                                                                                                                                                                                                                    |
+| [state-design.md](references/state-design.md) | State lattice — idle / loading / empty / error / partial / conflict / offline. Load for `/unhappy`.                                                                                                                                                                                                                                                                                                                                                                  |
+| [coverage.md](references/coverage.md)         | UX coverage — the parts 12 screen archetypes need to be complete (data table, settings, search, detail view, first-run, billing, pricing, docs, checkout, onboarding, destructive confirm, invite). The **completeness** axis, not distinction. Load for `/harden`, or when asked what a screen is missing. **Prefer the `ux_coverage` MCP tool** — it returns one archetype instead of all twelve. Generated from `mcp/src/coverage-data.mjs`; do not edit by hand. |
+| [dataviz.md](references/dataviz.md)           | Cleveland-McGill perceptual hierarchy, chart selection matrix, ColorBrewer/Okabe-Ito palettes, Tufte, direct labeling. Load when designing charts.                                                                                                                                                                                                                                                                                                                   |
+| [agents.md](references/agents.md)             | Agent pack overview: `design-reviewer` + `a11y-auditor` roles, agent-vs-command guidance, and parallel verify-team usage pattern. Load when setting up or describing the verify team.                                                                                                                                                                                                                                                                                |

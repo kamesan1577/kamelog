@@ -10,13 +10,13 @@ An outcome recipe is a build contract, not a rule list: follow it top to bottom 
 
 Ask once, in one compact prompt. If the user declines or says "you decide", apply the defaults — never block.
 
-| Input | Options | Default |
-|---|---|---|
-| Primary user + 60-second decision | exec ("are we winning?") / operator ("what needs action now?") / analyst ("why did X change?") | operator |
-| Theme | one of the four presets in [themes.md](themes.md), or project's existing tokens | existing tokens if present, else **Graphite** |
-| Density | VISUAL_DENSITY knob 1-10 | 7 |
-| Variance | DESIGN_VARIANCE knob 1-10 | 4 |
-| Signature bet | one from [craft-intent.md](craft-intent.md) §3 product list | nav active indicator or hero metric sparkline |
+| Input                             | Options                                                                                        | Default                                       |
+| --------------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Primary user + 60-second decision | exec ("are we winning?") / operator ("what needs action now?") / analyst ("why did X change?") | operator                                      |
+| Theme                             | one of the four presets in [themes.md](themes.md), or project's existing tokens                | existing tokens if present, else **Graphite** |
+| Density                           | VISUAL_DENSITY knob 1-10                                                                       | 7                                             |
+| Variance                          | DESIGN_VARIANCE knob 1-10                                                                      | 4                                             |
+| Signature bet                     | one from [craft-intent.md](craft-intent.md) §3 product list                                    | nav active indicator or hero metric sparkline |
 
 The first answer selects the composition. The persona is not cosmetic — it decides what the hero metric is and what gets buried ([dashboard.md](dashboard.md) "Ranking decisions").
 

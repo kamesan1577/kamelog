@@ -7,6 +7,7 @@ Detailed guidance for building data-heavy dashboards that feel designed, not gen
 A dashboard needs a sidebar + main content area. The sidebar is the navigation spine.
 
 **Sidebar navigation:**
+
 - Subtle background tint (e.g., `background: #f8fafc` / Tailwind: `bg-slate-50`, or `background: #030712` / Tailwind: `bg-gray-950`) — NOT full black unless Dark Premium style. A dark sidebar is a common AI pattern; prefer a subtle tint that complements the content area.
 - Muted nav text that brightens on hover/active. Active item gets accent background at low opacity (`background: oklch(var(--accent) / 0.1)` / Tailwind: `bg-accent/10`) + accent text.
 - Brand/logo at top, user profile at bottom.
@@ -14,6 +15,7 @@ A dashboard needs a sidebar + main content area. The sidebar is the navigation s
 - `overscroll-behavior: contain` on the sidebar if it scrolls independently.
 
 **Main content area:**
+
 - Filter/toolbar row at the top: ghost buttons for filters, active state uses accent bg at low opacity. Always include a date range selector for any time-series surface. **Why:** time-series data without an interactive range silently encodes the assumption that the default window is correct — when it isn't (and it usually isn't for power users), the dashboard becomes a screenshot. **When it breaks:** real-time monitoring surfaces with a fixed last-N-minutes window — the range is the affordance, not the picker.
 - Content grid below filters: metric cards → charts → tables/lists.
 - Minimum 3 different content types visible per viewport (e.g., metric cards + chart + table).
@@ -23,14 +25,17 @@ A dashboard needs a sidebar + main content area. The sidebar is the navigation s
 Never show 4+ identical metric cards. Differentiate the primary metric. **Why:** a uniform grid of equal-weight cards triggers the AI-template tell — variety signals editorial decision; uniformity signals defaulted-out. It also fails the squint test: the eye can't lock on a primary at first glance. **How to differentiate:** primary card gets accent tint, slightly larger number, optional sparkline; secondaries are neutral with smaller type. See Signal-to-Noise Hierarchy section below.
 
 **Primary metric card:**
+
 - Accent-tinted background (`background: oklch(var(--accent) / 0.05)` / Tailwind: `bg-accent/5`) with accent-colored number, OR solid accent background with white text.
 - Slightly larger number (36px vs 28px for others).
 
 **Secondary metric cards:**
+
 - White background, subtle border (`1px solid oklch(92% 0.005 250)`).
 - Black number, secondary-color label.
 
 **All metric cards should include:**
+
 - Sparklines: 32px tall, polyline SVG, accent color with faded fill underneath.
 - Change text: "+2,149 from last month" in `var(--text-tertiary)`. **Never green arrows for positive, red for negative.** **Why:** color implies judgment that may not match user context — a 30% increase in costs is "positive" by sign and "bad" by goal; the green arrow encodes the wrong story. Render the magnitude in neutral and let the user's interpretation supply meaning. **When it breaks:** financial trading surfaces where positive/negative is universally tied to goal (gains green, losses red is the domain convention) — match the user's domain, don't fight it.
 - Label: sentence case, 12-13px, `font-weight: 500`, secondary color.
@@ -39,15 +44,15 @@ Never show 4+ identical metric cards. Differentiate the primary metric. **Why:**
 
 ## Chart Type Decision Matrix
 
-| Data story | Best chart | Why | Avoid |
-|-----------|-----------|-----|-------|
-| Trend over time | Area chart with gradient fill | Shows direction + volume | Vertical bar chart |
-| Comparing categories | Horizontal bar chart | Labels are readable, easy to scan | Vertical bar with rotated labels |
-| Comparing discrete values | Vertical bar chart | Natural for small sets (3-7 items) | Too many bars (>8) |
-| Part-of-whole | Donut/ring chart (use sparingly) | Center text shows total | Pie chart — harder to compare |
-| Inline trend in a card | Sparkline (32px polyline) | Minimal, contextual | Full chart crammed into a card |
-| Conversion/funnel | Progressive bars with stage labels | Shows drop-off clearly | Donut chart |
-| Never use | — | — | Pie charts, 3D charts of any kind |
+| Data story                | Best chart                         | Why                                | Avoid                             |
+| ------------------------- | ---------------------------------- | ---------------------------------- | --------------------------------- |
+| Trend over time           | Area chart with gradient fill      | Shows direction + volume           | Vertical bar chart                |
+| Comparing categories      | Horizontal bar chart               | Labels are readable, easy to scan  | Vertical bar with rotated labels  |
+| Comparing discrete values | Vertical bar chart                 | Natural for small sets (3-7 items) | Too many bars (>8)                |
+| Part-of-whole             | Donut/ring chart (use sparingly)   | Center text shows total            | Pie chart — harder to compare     |
+| Inline trend in a card    | Sparkline (32px polyline)          | Minimal, contextual                | Full chart crammed into a card    |
+| Conversion/funnel         | Progressive bars with stage labels | Shows drop-off clearly             | Donut chart                       |
+| Never use                 | —                                  | —                                  | Pie charts, 3D charts of any kind |
 
 **Why never pie charts:** Cleveland-McGill perceptual hierarchy ranks angle (pie) below position (bar). Humans compare bar lengths to within a few percent; pie wedges fail at 4+ slices. **Why never 3D:** depth occludes data points and foreshortens position-based comparison. No 2D chart benefits from a third dimension. **When a two-segment donut is acceptable:** a donut with center label for binary proportions (used vs free, paid vs free) — only one comparison to make.
 
@@ -70,7 +75,7 @@ Tables are the workhorse of dashboards. Make them earn their space.
 - **Headers**: sentence case, `font-weight: 500`, secondary color. **Never uppercase table headers.** **Why:** uppercase removes the lowercase letterforms that aid scan-pattern recognition; readers process uppercase ~13-20% slower than sentence case (Tinker 1969). Uppercase also reads as decorative-template, not data-functional.
 - **Alignment**: text left, numbers right, status center.
 - **Wrap every table in `overflow-x: auto`.** Horizontal, not `overflow-y` and not `overflow-hidden`. **Why:** a table is the one layout that cannot reflow — columns have minimum content widths, so at ~320px it either clips at the viewport edge or forces the whole page to scroll sideways. Vertical overflow solves a different problem and leaves this one intact.
-- **Put `position: sticky; top: 0` on `thead` past ~15 rows.** **Why:** once the header scrolls out of view every cell below it is an unlabelled string, and the user scrolls back up to remember which column is which. On an operator surface the table *is* the product, so this is not polish.
+- **Put `position: sticky; top: 0` on `thead` past ~15 rows.** **Why:** once the header scrolls out of view every cell below it is an unlabelled string, and the user scrolls back up to remember which column is which. On an operator surface the table _is_ the product, so this is not polish.
 - **Virtualize past 200 rows.** **Why:** every row is DOM the browser lays out, styles, and paints on each scroll frame — a 2,000-row table blows the 16ms budget before any of your CSS is at fault, and the fix is never "optimize the row component". Render a window (TanStack Virtual, `react-window`) or paginate. **When it breaks:** the table must be Cmd+F-searchable or printable in full — then paginate instead of virtualizing, since a virtual window hides rows from find-in-page.
 - **`scrollbar-gutter: stable` on every scroll container.** **Why:** on overlay-scrollbar platforms the track appears only on scroll, and the content reflows by its width at that moment — column edges jump the instant the user touches the wheel. Reserving the gutter costs nothing and removes the shift.
 

@@ -1,6 +1,6 @@
 # Personas — Walkthrough Checklists
 
-Five personas, five journeys. A heuristic score says what's wrong in the abstract. A persona walkthrough says *who* it breaks for. Use these as overlays on top of `heuristics.md`: same UI, five different lenses.
+Five personas, five journeys. A heuristic score says what's wrong in the abstract. A persona walkthrough says _who_ it breaks for. Use these as overlays on top of `heuristics.md`: same UI, five different lenses.
 
 Each persona has a checklist. Every un-ticked box is a finding. Rank findings using the same impact tags from `heuristics.md` (`blocks-conversion`, `adds-friction`, `reduces-trust`, `minor-polish`).
 
@@ -192,14 +192,14 @@ Each persona has a checklist. Every un-ticked box is a finding. Rank findings us
 
 Invoked by `/ui-craft:heuristic <target> --persona=<name>`:
 
-| Arg | Persona | Loads |
-|-----|---------|-------|
-| `--persona=priya` | First-timer Priya | Section 1 |
-| `--persona=jordan` | Power user Jordan | Section 2 |
-| `--persona=adaeze` | Low-bandwidth Adaeze | Section 3 |
-| `--persona=kwame` | Screen-reader user Kwame | Section 4 |
-| `--persona=margo` | One-thumb Margo | Section 5 |
-| `--persona=all` | All five | All sections |
+| Arg                | Persona                  | Loads        |
+| ------------------ | ------------------------ | ------------ |
+| `--persona=priya`  | First-timer Priya        | Section 1    |
+| `--persona=jordan` | Power user Jordan        | Section 2    |
+| `--persona=adaeze` | Low-bandwidth Adaeze     | Section 3    |
+| `--persona=kwame`  | Screen-reader user Kwame | Section 4    |
+| `--persona=margo`  | One-thumb Margo          | Section 5    |
+| `--persona=all`    | All five                 | All sections |
 
 Output format: same scorecard shape as `heuristics.md` (rows of `| Checklist item | Pass/Fail | Finding | Impact |`). End with top 3-5 findings ranked by impact tag.
 

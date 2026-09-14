@@ -27,15 +27,15 @@ What the user expects the moment they hit send. Every bullet is a hard rule, not
 
 Seven states AI UIs need beyond the base `state-design.md` lattice. Every state has a distinct visual signal — the user never has to guess which one they're in.
 
-| State | Signal |
-|---|---|
-| Idle | Empty input, placeholder copy, blinking cursor on focus. Optionally: starter prompt carousels below input — only when the surface has tested the carousel against a control (no surface should ship "what AI thinks users want to ask" — that pattern reads as condescending and misses real intents). |
-| Composing | User typing; no AI activity shown; send button enabled |
-| Thinking | Sent, model hasn't started; typing-dots or "thinking…" label; max 2s before escalating to progress |
-| Streaming | Caret visible; tokens appearing; stop button active; auto-scroll following tail |
-| Tool-calling | Labeled tool trace ("Searching web for…" / "Reading file X.ts") with collapsible detail and running spinner |
-| Complete | Caret gone; all actions available — regenerate, copy, feedback, branch |
-| Error | Specific cause + retry + copy-error-id; never a toast that vanishes |
+| State        | Signal                                                                                                                                                                                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Idle         | Empty input, placeholder copy, blinking cursor on focus. Optionally: starter prompt carousels below input — only when the surface has tested the carousel against a control (no surface should ship "what AI thinks users want to ask" — that pattern reads as condescending and misses real intents). |
+| Composing    | User typing; no AI activity shown; send button enabled                                                                                                                                                                                                                                                 |
+| Thinking     | Sent, model hasn't started; typing-dots or "thinking…" label; max 2s before escalating to progress                                                                                                                                                                                                     |
+| Streaming    | Caret visible; tokens appearing; stop button active; auto-scroll following tail                                                                                                                                                                                                                        |
+| Tool-calling | Labeled tool trace ("Searching web for…" / "Reading file X.ts") with collapsible detail and running spinner                                                                                                                                                                                            |
+| Complete     | Caret gone; all actions available — regenerate, copy, feedback, branch                                                                                                                                                                                                                                 |
+| Error        | Specific cause + retry + copy-error-id; never a toast that vanishes                                                                                                                                                                                                                                    |
 
 The thinking → streaming transition is the most-botched handoff. If thinking lasts > 2s without a progress signal, users refresh. Escalate to "Still thinking — this sometimes takes up to 10s" after 2s.
 
@@ -46,6 +46,7 @@ The thinking → streaming transition is the most-botched handoff. If thinking l
 When the model calls a function (web search, file read, code execution), render it inline. Hiding tool calls is the fastest way to lose user trust.
 
 **Required parts:**
+
 - **Title + target.** "Search web: 'Anchor Positioning browser support'" — not "Tool call: search".
 - **Status icon.** Running (spinner), complete (check), failed (warning).
 - **Collapsible detail.** Expand to show request args + response. Collapsed by default for readable flow; expanded by user choice persists through the session.
@@ -83,11 +84,11 @@ Every AI response gets visible feedback controls (thumbs / star / "did this help
 
 Three distinct verbs for three distinct operations. Mixing them is a common AI-UI tell.
 
-| Verb | Meaning | Effect on history |
-|------|---------|-------------------|
-| Retry | Same prompt, same context, same model | Replaces prior response |
+| Verb       | Meaning                                                | Effect on history                           |
+| ---------- | ------------------------------------------------------ | ------------------------------------------- |
+| Retry      | Same prompt, same context, same model                  | Replaces prior response                     |
 | Regenerate | Same prompt, variation (temperature bump or alt model) | Creates alternative; original stays visible |
-| Continue | Response was cut off; extend from last token | Appends to prior response |
+| Continue   | Response was cut off; extend from last token           | Appends to prior response                   |
 
 Label the buttons with the actual verb. "Try again" is ambiguous — is it retry or regenerate? Pick one and be explicit.
 

@@ -12,16 +12,16 @@ Every component-that-touches-data has this set. For each, design the visual AND 
 
 This table is the evaluation source for the `state-coverage` loop preset (see `../SKILL.md` → loops.md).
 
-| State | What to design | Common mistake |
-|-------|---------------|----------------|
-| **Idle** | Default resting state. Primary action obvious. | Treating "empty form" as idle — it's actually Empty. |
-| **Loading** | Skeleton matching final layout. Appears after 200ms. | Centered spinner on a blank screen (no layout match, no cue). |
-| **Empty** | Explain why empty + CTA to fix it. | "No data" with no illustration, no explanation, no next step. |
-| **Error** | Specific cause + one-click recovery + support ID. | "Something went wrong" with no detail and no retry. |
-| **Partial** | Some data loaded, some failing. Show what succeeded. | Hide everything because one field failed — user sees blank. |
-| **Success** | Positive feedback, brief, visual + textual. | Toast that vanishes in 1s; user misses it. |
-| **Conflict** | Two actors edited. Show both, let user resolve. | Last write wins silently; prior user's work is gone. |
-| **Offline** | Connection lost. Queue writes. Communicate. | Pretend everything is fine; fail on next sync. |
+| State        | What to design                                       | Common mistake                                                |
+| ------------ | ---------------------------------------------------- | ------------------------------------------------------------- |
+| **Idle**     | Default resting state. Primary action obvious.       | Treating "empty form" as idle — it's actually Empty.          |
+| **Loading**  | Skeleton matching final layout. Appears after 200ms. | Centered spinner on a blank screen (no layout match, no cue). |
+| **Empty**    | Explain why empty + CTA to fix it.                   | "No data" with no illustration, no explanation, no next step. |
+| **Error**    | Specific cause + one-click recovery + support ID.    | "Something went wrong" with no detail and no retry.           |
+| **Partial**  | Some data loaded, some failing. Show what succeeded. | Hide everything because one field failed — user sees blank.   |
+| **Success**  | Positive feedback, brief, visual + textual.          | Toast that vanishes in 1s; user misses it.                    |
+| **Conflict** | Two actors edited. Show both, let user resolve.      | Last write wins silently; prior user's work is gone.          |
+| **Offline**  | Connection lost. Queue writes. Communicate.          | Pretend everything is fine; fail on next sync.                |
 
 ---
 
@@ -36,6 +36,7 @@ Teams that design happy-first ship demos that crumble on real data. Teams that d
 ## Loading States
 
 **Skeleton rules:**
+
 - Match the final layout — same grid, same rough box sizes. Skeletons that don't match cause cumulative layout shift (CLS) when real content arrives.
 - Show after **200ms**, not immediately. A flash of skeleton for fast responses looks broken.
 - Set an upper bound of **5s**. Past that, escalate to a progress indicator or a timeout message with a retry.
@@ -43,11 +44,13 @@ Teams that design happy-first ship demos that crumble on real data. Teams that d
 - Preserve stable layout for known elements (avatar, title) while skeletonizing variable ones (body, list).
 
 **Button loading:**
+
 - Keep the label; don't swap to just a spinner. Users lose context.
 - Disable but don't hide — users click it trying to cancel.
-- Spinner goes *inside* the button, not next to it.
+- Spinner goes _inside_ the button, not next to it.
 
 **Navigation loading:**
+
 - Optimistic route change — paint the new layout immediately; stream data into it.
 - A progress bar at the top of the viewport is better than a blank screen.
 
@@ -58,12 +61,14 @@ Teams that design happy-first ship demos that crumble on real data. Teams that d
 Empty states are the most skipped state and the most valuable. A first-time user sees an empty state before any happy path.
 
 **Required:**
+
 - Explain **why** it's empty — "You haven't created any projects yet" beats "No data"
 - Offer **a next action** — a CTA to populate the state. Every empty state is a call to onboard.
 - Visual or illustration — even a subtle icon. Prevents the "this page is broken" read.
 - Secondary info if useful — "Projects help you organize your work. Learn more."
 
 **Empty state types:**
+
 - **First-run empty** (user just signed up) — onboarding. Heavy CTA.
 - **Filtered empty** (user applied filters that match nothing) — "No results — try removing filters" with a clear-filters button.
 - **Cleared empty** (user archived / deleted everything) — celebratory or contextual; may not need a CTA.
@@ -75,22 +80,26 @@ Empty states are the most skipped state and the most valuable. A first-time user
 Specific beats generic. Actionable beats dead-end. Recoverable beats fatal.
 
 **Field-level errors:**
+
 - Inline, at the field. Not a toast, not a global banner.
 - Describe the problem AND the fix — "Password must include a number" beats "Invalid password."
 - Red is a signal, not the whole message. Pair color with icon and text.
 - `aria-invalid` + `aria-describedby` so screen readers announce.
 
 **Form-level errors:**
+
 - Scroll to the first invalid field, focus it.
 - Summary at the top is fine in addition to inline, not instead of.
 
 **Server errors:**
+
 - Specific cause if you know it ("File too large — max 10MB").
 - Copy-paste support ID — `Error ID: xyz-123` — so the user can send it to support.
 - One-click retry where possible.
 - Never blame the user for network failures.
 
 **Network errors:**
+
 - Distinguish offline from 500 from 403. Different causes, different fixes.
 - Keep the in-flight state — don't throw away the form the user just filled.
 
@@ -126,7 +135,7 @@ Connection is gone. Anticipate this on mobile, field apps, travel, and flaky wif
 - Communicate at the app shell: "You're offline — changes will sync when reconnected."
 - Queue writes locally (IndexedDB, localStorage). Optimistic UI locally.
 - Reconcile on reconnect: apply queued writes, handle conflicts, surface any rejections.
-- Disable actions that *require* connectivity (payments) — explain why.
+- Disable actions that _require_ connectivity (payments) — explain why.
 
 ---
 
@@ -171,11 +180,11 @@ Before any interactive surface ships, every item on this list is designed (not n
 
 **Knob gating (used by `/ui-craft:unhappy`):**
 
-| CRAFT_LEVEL | Required states |
-|-------------|----------------|
-| ≤ 4 | idle, loading, error |
-| 5-7 | idle, loading, empty, error, success |
-| 8+ | all of the above plus partial, conflict, offline |
+| CRAFT_LEVEL | Required states                                  |
+| ----------- | ------------------------------------------------ |
+| ≤ 4         | idle, loading, error                             |
+| 5-7         | idle, loading, empty, error, success             |
+| 8+          | all of the above plus partial, conflict, offline |
 
 Missing a required state is a finding. Fix before declaring the happy path "done."
 

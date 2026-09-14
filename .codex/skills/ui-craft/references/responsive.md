@@ -9,10 +9,14 @@ Adaptation is not just scaling — it's rethinking for each context.
 Add breakpoints where the content breaks, not at conventional device widths. Container queries are the preferred mechanism — components respond to their container, not to the viewport.
 
 ```css
-.card-container { container-type: inline-size; }
+.card-container {
+  container-type: inline-size;
+}
 
 @container (min-width: 400px) {
-  .card { grid-template-columns: 1fr 2fr; }
+  .card {
+    grid-template-columns: 1fr 2fr;
+  }
 }
 ```
 
@@ -52,12 +56,14 @@ Use these only when integrating with an existing system. New code should prefer 
 ## Mobile Adaptation (Desktop → Mobile)
 
 ### Layout
+
 - Single column (not multi-column)
 - Vertical stacking
 - Full-width components
 - Bottom navigation (not top/side)
 
 ### Interaction
+
 - Touch targets **44x44px minimum**
 - Swipe gestures only for reversible, spatially-implied actions — dismiss a sheet, page a carousel, reveal a row action. **Why:** a swipe leaves no visible affordance, so anything discovered only by swiping is undiscoverable to a first-time user, and anything destructive behind it is irreversible-by-accident. Every swipe needs a visible equivalent: a button, a menu item, or a drag handle.
 - Bottom sheets instead of dropdowns
@@ -65,12 +71,14 @@ Use these only when integrating with an existing system. New code should prefer 
 - More spacing between interactive elements
 
 ### Content
+
 - **Progressive disclosure** — don't show everything at once
 - Secondary content in tabs/accordions
 - Shorter, more concise text
 - Minimum **16px font size** (prevents iOS zoom)
 
 ### Navigation
+
 - Hamburger or bottom nav
 - Reduce complexity
 - Sticky headers for context
@@ -91,18 +99,21 @@ Use these only when integrating with an existing system. New code should prefer 
 ## Desktop Adaptation (Mobile → Desktop)
 
 ### Layout
+
 - Multi-column (use horizontal space)
 - Side navigation: always visible on desktop (1024px+). On tablet (768–1023px): collapse to icon rail or persistent narrow sidebar. On mobile: collapse to a drawer or bottom-nav pattern. **Why:** primary navigation must remain discoverable; visible-by-default at desktop trades screen real estate for discoverability, while mobile trades discoverability for content room — both are correct in their context.
 - Multiple information panels
 - Max-width constraints (don't stretch to 4K)
 
 ### Interaction
+
 - Hover states for additional info
 - Keyboard shortcuts
 - Right-click context menus
 - Drag and drop, multi-select with Shift/Cmd
 
 ### Content
+
 - Show more info upfront (less progressive disclosure)
 - Data tables with many columns
 - Richer visualizations
@@ -125,8 +136,8 @@ Use these only when integrating with an existing system. New code should prefer 
 
 ```html
 <picture>
-  <source media="(min-width: 768px)" srcset="large.webp">
-  <img src="small.webp" alt="..." width="600" height="400" loading="lazy">
+  <source media="(min-width: 768px)" srcset="large.webp" />
+  <img src="small.webp" alt="..." width="600" height="400" loading="lazy" />
 </picture>
 ```
 
@@ -134,7 +145,7 @@ Use these only when integrating with an existing system. New code should prefer 
 
 ## Viewport Units
 
-Use `dvh` instead of `100vh` or Tailwind's `h-screen` for any surface meant to fill the viewport. Mobile browsers change the visible viewport height as the URL bar shows and hides — `100vh` measures the *largest* possible viewport and locks to it, so a full-height hero or modal ends up taller than what's actually visible and the bottom gets clipped behind the browser chrome. `dvh` (dynamic viewport height) tracks the real, current viewport instead.
+Use `dvh` instead of `100vh` or Tailwind's `h-screen` for any surface meant to fill the viewport. Mobile browsers change the visible viewport height as the URL bar shows and hides — `100vh` measures the _largest_ possible viewport and locks to it, so a full-height hero or modal ends up taller than what's actually visible and the bottom gets clipped behind the browser chrome. `dvh` (dynamic viewport height) tracks the real, current viewport instead.
 
 ---
 

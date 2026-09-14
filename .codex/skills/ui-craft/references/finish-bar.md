@@ -23,6 +23,7 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 **Goal:** the surface resolves to one primary thing on first glance. The rest reads as supporting.
 
 **Criteria:**
+
 - Squint test passes: blur the screen or squint for 200ms. One element dominates. (Perceptual basis in `layout.md` — Squint Test section.)
 - Primary / Secondary / Tertiary / Quaternary named explicitly for this surface before touching pixels. Write them down.
 - Adjacent hierarchy levels differ by ≥1.5× in at least one signal: size, weight, contrast, surface area, or position.
@@ -40,6 +41,7 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 **Goal:** typography is a system, not a collection of styles that happen to coexist.
 
 **Criteria:**
+
 - ≤3 font weights in the visible viewport. More signals indecision, not richness.
 - Tabular numerals on every cell, badge, or display element containing numerical data (`font-variant-numeric: tabular-nums`).
 - OpenType features active where the font supports them: discretionary ligatures off in UI, contextual alternates on for serif headlines, kerning always on.
@@ -58,6 +60,7 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 **Goal:** at least three distinguishable elevation levels, both modes intentional.
 
 **Criteria:**
+
 - Canvas, raised, and overlay surfaces are visually distinct: ≥2% luminance delta in light mode, ≥4% in dark mode.
 - Semantic naming in tokens: `--surface-canvas`, `--surface-raised`, `--surface-overlay` (or equivalent). No unnamed magic values.
 - Dark mode surfaces are not inverted light primitives. Canvas in dark sits at a near-black with a hue tint — not `#000000`. Raised surfaces add luminance, not just reduce it.
@@ -75,6 +78,7 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 **Goal:** within < between < section, at every nesting level without exception.
 
 **Criteria:**
+
 - Every spacing value comes from the token scale. No arbitrary px values. (`layout.md` — Spacing Rhythm section.)
 - The rhythm invariant holds at every nesting level: label 4px above its input, inputs 16px apart within the form, form 48px from the next section. Check three nesting levels minimum.
 - Section breaks are ≥2× the inter-block spacing. If they are not, sections blur into blocks.
@@ -91,6 +95,7 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 **Goal:** one icon family, stroke weight matched to type, geometry coherent across the surface.
 
 **Criteria:**
+
 - Single icon family throughout the surface. No mixing families from different systems.
 - Icon stroke weight visually matches body type weight: 1.5px stroke for `font-weight: 400`, 2px for 500. Mismatched weights read as elements from different UIs.
 - Icon-to-type size ratio is consistent: if a 24px icon appears beside a 16px label, that ratio holds throughout. A 20px icon beside a 16px label elsewhere is a finding.
@@ -108,6 +113,7 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 **Goal:** every state designed, not defaulted or missing.
 
 **Criteria — all eight states must have explicit designs:**
+
 - **Idle** — the resting state is intentional, not just the absence of everything else.
 - **Loading** — skeleton matches the final layout geometry; shown after ~200ms to avoid flash on fast connections.
 - **Empty** — one line explaining why it's empty + one primary action. Never "No items found" with no next step.
@@ -128,6 +134,7 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 **Goal:** every transition is purposeful, sub-400ms for UI, and motion-gap-clean.
 
 **Criteria:**
+
 - UI transitions use the duration scale's transition band: 100–400ms. Nothing outside this range for interactive state changes.
 - Easings have perceptual basis: no `linear` for spatial motion, no symmetric `ease-in-out` on hover — spatial motion should ease out. (Cross-ref `motion.md` — Duration and Easing Scale.)
 - Motion-gap audit clean: no interactive state changes that snap without a transition where the change is visually significant (appearance, disappearance, repositioning).
@@ -145,6 +152,7 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 **Goal:** every string has voice, specificity, and a single author.
 
 **Criteria:**
+
 - Verbs consistent across primary actions throughout the surface. Pick one form and hold it.
 - No placeholder copy in production paths: no lorem ipsum, no generic names, no TODO comments, no XXX strings.
 - No generic CTAs — every call to action names the specific outcome of the action.
@@ -163,6 +171,7 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 **Goal:** small details match the resolution intent of the design.
 
 **Criteria:**
+
 - Borders use sub-pixel approaches where a hairline is intended: `border: 1px solid color-mix(in oklch, var(--text-primary) 8%, transparent)` reads as a separator; a solid `neutral-200` border reads as a structural edge. Use the right one.
 - Shadow stacks use 2–3 layers for depth perception. A single shadow at one blur value looks flat and unconvincing.
 - Corner radii vary by element role: buttons, cards, and inputs each have a distinct radius. Uniform radius on every element is an AI-template tell — the single most recognizable signal of generated UI. (Cross-ref `inspiration.md` — Reference Token Values section.)
@@ -180,6 +189,7 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 **Goal:** every number, date, and currency communicates the right thing at the right precision.
 
 **Criteria:**
+
 - Tabular numerals on all data display: cells, KPIs, badges, inline metrics (`font-variant-numeric: tabular-nums`).
 - Counts abbreviated where the absolute value isn't the point: `1.2k`, `3.4M`, `12.5h`. Unabbreviated where the exact value matters.
 - Relative time where the user cares about recency (`2m ago`, `yesterday`). Absolute time where provenance matters (`Mar 4, 14:32 UTC`). Never use one format everywhere — they answer different questions.
@@ -195,17 +205,20 @@ The bar is opinionated about what matters. When a pass conflicts with a recorded
 ## How Findings Map to Severity
 
 **Critical — block ship:**
+
 - Pass 1: no discernible hierarchy (flat field of equal-weight elements)
 - Pass 6: states missing explicit designs (loading, empty, or error undefined)
 - Pass 8: placeholder copy in production paths (lorem ipsum, TODO strings, generic names)
 
 **Major — fix before ship when time allows; document if not:**
+
 - Pass 3: surface stack incomplete or dark mode is an inverted light layer
 - Pass 7: motion-gap failures on visible state changes; `prefers-reduced-motion` contract not honored
 - Pass 9: uniform border-radius across all element types
 - Pass 2: proportional numerals on tabular data (misaligned columns, impossible to compare)
 
 **Minor — polish; ship-okay if explicitly accepted:**
+
 - Pass 2: single weight-count violation (four weights, not three)
 - Pass 5: icon stroke weight off by a half-unit
 - Pass 10: currency format missing locale

@@ -66,6 +66,7 @@ file:line - [category] description of issue → fix
 ```
 
 Example:
+
 ```
 components/modal.tsx:45 - [animation] Exit 400ms exceeds 300ms limit → reduce to 200ms
 components/button.css:12 - [interaction] Missing :active transform → add scale(0.97)
@@ -78,6 +79,7 @@ components/button.css:12 - [interaction] Missing :active transform → add scale
 Follow this sequence. Each section is a separate lens.
 
 ### Step 0: Context
+
 - **What is this?** (app type, screen purpose, target user)
 - **Emotional context?** (stressful? casual? high-stakes? routine?)
 
@@ -88,48 +90,52 @@ Run the Anti-Slop Test from SKILL.md (Critical → Major → Minor). Every item 
 **The test**: "If someone said AI made this, would they believe it immediately?"
 
 ### Step 2: First Impressions
+
 One paragraph on gut reaction. Be honest and direct. This is the "noticing" step — seeing what's actually there, not what you expect.
 
 ### Step 3: Visual Design
 
-| Dimension | What to Look For |
-|-----------|-----------------|
-| Color intentionality | Every color purposeful? Too many competing backgrounds/accents? |
-| Typographic hierarchy | Clear scale from most to least important? Count distinct sizes/weights |
-| Shadow & stroke quality | Crisp or muddy? Borders competing with content? |
-| Visual weight vs importance | Heaviest elements = most important? Decorative stealing attention? |
-| Spacing & alignment | Consistent? Clear grid? Excess padding? |
-| Icon consistency | Same family, weight, stroke width, optical size? |
+| Dimension                   | What to Look For                                                       |
+| --------------------------- | ---------------------------------------------------------------------- |
+| Color intentionality        | Every color purposeful? Too many competing backgrounds/accents?        |
+| Typographic hierarchy       | Clear scale from most to least important? Count distinct sizes/weights |
+| Shadow & stroke quality     | Crisp or muddy? Borders competing with content?                        |
+| Visual weight vs importance | Heaviest elements = most important? Decorative stealing attention?     |
+| Spacing & alignment         | Consistent? Clear grid? Excess padding?                                |
+| Icon consistency            | Same family, weight, stroke width, optical size?                       |
 
 For each issue:
+
 > **[Issue name]** — [Specific factual observation]. [Impact on user]. [What it could be instead.]
 
 Be precise. Count things. Quote text. Name colors. Measure relative sizes.
 
 ### Step 4: Interface Design
 
-| Dimension | What to Look For |
-|-----------|-----------------|
-| Focusing mechanism | Clear where to look first? Visual entry point? |
+| Dimension              | What to Look For                                               |
+| ---------------------- | -------------------------------------------------------------- |
+| Focusing mechanism     | Clear where to look first? Visual entry point?                 |
 | Progressive disclosure | Complexity revealed gradually? 40 things when 5 would suffice? |
-| Information density | Appropriate for context? |
-| Expectation setting | User knows what happens next? Progress communicated? |
-| Feedback & reward | Actions acknowledged? Completed items celebrated? |
-| Redundancy | Labels repeating known information? Can anything be removed? |
+| Information density    | Appropriate for context?                                       |
+| Expectation setting    | User knows what happens next? Progress communicated?           |
+| Feedback & reward      | Actions acknowledged? Completed items celebrated?              |
+| Redundancy             | Labels repeating known information? Can anything be removed?   |
 
 Frame as missed opportunities:
+
 > "We're missing an opportunity to [reward progress / reduce cognitive load / etc.]"
 
 ### Step 5: Consistency & Conventions
 
-| Dimension | What to Look For |
-|-----------|-----------------|
-| Pattern consistency | Similar actions handled the same way? |
-| Platform conventions | Follows established patterns? Deviations intentional? |
-| Component reuse | Elements that should be same component but aren't? |
+| Dimension                | What to Look For                                          |
+| ------------------------ | --------------------------------------------------------- |
+| Pattern consistency      | Similar actions handled the same way?                     |
+| Platform conventions     | Follows established patterns? Deviations intentional?     |
+| Component reuse          | Elements that should be same component but aren't?        |
 | Visual language cohesion | Feels like one designer or assembled from different kits? |
 
 ### Step 6: User Context
+
 - **How does this make the user feel?** Name the emotion.
 - **User's likely state of mind?** Anxious? Focused? Under pressure?
 - **Does the interface respect that state?**
@@ -172,6 +178,7 @@ Keep it honest and short. The report reflects what this run actually inspected �
 ## Comprehensive Audit Checklist
 
 ### Animation Audit
+
 - [ ] No `transition: all` — properties listed explicitly
 - [ ] No `scale(0)` entry — starts from `scale(0.95)` with `opacity: 0`
 - [ ] No `ease-in` on UI elements — use `ease-out` or custom curve
@@ -202,6 +209,7 @@ Full checklist lives in `accessibility.md` (**Quick Checklist** + **Forms**). Fa
 - [ ] `touch-action: manipulation` on controls
 
 ### Layout Audit
+
 - [ ] Optical alignment (±1px adjustments where needed)
 - [ ] Deliberate grid/baseline/edge alignment
 - [ ] Responsive: mobile, laptop, ultra-wide verified
@@ -212,6 +220,7 @@ Full checklist lives in `accessibility.md` (**Quick Checklist** + **Forms**). Fa
 - [ ] Empty states handled
 
 ### Design Audit
+
 - [ ] Layered shadows (ambient + direct)
 - [ ] Nested radii: child ≤ parent
 - [ ] Hue-consistent borders/shadows on colored backgrounds
@@ -225,6 +234,7 @@ Full checklist lives in `accessibility.md` (**Quick Checklist** + **Forms**). Fa
 - [ ] `-webkit-font-smoothing: antialiased` on root (macOS)
 
 ### Performance Audit
+
 - [ ] Only compositor props animated (`transform`, `opacity`)
 - [ ] No layout thrashing (interleaved reads/writes)
 - [ ] Large lists virtualized (>50 items)
@@ -269,6 +279,7 @@ Full checklist lives in `accessibility.md` (**Quick Checklist** + **Forms**). Fa
 ## Voice Rules
 
 ### BE:
+
 - **Specific** — "There are six columns per row" not "a lot of data"
 - **Decisive** — "This is overwhelming" not "might feel overwhelming"
 - **Factual first** — State what you see before judging
@@ -277,6 +288,7 @@ Full checklist lives in `accessibility.md` (**Quick Checklist** + **Forms**). Fa
 - **Quantitative** — Count elements, name colors, measure sizes
 
 ### DO NOT:
+
 - Hedge ("maybe", "perhaps")
 - Apologize ("unfortunately")
 - Be vague ("feels off" without specifics)
@@ -284,6 +296,7 @@ Full checklist lives in `accessibility.md` (**Quick Checklist** + **Forms**). Fa
 - Prescribe without reasoning
 
 ### Severity Priority
+
 1. **Structural** — information architecture, mental model, missing functionality
 2. **Behavioral** — response, flow, communication
 3. **Visual** — color, type, spacing, shadows
@@ -311,13 +324,13 @@ The difference between "correct" and "crafted" is 20 small things done right. Ru
 
 When reviewing or polishing existing UI, these are the most frequent problems:
 
-| Issue | How to spot it | Fix |
-|-------|---------------|-----|
-| Everything is the same shade of gray | Squint test — no visual hierarchy | Darken headings to 900, lighten secondary to 500, add one accent |
-| Cards all look identical | 4+ cards with same border, radius, shadow | Differentiate primary card, vary content types, break the grid |
-| Hover states missing or default | Buttons/cards don't respond to cursor | Add translateY(-1px) + shadow on cards, bg darken on buttons |
-| Spacing is uniform everywhere | Same gap between all sections | Vary: tighter within groups, looser between sections |
-| No loading/empty/error states | Only the happy path is designed | Add skeleton, empty state with CTA, inline errors |
+| Issue                                | How to spot it                            | Fix                                                              |
+| ------------------------------------ | ----------------------------------------- | ---------------------------------------------------------------- |
+| Everything is the same shade of gray | Squint test — no visual hierarchy         | Darken headings to 900, lighten secondary to 500, add one accent |
+| Cards all look identical             | 4+ cards with same border, radius, shadow | Differentiate primary card, vary content types, break the grid   |
+| Hover states missing or default      | Buttons/cards don't respond to cursor     | Add translateY(-1px) + shadow on cards, bg darken on buttons     |
+| Spacing is uniform everywhere        | Same gap between all sections             | Vary: tighter within groups, looser between sections             |
+| No loading/empty/error states        | Only the happy path is designed           | Add skeleton, empty state with CTA, inline errors                |
 
 ---
 

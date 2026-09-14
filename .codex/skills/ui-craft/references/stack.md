@@ -4,13 +4,13 @@ Load this reference **only when the user opts in during Discovery**. Every rule 
 
 ## Decision tree — which library?
 
-| Need | Pick |
-|------|------|
-| Single hover, fade, or enter | **CSS transition / `@keyframes`** (0KB, always wins) |
-| Modern CSS scroll-linked reveal | **`animation-timeline: view()`** before any JS library |
-| React layout/exit animations, gestures, scroll progress tied to state | **Motion** |
-| Complex timelines with labels/overlaps, ScrollTrigger pin+scrub, SplitText, SVG paths, non-React | **GSAP** |
-| 3D scenes, shaders, product viewers, particle fields | **Three.js + R3F** |
+| Need                                                                                             | Pick                                                   |
+| ------------------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| Single hover, fade, or enter                                                                     | **CSS transition / `@keyframes`** (0KB, always wins)   |
+| Modern CSS scroll-linked reveal                                                                  | **`animation-timeline: view()`** before any JS library |
+| React layout/exit animations, gestures, scroll progress tied to state                            | **Motion**                                             |
+| Complex timelines with labels/overlaps, ScrollTrigger pin+scrub, SplitText, SVG paths, non-React | **GSAP**                                               |
+| 3D scenes, shaders, product viewers, particle fields                                             | **Three.js + R3F**                                     |
 
 **Never install two animation libraries that animate the same property** — they will fight and one will silently lose. Pick one per surface.
 
@@ -21,20 +21,24 @@ Load this reference **only when the user opts in during Discovery**. Every rule 
 Package renamed to `motion` on npm (legacy `framer-motion` still works).
 
 ### When to reach for it
+
 - React component needs **exit** animation — `AnimatePresence` is the only clean way to animate unmounts.
 - **Shared element transition** (tabs underline, modal-from-card) — `layoutId`.
 - **Scroll-linked** progress bars, parallax tied to component state — `useScroll` + `useTransform`.
 - **Gesture-driven** interactions (drag, pan).
 
 ### When NOT
+
 - A single hover/fade/enter — CSS wins, no library needed.
 - A one-off `@keyframes` spinner or loader.
 - Non-React surfaces — use GSAP.
 
 ### Install
+
 ```bash
 npm install motion
 ```
+
 ```tsx
 import {
   motion,
@@ -45,12 +49,13 @@ import {
   MotionConfig,
   LazyMotion,
   domAnimation,
-} from "motion/react"
+} from "motion/react";
 ```
 
 ### Top patterns
 
 **1. Exit animation with `AnimatePresence`**
+
 ```tsx
 <AnimatePresence>
   {open && (
@@ -64,35 +69,47 @@ import {
   )}
 </AnimatePresence>
 ```
+
 Every child needs a unique `key`. Without `AnimatePresence`, `exit` is silently ignored.
 
 **2. Shared element transition with `layoutId`**
+
 ```tsx
-{tabs.map((tab) => (
-  <button key={tab.id} onClick={() => setActive(tab.id)}>
-    {tab.label}
-    {active === tab.id && (
-      <motion.div layoutId="tab-underline" className="underline" />
-    )}
-  </button>
-))}
+{
+  tabs.map((tab) => (
+    <button key={tab.id} onClick={() => setActive(tab.id)}>
+      {tab.label}
+      {active === tab.id && (
+        <motion.div layoutId="tab-underline" className="underline" />
+      )}
+    </button>
+  ));
+}
 ```
+
 Animates position between elements sharing the same `layoutId`. FLIP-based, GPU-safe.
 
 **3. Scroll progress (smoothed with `useSpring`)**
+
 ```tsx
-const { scrollYProgress } = useScroll()
-const smooth = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.3 })
+const { scrollYProgress } = useScroll();
+const smooth = useSpring(scrollYProgress, {
+  stiffness: 120,
+  damping: 30,
+  mass: 0.3,
+});
 return (
   <motion.div
     style={{ scaleX: smooth, transformOrigin: "0%" }}
     className="fixed top-0 inset-x-0 h-[2px] bg-foreground"
   />
-)
+);
 ```
+
 Always bind scroll-linked values via `style`, **never** via `animate` (would trigger React renders per frame). `useSpring` smooths without a RAF loop.
 
 **3b. Viewport-triggered reveal**
+
 ```tsx
 <motion.section
   initial={{ opacity: 0, y: 24 }}
@@ -101,9 +118,11 @@ Always bind scroll-linked values via `style`, **never** via `animate` (would tri
   transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
 />
 ```
+
 `once: true` prevents re-triggering on scroll back. Negative `margin` fires before the element is fully in view — feels natural, not delayed.
 
 **4. Spring vs tween — pick ONE per project**
+
 ```tsx
 // Spring (Motion default — physical, no fixed duration)
 transition={{ type: "spring", bounce: 0.25, visualDuration: 0.3 }}
@@ -111,14 +130,17 @@ transition={{ type: "spring", bounce: 0.25, visualDuration: 0.3 }}
 // Tween (deterministic, matches our 200–300ms rule)
 transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
 ```
+
 Mixing both within the same app reads as inconsistent. Document the choice.
 
 **5. Reduced-motion, once for the whole app**
+
 ```tsx
 <MotionConfig reducedMotion="user">
   <App />
 </MotionConfig>
 ```
+
 Or per-component with `useReducedMotion()` and branch the animation.
 
 ### Clashes with ui-craft rules
@@ -160,6 +182,7 @@ Or per-component with `useReducedMotion()` and branch the animation.
 All GSAP plugins (including ScrollTrigger, SplitText, MorphSVG) are MIT since late 2024.
 
 ### When to reach for it
+
 - **Timelines with labels/overlaps** — sequence shots, re-use, rewind.
 - **ScrollTrigger** — pin sections, scrub cinematic scenes, snap to waypoints.
 - **SplitText** — per-line/word/char reveal on headlines.
@@ -167,63 +190,73 @@ All GSAP plugins (including ScrollTrigger, SplitText, MorphSVG) are MIT since la
 - **Non-React surfaces** — vanilla, canvas/WebGL tweening.
 
 ### When NOT
+
 - A hover state or enter animation in React — Motion is more ergonomic.
 - Anything CSS `animation-timeline: view()` can do natively in evergreens.
 - Text splitting on body copy — huge DOM cost + a11y risk. Headlines only.
 
 ### Install
+
 ```bash
 npm install gsap @gsap/react
 ```
-```ts
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { SplitText } from "gsap/SplitText"
-import { useGSAP } from "@gsap/react"
 
-gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP)
+```ts
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { SplitText } from "gsap/SplitText";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger, SplitText, useGSAP);
 ```
+
 Always `registerPlugin()` — in production bundlers will otherwise tree-shake plugins to nothing (silent failure).
 
 ### Top patterns
 
 **1. `useGSAP` hook (React) — auto-cleanup, StrictMode safe**
+
 ```tsx
-const ref = useRef<HTMLDivElement>(null)
+const ref = useRef<HTMLDivElement>(null);
 useGSAP(
   () => {
-    gsap.from(".card", { y: 40, opacity: 0, stagger: 0.08, duration: 0.3 })
+    gsap.from(".card", { y: 40, opacity: 0, stagger: 0.08, duration: 0.3 });
   },
-  { scope: ref }
-)
-return <div ref={ref}>…</div>
+  { scope: ref },
+);
+return <div ref={ref}>…</div>;
 ```
+
 Wraps `gsap.context()` so everything reverts on unmount. Never use raw `useEffect` for GSAP in React.
 
 **2. Timeline with labels**
+
 ```ts
 const tl = gsap.timeline({
   defaults: { ease: "power2.out", duration: 0.3 },
-})
+});
 tl.from(".title", { y: 40, opacity: 0 })
-  .from(".sub",   { opacity: 0 }, "-=0.2") // overlap 200ms
-  .addLabel("hero-done")
+  .from(".sub", { opacity: 0 }, "-=0.2") // overlap 200ms
+  .addLabel("hero-done");
 ```
+
 Overlap with relative offsets keeps sequences tight.
 
 **3. ScrollTrigger pin + scrub**
+
 ```ts
 gsap.to(".panel", {
   xPercent: -300,
   scrollTrigger: {
     trigger: ".panels",
     pin: true,
-    scrub: 1,               // smooth with 1s catch-up, never `true`
+    scrub: 1, // smooth with 1s catch-up, never `true`
     end: "+=2000",
     invalidateOnRefresh: true,
   },
-})
+});
 ```
+
 Use `scrub: 1` (or higher), not `true` — `true` welds the animation to the wheel and jitters.
 
 **3a. Sticky-stack (cards pin and stack on scroll) — canonical skeleton**
@@ -231,89 +264,114 @@ Use `scrub: 1` (or higher), not `true` — `true` welds the animation to the whe
 The #1 sticky-stack bug: the trigger fires halfway down the viewport instead of pinning at the top. The fix is always `start: "top top"`.
 
 ```tsx
-useGSAP(() => {
-  const cards = gsap.utils.toArray<HTMLElement>(".stack-card")
-  cards.forEach((card, i) => {
-    if (i === cards.length - 1) return
-    ScrollTrigger.create({
-      trigger: card,
-      start: "top top",                      // pin at viewport top — never "top center"
-      endTrigger: cards[cards.length - 1],
-      end: "top top",
-      pin: true,
-      pinSpacing: false,
-    })
-    // previous card recedes as the NEXT card arrives
-    gsap.to(card, {
-      scale: 0.94, autoAlpha: 0.6, ease: "none",
-      scrollTrigger: { trigger: cards[i + 1], start: "top bottom", end: "top top", scrub: 1 },
-    })
-  })
-}, { scope: ref })
+useGSAP(
+  () => {
+    const cards = gsap.utils.toArray<HTMLElement>(".stack-card");
+    cards.forEach((card, i) => {
+      if (i === cards.length - 1) return;
+      ScrollTrigger.create({
+        trigger: card,
+        start: "top top", // pin at viewport top — never "top center"
+        endTrigger: cards[cards.length - 1],
+        end: "top top",
+        pin: true,
+        pinSpacing: false,
+      });
+      // previous card recedes as the NEXT card arrives
+      gsap.to(card, {
+        scale: 0.94,
+        autoAlpha: 0.6,
+        ease: "none",
+        scrollTrigger: {
+          trigger: cards[i + 1],
+          start: "top bottom",
+          end: "top top",
+          scrub: 1,
+        },
+      });
+    });
+  },
+  { scope: ref },
+);
 ```
 
-Every card except the last is pinned; the recede tween is driven by the *next* card's trigger. Cards themselves are `min-height: 100dvh` flex-centered wrappers.
+Every card except the last is pinned; the recede tween is driven by the _next_ card's trigger. Cards themselves are `min-height: 100dvh` flex-centered wrappers.
 
 **3b. Horizontal pan (vertical scroll drives horizontal travel) — canonical skeleton**
 
 The #1 horizontal-pan bug: the pan starts before the section is pinned, so the user sees half a slide. Same fix: `start: "top top"`, pin the wrapper, scrub the inner track.
 
 ```tsx
-useGSAP(() => {
-  const distance = track.current!.scrollWidth - window.innerWidth
-  gsap.to(track.current, {
-    x: -distance, ease: "none",
-    scrollTrigger: {
-      trigger: wrap.current,
-      start: "top top",
-      end: () => `+=${distance}`,            // scroll length = horizontal travel
-      pin: true,
-      scrub: 1,
-      invalidateOnRefresh: true,
-    },
-  })
-}, { scope: wrap })
+useGSAP(
+  () => {
+    const distance = track.current!.scrollWidth - window.innerWidth;
+    gsap.to(track.current, {
+      x: -distance,
+      ease: "none",
+      scrollTrigger: {
+        trigger: wrap.current,
+        start: "top top",
+        end: () => `+=${distance}`, // scroll length = horizontal travel
+        pin: true,
+        scrub: 1,
+        invalidateOnRefresh: true,
+      },
+    });
+  },
+  { scope: wrap },
+);
 ```
 
 Wrapper is `overflow: hidden`; the track is a `100dvh` flex row. Both skeletons collapse to plain stacked sections under `prefers-reduced-motion` (wrap in `gsap.matchMedia`, pattern 5 below).
 
 **4. SplitText (headlines only)**
+
 ```ts
-const split = SplitText.create(".headline", { type: "lines,words" })
+const split = SplitText.create(".headline", { type: "lines,words" });
 gsap.from(split.words, {
   y: 24,
   opacity: 0,
   stagger: 0.02,
   duration: 0.4,
   ease: "power3.out",
-})
+});
 ```
+
 Revert with `split.revert()` in cleanup. `@gsap/react` handles it if scoped.
 
 **5. `matchMedia` for responsive + reduced-motion**
+
 ```ts
-const mm = gsap.matchMedia()
+const mm = gsap.matchMedia();
 mm.add("(prefers-reduced-motion: no-preference)", () => {
   // animations here
-})
+});
 mm.add("(min-width: 768px)", () => {
   // desktop-only pins
-})
+});
 ```
+
 This is the only sane way to handle reduced-motion and breakpoints together in GSAP.
 
 **6. `quickTo` for high-frequency updates (mouse follower, pointer-linked)**
+
 ```ts
-const xTo = gsap.quickTo("#dot", "x", { duration: 0.4, ease: "power3" })
-const yTo = gsap.quickTo("#dot", "y", { duration: 0.4, ease: "power3" })
-window.addEventListener("pointermove", (e) => { xTo(e.clientX); yTo(e.clientY) })
+const xTo = gsap.quickTo("#dot", "x", { duration: 0.4, ease: "power3" });
+const yTo = gsap.quickTo("#dot", "y", { duration: 0.4, ease: "power3" });
+window.addEventListener("pointermove", (e) => {
+  xTo(e.clientX);
+  yTo(e.clientY);
+});
 ```
+
 Reuses one tween instead of creating a new tween per event — crucial for pointer/scroll handlers that fire 60+ times/sec. Never `gsap.to()` inside a frequent event handler.
 
 **7. `autoAlpha` over `opacity`**
+
 ```ts
-gsap.to(".menu", { autoAlpha: 0, duration: 0.2 })
+gsap.to(".menu", { autoAlpha: 0, duration: 0.2 });
 ```
+
 `autoAlpha` animates opacity **and** toggles `visibility: hidden` at 0 — hidden elements stop catching pointer events and get skipped by screen readers. `opacity: 0` alone does neither.
 
 ### Clashes with ui-craft rules
@@ -335,10 +393,10 @@ gsap.to(".menu", { autoAlpha: 0, duration: 0.2 })
 - **Pause animations off-screen with `IntersectionObserver`**. On long pages with multiple timelines, idle sections still burn RAF cycles. Pause them:
   ```ts
   const io = new IntersectionObserver(([entry]) => {
-    if (entry.isIntersecting) tl.play()
-    else tl.pause()
-  })
-  io.observe(container)
+    if (entry.isIntersecting) tl.play();
+    else tl.pause();
+  });
+  io.observe(container);
   ```
   Or use ScrollTrigger's `toggleActions: "play pause resume pause"` which handles this natively.
 
@@ -357,37 +415,42 @@ gsap.to(".menu", { autoAlpha: 0, duration: 0.2 })
 R3F v9 pairs with React 19; v8 with React 18. `drei` is the swiss-army helper set — always install alongside.
 
 ### When to reach for it
+
 - **3D product viewers** the user rotates.
 - **Interactive hero scenes** where the scene reacts to scroll or cursor.
 - **Data viz in 3D** (rare — prefer 2D unless the extra dimension is load-bearing).
 - **Shaders** tied to React state.
 
 ### When NOT
+
 - A marketing page that could be a **WebP/MP4** — users on phones pay 400KB + GPU for nothing.
 - Static logo rotation — CSS 3D transforms.
 - Decorative 2D canvas — `<canvas>` + Motion.
 
 ### Install
+
 ```bash
 npm install three @react-three/fiber @react-three/drei
 ```
+
 ```tsx
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import {
   Environment,
   OrbitControls,
   useGLTF,
   PerformanceMonitor,
-} from "@react-three/drei"
+} from "@react-three/drei";
 ```
 
 ### Top patterns
 
 **1. Canvas with perf caps (always)**
+
 ```tsx
 <Canvas
-  dpr={[1, 2]}             // cap retina cost
-  frameloop="demand"       // render only when props change
+  dpr={[1, 2]} // cap retina cost
+  frameloop="demand" // render only when props change
   camera={{ position: [0, 0, 5], fov: 45 }}
   gl={{ antialias: true, powerPreference: "high-performance" }}
 >
@@ -396,34 +459,42 @@ import {
   <Model />
 </Canvas>
 ```
+
 `dpr={[1, 2]}` + `frameloop="demand"` is the responsible default. Most "heavy" R3F demos are heavy because they omit these.
 
 **2. `useFrame` with delta, never fixed increments**
+
 ```tsx
 useFrame((_, dt) => {
-  ref.current.rotation.y += dt * 0.5 // speed in rad/sec, framerate-independent
-})
+  ref.current.rotation.y += dt * 0.5; // speed in rad/sec, framerate-independent
+});
 ```
+
 Never `+= 0.01` — ties speed to framerate (feels fast on 120Hz, slow on 60Hz).
 
 **3. `<Environment />` + `<Lightformer />` for lighting**
+
 ```tsx
 <Environment preset="studio" />
 ```
+
 Presets (`studio`, `city`, `sunset`, `warehouse`, `apartment`) cover 90% of cases. Beats five hand-placed lights.
 
 **4. Instancing for repeats**
+
 ```tsx
 <instancedMesh args={[null, null, 10000]}>
   <boxGeometry args={[0.1, 0.1, 0.1]} />
   <meshStandardMaterial />
 </instancedMesh>
 ```
+
 One draw call for 10k objects. Use when the same mesh repeats more than ~50 times.
 
 **5. Auto-degrade with `PerformanceMonitor` (drei)**
+
 ```tsx
-const [dpr, setDpr] = useState(1.5)
+const [dpr, setDpr] = useState(1.5);
 return (
   <Canvas dpr={dpr}>
     <PerformanceMonitor
@@ -432,11 +503,13 @@ return (
     />
     …
   </Canvas>
-)
+);
 ```
+
 Drops `dpr` automatically on low FPS. Ship this on any production scene.
 
 **6. `<Suspense>` with nested progressive loading**
+
 ```tsx
 <Canvas>
   <Suspense fallback={<Model url="/model-low.glb" />}>
@@ -444,47 +517,56 @@ Drops `dpr` automatically on low FPS. Ship this on any production scene.
   </Suspense>
 </Canvas>
 ```
+
 Every `useLoader` / `useGLTF` / `useTexture` **must** live under a Suspense boundary. Nesting lets you show a low-res placeholder while the high-res loads, then swap — zero blank frames.
 
 **6b. DOM overlays inside the scene with `<Html>` (drei)**
+
 ```tsx
-import { Html } from "@react-three/drei"
+import { Html } from "@react-three/drei";
 
 <mesh position={[0, 1, 0]}>
   <Html distanceFactor={8} occlude="blending">
     <div className="rounded-md bg-background/90 px-2 py-1 text-xs">Label</div>
   </Html>
-</mesh>
+</mesh>;
 ```
+
 `distanceFactor` scales with camera distance (so labels don't balloon on zoom). `occlude` hides the overlay when geometry blocks it — respects depth without feeling cheap.
 
 **6c. Axis-specific prop notation**
+
 ```tsx
 // Instead of <mesh position={[x, 0, 0]}> on every render:
 <mesh position-x={x} />
 ```
+
 Avoids recreating the `[x, y, z]` tuple each frame and reads cleaner when animating a single axis via state/ref.
 
 **7. Auto-fit camera with `<Bounds>` + `<Center>`**
+
 ```tsx
-import { Bounds, Center } from "@react-three/drei"
+import { Bounds, Center } from "@react-three/drei";
 
 <Canvas>
   <Bounds fit clip observe margin={1.2}>
-    <Center><Model /></Center>
+    <Center>
+      <Model />
+    </Center>
   </Bounds>
-</Canvas>
+</Canvas>;
 ```
+
 Stops the "model invisible because the camera is inside it" footgun. `observe` re-fits on model change.
 
 ### Clashes with ui-craft rules
 
 - Three.js runs **its own RAF** — independent of CSS `prefers-reduced-motion`. Read it in React and cut autorotate / camera drift:
   ```tsx
-  const reduced = useReducedMotion()
+  const reduced = useReducedMotion();
   useFrame((_, dt) => {
-    if (!reduced) ref.current.rotation.y += dt * 0.2
-  })
+    if (!reduced) ref.current.rotation.y += dt * 0.2;
+  });
   ```
 - Heavy lighting/shadows violate the spirit of "GPU-accelerated transforms only" by burning GPU on everything. Budget draw calls and shadow resolution.
 - Default `Canvas` runs 60fps forever — battery killer. **`frameloop="demand"` is the default**, not the optimization.

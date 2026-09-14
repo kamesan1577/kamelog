@@ -48,11 +48,11 @@ List them in conflict-resolution order. When two principles apply to the same de
 
 **Example pairs — strong vs. weak:**
 
-| Strong | Weak | Why the weak one fails |
-|--------|------|----------------------|
-| "Wrong is worse than late." | "Accuracy matters." | The strong one resolves the confirmation modal debate. The weak one is a platitude every product claims. |
-| "The empty page is the customer." | "Good onboarding is important." | The strong one makes a specific architectural call: blank canvas over wizard. The weak one is a category. |
-| "Show the data, not the design." | "Keep it simple." | The strong one tells the agent what to do with color, chrome, and decoration. The weak one means nothing actionable. |
+| Strong                            | Weak                            | Why the weak one fails                                                                                               |
+| --------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| "Wrong is worse than late."       | "Accuracy matters."             | The strong one resolves the confirmation modal debate. The weak one is a platitude every product claims.             |
+| "The empty page is the customer." | "Good onboarding is important." | The strong one makes a specific architectural call: blank canvas over wizard. The weak one is a category.            |
+| "Show the data, not the design."  | "Keep it simple."               | The strong one tells the agent what to do with color, chrome, and decoration. The weak one means nothing actionable. |
 
 ---
 
@@ -86,11 +86,11 @@ Short. Declarative. Each item should prevent at least one future feature request
 Corrections the user has made to design output on this project — the brief teaching itself. Starts empty; grows whenever the user rejects or redirects a choice. Each entry is dated and pins the rule plus the reason, so it generalizes instead of pattern-matching one literal case.
 
 ```markdown
-- **2026-06-23** — No gradient backgrounds on hero/landing surfaces. *Why:* brand reads restrained; flashy undercuts trust.
-- **2026-06-20** — Button press feedback caps at `scale(0.97)`. *Why:* user found 0.92 exaggerated.
+- **2026-06-23** — No gradient backgrounds on hero/landing surfaces. _Why:_ brand reads restrained; flashy undercuts trust.
+- **2026-06-20** — Button press feedback caps at `scale(0.97)`. _Why:_ user found 0.92 exaggerated.
 ```
 
-These are project-scoped design facts, not a general memory store — they live in the brief because they *are* design decisions, just learned rather than stated up front. They rank with the principles (section 3): a learned constraint overrides a skill default but never the accessibility/correctness floor.
+These are project-scoped design facts, not a general memory store — they live in the brief because they _are_ design decisions, just learned rather than stated up front. They rank with the principles (section 3): a learned constraint overrides a skill default but never the accessibility/correctness floor.
 
 ### 7. Fold classes used (append-only, written by `/craft`)
 
@@ -109,7 +109,7 @@ This section is not documentation, it is the mechanism. Asking a model for varie
 
 Read `.ui-craft/brief.md` first when working on any UI. It is Discovery Phase Step 1.
 
-When making a design decision, cite the principle it applies. Write it as: *"Density reduced per principle 2: 'Show the data, not the design.'"* If a decision isn't covered by any principle, flag it — the brief is incomplete, not the decision wrong. Surface the gap so the brief can be updated.
+When making a design decision, cite the principle it applies. Write it as: _"Density reduced per principle 2: 'Show the data, not the design.'"_ If a decision isn't covered by any principle, flag it — the brief is incomplete, not the decision wrong. Surface the gap so the brief can be updated.
 
 If two principles conflict, the higher-ranked one wins. Document the override.
 
@@ -149,8 +149,7 @@ Update when any of these shift: product direction, target user definition, surfa
 Date each addition. Never delete past principles — if a principle is superseded, mark it deprecated with the date and a reason:
 
 ```markdown
-~~3. "Speed over completeness."~~ — deprecated 2025-11, product shifted to compliance use case where error cost > latency cost.
-4. "Correctness over speed."
+~~3. "Speed over completeness."~~ — deprecated 2025-11, product shifted to compliance use case where error cost > latency cost. 4. "Correctness over speed."
 ```
 
 The brief is append-mostly. The team should be able to trace why a principle changed.
@@ -163,7 +162,7 @@ When the user corrects design output — "not like that", "I don't like this", "
 
 This is project-scoped, and it lives in the brief by design — ui-craft is a UI skill, not a general memory engine.
 
-**Optional cross-project bridge.** If the user wants a correction applied across *all* their projects (not just this one), that's general memory, outside the brief's scope. When an external memory service is available to the agent, mirror the constraint there so other projects inherit it; otherwise note that cross-project recall needs such a service. The brief remains the canonical project store either way.
+**Optional cross-project bridge.** If the user wants a correction applied across _all_ their projects (not just this one), that's general memory, outside the brief's scope. When an external memory service is available to the agent, mirror the constraint there so other projects inherit it; otherwise note that cross-project recall needs such a service. The brief remains the canonical project store either way.
 
 ---
 

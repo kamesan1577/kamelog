@@ -6,16 +6,16 @@ WCAG compliance, keyboard navigation, focus management, ARIA, and forms.
 
 ## Priority Categories
 
-| Priority | Category | Impact |
-|----------|----------|--------|
-| 1 | Accessible names | Critical |
-| 2 | Keyboard access | Critical |
-| 3 | Focus & dialogs | Critical |
-| 4 | Semantics | High |
-| 5 | Forms & errors | High |
-| 6 | Announcements | Medium-high |
-| 7 | Contrast & states | Medium |
-| 8 | Media & motion | Low-medium |
+| Priority | Category          | Impact      |
+| -------- | ----------------- | ----------- |
+| 1        | Accessible names  | Critical    |
+| 2        | Keyboard access   | Critical    |
+| 3        | Focus & dialogs   | Critical    |
+| 4        | Semantics         | High        |
+| 5        | Forms & errors    | High        |
+| 6        | Announcements     | Medium-high |
+| 7        | Contrast & states | Medium      |
+| 8        | Media & motion    | Low-medium  |
 
 ---
 
@@ -100,7 +100,10 @@ WCAG compliance, keyboard navigation, focus management, ARIA, and forms.
 
 ```css
 @media (prefers-reduced-motion: reduce) {
-  .animated { animation: none; transition: none; }
+  .animated {
+    animation: none;
+    transition: none;
+  }
 }
 ```
 
@@ -110,9 +113,12 @@ const initial = shouldReduceMotion ? false : { opacity: 0, y: 20 };
 ```
 
 - Gate hover animations:
+
 ```css
 @media (hover: hover) and (pointer: fine) {
-  .element:hover { transform: scale(1.05); }
+  .element:hover {
+    transform: scale(1.05);
+  }
 }
 ```
 

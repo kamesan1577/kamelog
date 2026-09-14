@@ -23,14 +23,15 @@ Two rules that belong at the input level, before any validation or layout decisi
 
 The most-botched decision in form UX. Wrong timing feels punitive; right timing feels invisible.
 
-| Trigger | When to use | When not to |
-|---------|-------------|-------------|
-| On blur | Format-checkable fields (email, URL, credit card, phone) | Required-only check — don't punish leaving a field |
-| On submit | Required fields, inter-field dependencies, server-side uniqueness | Format checks that could fire earlier |
-| Inline (as-you-type) | Password strength, character count, username availability | Email format (too noisy); most other fields |
-| On mount | Never | Ever |
+| Trigger              | When to use                                                       | When not to                                        |
+| -------------------- | ----------------------------------------------------------------- | -------------------------------------------------- |
+| On blur              | Format-checkable fields (email, URL, credit card, phone)          | Required-only check — don't punish leaving a field |
+| On submit            | Required fields, inter-field dependencies, server-side uniqueness | Format checks that could fire earlier              |
+| Inline (as-you-type) | Password strength, character count, username availability         | Email format (too noisy); most other fields        |
+| On mount             | Never                                                             | Ever                                               |
 
 **Rules:**
+
 - Validate on blur only after the user has interacted with the field at least once. Never validate on mount — nothing is wrong yet, and red borders on a fresh form read as hostile.
 - Inline validation: debounce 300ms before showing error states. **Why:** without debounce, users see flickering error→success cycles as they type. Jittery feedback breaks the typing flow and reduces trust. 300ms is the threshold where users perceive feedback as "after I stopped" rather than "while I'm typing". (See Debounce Timings below.)
 - Server-side uniqueness checks (username, slug) show a tiny spinner in the field during the check, then a green check or red error on resolve.
@@ -42,7 +43,7 @@ The most-botched decision in form UX. Wrong timing feels punitive; right timing 
 
 Where error messages live on the page. Details on copy tone are in `copy.md`.
 
-- **Errors below the input; hints and help text ABOVE it.** Errors appear after typing, so below-field placement follows reading order. Hints are needed *while* typing — below the field they get covered by autofill menus and the mobile keyboard; above the field they stay visible.
+- **Errors below the input; hints and help text ABOVE it.** Errors appear after typing, so below-field placement follows reading order. Hints are needed _while_ typing — below the field they get covered by autofill menus and the mobile keyboard; above the field they stay visible.
 - **Red border on the input itself**, plus message, plus icon (`⚠` or field-specific). Color alone fails WCAG and color-blind users — pair color with shape/text.
 - **Scroll to first error on submit** if not in view. Focus it so screen readers announce it immediately.
 - **Summary at the top is additive, not a replacement.** For long forms, an aria-live summary box ("3 fields need attention") helps — but every field still has its own inline error.
@@ -143,15 +144,15 @@ Basics most forms miss. The keyboard contract is non-negotiable on any form a us
 
 The fields that AI-generated forms get wrong.
 
-| Field | Pattern |
-|-------|---------|
-| Phone | Country code picker + mask + formatted display. Store E.164 internally; display local format ("(415) 555-1234") |
-| Date | Prefer native `<input type="date">` where UX is tolerable. For ranges or complex pickers, a dedicated accessible component |
-| Time zone | Pre-fill from browser (`Intl.DateTimeFormat().resolvedOptions().timeZone`); let user override; display user-facing name ("9:00 AM PT") not IANA ID |
-| Credit card | Autoformat with a space every 4 digits; detect brand from first digits; move focus to expiry when card number is valid |
-| Currency | Format per locale via `Intl.NumberFormat`; never let users type the currency symbol — render it as a prefix affordance |
-| Password | Show/hide toggle (eye icon + `aria-label`). Strength indicator relative, not absolute. Skip the "1 uppercase, 1 number, 1 special" dance unless compliance requires it — long is better than complex |
-| Magic link | "Check your email" state with explicit "Didn't receive? Resend in 30s" countdown; cooldown visible |
+| Field       | Pattern                                                                                                                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Phone       | Country code picker + mask + formatted display. Store E.164 internally; display local format ("(415) 555-1234")                                                                                        |
+| Date        | Prefer native `<input type="date">` where UX is tolerable. For ranges or complex pickers, a dedicated accessible component                                                                             |
+| Time zone   | Pre-fill from browser (`Intl.DateTimeFormat().resolvedOptions().timeZone`); let user override; display user-facing name ("9:00 AM PT") not IANA ID                                                     |
+| Credit card | Autoformat with a space every 4 digits; detect brand from first digits; move focus to expiry when card number is valid                                                                                 |
+| Currency    | Format per locale via `Intl.NumberFormat`; never let users type the currency symbol — render it as a prefix affordance                                                                                 |
+| Password    | Show/hide toggle (eye icon + `aria-label`). Strength indicator relative, not absolute. Skip the "1 uppercase, 1 number, 1 special" dance unless compliance requires it — long is better than complex   |
+| Magic link  | "Check your email" state with explicit "Didn't receive? Resend in 30s" countdown; cooldown visible                                                                                                     |
 | File upload | Drag-and-drop with dashed border indicator on drag-over; per-file progress (bar + filename + size + cancel); per-file retry on failure; `accept` hints + descriptive copy ("PDF, PNG, JPG up to 10MB") |
 
 ---

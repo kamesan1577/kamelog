@@ -15,12 +15,12 @@ Any motion work: hover, enter/exit, modals, drawers, page transitions, scroll re
 1. **Justify every animation** — motion must communicate something (hierarchy, state, spatial relationship). Decorative motion is noise.
 2. **Frequency determines budget** — 100+ times/day gets zero animation. Occasional (modals, drawers) get standard. First-time experiences can delight.
 
-   | Frequency | Animation |
-   |-----------|-----------|
-   | 100+ times/day (keyboard shortcuts, command palette) | **None. Ever.** |
-   | Tens of times/day (hover, list nav, typing) | Remove or drastically reduce — under 150ms or none |
-   | Occasional (modals, drawers, toasts) | Standard animation, 200-300ms, clear purpose |
-   | Rare / first-time (onboarding, celebrations) | Can add delight — tell a story |
+   | Frequency                                            | Animation                                          |
+   | ---------------------------------------------------- | -------------------------------------------------- |
+   | 100+ times/day (keyboard shortcuts, command palette) | **None. Ever.**                                    |
+   | Tens of times/day (hover, list nav, typing)          | Remove or drastically reduce — under 150ms or none |
+   | Occasional (modals, drawers, toasts)                 | Standard animation, 200-300ms, clear purpose       |
+   | Rare / first-time (onboarding, celebrations)         | Can add delight — tell a story                     |
 
 3. **Speed communicates confidence** — under 200ms feels instant. 300ms+ starts feeling sluggish.
 4. **Respect the user's system** — `prefers-reduced-motion` is not optional. Provide meaningful fallbacks, not just `animation: none`.
@@ -45,20 +45,20 @@ Five tokens cover ~95% of UI. Pick from this scale; do not invent.
 
 ```css
 :root {
-  --motion-fast:   120ms; /* color / opacity, tooltip, hover */
-  --motion-base:   200ms; /* small UI — dropdown, toggle, tab, select */
+  --motion-fast: 120ms; /* color / opacity, tooltip, hover */
+  --motion-base: 200ms; /* small UI — dropdown, toggle, tab, select */
   --motion-medium: 280ms; /* medium UI — modal open, drawer, popover */
-  --motion-slow:   400ms; /* large UI — page transition, full sheet */
+  --motion-slow: 400ms; /* large UI — page transition, full sheet */
   --motion-slower: 600ms; /* decorative / onboarding — sparingly */
 }
 ```
 
-| Token | Range | Use for |
-|-------|-------|---------|
-| `--motion-fast` | 120ms | Opacity, color, hover, focus ring, tooltip show/hide |
-| `--motion-base` | 200ms | Dropdowns, toggles, tabs, selects, chips, accordion |
-| `--motion-medium` | 280ms | Modals, popovers, drawers (desktop), snackbars |
-| `--motion-slow` | 400ms | Page transitions, drawers (mobile), full-screen sheets |
+| Token             | Range | Use for                                                  |
+| ----------------- | ----- | -------------------------------------------------------- |
+| `--motion-fast`   | 120ms | Opacity, color, hover, focus ring, tooltip show/hide     |
+| `--motion-base`   | 200ms | Dropdowns, toggles, tabs, selects, chips, accordion      |
+| `--motion-medium` | 280ms | Modals, popovers, drawers (desktop), snackbars           |
+| `--motion-slow`   | 400ms | Page transitions, drawers (mobile), full-screen sheets   |
 | `--motion-slower` | 600ms | Hero animations, onboarding choreography, first-run only |
 
 Never `transition: 153ms`. Never `200ms` on one button and `220ms` on another for the same state. A bespoke duration is a finding.
@@ -71,22 +71,28 @@ Four tokens cover ~95% of UI easing. System defaults — framework libraries hav
 
 ```css
 :root {
-  --ease-out:         cubic-bezier(0.22, 1, 0.36, 1);   /* entrances, most UI */
-  --ease-in-out:      cubic-bezier(0.65, 0, 0.35, 1);   /* same-layer transitions */
-  --ease-emphasized:  cubic-bezier(0.2, 0, 0, 1);       /* hero, attention-grabbing */
-  --ease-soft:        cubic-bezier(0.4, 0, 0.2, 1);     /* Material-like, general purpose */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1); /* entrances, most UI */
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1); /* same-layer transitions */
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1); /* hero, attention-grabbing */
+  --ease-soft: cubic-bezier(
+    0.4,
+    0,
+    0.2,
+    1
+  ); /* Material-like, general purpose */
 }
 ```
 
-| Token | Perceptual basis | When to use |
-|-------|-----------------|-------------|
-| `--ease-out` | Decelerates to rest — matches how real objects behave under gravity. Feels natural for anything arriving. | Default for almost everything. Entrances, hover, dropdown, modal open. |
-| `--ease-in-out` | Symmetric ramp — deliberate, reads as intentional but can feel sluggish if overused. | Elements already on screen that move or morph (layout changes, repositioning). |
-| `--ease-emphasized` | Aggressive ease-out — arrives quickly and settles hard. Signals importance and speed of response. | One element per viewport — hero reveal, primary CTA emphasis. |
-| `--ease-soft` | Gentle ease-out with softer deceleration tail — less snappy, more comfortable for dense UI. | Gentler alternative for general UI; Material-style products. |
+| Token               | Perceptual basis                                                                                          | When to use                                                                    |
+| ------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| `--ease-out`        | Decelerates to rest — matches how real objects behave under gravity. Feels natural for anything arriving. | Default for almost everything. Entrances, hover, dropdown, modal open.         |
+| `--ease-in-out`     | Symmetric ramp — deliberate, reads as intentional but can feel sluggish if overused.                      | Elements already on screen that move or morph (layout changes, repositioning). |
+| `--ease-emphasized` | Aggressive ease-out — arrives quickly and settles hard. Signals importance and speed of response.         | One element per viewport — hero reveal, primary CTA emphasis.                  |
+| `--ease-soft`       | Gentle ease-out with softer deceleration tail — less snappy, more comfortable for dense UI.               | Gentler alternative for general UI; Material-style products.                   |
 
 **Never:**
-- `ease-in` for UI — acceleration without deceleration means the element speeds up as it arrives, which reads as a collision, not a landing. A dropdown with `ease-in` at 300ms *feels* slower than `ease-out` at the same duration.
+
+- `ease-in` for UI — acceleration without deceleration means the element speeds up as it arrives, which reads as a collision, not a landing. A dropdown with `ease-in` at 300ms _feels_ slower than `ease-out` at the same duration.
 - `linear` for spatial motion — machine-like and robotic; use only for opacity-only fades, loading bars, marquees, scroll-linked progress, and continuous rotation.
 - Bespoke easings named "smooth" with `cubic-bezier(0.5, 0.5, 0.5, 0.5)` — that's a straight line.
 - Bounce / elastic easing on functional UI — reads dated and draws attention to the animation itself.
@@ -125,9 +131,15 @@ General interaction rules (keyboard timing, touch targets, `overscroll-behavior`
 Stagger example:
 
 ```css
-.item:nth-child(1) { animation-delay: 0ms; }
-.item:nth-child(2) { animation-delay: 50ms; }
-.item:nth-child(3) { animation-delay: 100ms; }
+.item:nth-child(1) {
+  animation-delay: 0ms;
+}
+.item:nth-child(2) {
+  animation-delay: 50ms;
+}
+.item:nth-child(3) {
+  animation-delay: 100ms;
+}
 ```
 
 For multi-stage storyboards with named timing + config objects + stage-driven sequencing, see `../examples/animation-storyboard.md`.
@@ -138,15 +150,15 @@ For multi-stage storyboards with named timing + config objects + stage-driven se
 
 A ceiling on simultaneous entrance animations. This is the tool against AI's "animate everything on mount" slop.
 
-| Surface | Budget |
-|---------|--------|
-| Landing hero | Up to 3 staggered entrances (headline / subhead / CTA). One scroll-linked element max. |
-| Feature section | 1 reveal-on-scroll per card, stagger 40ms, triggers once. |
-| Dashboard | **Micro-interactions only.** No entrance animations on metric cards, charts, tables. |
-| Forms | 1 focus ring transition per field. No field-by-field staggered entrance. |
-| Modals | Backdrop fade + panel transform. Nothing inside the modal animates on open. |
-| Settings / admin | Zero entrance animations. High-frequency tool — motion wastes time. |
-| Onboarding (first-run) | Larger budget — the one moment it pays off. |
+| Surface                | Budget                                                                                 |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| Landing hero           | Up to 3 staggered entrances (headline / subhead / CTA). One scroll-linked element max. |
+| Feature section        | 1 reveal-on-scroll per card, stagger 40ms, triggers once.                              |
+| Dashboard              | **Micro-interactions only.** No entrance animations on metric cards, charts, tables.   |
+| Forms                  | 1 focus ring transition per field. No field-by-field staggered entrance.               |
+| Modals                 | Backdrop fade + panel transform. Nothing inside the modal animates on open.            |
+| Settings / admin       | Zero entrance animations. High-frequency tool — motion wastes time.                    |
+| Onboarding (first-run) | Larger budget — the one moment it pays off.                                            |
 
 If a viewport has more than its budget, cut. Every "let's add one more" compounds.
 
@@ -159,12 +171,14 @@ If a viewport has more than its budget, cut. Every "let's add one more" compound
 Springs feel natural because they simulate real physics — no fixed duration, they settle based on physical parameters. Stiffness controls resistance to displacement: high stiffness means the spring snaps back hard and fast. Damping controls resistance to velocity: low damping lets the element overshoot and oscillate; high damping absorbs the energy and settles immediately. The practical result: high stiffness + high damping = quick, settled, confident. High stiffness + low damping = bouncy and playful. Low stiffness + high damping = slow and heavy. Never tune by feel alone — fix a target feel, then dial parameters to match it.
 
 **Use springs when:**
+
 - Drag interactions with momentum
 - Elements that should feel "alive" (Dynamic Island)
 - Gestures that can be interrupted mid-animation (springs maintain velocity; CSS animations restart from zero)
 - Mouse-tracking decorative interactions (`useSpring` to interpolate)
 
 **Use tween when:**
+
 - The project has strict duration budgets (200-300ms UI rule)
 - Deterministic motion matches the brand
 - Motion is purely functional (no "alive" personality)
@@ -180,6 +194,7 @@ Springs feel natural because they simulate real physics — no fixed duration, t
 ```
 
 **Spring rules:**
+
 - Bounce in functional UI is an anti-pattern. The only acceptable use is single-element micro-feedback (heart toggle, badge appearance) where bounce amplitude stays at 0.1-0.3 of base.
 - Balanced parameters: `stiffness: 500, damping: 30` settles quickly; `stiffness: 1000, damping: 5` is too bouncy.
 - Drag release: `{ type: "spring", velocity: info.velocity.x }` preserves input energy.
@@ -187,12 +202,12 @@ Springs feel natural because they simulate real physics — no fixed duration, t
 
 **Spring presets:**
 
-| Use case | Config | Feel |
-|----------|--------|------|
-| Cards / containers | `stiffness: 300, damping: 30` | Smooth settle — no overshoot, reads as composed |
-| Pop-ins / badges | `stiffness: 500, damping: 25` | Snappy with a very slight bounce — draws the eye without distracting |
-| Slides / entrances | `stiffness: 350, damping: 28` | Balanced — lands confidently, slight energy without playfulness |
-| Drag release | `stiffness: 500, damping: 30` + velocity | Fast return that preserves the momentum the user imparted |
+| Use case           | Config                                   | Feel                                                                 |
+| ------------------ | ---------------------------------------- | -------------------------------------------------------------------- |
+| Cards / containers | `stiffness: 300, damping: 30`            | Smooth settle — no overshoot, reads as composed                      |
+| Pop-ins / badges   | `stiffness: 500, damping: 25`            | Snappy with a very slight bounce — draws the eye without distracting |
+| Slides / entrances | `stiffness: 350, damping: 28`            | Balanced — lands confidently, slight energy without playfulness      |
+| Drag release       | `stiffness: 500, damping: 30` + velocity | Fast return that preserves the momentum the user imparted            |
 
 ---
 
@@ -201,7 +216,7 @@ Springs feel natural because they simulate real physics — no fixed duration, t
 A sun that becomes a moon on theme toggle, a checkmark that replaces a copy icon after a click — same slot, different glyph, no layout shift. Done wrong it either reads as a flicker (plain crossfade, nothing else) or as the icon resizing itself rather than being replaced (entering scale starts too large).
 
 - **Both icons cross-fade opacity together** — outgoing down, incoming up, one shared duration.
-- **The incoming icon grows in from roughly 0.25-0.35 of its full size, not from a near-full scale.** The point isn't the exact number — it's that entering should read as *arriving*, not as *resizing*. Starting closer to 1 makes the icon look like it's stretching into place; starting small enough makes it unambiguous that a new element appeared.
+- **The incoming icon grows in from roughly 0.25-0.35 of its full size, not from a near-full scale.** The point isn't the exact number — it's that entering should read as _arriving_, not as _resizing_. Starting closer to 1 makes the icon look like it's stretching into place; starting small enough makes it unambiguous that a new element appeared.
 - **A few pixels of blur clearing to zero** as the incoming icon settles takes the edge off the transition further, so the swap feels like one continuous event rather than a hard cut.
 - **No overshoot.** Springs here want to land and stop — a wobbling checkmark after a save reads as a glitch, not a flourish, because nothing about "your click registered" calls for bounce.
 
@@ -217,9 +232,10 @@ DOM-only fallback when a motion library isn't in play — stack both icons in th
   opacity: 0;
   transform: scale(0.3);
   filter: blur(2px);
-  transition: opacity var(--motion-fast) var(--ease-out),
-              transform var(--motion-fast) var(--ease-out),
-              filter var(--motion-fast) var(--ease-out);
+  transition:
+    opacity var(--motion-fast) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out),
+    filter var(--motion-fast) var(--ease-out);
 }
 .swap-slot > svg[data-visible="true"] {
   opacity: 1;
@@ -248,6 +264,7 @@ DOM-only fallback when a motion library isn't in play — stack both icons in th
 ```
 
 **Two exceptions to "disable everything":**
+
 - **Loading indicators keep animating.** Reduced motion removes gratuitous motion, not signal. A frozen spinner reads as "broken."
 - **Essential feedback stays.** A focus ring still needs a perceptible transition (fast, no easing drama) so keyboard users see the state change.
 
@@ -271,9 +288,9 @@ Prefer CSS transitions/animations → WAAPI → JS libraries, in that order. Som
 
 ```js
 // May drop frames (shorthand — main thread)
-animate({ x: 100 })
+animate({ x: 100 });
 // Hardware-accelerated (explicit)
-animate({ transform: "translateX(100px)" })
+animate({ transform: "translateX(100px)" });
 ```
 
 ### FLIP Pattern
@@ -281,13 +298,14 @@ animate({ transform: "translateX(100px)" })
 Measure once, animate via transform — never animate layout properties directly:
 
 ```js
-const first = el.getBoundingClientRect();       // 1. First: measure
-el.classList.add('moved');
-const last = el.getBoundingClientRect();         // 2. Last: apply final state
+const first = el.getBoundingClientRect(); // 1. First: measure
+el.classList.add("moved");
+const last = el.getBoundingClientRect(); // 2. Last: apply final state
 el.style.transform = `translateX(${first.left - last.left}px)`; // 3. Invert
-requestAnimationFrame(() => {                    // 4. Play
-  el.style.transition = 'transform 0.3s';
-  el.style.transform = '';
+requestAnimationFrame(() => {
+  // 4. Play
+  el.style.transition = "transform 0.3s";
+  el.style.transform = "";
 });
 ```
 
@@ -301,8 +319,14 @@ Prefer CSS Scroll Timelines — runs off main thread:
   animation-timeline: view();
 }
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 ```
 
@@ -315,8 +339,12 @@ Prefer `IntersectionObserver` for visibility triggers. Never poll `scrollY` or u
 `will-change` is surgical and temporary — add it before the animation starts, remove it after:
 
 ```css
-.animating { will-change: transform; }
-.done      { will-change: auto; }
+.animating {
+  will-change: transform;
+}
+.done {
+  will-change: auto;
+}
 ```
 
 Avoid many or large promoted layers — each consumes GPU memory. Validate with DevTools Layers panel when performance matters.
@@ -331,7 +359,7 @@ Changing a CSS variable on a parent recalculates all children. Update `transform
 
 ```js
 // Bad: triggers recalc on all children
-element.style.setProperty('--swipe-amount', `${distance}px`);
+element.style.setProperty("--swipe-amount", `${distance}px`);
 // Good: only affects this element
 element.style.transform = `translateY(${distance}px)`;
 ```
@@ -388,17 +416,17 @@ Shareable tokens for Figma variables, Style Dictionary, or tokens.studio:
 {
   "motion": {
     "duration": {
-      "fast":    { "value": 120, "type": "duration", "unit": "ms" },
-      "base":    { "value": 200, "type": "duration", "unit": "ms" },
-      "medium":  { "value": 280, "type": "duration", "unit": "ms" },
-      "slow":    { "value": 400, "type": "duration", "unit": "ms" },
-      "slower":  { "value": 600, "type": "duration", "unit": "ms" }
+      "fast": { "value": 120, "type": "duration", "unit": "ms" },
+      "base": { "value": 200, "type": "duration", "unit": "ms" },
+      "medium": { "value": 280, "type": "duration", "unit": "ms" },
+      "slow": { "value": 400, "type": "duration", "unit": "ms" },
+      "slower": { "value": 600, "type": "duration", "unit": "ms" }
     },
     "ease": {
-      "out":        { "value": [0.22, 1, 0.36, 1],   "type": "cubicBezier" },
-      "inOut":      { "value": [0.65, 0, 0.35, 1],   "type": "cubicBezier" },
-      "emphasized": { "value": [0.2, 0, 0, 1],       "type": "cubicBezier" },
-      "soft":       { "value": [0.4, 0, 0.2, 1],     "type": "cubicBezier" }
+      "out": { "value": [0.22, 1, 0.36, 1], "type": "cubicBezier" },
+      "inOut": { "value": [0.65, 0, 0.35, 1], "type": "cubicBezier" },
+      "emphasized": { "value": [0.2, 0, 0, 1], "type": "cubicBezier" },
+      "soft": { "value": [0.4, 0, 0.2, 1], "type": "cubicBezier" }
     }
   }
 }
@@ -408,12 +436,12 @@ Figma handles `cubicBezier` via plugins; Style Dictionary compiles to CSS / JS /
 
 **Framework mapping:**
 
-| Framework | Duration | Easing |
-|-----------|----------|--------|
-| Vanilla CSS | `var(--motion-base)` | `var(--ease-out)` |
-| Tailwind (extend) | `theme.transitionDuration: { base: '200ms' }` | `theme.transitionTimingFunction: { out: 'cubic-bezier(0.22, 1, 0.36, 1)' }` |
-| Motion (framer-motion) | `transition={{ duration: 0.2 }}` | `transition={{ ease: [0.22, 1, 0.36, 1] }}` |
-| GSAP | `gsap.to(el, { duration: 0.2 })` | `ease: 'power2.out'` (≈ ease-out) |
+| Framework              | Duration                                      | Easing                                                                      |
+| ---------------------- | --------------------------------------------- | --------------------------------------------------------------------------- |
+| Vanilla CSS            | `var(--motion-base)`                          | `var(--ease-out)`                                                           |
+| Tailwind (extend)      | `theme.transitionDuration: { base: '200ms' }` | `theme.transitionTimingFunction: { out: 'cubic-bezier(0.22, 1, 0.36, 1)' }` |
+| Motion (framer-motion) | `transition={{ duration: 0.2 }}`              | `transition={{ ease: [0.22, 1, 0.36, 1] }}`                                 |
+| GSAP                   | `gsap.to(el, { duration: 0.2 })`              | `ease: 'power2.out'` (≈ ease-out)                                           |
 
 Map the project's animation library to the token names, not raw values — when the scale changes, one file updates.
 

@@ -14,13 +14,13 @@ Usability is not a knob. `CRAFT_LEVEL` does not relax these scores — a 2 is a 
 
 ## Scoring Rubric (applies to every heuristic)
 
-| Score | Meaning |
-|-------|---------|
-| **1** | Blocks users. Core task cannot complete. |
-| **2** | Severe friction. Users abandon or error repeatedly. |
+| Score | Meaning                                              |
+| ----- | ---------------------------------------------------- |
+| **1** | Blocks users. Core task cannot complete.             |
+| **2** | Severe friction. Users abandon or error repeatedly.  |
 | **3** | Works but confusing. Users complete with hesitation. |
-| **4** | Works, minor polish left. No user impact. |
-| **5** | Best-in-class. Nothing to add. |
+| **4** | Works, minor polish left. No user impact.            |
+| **5** | Best-in-class. Nothing to add.                       |
 
 Every finding is recorded in a row: `| Heuristic | Score | Finding | Impact |`.
 
@@ -35,6 +35,7 @@ Source: Nielsen, J. (1994). "10 Usability Heuristics for User Interface Design."
 The system should always keep users informed about what is going on, through appropriate feedback within reasonable time.
 
 **What to look for:**
+
 - [ ] Every async action has a loading state (spinner, progress, skeleton)
 - [ ] Submit buttons disable + show progress while in flight
 - [ ] Optimistic UI reconciles on server response (no silent failure)
@@ -42,6 +43,7 @@ The system should always keep users informed about what is going on, through app
 - [ ] Long operations (>5s) escalate to progress percentage or estimate
 
 **Common failures in AI-generated UIs:**
+
 - Form submit has no loading state — user clicks 3-4x thinking nothing happened
 - Toast appears then disappears before the user can read it
 - No indication that a save succeeded ("did it work?")
@@ -51,6 +53,7 @@ The system should always keep users informed about what is going on, through app
 Speak the user's language — words, phrases, concepts they know. Follow real-world conventions.
 
 **What to look for:**
+
 - [ ] No system jargon in user-facing copy ("exception thrown", "null ref")
 - [ ] Icons match cultural convention (trash = delete, not a cog)
 - [ ] Dates are formatted for the user's locale, not ISO
@@ -58,6 +61,7 @@ Speak the user's language — words, phrases, concepts they know. Follow real-wo
 - [ ] Metaphors are consistent (folder, file, workspace)
 
 **Common failures in AI-generated UIs:**
+
 - "Submit payload" instead of "Save changes"
 - "Entity not found" instead of "We couldn't find that project"
 - Time displayed as `1713369600` (Unix) instead of `2 hours ago`
@@ -67,6 +71,7 @@ Speak the user's language — words, phrases, concepts they know. Follow real-wo
 Users often perform actions by mistake. They need a clearly marked emergency exit.
 
 **What to look for:**
+
 - [ ] Every destructive action has Undo (preferred) or a confirm dialog
 - [ ] Modals close on Esc and on backdrop click
 - [ ] Multi-step flows have Back without losing state
@@ -74,6 +79,7 @@ Users often perform actions by mistake. They need a clearly marked emergency exi
 - [ ] URL reflects state so the back button works
 
 **Common failures in AI-generated UIs:**
+
 - Delete is instant and irreversible — no undo toast
 - Modal traps the user; no way out without completing the form
 - Browser back loses all form input
@@ -83,12 +89,14 @@ Users often perform actions by mistake. They need a clearly marked emergency exi
 Users should not have to wonder whether different words, situations, or actions mean the same thing. Follow platform conventions.
 
 **What to look for:**
+
 - [ ] Primary action placement consistent across views (right side, solid fill)
 - [ ] Same verb for same operation throughout ("Delete" always, not "Delete"/"Remove"/"Trash")
 - [ ] Icon meanings stable across screens
 - [ ] Form patterns match platform (e.g., Cmd+Enter submits on macOS)
 
 **Common failures in AI-generated UIs:**
+
 - Buttons swap position between modals (Cancel left here, right there)
 - Three different words for "delete" in the same product
 - Non-standard scroll hijacking on a standard content page
@@ -98,6 +106,7 @@ Users should not have to wonder whether different words, situations, or actions 
 Better than good error messages is a design that prevents the problem from occurring in the first place.
 
 **What to look for:**
+
 - [ ] Destructive actions require confirmation typed with the resource name
 - [ ] Disabled states prevent invalid submissions (with explanation on hover)
 - [ ] Input constraints enforced client-side (date pickers, typed inputs)
@@ -105,6 +114,7 @@ Better than good error messages is a design that prevents the problem from occur
 - [ ] Warn before leaving unsaved changes
 
 **Common failures in AI-generated UIs:**
+
 - Freeform "Are you sure?" confirms that users mindlessly click
 - No validation until submit; user fills 12 fields then sees 4 errors
 - Paste blocked on fields (password confirm, order IDs)
@@ -114,6 +124,7 @@ Better than good error messages is a design that prevents the problem from occur
 Minimize the user's memory load by making objects, actions, and options visible.
 
 **What to look for:**
+
 - [ ] Recently used / favorited items surfaced
 - [ ] Autocomplete on any field with a known set of answers
 - [ ] Keyboard shortcuts listed in tooltips (not hidden in a help menu)
@@ -121,6 +132,7 @@ Minimize the user's memory load by making objects, actions, and options visible.
 - [ ] Empty states suggest next actions
 
 **Common failures in AI-generated UIs:**
+
 - Power-user shortcuts (Cmd+K) exist but are undiscoverable
 - User must remember which tab they were on after a refresh
 - Dropdown with 200 options and no search
@@ -130,6 +142,7 @@ Minimize the user's memory load by making objects, actions, and options visible.
 Accelerators — unseen by novice — may speed up the interaction for the expert.
 
 **What to look for:**
+
 - [ ] Keyboard shortcuts for frequent actions (Cmd+K, j/k nav)
 - [ ] Bulk actions on lists (multi-select + batch operate)
 - [ ] Saved views / filters / segments
@@ -137,6 +150,7 @@ Accelerators — unseen by novice — may speed up the interaction for the exper
 - [ ] Paste-to-action patterns (URL paste auto-parses)
 
 **Common failures in AI-generated UIs:**
+
 - Forces the same flow for novice and expert
 - No way to multi-select in lists of 100+
 - Command palette missing on tools users will spend hours in
@@ -146,6 +160,7 @@ Accelerators — unseen by novice — may speed up the interaction for the exper
 Dialogues should not contain information that is irrelevant or rarely needed.
 
 **What to look for:**
+
 - [ ] Every section answers one question; no filler
 - [ ] Visual weight proportional to importance
 - [ ] One accent, 3-5 placements per viewport (see SKILL.md anti-slop)
@@ -153,6 +168,7 @@ Dialogues should not contain information that is irrelevant or rarely needed.
 - [ ] No decorative graphics competing with content
 
 **Common failures in AI-generated UIs:**
+
 - Hero has 4 CTAs of equal weight
 - Every card has a colored top border
 - Gradient backgrounds on every section
@@ -162,6 +178,7 @@ Dialogues should not contain information that is irrelevant or rarely needed.
 Error messages in plain language, precisely indicate the problem, and constructively suggest a solution.
 
 **What to look for:**
+
 - [ ] Errors appear inline, at the field, not as a global banner
 - [ ] Messages specify what went wrong AND how to fix it
 - [ ] Server errors include a copy-to-clipboard ID for support
@@ -169,6 +186,7 @@ Error messages in plain language, precisely indicate the problem, and constructi
 - [ ] Network errors differ from validation errors
 
 **Common failures in AI-generated UIs:**
+
 - "Something went wrong" with no detail, no retry, no support path
 - Red toast that disappears before the user reads it
 - Error blames the user ("Invalid input") instead of explaining
@@ -178,6 +196,7 @@ Error messages in plain language, precisely indicate the problem, and constructi
 Even though it is better if the system can be used without documentation, help may be necessary.
 
 **What to look for:**
+
 - [ ] Help is contextual, not a separate site the user must leave to
 - [ ] Empty states double as onboarding ("Create your first project")
 - [ ] Tooltips on non-obvious icons
@@ -185,6 +204,7 @@ Even though it is better if the system can be used without documentation, help m
 - [ ] Searchable docs for deep features
 
 **Common failures in AI-generated UIs:**
+
 - No tooltips on icon-only buttons
 - Help buried behind a "?" in the corner with a 404 behind it
 - Onboarding is a 10-slide lightbox the user skips
@@ -204,6 +224,7 @@ Source: Fitts, P. M. (1954). "The information capacity of the human motor system
 **When load-bearing:** Every tappable / clickable surface. Critical on mobile.
 
 **How to score:**
+
 - **PASS** — touch targets ≥ 44px on mobile, ≥ 24px on desktop; primary CTA in the natural eye/thumb path; related actions grouped
 - **FAIL** — touch targets under 44px mobile; destructive actions adjacent to primary actions; CTA placed far from where the user just looked
 
@@ -216,6 +237,7 @@ Source: Hick, W. E. (1952). "On the rate of gain of information."
 **When load-bearing:** Menus, navigation, plan selectors, form fields, dashboards.
 
 **How to score:**
+
 - **PASS** — nav ≤ 7 items at any level; no field offers 20+ unfiltered options without search
 - **FAIL** — 12+ top-nav items; a single select with 200 entries and no type-ahead; dashboard with 18 metrics at equal weight
 
@@ -228,6 +250,7 @@ Source: Doherty, W. J. & Thadani, A. J. (1982). "The Economic Value of Rapid Res
 **When load-bearing:** Every user-initiated action. Critical on data-heavy views and transitions.
 
 **How to score:**
+
 - **PASS** — perceived response < 400ms; optimistic UI for saves, likes, toggles; skeletons within 200ms
 - **FAIL** — form submit shows a spinner for 2s with no optimistic state; nav click waits on full server round-trip before painting anything
 
@@ -240,6 +263,7 @@ Source: Cleveland, W. S. & McGill, R. (1984). "Graphical Perception: Theory, Exp
 **When load-bearing:** Every chart, metric card, comparative dataviz.
 
 **How to score:**
+
 - **PASS** — quantitative comparisons use position or length (bar, line, dot); color reserved for category; no pie or 3D
 - **FAIL** — pie chart used for comparison; donut with ≥ 5 slices; color-gradient used to encode magnitude where length would work
 
@@ -252,6 +276,7 @@ Source: Miller, G. A. (1956). "The Magical Number Seven, Plus or Minus Two."
 **When load-bearing:** Nav depth, form section counts, onboarding flows, step counts.
 
 **How to score:**
+
 - **PASS** — navigation ≤ 7 items per level; forms chunked into ≤ 5 sections; multi-step flows ≤ 5 steps or with clear progress. (Wizard ceiling is 5, not 7: each step holds multiple fields, and each field consumes working-memory slots of its own.)
 - **FAIL** — 14-item top nav; a single-page form with 23 ungrouped fields; a checkout with 9 steps and no progress indicator
 
@@ -264,6 +289,7 @@ Also called the Law of Conservation of Complexity. Attributed to Larry Tesler.
 **When load-bearing:** Feature-rich tools. Configuration-heavy flows. Anywhere you're tempted to "expose a toggle."
 
 **How to score:**
+
 - **PASS** — complexity absorbed by sensible defaults, automation, or backend inference; advanced controls behind progressive disclosure
 - **FAIL** — UI exposes every backend knob; user must configure 8 things before they can accomplish the primary task; no default state, only empty forms
 
@@ -273,12 +299,12 @@ Also called the Law of Conservation of Complexity. Attributed to Larry Tesler.
 
 Every finding carries exactly one impact tag. This is how a PM prioritizes:
 
-| Tag | Meaning | Example |
-|-----|---------|---------|
-| `blocks-conversion` | User cannot complete the core journey | Signup form submit silently fails on network error |
-| `adds-friction` | User completes but abandonment rate rises | Submit button has no loading state; users click 3-4x |
-| `reduces-trust` | Quality signal — affects retention | Typos in error messages; inconsistent button styles |
-| `minor-polish` | Craft layer only; no measurable user impact | Missing `tabular-nums` on a metric |
+| Tag                 | Meaning                                     | Example                                              |
+| ------------------- | ------------------------------------------- | ---------------------------------------------------- |
+| `blocks-conversion` | User cannot complete the core journey       | Signup form submit silently fails on network error   |
+| `adds-friction`     | User completes but abandonment rate rises   | Submit button has no loading state; users click 3-4x |
+| `reduces-trust`     | Quality signal — affects retention          | Typos in error messages; inconsistent button styles  |
+| `minor-polish`      | Craft layer only; no measurable user impact | Missing `tabular-nums` on a metric                   |
 
 Rank findings in the final output by impact tag, not by heuristic order: `blocks-conversion > adds-friction > reduces-trust > minor-polish`.
 
@@ -291,29 +317,29 @@ The `/ui-craft:heuristic` command outputs **exactly** this structure. Do not inv
 ```markdown
 ## Heuristic Scorecard
 
-| Heuristic | Score | Finding | Impact |
-|-----------|-------|---------|--------|
-| Visibility of system status | 2 | Form submit has no loading state; users click 3-4x thinking nothing happened | adds-friction |
-| Match system and real world | 4 | Dates formatted for locale; one copy says "entity" instead of "project" | minor-polish |
-| User control and freedom | 3 | Delete has confirm but no undo after it lands | reduces-trust |
-| Consistency and standards | 4 | Primary CTA consistent; one modal has Cancel on right, rest on left | minor-polish |
-| Error prevention | 4 | Delete confirms with the resource name — good | minor-polish |
-| Recognition over recall | 3 | Cmd+K exists but not surfaced in tooltips | adds-friction |
-| Flexibility and efficiency | 2 | No bulk-select on list of 200+ items | adds-friction |
-| Aesthetic and minimalist | 3 | Hero has two competing accents | reduces-trust |
-| Error recovery | 1 | "Something went wrong" with no ID, no retry | blocks-conversion |
-| Help and documentation | 3 | Tooltips on most icons; empty state has no CTA | reduces-trust |
+| Heuristic                   | Score | Finding                                                                      | Impact            |
+| --------------------------- | ----- | ---------------------------------------------------------------------------- | ----------------- |
+| Visibility of system status | 2     | Form submit has no loading state; users click 3-4x thinking nothing happened | adds-friction     |
+| Match system and real world | 4     | Dates formatted for locale; one copy says "entity" instead of "project"      | minor-polish      |
+| User control and freedom    | 3     | Delete has confirm but no undo after it lands                                | reduces-trust     |
+| Consistency and standards   | 4     | Primary CTA consistent; one modal has Cancel on right, rest on left          | minor-polish      |
+| Error prevention            | 4     | Delete confirms with the resource name — good                                | minor-polish      |
+| Recognition over recall     | 3     | Cmd+K exists but not surfaced in tooltips                                    | adds-friction     |
+| Flexibility and efficiency  | 2     | No bulk-select on list of 200+ items                                         | adds-friction     |
+| Aesthetic and minimalist    | 3     | Hero has two competing accents                                               | reduces-trust     |
+| Error recovery              | 1     | "Something went wrong" with no ID, no retry                                  | blocks-conversion |
+| Help and documentation      | 3     | Tooltips on most icons; empty state has no CTA                               | reduces-trust     |
 
 ## Design Law Audit
 
-| Law | Pass/Fail | Detail |
-|-----|-----------|--------|
-| Fitts's Law | FAIL | Primary CTA is 32px tall on mobile; expected ≥ 44px |
-| Hick's Law | PASS | 5 top-nav items — within 7±2 |
-| Doherty Threshold | FAIL | Save shows spinner for ~1.8s with no optimistic state |
-| Cleveland-McGill | PASS | Bar charts for comparison, color for category only |
-| Miller's Law | PASS | Form chunked into 4 logical sections |
-| Tesler's Law | FAIL | New user sees 8 required config fields before first action |
+| Law               | Pass/Fail | Detail                                                     |
+| ----------------- | --------- | ---------------------------------------------------------- |
+| Fitts's Law       | FAIL      | Primary CTA is 32px tall on mobile; expected ≥ 44px        |
+| Hick's Law        | PASS      | 5 top-nav items — within 7±2                               |
+| Doherty Threshold | FAIL      | Save shows spinner for ~1.8s with no optimistic state      |
+| Cleveland-McGill  | PASS      | Bar charts for comparison, color for category only         |
+| Miller's Law      | PASS      | Form chunked into 4 logical sections                       |
+| Tesler's Law      | FAIL      | New user sees 8 required config fields before first action |
 
 ## Top findings (ranked by impact)
 
@@ -325,6 +351,7 @@ The `/ui-craft:heuristic` command outputs **exactly** this structure. Do not inv
 ```
 
 **Notes on output:**
+
 - The first row of each heuristic table is the short-name version (not the verbose Nielsen title). The heuristic is unambiguous from context.
 - The `Top findings` list is a rank, not a re-listing. Include only findings at `reduces-trust` or worse. Cap at 5.
 - Scores of 4-5 don't need a finding row unless the grader wants to surface what's working. Blank findings for 4-5 rows are fine; the Score column carries the signal.
@@ -335,11 +362,11 @@ The `/ui-craft:heuristic` command outputs **exactly** this structure. Do not inv
 
 The scorecard above is qualitative. **UsabilityScore** rolls it into one 0-100 number + letter grade so it composes with the deterministic **UICraftScore** (`evals/quality/score.mjs`) and so a PM or CI run has a single figure to track.
 
-> **Judged, not deterministic.** UsabilityScore is computed by the host agent from this rubric — it reflects judgment and *may vary run to run*. It is **not** reproducible the way UICraftScore is. Never gate CI on UsabilityScore; gate on the deterministic UICraftScore and use UsabilityScore for review depth. Always label it `(judged)` when reporting.
+> **Judged, not deterministic.** UsabilityScore is computed by the host agent from this rubric — it reflects judgment and _may vary run to run_. It is **not** reproducible the way UICraftScore is. Never gate CI on UsabilityScore; gate on the deterministic UICraftScore and use UsabilityScore for review depth. Always label it `(judged)` when reporting.
 
 ### Formula
 
-Deterministic *given the scores* — the same scorecard always yields the same number. Only the act of scoring is judgment.
+Deterministic _given the scores_ — the same scorecard always yields the same number. Only the act of scoring is judgment.
 
 ```
 heuristic_base = round( ((mean(nielsen_scores) − 1) / 4) × 100 )   # 10 Nielsen scores, each 1–5
@@ -366,13 +393,13 @@ Append this block to the `/ui-craft:heuristic` output, after Top findings:
 
 **33 / F** (judged) · heuristic base 48 − law penalty 15
 
-| Component | Value |
-|-----------|-------|
-| Nielsen mean (1–5) | 2.9 |
-| Heuristic base (0–100) | 48 |
-| Failed design laws | 3 (Fitts, Doherty, Tesler) |
-| Law penalty | −15 |
-| **UsabilityScore** | **33 / F** |
+| Component              | Value                      |
+| ---------------------- | -------------------------- |
+| Nielsen mean (1–5)     | 2.9                        |
+| Heuristic base (0–100) | 48                         |
+| Failed design laws     | 3 (Fitts, Doherty, Tesler) |
+| Law penalty            | −15                        |
+| **UsabilityScore**     | **33 / F**                 |
 ```
 
 Machine-readable form (emit when a caller asks for `--json`, or when invoked by `/sddesign` / an extended report):
@@ -380,7 +407,12 @@ Machine-readable form (emit when a caller asks for `--json`, or when invoked by 
 ```json
 {
   "usability": { "score": 33, "grade": "F", "judged": true },
-  "components": { "nielsen_mean": 2.9, "heuristic_base": 48, "failed_laws": 3, "law_penalty": 15 },
+  "components": {
+    "nielsen_mean": 2.9,
+    "heuristic_base": 48,
+    "failed_laws": 3,
+    "law_penalty": 15
+  },
   "version": "usability-1.0"
 }
 ```
@@ -392,12 +424,12 @@ When the user wants the full quality picture, place the judged UsabilityScore be
 ```markdown
 ## Extended quality report
 
-| Score | Value | Reproducible? |
-|-------|-------|---------------|
-| UICraftScore | 82 / B | ✅ deterministic — identical every run |
-| UsabilityScore | 33 / F | ❌ judged — LLM judgment, may vary |
+| Score          | Value  | Reproducible?                          |
+| -------------- | ------ | -------------------------------------- |
+| UICraftScore   | 82 / B | ✅ deterministic — identical every run |
+| UsabilityScore | 33 / F | ❌ judged — LLM judgment, may vary     |
 
-Gate CI on UICraftScore. Use UsabilityScore to prioritize review depth — a high deterministic score with a low UsabilityScore means the code is clean but the *experience* has friction the static rules can't see.
+Gate CI on UICraftScore. Use UsabilityScore to prioritize review depth — a high deterministic score with a low UsabilityScore means the code is clean but the _experience_ has friction the static rules can't see.
 ```
 
 The two scores are intentionally **not** averaged into one figure: one is reproducible and one is judged, and collapsing them would hide that distinction — the exact property the deterministic score exists to protect.

@@ -27,20 +27,20 @@ Humans decode visual encodings with predictable, measurable accuracy. Ordered fr
 
 Match the data shape and analytical question to a chart. Fallbacks listed when the default isn't possible.
 
-| Data shape + question | Default | Fallback | Avoid |
-|----------------------|---------|----------|-------|
-| Time series, one metric | Line | Area (sparingly, single series) | Vertical bars per day |
-| Time series, categorical breakdown, totals | Stacked bar or stacked area | — | 100% stacked (hides totals) |
-| Time series, categorical breakdown, individual trends | Small multiples (one line per panel) | Multi-line (≤ 4 series) | Spaghetti line chart (> 5 series) |
-| Categorical, one metric | Horizontal bar (sorted) | Dot plot | Pie, unless n ≤ 3 and parts-of-whole is the story |
-| Parts of a whole | Stacked bar (100%) with labels | Donut (n ≤ 5) | Pie with n > 5; donut without center total |
-| Distribution of one variable | Histogram | Density / violin | Mean-only bar |
-| Distribution across groups | Box plot or violin | Strip plot with jitter | Mean + error bar alone |
-| Correlation of two variables | Scatter + trend line | Hex-bin (high n) | A correlation coefficient printed as a single number |
-| Ranking | Horizontal bar sorted desc | Dot plot with reference line | Vertical bar with rotated labels |
-| Geographic (regional) | Choropleth, **per-capita normalized** | Symbol map | Raw-count choropleth (shows population, not signal) |
-| Flow / transition | Sankey (sparingly) | Cohort table, small multiples | Chord diagram for > 8 categories |
-| Hierarchy | Tree / indented list | Treemap (area ≫ precision) | Sunburst for > 3 levels |
+| Data shape + question                                 | Default                               | Fallback                        | Avoid                                                |
+| ----------------------------------------------------- | ------------------------------------- | ------------------------------- | ---------------------------------------------------- |
+| Time series, one metric                               | Line                                  | Area (sparingly, single series) | Vertical bars per day                                |
+| Time series, categorical breakdown, totals            | Stacked bar or stacked area           | —                               | 100% stacked (hides totals)                          |
+| Time series, categorical breakdown, individual trends | Small multiples (one line per panel)  | Multi-line (≤ 4 series)         | Spaghetti line chart (> 5 series)                    |
+| Categorical, one metric                               | Horizontal bar (sorted)               | Dot plot                        | Pie, unless n ≤ 3 and parts-of-whole is the story    |
+| Parts of a whole                                      | Stacked bar (100%) with labels        | Donut (n ≤ 5)                   | Pie with n > 5; donut without center total           |
+| Distribution of one variable                          | Histogram                             | Density / violin                | Mean-only bar                                        |
+| Distribution across groups                            | Box plot or violin                    | Strip plot with jitter          | Mean + error bar alone                               |
+| Correlation of two variables                          | Scatter + trend line                  | Hex-bin (high n)                | A correlation coefficient printed as a single number |
+| Ranking                                               | Horizontal bar sorted desc            | Dot plot with reference line    | Vertical bar with rotated labels                     |
+| Geographic (regional)                                 | Choropleth, **per-capita normalized** | Symbol map                      | Raw-count choropleth (shows population, not signal)  |
+| Flow / transition                                     | Sankey (sparingly)                    | Cohort table, small multiples   | Chord diagram for > 8 categories                     |
+| Hierarchy                                             | Tree / indented list                  | Treemap (area ≫ precision)      | Sunburst for > 3 levels                              |
 
 **Rule of thumb:** if you can't name the question the chart answers, remove it.
 
@@ -87,7 +87,7 @@ For discrete groups with no order: regions, departments, products.
 
 ## Tufte Principles, Distilled
 
-Source: Tufte, E. R. (1983, 2001). *The Visual Display of Quantitative Information*.
+Source: Tufte, E. R. (1983, 2001). _The Visual Display of Quantitative Information_.
 
 - **Data-ink ratio** — maximize ink spent on data, minimize ink spent on chrome. Every gridline, tick, border, legend box must earn its space.
 - **No chartjunk** — no 3-D, no gradients as decoration, no drop shadows on bars, no textures.
@@ -130,6 +130,7 @@ Works for: bar charts (label inside or at end of bar), scatter (label the outlie
 Use when comparing the same metric across a dimension — 8 regions, 6 products, 12 months. The eye compares adjacent panels instantly; a single overlaid chart with 8 lines is a mess.
 
 **Layout rules:**
+
 - **Consistent axes across panels** — same x-scale, same y-scale. If scales differ, the comparison breaks.
 - **Consistent chart type** — all lines, all bars; never mix.
 - **One title explaining the one thing that varies** ("Revenue by region, Jan-Dec"), plus a small subtitle per panel naming that panel's dimension value.
@@ -147,6 +148,7 @@ Animate to reveal change, not for decoration. The D3 enter / update / exit patte
 - **Exit** — removed points fade out and collapse (150-200ms, `ease-in`).
 
 **Rules:**
+
 - Tween values, not colors — category color stays stable so the eye can track a specific series.
 - Respect `prefers-reduced-motion` — collapse to instant transitions.
 - Never animate on mount just for the entrance. A dashboard loading is not a moment for choreography.
@@ -175,6 +177,7 @@ Ten items a reviewer will flag immediately. Fix before shipping.
 ## When `ui-craft-detect` Flags `dataviz/*` Rules
 
 The detector rules map directly onto this file:
+
 - `dataviz/no-pie-gt-5` → § Cleveland-McGill + § Chart Selection Matrix
 - `dataviz/no-3d` → § Anti-Slop Checklist
 - `dataviz/sequential-not-rainbow` → § Color for Data → Sequential
@@ -187,11 +190,11 @@ Cross-reference when triaging a flagged chart.
 
 ## Sources
 
-- Cleveland, W. S. & McGill, R. (1984). "Graphical Perception." *JASA*.
-- Tufte, E. R. (2001). *The Visual Display of Quantitative Information*, 2nd ed.
-- Bostock, M. et al. (2011). "D3: Data-Driven Documents." *IEEE TVCG*.
+- Cleveland, W. S. & McGill, R. (1984). "Graphical Perception." _JASA_.
+- Tufte, E. R. (2001). _The Visual Display of Quantitative Information_, 2nd ed.
+- Bostock, M. et al. (2011). "D3: Data-Driven Documents." _IEEE TVCG_.
 - Brewer, C. A. ColorBrewer 2.0 — [colorbrewer2.org](https://colorbrewer2.org/).
 - Okabe, M. & Ito, K. (2008). "Color Universal Design."
-- Wilke, C. O. (2019). *Fundamentals of Data Visualization*. O'Reilly.
-- Birch, J. (2012). "Worldwide prevalence of red-green color deficiency." *Journal of the Optical Society of America A*.
-- Sharpe, L. T. et al. (1999). "A new and popular explanation of colour blindness." In *Colour Vision: From Genes to Perception*. Cambridge University Press.
+- Wilke, C. O. (2019). _Fundamentals of Data Visualization_. O'Reilly.
+- Birch, J. (2012). "Worldwide prevalence of red-green color deficiency." _Journal of the Optical Society of America A_.
+- Sharpe, L. T. et al. (1999). "A new and popular explanation of colour blindness." In _Colour Vision: From Genes to Perception_. Cambridge University Press.

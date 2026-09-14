@@ -6,13 +6,13 @@ Outcome recipe for authentication surfaces. Small surface, zero tolerance: auth 
 
 ## Step 0 — Four inputs (defaults if unanswered)
 
-| Input | Options | Default |
-|---|---|---|
-| Brand surface | product has marketing presence worth showing / pure utility app | marketing presence |
-| Auth methods | SSO-first (Google/GitHub/SAML) / email-first / both | both, SSO on top |
-| Theme | preset from [themes.md](themes.md) or existing brand tokens | brand tokens if present, else **Graphite** |
-| Variance | DESIGN_VARIANCE 1-10 | 4 |
-| Signature bet | one from [craft-intent.md](craft-intent.md) §3 auth list | panel proof asset (metric + sparkline) or trust footer line |
+| Input         | Options                                                         | Default                                                     |
+| ------------- | --------------------------------------------------------------- | ----------------------------------------------------------- |
+| Brand surface | product has marketing presence worth showing / pure utility app | marketing presence                                          |
+| Auth methods  | SSO-first (Google/GitHub/SAML) / email-first / both             | both, SSO on top                                            |
+| Theme         | preset from [themes.md](themes.md) or existing brand tokens     | brand tokens if present, else **Graphite**                  |
+| Variance      | DESIGN_VARIANCE 1-10                                            | 4                                                           |
+| Signature bet | one from [craft-intent.md](craft-intent.md) §3 auth list        | panel proof asset (metric + sparkline) or trust footer line |
 
 ## Step 1 — Pick the composition
 

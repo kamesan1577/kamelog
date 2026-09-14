@@ -13,6 +13,7 @@ View Transitions preserve scroll position and focus across navigations because t
 **Don't use View Transitions for:** modal overlays (use `@starting-style` + `display: block` allow-keywords instead), in-page state transitions (use CSS Scroll Timelines or simple transitions), tab-switching within the same page (no view boundary).
 
 ### Basic Usage
+
 ```js
 document.startViewTransition(() => {
   // Update DOM here
@@ -21,9 +22,12 @@ document.startViewTransition(() => {
 ```
 
 ### Named Transitions
+
 ```css
 /* Source element */
-.card-image { view-transition-name: card-hero; }
+.card-image {
+  view-transition-name: card-hero;
+}
 
 /* Style the transition */
 ::view-transition-group(card-hero) {
@@ -38,6 +42,7 @@ Each `view-transition-name` must be unique at the moment the transition fires �
 
 - Each `view-transition-name` must be **unique during transition**
 - **Clean up names** after transition completes:
+
 ```js
 sourceImg.style.viewTransitionName = "card";
 document.startViewTransition(() => {
@@ -45,6 +50,7 @@ document.startViewTransition(() => {
   targetImg.style.viewTransitionName = "card";
 });
 ```
+
 - Use **only for navigation-level changes** — avoid for rapid interactions
 - Interruptibility is limited — avoid for interaction-heavy UI
 - Prefer over JS animation libraries for page transitions
@@ -59,7 +65,9 @@ document.startViewTransition(() => {
 .toast {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 400ms ease, transform 400ms ease;
+  transition:
+    opacity 400ms ease,
+    transform 400ms ease;
 
   @starting-style {
     opacity: 0;
@@ -77,6 +85,7 @@ Baseline 2024. Pair with `transition-behavior: allow-discrete` when the element 
 Scroll Timelines drive animations from scroll position rather than time, running off the main thread with zero scroll event listeners. The timeline replaces the clock — the progress of the scroll IS the animation progress.
 
 ### Scroll-Linked
+
 ```css
 .progress-bar {
   animation: grow linear;
@@ -84,12 +93,17 @@ Scroll Timelines drive animations from scroll position rather than time, running
 }
 
 @keyframes grow {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 ```
 
 ### View-Linked (element entering viewport)
+
 ```css
 .reveal {
   animation: fade-in linear;
@@ -98,8 +112,14 @@ Scroll Timelines drive animations from scroll position rather than time, running
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 ```
 
@@ -125,11 +145,17 @@ A component's layout should respond to the space it occupies, not the viewport. 
 }
 
 @container card (min-width: 400px) {
-  .card { display: grid; grid-template-columns: 1fr 2fr; }
+  .card {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+  }
 }
 
 @container card (max-width: 399px) {
-  .card { display: flex; flex-direction: column; }
+  .card {
+    display: flex;
+    flex-direction: column;
+  }
 }
 ```
 
@@ -140,6 +166,7 @@ A component's layout should respond to the space it occupies, not the viewport. 
 `::before` and `::after` add a layer of styling surface without extra DOM nodes. The most useful application is interactive state overlays — placing a pseudo-element between the element's background and content lets hover/focus states change the overlay without affecting surrounding elements. Hit target expansion is the other dominant use case: extend the interactive area without changing the visible element.
 
 ### Decorative Content (::before / ::after)
+
 ```css
 /* Background effect without extra DOM */
 .button {
@@ -161,6 +188,7 @@ A component's layout should respond to the space it occupies, not the viewport. 
 ```
 
 ### Hit Target Expansion
+
 ```css
 .small-icon-button {
   position: relative;
@@ -168,7 +196,7 @@ A component's layout should respond to the space it occupies, not the viewport. 
 .small-icon-button::before {
   content: "";
   position: absolute;
-  inset: -8px -12px;  /* Expand clickable area */
+  inset: -8px -12px; /* Expand clickable area */
 }
 ```
 
@@ -187,9 +215,15 @@ A component's layout should respond to the space it occupies, not the viewport. 
 `clip-path: inset()` is the cleaner alternative to animating `width` or `height` for reveal effects — it composites, doesn't reflow, and accepts fractional values. Four inset values map to top/right/bottom/left clipping edges; animate between them for directional reveals.
 
 ```css
-.hidden  { clip-path: inset(0 100% 0 0); }  /* clipped from right */
-.visible { clip-path: inset(0 0 0 0);    }  /* fully visible */
-.element { transition: clip-path 200ms ease-out; }
+.hidden {
+  clip-path: inset(0 100% 0 0);
+} /* clipped from right */
+.visible {
+  clip-path: inset(0 0 0 0);
+} /* fully visible */
+.element {
+  transition: clip-path 200ms ease-out;
+}
 ```
 
 Patterns: hold-to-delete (2s linear on `:active`), tab transitions, image reveals on scroll, comparison sliders. In all cases the visible-state value is `inset(0 0 0 0)` — vary the hidden-state edge to control direction.
@@ -198,17 +232,17 @@ Patterns: hold-to-delete (2s linear on `:active`), tab transitions, image reveal
 
 ## Useful Modern Properties
 
-| Property | Use |
-|----------|-----|
-| `text-wrap: balance` | Balanced line lengths for headings |
-| `text-wrap: pretty` | Better line breaks for body text |
-| `font-variant-numeric: tabular-nums` | Aligned numbers in tables/data |
-| `overscroll-behavior: contain` | Prevent scroll chaining in modals |
-| `scroll-margin-top` | Offset for anchor links with sticky headers |
-| `content-visibility: auto` | Lazy-render off-screen content |
-| `color-scheme: dark` | Native dark mode for scrollbars/forms |
-| `accent-color` | Style form controls (checkboxes, radios) |
-| `scrollbar-gutter: stable` | Reserve the scrollbar track so content never shifts when it appears |
+| Property                             | Use                                                                 |
+| ------------------------------------ | ------------------------------------------------------------------- |
+| `text-wrap: balance`                 | Balanced line lengths for headings                                  |
+| `text-wrap: pretty`                  | Better line breaks for body text                                    |
+| `font-variant-numeric: tabular-nums` | Aligned numbers in tables/data                                      |
+| `overscroll-behavior: contain`       | Prevent scroll chaining in modals                                   |
+| `scroll-margin-top`                  | Offset for anchor links with sticky headers                         |
+| `content-visibility: auto`           | Lazy-render off-screen content                                      |
+| `color-scheme: dark`                 | Native dark mode for scrollbars/forms                               |
+| `accent-color`                       | Style form controls (checkboxes, radios)                            |
+| `scrollbar-gutter: stable`           | Reserve the scrollbar track so content never shifts when it appears |
 
 ---
 
@@ -218,7 +252,9 @@ A fade to the edge of a scroll area or an image is a **transparency** effect, no
 
 ```css
 /* Wrong — a gradient overlay hardcodes the background */
-.fade { background: linear-gradient(to bottom, transparent, var(--bg)); }
+.fade {
+  background: linear-gradient(to bottom, transparent, var(--bg));
+}
 
 /* Right — the mask fades the element itself */
 .fade {
@@ -248,7 +284,7 @@ Anchor Positioning replaces JS-driven popover positioning — no `getBoundingCli
 .popover {
   position: absolute;
   position-anchor: --trigger;
-  position-area: bottom center;  /* one-line placement */
+  position-area: bottom center; /* one-line placement */
   margin-top: 8px;
 }
 
@@ -300,7 +336,7 @@ The browser already implements focus trapping, ESC handling, and backdrop render
 
 ```js
 // Open modal dialog (ESC closes, focus trapped)
-document.getElementById('confirm').showModal();
+document.getElementById("confirm").showModal();
 ```
 
 ### Rules
@@ -331,7 +367,7 @@ Browsers historically refused to animate to intrinsic sizes (`height: auto`, `wi
 }
 
 .accordion[open] {
-  height: auto;  /* now animatable */
+  height: auto; /* now animatable */
 }
 ```
 
@@ -355,10 +391,10 @@ Hand-tuned shade ladders break every time the base token changes. `color-mix()` 
   --accent: oklch(62% 0.15 250);
   --surface: oklch(98% 0.005 250);
 
-  --accent-hover:   color-mix(in oklch, var(--accent) 85%, white);
+  --accent-hover: color-mix(in oklch, var(--accent) 85%, white);
   --accent-pressed: color-mix(in oklch, var(--accent) 85%, black);
-  --accent-muted:   color-mix(in oklch, var(--accent) 20%, var(--surface));
-  --accent-ring:    color-mix(in oklch, var(--accent) 40%, transparent);
+  --accent-muted: color-mix(in oklch, var(--accent) 20%, var(--surface));
+  --accent-ring: color-mix(in oklch, var(--accent) 40%, transparent);
 }
 ```
 
@@ -418,6 +454,7 @@ Beyond the basic size query. Use for component-level responsiveness where viewpo
 **Anti-pattern:** using `@media (max-width: 768px)` to change a card's layout when the card lives in both a narrow sidebar and a wide main region — the breakpoint fires on both even though only one needs the narrow layout.
 
 ### Style queries
+
 ```css
 .card {
   container-name: card;
@@ -425,23 +462,36 @@ Beyond the basic size query. Use for component-level responsiveness where viewpo
 }
 
 @container card style(--theme: dark) {
-  .card__title { color: oklch(95% 0 0); }
+  .card__title {
+    color: oklch(95% 0 0);
+  }
 }
 ```
 
 Style queries read custom properties from the container (custom-property style queries are Baseline 2025 — supported in all current major browsers).
 
 ### Named containers for predictable scoping
+
 ```css
-.sidebar { container-name: sidebar; container-type: inline-size; }
-.main    { container-name: main;    container-type: inline-size; }
+.sidebar {
+  container-name: sidebar;
+  container-type: inline-size;
+}
+.main {
+  container-name: main;
+  container-type: inline-size;
+}
 
 @container sidebar (min-width: 240px) {
-  .nav-item { padding-inline: 12px; }
+  .nav-item {
+    padding-inline: 12px;
+  }
 }
 
 @container main (min-width: 720px) {
-  .nav-item { padding-inline: 20px; }
+  .nav-item {
+    padding-inline: 20px;
+  }
 }
 ```
 

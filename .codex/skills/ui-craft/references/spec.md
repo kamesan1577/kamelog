@@ -28,40 +28,40 @@ Copy this block for each new surface. Fill every subsection — leave none empty
 
 Desktop
 ┌──────────────────────────────────────────────┐
-│ [region]               [region]     [region] │
+│ [region] [region] [region] │
 ├──────────────────────────────────────────────┤
-│  ┌────────────────┐   ┌───────────────────┐  │
-│  │ <content area> │   │ <content area>    │  │
-│  └────────────────┘   └───────────────────┘  │
+│ ┌────────────────┐ ┌───────────────────┐ │
+│ │ <content area> │ │ <content area> │ │
+│ └────────────────┘ └───────────────────┘ │
 └──────────────────────────────────────────────┘
 
 Mobile
 ┌──────────────────┐
-│ [region]   [☰]   │
+│ [region] [☰] │
 ├──────────────────┤
-│  <content area>  │
+│ <content area> │
 └──────────────────┘
 
 ### Component inventory
 
-| Region | Component | Contract ref |
-|--------|-----------|--------------|
-| header | Nav bar | components.md → Nav bar |
-| hero | Headline + CTA | components.md → Buttons |
-| … | … | … |
+| Region | Component      | Contract ref            |
+| ------ | -------------- | ----------------------- |
+| header | Nav bar        | components.md → Nav bar |
+| hero   | Headline + CTA | components.md → Buttons |
+| …      | …              | …                       |
 
 ### State lattice
 
-| State | Required / Optional / N-A | Notes |
-|-------|--------------------------|-------|
-| idle | Required | default, data present |
-| loading | Required | skeletons mirror final layout |
-| empty | Required | first-run or no data |
-| error | Required | cause + recovery action |
-| partial | Optional — only if widgets can fail independently | |
-| conflict | N-A | no collaborative editing on this surface |
-| offline | Optional — only if writes are queued | |
-| success | Required | confirmation after primary action |
+| State    | Required / Optional / N-A                         | Notes                                    |
+| -------- | ------------------------------------------------- | ---------------------------------------- |
+| idle     | Required                                          | default, data present                    |
+| loading  | Required                                          | skeletons mirror final layout            |
+| empty    | Required                                          | first-run or no data                     |
+| error    | Required                                          | cause + recovery action                  |
+| partial  | Optional — only if widgets can fail independently |                                          |
+| conflict | N-A                                               | no collaborative editing on this surface |
+| offline  | Optional — only if writes are queued              |                                          |
+| success  | Required                                          | confirmation after primary action        |
 
 See [state-design.md](state-design.md) for state contracts and CRAFT_LEVEL thresholds.
 

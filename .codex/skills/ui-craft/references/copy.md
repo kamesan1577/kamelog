@@ -12,10 +12,10 @@ Voice, tone, reading level, terminology, inclusive language, locale handling, an
 
 Pick three axes. Lock a position on each. Deviations are deliberate (brand campaigns, April Fools), never accidental.
 
-| Axis | Endpoints | What to lock down |
-|------|-----------|-------------------|
-| Formality | Formal ↔ Casual | Pick a position; document with one sample sentence at the chosen point and one at each extreme |
-| Reverence | Reverent ↔ Irreverent | Reverent treats the user task as serious; irreverent allows wit and acknowledges absurdity. Pick one. |
+| Axis      | Endpoints                  | What to lock down                                                                                                                                    |
+| --------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Formality | Formal ↔ Casual            | Pick a position; document with one sample sentence at the chosen point and one at each extreme                                                       |
+| Reverence | Reverent ↔ Irreverent      | Reverent treats the user task as serious; irreverent allows wit and acknowledges absurdity. Pick one.                                                |
 | Expertise | Expert ↔ Beginner-friendly | Expert assumes vocabulary; beginner-friendly defines on first use. Mixed within a product is acceptable when the surfaces serve different audiences. |
 
 Document the positions. "Casual-but-respectful, beginner-friendly, mildly irreverent" is a brief a writer can execute against. "Friendly" is not.
@@ -24,17 +24,17 @@ Document the positions. "Casual-but-respectful, beginner-friendly, mildly irreve
 
 Voice is fixed; tone moves along these contexts. Each row below assumes a default voice of "casual-professional, beginner-friendly, restrained."
 
-| Context | Tone | Example |
-|---------|------|---------|
-| Onboarding | Warm + specific | "Let's get your first project in. Takes 60 seconds." |
-| Error — user-recoverable | Honest + actionable | "We couldn't save your draft. Retry, or copy the error for support: `abc-123`." |
-| Error — system outage | Honest + transparent | "Search is down. We're investigating. Your data is safe." |
-| Success | Restrained | "Changes saved." — not "Amazing work!" |
-| Destructive confirm | Explicit about consequences | "Delete 3 items? You'll have 30 days to restore them from Trash." |
-| Empty state | Action-oriented | "No integrations yet. Connect Slack, GitHub, or Linear to get started." |
-| Paywall / limit | Informational, not shaming | "You're at 5/5 free projects. Upgrade to create more." |
-| Danger zone (settings) | Neutral + precise | "Deleting the workspace removes all 47 projects and invalidates all API keys." |
-| Waiting / latency | Honest about duration | "Generating report. Usually 20-40 seconds." |
+| Context                  | Tone                        | Example                                                                         |
+| ------------------------ | --------------------------- | ------------------------------------------------------------------------------- |
+| Onboarding               | Warm + specific             | "Let's get your first project in. Takes 60 seconds."                            |
+| Error — user-recoverable | Honest + actionable         | "We couldn't save your draft. Retry, or copy the error for support: `abc-123`." |
+| Error — system outage    | Honest + transparent        | "Search is down. We're investigating. Your data is safe."                       |
+| Success                  | Restrained                  | "Changes saved." — not "Amazing work!"                                          |
+| Destructive confirm      | Explicit about consequences | "Delete 3 items? You'll have 30 days to restore them from Trash."               |
+| Empty state              | Action-oriented             | "No integrations yet. Connect Slack, GitHub, or Linear to get started."         |
+| Paywall / limit          | Informational, not shaming  | "You're at 5/5 free projects. Upgrade to create more."                          |
+| Danger zone (settings)   | Neutral + precise           | "Deleting the workspace removes all 47 projects and invalidates all API keys."  |
+| Waiting / latency        | Honest about duration       | "Generating report. Usually 20-40 seconds."                                     |
 
 **Never:** exclamation points on errors. Emoji in enterprise contexts. Celebratory copy on routine saves.
 
@@ -54,11 +54,11 @@ Target ~8th-grade reading level (Flesch-Kincaid ~70+, grade ~8). Rules of thumb:
 
 **Example rewrite:**
 
-| Before (grade 14) | After (grade 7) |
-|-------------------|-----------------|
+| Before (grade 14)                                                                                     | After (grade 7)                                |
+| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
 | "Upon successful authentication, users will be redirected to their personalized dashboard interface." | "You'll see your dashboard after you sign in." |
-| "In the event that the operation is unsuccessful, please re-attempt the transmission." | "If it fails, try again." |
-| "Configuration modifications will be persisted upon form submission." | "Your changes save when you click Save." |
+| "In the event that the operation is unsuccessful, please re-attempt the transmission."                | "If it fails, try again."                      |
+| "Configuration modifications will be persisted upon form submission."                                 | "Your changes save when you click Save."       |
 
 Automate: [hemingwayapp.com](https://hemingwayapp.com/) for spot checks; the [`flesch` npm package](https://www.npmjs.com/package/flesch) for build-time linting. `write-good` (npm) flags weasel words, passive voice, lexical illusions. `alex` (npm) is an inclusive-language linter.
 
@@ -69,6 +69,7 @@ Automate: [hemingwayapp.com](https://hemingwayapp.com/) for spot checks; the [`f
 Every product needs a glossary. Same concept → same word, everywhere.
 
 **Common pitfalls:**
+
 - `user` / `member` / `account` / `seat` — pick one per concept and stick.
 - `project` / `workspace` / `board` — pick one per level of hierarchy.
 - `delete` / `remove` / `archive` / `trash` — these mean different things; don't alias.
@@ -83,17 +84,17 @@ Every product needs a glossary. Same concept → same word, everywhere.
 
 Swap the loaded term for the neutral one. Keep the list tight — don't moralize, just fix.
 
-| Replace | With |
-|---------|------|
-| blacklist / whitelist | blocklist / allowlist |
-| master / slave | primary / replica |
-| sanity check | quick check |
-| grandfathered | legacy |
-| he / she (generic) | they |
-| manhours / manpower | work hours / team capacity |
-| man-in-the-middle | on-path attack |
-| dummy value | placeholder value |
-| first-class citizen | fully supported |
+| Replace               | With                       |
+| --------------------- | -------------------------- |
+| blacklist / whitelist | blocklist / allowlist      |
+| master / slave        | primary / replica          |
+| sanity check          | quick check                |
+| grandfathered         | legacy                     |
+| he / she (generic)    | they                       |
+| manhours / manpower   | work hours / team capacity |
+| man-in-the-middle     | on-path attack             |
+| dummy value           | placeholder value          |
+| first-class citizen   | fully supported            |
 
 Don't soften to the point of vagueness — "on-path attack" is still precise; "bad thing happens in network" is not.
 
@@ -128,13 +129,13 @@ Rules agents routinely ignore. Every one is shippable to production the day the 
 
 **Verb + noun.** Never `Submit`, `OK`, `Click here`, `Continue`.
 
-| Generic | Specific |
-|---------|----------|
-| Submit | Create project |
-| OK | Got it |
-| Continue | Next: billing |
+| Generic    | Specific                     |
+| ---------- | ---------------------------- |
+| Submit     | Create project               |
+| OK         | Got it                       |
+| Continue   | Next: billing                |
 | Click here | Download invoice (PDF, 84KB) |
-| Delete | Delete workspace |
+| Delete     | Delete workspace             |
 
 - Describe the action specifically (verb + noun). Active voice.
 - **Destructive actions include the object:** "Delete `project-alpha`" — user confirms the thing, not a generic verb. Typing the name for irreversible operations is the gold standard.
@@ -180,6 +181,7 @@ Three parts, in order: **what happened** + **why** + **what to do**.
 **Missing pieces = bad error.** "Something went wrong" has none. "Invalid input" has only the first.
 
 ### Rules
+
 - Explain what went wrong in plain language
 - Suggest how to fix it
 - Don't blame the user
@@ -204,9 +206,11 @@ Three parts, in order: **what happened** + **why** + **what to do**.
 ## Loading & Success States
 
 **Loading** — Bad: "Loading..." (for 30+ seconds). Good: "Analyzing your data... this usually takes 30-60 seconds."
+
 - Set expectations, explain what's happening, show progress, offer "Cancel".
 
 **Success** — Bad: "Success". Good: "Settings saved! Your changes will take effect immediately."
+
 - Confirm what happened, explain what's next, be brief but complete.
 
 ---
@@ -231,6 +235,7 @@ Three parts, in order: **what happened** + **why** + **what to do**.
 - Never use placeholders as the only labels
 
 **Tooltips** — Bad: "This is the username field". Good: "Choose a username. You can change this later in Settings."
+
 - Add value (don't repeat the label), answer "What is this?" or "Why?", inline help first, tooltips as last resort.
 
 ---
@@ -296,5 +301,5 @@ UX sins, not style choices.
 - Mailchimp Content Style Guide — [styleguide.mailchimp.com](https://styleguide.mailchimp.com/).
 - Shopify Polaris — Content Guidelines.
 - Atlassian Design System — Writing Style.
-- Flesch, R. "A New Readability Yardstick." *Journal of Applied Psychology*, 1948.
+- Flesch, R. "A New Readability Yardstick." _Journal of Applied Psychology_, 1948.
 - Unicode CLDR — locale data for dates, numbers, plurals.

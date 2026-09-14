@@ -16,10 +16,10 @@ Apply these in all standard Latin-script web UI unless a specific context overri
 
 **Font recommendations** — pick one family for body, optionally a second for display. In a single product surface, don't mix more than two typefaces; editorial layouts intentionally mix three or more for hierarchy.
 
-| Category | Safe choices |
-|----------|-------------|
-| Sans-serif | Inter, Geist, DM Sans, Plus Jakarta Sans |
-| Monospace | Geist Mono, JetBrains Mono, IBM Plex Mono |
+| Category     | Safe choices                                                           |
+| ------------ | ---------------------------------------------------------------------- |
+| Sans-serif   | Inter, Geist, DM Sans, Plus Jakarta Sans                               |
+| Monospace    | Geist Mono, JetBrains Mono, IBM Plex Mono                              |
 | System stack | `system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif` |
 
 **Safe choices are product-shell defaults, not marketing display picks.** On landings, portfolios, and brand surfaces the display face carries voice — reaching for the same safe sans every build produces monoculture. Selection procedure for marketing display type:
@@ -50,15 +50,15 @@ the single loudest tell of a surface built by an agent rather than designed.
 Measured on four surfaces whose typography is the reason people copy them (a project tool, a
 deploy platform, a voice API, a commerce framework), at 2120x1143:
 
-| | A | B | C | D |
-|---|---|---|---|---|
-| distinct sizes rendered in the fold | 9 | **4** | 5 | **4** |
-| sizes below 14px | 4 | **0** | 2 | 2 |
-| display size | 64 | 64 | 48 | 64 |
-| next size used below it | 20 | 24 | 16 | 16 |
-| **the jump** | **3.2x** | **2.7x** | **3.0x** | **4.0x** |
-| weight of the display type | 510 | 450-500 | 400 | 500 |
-| distinct weights | 3 | 3 | 3 | **2** |
+|                                     | A        | B        | C        | D        |
+| ----------------------------------- | -------- | -------- | -------- | -------- |
+| distinct sizes rendered in the fold | 9        | **4**    | 5        | **4**    |
+| sizes below 14px                    | 4        | **0**    | 2        | 2        |
+| display size                        | 64       | 64       | 48       | 64       |
+| next size used below it             | 20       | 24       | 16       | 16       |
+| **the jump**                        | **3.2x** | **2.7x** | **3.0x** | **4.0x** |
+| weight of the display type          | 510      | 450-500  | 400      | 500      |
+| distinct weights                    | 3        | 3        | 3        | **2**    |
 
 Three rules fall out of that table, and all three are checkable:
 
@@ -81,20 +81,22 @@ Corollary on small type: seven sizes under 14px is how a landing page ends up re
 dashboard. Two is plenty, and one of those should be the mono label size.
 
 ### Scale (a palette to choose from, not a set to emit)
+
 ```css
---text-xs:   0.75rem;   /* 12px - mono labels, captions */
---text-sm:   0.875rem;  /* 14px - secondary text */
---text-base: 1rem;      /* 16px - body text */
---text-lg:   1.25rem;   /* 20px - lead text */
---text-xl:   1.875rem;  /* 30px - section heads */
---text-2xl:  2.75rem;   /* 44px - the one big number, on data surfaces */
---text-3xl:  4.75rem;   /* 76px - display */
+--text-xs: 0.75rem; /* 12px - mono labels, captions */
+--text-sm: 0.875rem; /* 14px - secondary text */
+--text-base: 1rem; /* 16px - body text */
+--text-lg: 1.25rem; /* 20px - lead text */
+--text-xl: 1.875rem; /* 30px - section heads */
+--text-2xl: 2.75rem; /* 44px - the one big number, on data surfaces */
+--text-3xl: 4.75rem; /* 76px - display */
 ```
+
 Pick four to six of these per surface and use nothing else. A dense console legitimately
 sits low on the ladder (11 / 13 / 16 / 22 / 64); a restaurant page legitimately skips the
 middle entirely (12 / 15 / 30 / 88). Both are ladders. Twelve evenly-spaced steps is not.
 
-Match the *floor* to the product type — dense apps start at 11-13px, marketing at 13-16px —
+Match the _floor_ to the product type — dense apps start at 11-13px, marketing at 13-16px —
 but the jump to display stays large in both. A console with a 2.9x jump to its one headline
 number is right; a console with twelve steps is not.
 
@@ -103,6 +105,7 @@ number is right; a console with twelve steps is not.
 ## Font Selection
 
 ### Principles
+
 - **Display fonts** for headlines — distinctive, personality-rich. A font excellent for display (high contrast, tight spacing) is wrong for body text at 16px.
 - **Body fonts** for running text — readable, neutral, well-hinted at small sizes. A workhorse body font (Charter, IBM Plex Sans) often looks bland at hero scale — that's fine, just don't ask it to do both jobs.
 - **UI fonts** for labels and dense interfaces — optimized x-height, open apertures. Inter and Geist are UI fonts first; using them at 48px display is fine, but don't expect typographic personality.
@@ -111,13 +114,21 @@ number is right; a console with twelve steps is not.
 - **Subset fonts** — ship only code points/scripts you use
 
 ### Loading
+
 ```html
-<link rel="preload" href="/fonts/main.woff2" as="font" type="font/woff2" crossorigin>
+<link
+  rel="preload"
+  href="/fonts/main.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin
+/>
 ```
+
 ```css
 @font-face {
-  font-family: 'Main';
-  src: url('/fonts/main.woff2') format('woff2');
+  font-family: "Main";
+  src: url("/fonts/main.woff2") format("woff2");
   font-display: swap;
   unicode-range: U+0000-007F; /* Basic Latin only */
 }
@@ -144,6 +155,7 @@ These rules apply to **Latin script, sans-serif and display faces** unless state
   > **When it breaks:** Not a universal Never. ALL CAPS is acceptable for small category labels (10-13px), regulatory text, and utilitarian aesthetics — just always add tracking when you do it.
 
 ### Never
+
 - Use system fonts when personality matters — system stacks are fine for utilitarian UI but they signal "no design intent" in brand-facing contexts
 - Mix more than 2-3 typefaces **in a single product surface** — editorial layouts (magazines, marketing pages) intentionally exceed this for typographic hierarchy
 
@@ -152,6 +164,7 @@ These rules apply to **Latin script, sans-serif and display faces** unless state
 ## Readability
 
 ### Line Length
+
 - **Prose body text**: 45-75 characters per line (ideal: 66). Use `max-width: 65ch` on text containers.
   > **When it breaks:** UI labels, buttons, table cells, and dense data layouts tolerate much shorter or longer lines. The 65ch rule is for continuous reading, not UI components.
 
@@ -166,9 +179,19 @@ Line height is script- and x-height-dependent — no single value works universa
   > **When it breaks:** Applying 1.5 body line-height to display text; applying CJK ratios to Latin body text (creates too much vertical space).
 
 ### Text Wrapping
+
 ```css
-h1, h2, h3, h4 { text-wrap: balance; }
-p, li, dd      { text-wrap: pretty; }
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+p,
+li,
+dd {
+  text-wrap: pretty;
+}
 ```
 
 - **`text-wrap: balance`** — even line lengths for headings
@@ -180,10 +203,14 @@ p, li, dd      { text-wrap: pretty; }
 
 ```css
 /* Tabular numbers for data alignment */
-.data-value { font-variant-numeric: tabular-nums; }
+.data-value {
+  font-variant-numeric: tabular-nums;
+}
 
 /* Or use a monospace font for data-heavy tables */
-.data-table { font-family: var(--font-mono, monospace); }
+.data-table {
+  font-family: var(--font-mono, monospace);
+}
 ```
 
 - **`tabular-nums`** for any numbers that align vertically in columns (tables, prices, stats) — this is a near-universal rule for data UI; the exception is decorative numerals in display headings where proportional figures look better
@@ -195,6 +222,7 @@ p, li, dd      { text-wrap: pretty; }
 ## Text Handling
 
 ### Content Overflow
+
 ```css
 /* Single line truncation */
 .truncate {
@@ -218,12 +246,14 @@ p, li, dd      { text-wrap: pretty; }
 ```
 
 ### Special Characters
+
 - **Curly quotes**: " " not " "
 - **Ellipsis character**: … not ...
 - **Non-breaking spaces**: `10&nbsp;MB`, `⌘&nbsp;K`, brand names
 - **`scroll-margin-top`** on headings for anchor links
 
 ### Resilience
+
 - Layouts handle short, average, AND very long content
 - Handle empty strings without broken UI
 - Locale-aware: `Intl.DateTimeFormat`, `Intl.NumberFormat`

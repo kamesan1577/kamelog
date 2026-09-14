@@ -24,12 +24,12 @@ Accessibility audit. Loads [accessibility.md](accessibility.md). Covers keyboard
 
 Both agents and commands surface quality findings, but they operate differently:
 
-| | Commands (`/critique`, `/audit`, …) | Agents (`design-reviewer`, `a11y-auditor`) |
-|---|---|---|
-| **Context** | Inline — run inside the caller's active context window | Fresh — each agent starts with a clean context |
-| **Parallelism** | Sequential (one lens at a time) | Parallel — both can run simultaneously on the same target |
-| **Tool scope** | Full skill tool scope | Restricted to Read, Grep, Glob (read-only) |
-| **Best for** | Interactive iteration, mixed build+review sessions | Dedicated review passes, PR audits, CI-style verification |
+|                 | Commands (`/critique`, `/audit`, …)                    | Agents (`design-reviewer`, `a11y-auditor`)                |
+| --------------- | ------------------------------------------------------ | --------------------------------------------------------- |
+| **Context**     | Inline — run inside the caller's active context window | Fresh — each agent starts with a clean context            |
+| **Parallelism** | Sequential (one lens at a time)                        | Parallel — both can run simultaneously on the same target |
+| **Tool scope**  | Full skill tool scope                                  | Restricted to Read, Grep, Glob (read-only)                |
+| **Best for**    | Interactive iteration, mixed build+review sessions     | Dedicated review passes, PR audits, CI-style verification |
 
 Use commands when you are already in a build session and want a quick inline lens.
 

@@ -4,7 +4,7 @@
 
 This is the **completeness** axis. It asks whether a screen has the parts screens of
 its kind need. It is not the distinction axis — [finish-bar.md](finish-bar.md), the
-surface recipes and `check_anti_slop` answer *is this designed*. Report the two side
+surface recipes and `check_anti_slop` answer _is this designed_. Report the two side
 by side.
 
 If the MCP server is connected, call `ux_coverage` instead of reading this file — it
@@ -15,13 +15,13 @@ it. This file is the fallback for installs without the server.
 
 Each part gets one marker:
 
-| Marker | Meaning |
-|---|---|
-| **present** | the part is there, doing what it describes |
-| **partial** | there but incomplete or weakened — say which half is missing |
-| **missing** | not there, and it should be — say what it costs the user |
+| Marker         | Meaning                                                                                                |
+| -------------- | ------------------------------------------------------------------------------------------------------ |
+| **present**    | the part is there, doing what it describes                                                             |
+| **partial**    | there but incomplete or weakened — say which half is missing                                           |
+| **missing**    | not there, and it should be — say what it costs the user                                               |
 | **not-needed** | absent and that is correct here — needs a stated reason, not just an absence you would rather not flag |
-| **unknown** | what you were given does not show enough to tell — say whether more input would settle it |
+| **unknown**    | what you were given does not show enough to tell — say whether more input would settle it              |
 
 **No score, no count, no percentage.** "6 of 8" makes `not-needed` read as a failure and
 turns a review into a grade. It also re-creates the problem `score_ui` already has:
@@ -44,7 +44,7 @@ of them goes stale.
 **States** are not restated here. [state-design.md](state-design.md) owns the lattice
 (idle / loading / empty / error / partial / success / conflict / offline) and the
 `state-coverage` loop preset evaluates it. Each archetype below names only the lattice
-instances that are non-obvious *for that archetype* — a data table's filtered-empty is a
+instances that are non-obvious _for that archetype_ — a data table's filtered-empty is a
 different screen from its first-run-empty, and that is archetype knowledge, not lattice
 knowledge.
 

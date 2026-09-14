@@ -9,7 +9,9 @@ Strategic color application, palette building, dark mode, and design tokens.
 More color ≠ better. Strategic color beats rainbow vomit. Every color needs a purpose.
 
 ### Application UI Color Balance
+
 The 60-30-10 rule is for interior design and marketing sites — not application UI. Mature SaaS products follow a different pattern:
+
 - **90%+ neutral tones** — grays, whites, subtle warm/cool tints for surfaces and text
 - **One accent color, used sparingly** — buttons, links, focus rings, emphasis states
 - **Secondary colors only for semantic meaning** — success green, warning amber, error red
@@ -18,16 +20,17 @@ The 60-30-10 rule is for interior design and marketing sites — not application
 
 Product UI stays restrained; marketing surfaces have permission to commit further. Pick a strategy **before** picking colors, gated by DESIGN_VARIANCE ([craft-intent.md](craft-intent.md)):
 
-| Strategy | What it means | Variance gate |
-|----------|---------------|---------------|
-| **Restrained** | 90%+ neutral, one accent ≤10% of surface | any — the product default |
-| **Committed** | one saturated color carries 30-60% of the surface (a drenched hero, a full-color section) | ≥7 |
-| **Full palette** | 3-4 named color roles, each used deliberately | ≥8, brand campaign or portfolio |
-| **Drenched** | the surface IS the color; neutrals are the exception | 9-10, explicit brief only |
+| Strategy         | What it means                                                                             | Variance gate                   |
+| ---------------- | ----------------------------------------------------------------------------------------- | ------------------------------- |
+| **Restrained**   | 90%+ neutral, one accent ≤10% of surface                                                  | any — the product default       |
+| **Committed**    | one saturated color carries 30-60% of the surface (a drenched hero, a full-color section) | ≥7                              |
+| **Full palette** | 3-4 named color roles, each used deliberately                                             | ≥8, brand campaign or portfolio |
+| **Drenched**     | the surface IS the color; neutrals are the exception                                      | 9-10, explicit brief only       |
 
 Commit or don't — a saturated hero hedged with timid neutrals around the edges reads as indecision. A beige-and-muted landing page on a brand brief ignores the register: on marketing surfaces, restraint without intent reads as mediocre, not refined. Name what the strategy is doing in the Craft Read so the user can push back.
 
 ### Color Purposes
+
 - **Semantic**: success (green), error (red/rose), warning (amber), info (blue)
 - **Hierarchy**: drawing attention to important elements
 - **Categorization**: different sections, types, or states
@@ -38,7 +41,7 @@ Commit or don't — a saturated hero hedged with timid neutrals around the edges
 
 ## Use OKLCH
 
-OKLCH is perceptually uniform — equal steps in lightness *look* equal. Best for generating harmonious scales.
+OKLCH is perceptually uniform — equal steps in lightness _look_ equal. Best for generating harmonious scales.
 
 ```css
 /* Warm neutral (not pure gray) */
@@ -48,11 +51,11 @@ OKLCH is perceptually uniform — equal steps in lightness *look* equal. Best fo
 --surface-cool: oklch(97% 0.01 250);
 
 /* Generate a consistent scale */
---blue-50:  oklch(97% 0.02 250);
+--blue-50: oklch(97% 0.02 250);
 --blue-100: oklch(93% 0.04 250);
 --blue-200: oklch(87% 0.08 250);
 --blue-500: oklch(60% 0.15 250);
---blue-900: oklch(30% 0.10 250);
+--blue-900: oklch(30% 0.1 250);
 ```
 
 ---
@@ -62,6 +65,7 @@ OKLCH is perceptually uniform — equal steps in lightness *look* equal. Best fo
 Max displayable chroma is not a flat ceiling — it varies strongly by hue and lightness. Purples and blues reach far higher chroma at mid lightness than yellows and cyans do at the same lightness; the OKLCH gamut is an uneven shape, not a cylinder. When generating a multi-hue palette (categorical chart colors, semantic status colors across hues), hold **chroma as a percentage of each hue's own max** rather than one absolute chroma value for every hue — a fixed `C 0.15` looks vivid on a purple and clipped/dull on a cyan at the same lightness, because the cyan's ceiling is lower.
 
 **A P3 screen should get more color, not a different color.** Ship the sRGB-safe value as the default and let capable displays step up to a richer chroma at the same hue and lightness — the two versions should read as the same accent, just less clipped on hardware that can show it:
+
 ```css
 :root {
   --accent: oklch(60% 0.15 250); /* sRGB-safe default */
@@ -73,6 +77,7 @@ Max displayable chroma is not a flat ceiling — it varies strongly by hue and l
   }
 }
 ```
+
 If the project also needs to support browsers without `oklch()` at all, wrap the enhanced rule in `@supports (color: oklch(0 0 0))` — inside that block, declare the plain-color fallback first and the OKLCH value second, so a supporting browser applies the fallback and then immediately overrides it with the richer color, while a non-supporting browser skips the whole block and keeps whatever fallback was set outside it.
 
 ---
@@ -86,22 +91,27 @@ A complete UI palette from a single brand hue, five roles: **text strong**, **te
 **QA the scale before shipping it.** A scale generated in HSL keeps the same numeric hue at every step but doesn't hold that hue perceptually constant — the light and dark ends visibly lean toward a neighboring hue even though the number didn't move. Spot-check by reading the OKLCH hue angle at each step of the generated scale; if it wanders more than roughly a dozen degrees from one end to the other, the drift is visible to the eye, not just on paper, and the fix is regenerating in OKLCH with hue held fixed while only lightness and chroma vary.
 
 ### Tinted Neutrals
+
 Default to tinted neutrals over pure gray — a subtle hue tint reads as intentional. (Exception: deliberately achromatic systems — Sharp Geometric at zero chroma, print-derived palettes — where pure gray IS the statement; see the Signal preset in `themes.md`.)
+
 - **Warm**: `oklch(L 0.01 60)` (slight warm tint)
 - **Cool**: `oklch(L 0.01 250)` (slight blue tint)
 - Match tint to your brand's primary hue
 
 ### Hue Consistency
+
 On non-neutral backgrounds, tint borders/shadows/text toward the same hue:
+
 ```css
 /* Card on blue background */
 .card {
-  border: 1px solid oklch(70% 0.05 250);  /* blue-tinted border */
-  box-shadow: 0 4px 12px oklch(30% 0.03 250 / 0.15);  /* blue-tinted shadow */
+  border: 1px solid oklch(70% 0.05 250); /* blue-tinted border */
+  box-shadow: 0 4px 12px oklch(30% 0.03 250 / 0.15); /* blue-tinted shadow */
 }
 ```
 
 ### Never
+
 - Gray text on colored backgrounds — looks washed out; use darker shade of bg color or transparency
 - Pure black (`#000`) or pure white (`#fff`) for large areas
 - Purple/cyan/blue gradient everything (AI slop)
@@ -112,12 +122,15 @@ On non-neutral backgrounds, tint borders/shadows/text toward the same hue:
 ## Dark Mode
 
 ### Required Setup
+
 ```html
 <html style="color-scheme: dark">
-<meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#000000" />
+</html>
 ```
 
 ### Rules
+
 - `color-scheme: dark` on `<html>` — ensures scrollbars, form controls, etc. have proper contrast
 - `<meta name="theme-color">` matches page background
 - Explicit `background-color` and `color` on native `<select>` (Windows fix)
@@ -132,26 +145,26 @@ On non-neutral backgrounds, tint borders/shadows/text toward the same hue:
 
 ```css
 /* Surfaces */
---surface-primary:   oklch(...);
+--surface-primary: oklch(...);
 --surface-secondary: oklch(...);
---surface-elevated:  oklch(...);
+--surface-elevated: oklch(...);
 
 /* Text */
---text-primary:   oklch(...);
+--text-primary: oklch(...);
 --text-secondary: oklch(...);
---text-tertiary:  oklch(...);
+--text-tertiary: oklch(...);
 
 /* Status */
 --status-success: oklch(65% 0.18 145);
---status-error:   oklch(60% 0.20 25);
+--status-error: oklch(60% 0.2 25);
 --status-warning: oklch(75% 0.15 70);
---status-info:    oklch(60% 0.15 250);
+--status-info: oklch(60% 0.15 250);
 
 /* Interactive */
 --interactive-primary: oklch(...);
---interactive-hover:   oklch(...);  /* more contrast than rest */
---interactive-active:  oklch(...);  /* even more contrast */
---interactive-focus:   oklch(...);
+--interactive-hover: oklch(...); /* more contrast than rest */
+--interactive-active: oklch(...); /* even more contrast */
+--interactive-focus: oklch(...);
 ```
 
 **State overlays scale better than per-component state colors:** define hover/press as two reusable overlay tokens (e.g. hover = the fill tone, press = the weak stroke tone, or translucent black/white steps) and apply them over ANY component surface. Every new component inherits correct states for free instead of minting its own hover/press variations.
@@ -173,6 +186,7 @@ On non-neutral backgrounds, tint borders/shadows/text toward the same hue:
 ## Application Patterns
 
 ### Accent Application
+
 - Primary actions (CTA buttons)
 - Links (maintain accessibility)
 - Key icons for recognition
@@ -181,26 +195,33 @@ On non-neutral backgrounds, tint borders/shadows/text toward the same hue:
 - Focus rings matching brand
 
 ### Background & Surfaces
+
 - Tinted backgrounds (warm/cool neutrals, not pure gray)
 - Colored sections to separate areas
 - Subtle gradient backgrounds (intentional, not generic)
 - Tinted cards for warmth
 
 ### Borders & Accents
+
 - Accent borders on cards (left/top)
 - Colored underlines for active states
 - Subtle colored dividers
 - Colored focus indicators
 
 ### Image Outlines
+
 Give `<img>` a subtle `1px` inset outline so images sit at the same depth as bordered/shadowed surfaces — and the outline color is **non-negotiable**:
+
 - **Light mode:** pure black at low opacity — `rgba(0,0,0,0.1)` (Tailwind `outline-black/10`).
 - **Dark mode:** pure white — `rgba(255,255,255,0.1)` (Tailwind `dark:outline-white/10`).
 - **Never** a tinted near-black/near-white from the palette (slate/zinc/neutral, `#0a0a0a`, `#f5f5f7`) and never the accent/ink hue. A tinted outline picks up the surface underneath and reads as dirt on the image edge — this is the one place the hue-consistency rule above does NOT apply.
 - Use `outline` + `outline-offset: -1px` (inset), not `border` — keeps the image its intended size and adds nothing to layout.
 
 ```css
-img { outline: 1px solid rgba(0,0,0,0.1); outline-offset: -1px; }
+img {
+  outline: 1px solid rgba(0, 0, 0, 0.1);
+  outline-offset: -1px;
+}
 /* dark: rgba(255,255,255,0.1) */
 ```
 

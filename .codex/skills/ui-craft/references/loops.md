@@ -8,13 +8,13 @@ Run→evaluate→fix one→re-evaluate→stop. A loop is not a review pass — i
 
 Every preset declares all five fields. None is optional.
 
-| Field | Allowed values | Description |
-|-------|---------------|-------------|
-| `target` | `new-build` \| `existing-surface` \| `user-screenshot` | The artifact being evaluated |
-| `lens` | one or more reference file paths / sections | Reference content that drives evaluation |
-| `gate` | `checklist-all-green` \| `zero-critical` \| `zero-off-system` | Binary pass condition |
-| `renderer` | `required` \| `none` | Renderer dependency level — `required` degrades to code-only if unavailable; `none` means static analysis only (always available) |
-| `budget` | integer 1–5 (default 3, hard cap 5) | Maximum iterations allowed |
+| Field      | Allowed values                                                | Description                                                                                                                       |
+| ---------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `target`   | `new-build` \| `existing-surface` \| `user-screenshot`        | The artifact being evaluated                                                                                                      |
+| `lens`     | one or more reference file paths / sections                   | Reference content that drives evaluation                                                                                          |
+| `gate`     | `checklist-all-green` \| `zero-critical` \| `zero-off-system` | Binary pass condition                                                                                                             |
+| `renderer` | `required` \| `none`                                          | Renderer dependency level — `required` degrades to code-only if unavailable; `none` means static analysis only (always available) |
+| `budget`   | integer 1–5 (default 3, hard cap 5)                           | Maximum iterations allowed                                                                                                        |
 
 ---
 
@@ -59,6 +59,7 @@ Every loop report MUST state:
 - **Unresolved findings** — any finding still open when the loop stops.
 
 **`target = user-screenshot` → EVALUATE-ONLY mode:**
+
 - Produce a severity-ranked findings report.
 - MUST NOT apply any fixes.
 - MUST NOT run fix iterations.
@@ -80,11 +81,11 @@ Every loop report MUST state:
 
 ## Preset Catalog
 
-| Preset | target | lens | gate | renderer | maps to |
-|--------|--------|------|------|----------|---------|
-| `visual-anti-slop` | new-build \| existing-surface | SKILL.md Anti-Slop Test + finish-bar.md Pass 1 + Pass 9 | zero-critical (Major: absent or explicitly user-confirmed — no self-accept, silence ≠ accepted) | required — degrades to code-only | `/finalize` |
-| `state-coverage` | new-build \| existing-surface | state-design.md lattice, knob-gated to CRAFT_LEVEL | checklist-all-green (all required states present) | none | `/unhappy` |
-| `token-consistency` | new-build \| existing-surface | tokens.md 3-layer contract + SKILL.md Anti-Slop Minor items | zero-off-system | none (static scan) | `/tokens audit` |
+| Preset              | target                        | lens                                                        | gate                                                                                            | renderer                         | maps to         |
+| ------------------- | ----------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------- | --------------- |
+| `visual-anti-slop`  | new-build \| existing-surface | SKILL.md Anti-Slop Test + finish-bar.md Pass 1 + Pass 9     | zero-critical (Major: absent or explicitly user-confirmed — no self-accept, silence ≠ accepted) | required — degrades to code-only | `/finalize`     |
+| `state-coverage`    | new-build \| existing-surface | state-design.md lattice, knob-gated to CRAFT_LEVEL          | checklist-all-green (all required states present)                                               | none                             | `/unhappy`      |
+| `token-consistency` | new-build \| existing-surface | tokens.md 3-layer contract + SKILL.md Anti-Slop Minor items | zero-off-system                                                                                 | none (static scan)               | `/tokens audit` |
 
 ---
 
@@ -135,10 +136,10 @@ Every loop report MUST state:
 
 ## Choosing / Adding a Preset
 
-| Use case | Preset |
-|----------|--------|
-| Surface looks AI-generated; fix visual slop | `visual-anti-slop` |
-| Edge-case states are missing (loading, error, empty) | `state-coverage` |
+| Use case                                                    | Preset              |
+| ----------------------------------------------------------- | ------------------- |
+| Surface looks AI-generated; fix visual slop                 | `visual-anti-slop`  |
+| Edge-case states are missing (loading, error, empty)        | `state-coverage`    |
 | Hardcoded colors, radii, or spacing bypass the token system | `token-consistency` |
 
 **Preset block template** (drop-in for future presets — mirror this file's style):

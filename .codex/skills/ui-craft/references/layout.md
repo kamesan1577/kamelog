@@ -37,14 +37,14 @@ Concrete: a form label 4px above its input, inputs in the same form 16px apart, 
 Use tokens from a defined set. Values come from the scale — never arbitrary.
 
 ```css
---space-xs:  0.25rem;   /* 4px  — label-to-input, icon-to-label */
---space-sm:  0.5rem;    /* 8px  — items within a group */
---space-md:  1rem;      /* 16px — related components */
---space-lg:  1.5rem;    /* 24px — sibling sections */
---space-xl:  2rem;      /* 32px — component-to-component */
---space-2xl: 3rem;      /* 48px — section separations */
---space-3xl: 4rem;      /* 64px — major page regions */
---space-4xl: 6rem;      /* 96px — hero-to-content, above-fold breathing room */
+--space-xs: 0.25rem; /* 4px  — label-to-input, icon-to-label */
+--space-sm: 0.5rem; /* 8px  — items within a group */
+--space-md: 1rem; /* 16px — related components */
+--space-lg: 1.5rem; /* 24px — sibling sections */
+--space-xl: 2rem; /* 32px — component-to-component */
+--space-2xl: 3rem; /* 48px — section separations */
+--space-3xl: 4rem; /* 64px — major page regions */
+--space-4xl: 6rem; /* 96px — hero-to-content, above-fold breathing room */
 ```
 
 Use `gap` for sibling spacing — eliminates margin collapse and is the correct mental model.
@@ -73,12 +73,12 @@ Why it works: the human visual system applies a low-pass spatial frequency filte
 
 Four levels is the practical maximum for most UI. Beyond that, distinctions collapse.
 
-| Level | Role | Signal |
-|-------|------|--------|
-| Primary | Page-defining element (hero headline, main CTA) | Largest, highest contrast, most visual weight |
-| Secondary | Supporting structure (subheadings, section labels) | Minimum 1.5x smaller or lighter than primary |
-| Tertiary | Body content, field labels, card titles | Readable, not competing |
-| Quaternary | Metadata, timestamps, captions | Muted, clearly subordinate |
+| Level      | Role                                               | Signal                                        |
+| ---------- | -------------------------------------------------- | --------------------------------------------- |
+| Primary    | Page-defining element (hero headline, main CTA)    | Largest, highest contrast, most visual weight |
+| Secondary  | Supporting structure (subheadings, section labels) | Minimum 1.5x smaller or lighter than primary  |
+| Tertiary   | Body content, field labels, card titles            | Readable, not competing                       |
+| Quaternary | Metadata, timestamps, captions                     | Muted, clearly subordinate                    |
 
 **Minimum 1.5x difference between adjacent levels** to create a clear distinction. A 1.2x difference reads as an accident, not a decision.
 
@@ -118,6 +118,7 @@ Every layout needs exactly one focal point — the element the eye arrives at fi
 The geometric center of a rectangle is at 50% vertical. The optical center is 5–8% above that. Content positioned at the optical center feels balanced; content at true geometric center reads as slightly low.
 
 This matters most for:
+
 - Modal dialogs — vertically centered modals in a viewport look sunken; use `align-items: center` with a slight upward offset or top-biased margins
 - Icon placement within a bounding box — a 24×24 icon with a visually tall glyph needs a −1px vertical nudge
 - Above-the-fold hero sections — weight the primary element in the upper optical zone
@@ -144,10 +145,18 @@ The rule of thirds creates dynamic tension by placing subjects at grid intersect
 
 ```css
 /* Responsive without breakpoints — flex */
-.group { display: flex; flex-wrap: wrap; gap: var(--space-md); }
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
 
 /* Responsive without breakpoints — grid */
-.grid  { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-lg); }
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-lg);
+}
 ```
 
 Don't default to Grid when Flex would be simpler. Don't reach for JS measurement when CSS layout solves it.
@@ -167,23 +176,25 @@ Don't default to Grid when Flex would be simpler. Don't reach for JS measurement
 ## Depth & Elevation
 
 ### Z-Index Scale (Semantic)
+
 ```css
---z-dropdown:       10;
---z-sticky:         20;
+--z-dropdown: 10;
+--z-sticky: 20;
 --z-modal-backdrop: 30;
---z-modal:          40;
---z-toast:          50;
---z-tooltip:        60;
+--z-modal: 40;
+--z-toast: 50;
+--z-tooltip: 60;
 ```
 
 Never use arbitrary values (999, 9999). Use elevation to reinforce hierarchy, not as decoration.
 
 ### Shadow Scale
+
 ```css
---shadow-sm:  0 1px 2px rgba(0,0,0,0.05);
---shadow-md:  0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.06);
---shadow-lg:  0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
---shadow-xl:  0 20px 25px rgba(0,0,0,0.1), 0 8px 10px rgba(0,0,0,0.04);
+--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+--shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
+--shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+--shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 8px 10px rgba(0, 0, 0, 0.04);
 ```
 
 Always layered (ambient + direct light). Higher elevation = larger spread + lower opacity, not just a bigger number.
@@ -214,13 +225,13 @@ The relationship that keeps nested corners visually parallel: **outer radius = i
 
 ## Style-to-CSS Reference
 
-| Property | Minimal Clean | Soft Modern | Sharp Geometric | Rich Editorial | Dark Premium | Playful Bold |
-|----------|---------------|-------------|-----------------|----------------|--------------|--------------|
-| `border-radius` | 2-4px | 8-16px | 0px | 2-4px | 4-8px | 12-20px |
-| Shadows | None or barely-there | Layered (ambient + direct) | None — use borders | Subtle, warm | Subtle glow, inset | Bold, offset |
-| Borders | `rgba(0,0,0,0.06)` 1px | Soft, same hue as shadow | 1px crisp, high-contrast | Thin, warm-tinted | `rgba(255,255,255,0.08)` | Thick, colored |
-| Spacing | Generous whitespace | Comfortable, padded | Tight, precise | Generous, editorial | Moderate | Loose, breathing |
-| Weight range | 400-600 | 400-600 | 400-800 | 300-700 | 400-700 | 500-800 |
+| Property        | Minimal Clean          | Soft Modern                | Sharp Geometric          | Rich Editorial      | Dark Premium             | Playful Bold     |
+| --------------- | ---------------------- | -------------------------- | ------------------------ | ------------------- | ------------------------ | ---------------- |
+| `border-radius` | 2-4px                  | 8-16px                     | 0px                      | 2-4px               | 4-8px                    | 12-20px          |
+| Shadows         | None or barely-there   | Layered (ambient + direct) | None — use borders       | Subtle, warm        | Subtle glow, inset       | Bold, offset     |
+| Borders         | `rgba(0,0,0,0.06)` 1px | Soft, same hue as shadow   | 1px crisp, high-contrast | Thin, warm-tinted   | `rgba(255,255,255,0.08)` | Thick, colored   |
+| Spacing         | Generous whitespace    | Comfortable, padded        | Tight, precise           | Generous, editorial | Moderate                 | Loose, breathing |
+| Weight range    | 400-600                | 400-600                    | 400-800                  | 300-700             | 400-700                  | 500-800          |
 
 ---
 

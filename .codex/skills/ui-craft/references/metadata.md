@@ -31,6 +31,7 @@ Tags existing in the page source proves nothing about how a card actually render
 Nothing feeding a title, description, or JSON-LD block should trace back to an unstable input — no `Math.random()`, no `Date.now()`, no client-only state read before first paint.
 
 Two distinct failures follow from ignoring this:
+
 - **Hydration mismatch** — the server-rendered value and the client's first pass disagree, and the framework flags it.
 - **A stuck preview cache** — social platforms fetch a URL's metadata once and cache the result. If that single fetch happened to capture a randomized or time-sensitive value, every future share of that link shows the same wrong preview, with no external way to force a refresh.
 

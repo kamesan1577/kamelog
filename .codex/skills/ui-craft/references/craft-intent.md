@@ -8,21 +8,21 @@ Load on every `/craft`, default Build mode, and when the user asks for a full su
 
 Before tokens or layout, output **one line** the user can react to:
 
-> **Craft Read:** *[surface kind] for [audience], [product | marketing] language, [theme/accent hint], variance [N], signature bet: [choice].*
+> **Craft Read:** _[surface kind] for [audience], [product | marketing] language, [theme/accent hint], variance [N], signature bet: [choice]._
 
 **Infer from:** page/app kind, vibe words ("minimal", "editorial", "dense", "playful"), references the user named, existing brand tokens, audience.
 
 **Examples:**
 
-- *Craft Read: B2B ops dashboard for finance admins, product language, Graphite + teal accent, variance 4, signature bet: hero metric card with sparkline.*
-- *Craft Read: devtool launch page for technical buyers, marketing language, Porcelain + indigo, variance 7, signature bet: product screenshot cropped at fold with floating proof card.*
-- *Craft Read: designer portfolio for hiring managers, marketing language, editorial type, variance 8, signature bet: kinetic display headline with italic emphasis in same family.*
+- _Craft Read: B2B ops dashboard for finance admins, product language, Graphite + teal accent, variance 4, signature bet: hero metric card with sparkline._
+- _Craft Read: devtool launch page for technical buyers, marketing language, Porcelain + indigo, variance 7, signature bet: product screenshot cropped at fold with floating proof card._
+- _Craft Read: designer portfolio for hiring managers, marketing language, editorial type, variance 8, signature bet: kinetic display headline with italic emphasis in same family._
 
 If the brief is ambiguous, ask **one** clarifying question — never a questionnaire. If inferable, declare the Craft Read and proceed.
 
-**Anti-default discipline:** Generated design without a committed read clusters into three defaults — (1) warm cream background (~`#F4F1EA`) + serif display + terracotta/brass accent; (2) near-black background + one bright acid-green or vermilion accent; (3) broadsheet layout — hairline rules, zero border-radius, dense columns. Each is legitimate only *when the brief asks for it*, never as a default answer to "no brand direction" — same goes for purple mesh gradients, symmetric three-icon-card heroes, full-black sidebars, and Inter-on-everything without a reason.
+**Anti-default discipline:** Generated design without a committed read clusters into three defaults — (1) warm cream background (~`#F4F1EA`) + serif display + terracotta/brass accent; (2) near-black background + one bright acid-green or vermilion accent; (3) broadsheet layout — hairline rules, zero border-radius, dense columns. Each is legitimate only _when the brief asks for it_, never as a default answer to "no brand direction" — same goes for purple mesh gradients, symmetric three-icon-card heroes, full-black sidebars, and Inter-on-everything without a reason.
 
-**Second-order check (marketing surfaces):** name the aesthetic lane before building ("editorial type", "terminal-dark devtool", "warm-craft artisan"), then ask if someone could guess it from the domain alone — "devtool → dark mode + mono" is the first reflex, "AI tool that's not-purple → editorial serif restraint" is the same reflex one tier deeper. If the lane, or any default above, is guessable from the category, rework it until it isn't — the brand's specifics should pick the lane, not the category. Self-test: "would a similar brief for a *different* brand in this category produce this same plan?" If yes for any axis, that's a reflex, not a decision — revise it and state what changed.
+**Second-order check (marketing surfaces):** name the aesthetic lane before building ("editorial type", "terminal-dark devtool", "warm-craft artisan"), then ask if someone could guess it from the domain alone — "devtool → dark mode + mono" is the first reflex, "AI tool that's not-purple → editorial serif restraint" is the same reflex one tier deeper. If the lane, or any default above, is guessable from the category, rework it until it isn't — the brand's specifics should pick the lane, not the category. Self-test: "would a similar brief for a _different_ brand in this category produce this same plan?" If yes for any axis, that's a reflex, not a decision — revise it and state what changed.
 
 ---
 
@@ -30,21 +30,21 @@ If the brief is ambiguous, ask **one** clarifying question — never a questionn
 
 Separate from **VISUAL_DENSITY** (how much fits) and **CRAFT_LEVEL** (how refined). Variance controls **layout risk and creative amplitude**.
 
-| Variance | Product surfaces | Marketing surfaces |
-|----------|------------------|-------------------|
-| **1–3** | Symmetric grids, safe hierarchy | Centered hero OK only with asymmetric support |
-| **4–6** | Split layouts, metric hierarchy, one layout break | Split/bento heroes, alternating feature rows |
-| **7–8** | Strong typographic moments in shell (empty state, onboarding) | Asymmetric offsets, scroll-linked logo strip, display scale drama |
-| **9–10** | Rare — one experimental shell moment only | Kinetic type, scroll choreography — **explicit brief or user asks "experimental"** |
+| Variance | Product surfaces                                              | Marketing surfaces                                                                 |
+| -------- | ------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **1–3**  | Symmetric grids, safe hierarchy                               | Centered hero OK only with asymmetric support                                      |
+| **4–6**  | Split layouts, metric hierarchy, one layout break             | Split/bento heroes, alternating feature rows                                       |
+| **7–8**  | Strong typographic moments in shell (empty state, onboarding) | Asymmetric offsets, scroll-linked logo strip, display scale drama                  |
+| **9–10** | Rare — one experimental shell moment only                     | Kinetic type, scroll choreography — **explicit brief or user asks "experimental"** |
 
 **Defaults when user doesn't specify:**
 
-| Surface | Default variance |
-|---------|------------------|
-| Dashboard, settings, auth, tables | **4** |
-| Landing (live product) | **7** |
-| Landing (waitlist / pre-launch) | **6** |
-| Portfolio, case-study, launch event | **8** |
+| Surface                             | Default variance |
+| ----------------------------------- | ---------------- |
+| Dashboard, settings, auth, tables   | **4**            |
+| Landing (live product)              | **7**            |
+| Landing (waitlist / pre-launch)     | **6**            |
+| Portfolio, case-study, launch event | **8**            |
 
 `/bolder` raises variance (+1–2, cap 10) and motion (+1, cap 10). `/quieter` lowers both. Honor `prefers-reduced-motion` always.
 
@@ -102,18 +102,18 @@ Apply on dashboard, auth, settings, onboarding, admin — load with [recipe-dash
 
 Naming the platform is not enough to act on. Install what the row says:
 
-| Brief reads as… | Install | Ships as |
-|---|---|---|
-| Microsoft 365 / Fluent-flavoured | `@fluentui/react-components` | React |
-| Atlassian-suite companion | `@atlaskit/button`, `@atlaskit/textfield`, … | React, one package per component |
-| Shopify app or admin surface | `@shopify/polaris` | React |
-| Material-flavoured product | `@material/web` | Web components — any framework |
-| IBM-style B2B / enterprise analytics | `@carbon/react` | React (`@carbon/styles` for the CSS alone) |
-| Salesforce / Lightning | `@salesforce-ux/design-system` | CSS — any framework |
-| Adobe-flavoured | `@adobe/react-spectrum` | React |
-| GitHub-flavoured developer tooling | `@primer/react` | React (`@primer/primitives` for tokens alone) |
-| UK public sector | `govuk-frontend` | Plain CSS + JS |
-| US federal / state service | `@uswds/uswds` | Plain CSS + JS |
+| Brief reads as…                      | Install                                      | Ships as                                      |
+| ------------------------------------ | -------------------------------------------- | --------------------------------------------- |
+| Microsoft 365 / Fluent-flavoured     | `@fluentui/react-components`                 | React                                         |
+| Atlassian-suite companion            | `@atlaskit/button`, `@atlaskit/textfield`, … | React, one package per component              |
+| Shopify app or admin surface         | `@shopify/polaris`                           | React                                         |
+| Material-flavoured product           | `@material/web`                              | Web components — any framework                |
+| IBM-style B2B / enterprise analytics | `@carbon/react`                              | React (`@carbon/styles` for the CSS alone)    |
+| Salesforce / Lightning               | `@salesforce-ux/design-system`               | CSS — any framework                           |
+| Adobe-flavoured                      | `@adobe/react-spectrum`                      | React                                         |
+| GitHub-flavoured developer tooling   | `@primer/react`                              | React (`@primer/primitives` for tokens alone) |
+| UK public sector                     | `govuk-frontend`                             | Plain CSS + JS                                |
+| US federal / state service           | `@uswds/uswds`                               | Plain CSS + JS                                |
 
 Check the third column against the project before adding a dependency. Most of these ship as React and installing one into a Vue, Svelte or Angular codebase is worse than hand-rolling: take the system's tokens and CSS instead, which is the part that makes it recognisable. Atlassian has no meta-package — install the components the surface actually uses.
 
@@ -143,11 +143,11 @@ Apply on landing, portfolio, waitlist — load with [recipe-landing.md](recipe-l
 
 Rotate **one axis per build** so outputs don't converge:
 
-| Axis | Pool (pick 1) |
-|------|----------------|
-| Theme preset | Graphite, Porcelain, Signal, Carbon — [themes.md](themes.md) |
-| Accent family | indigo, teal, rose, amber, forest (OKLCH-safe) |
-| Signature bet | from §3 lists |
+| Axis          | Pool (pick 1)                                                |
+| ------------- | ------------------------------------------------------------ |
+| Theme preset  | Graphite, Porcelain, Signal, Carbon — [themes.md](themes.md) |
+| Accent family | indigo, teal, rose, amber, forest (OKLCH-safe)               |
+| Signature bet | from §3 lists                                                |
 
 Declare the axis in the Craft Read so the user can say "warmer accent" on iteration.
 

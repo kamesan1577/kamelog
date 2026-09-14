@@ -10,13 +10,13 @@ Outcome recipe for marketing landing pages — composition, section grammar, and
 
 ## Step 0 — Three inputs (defaults if unanswered)
 
-| Input | Options | Default |
-|---|---|---|
-| What exists to show | live product (screenshots possible) / pre-launch (no product yet) / sales-led service | live product |
-| Theme | a preset from [themes.md](themes.md) or existing brand tokens | brand tokens if present, else **Graphite** |
-| One conversion action | trial signup / demo request / waitlist / purchase | trial signup |
-| Variance | DESIGN_VARIANCE 1-10 | 7 (6 if pre-launch / waitlist only) |
-| Signature bet | one from [craft-intent.md](craft-intent.md) §3 marketing list | hero crop or floating proof card |
+| Input                 | Options                                                                               | Default                                    |
+| --------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------ |
+| What exists to show   | live product (screenshots possible) / pre-launch (no product yet) / sales-led service | live product                               |
+| Theme                 | a preset from [themes.md](themes.md) or existing brand tokens                         | brand tokens if present, else **Graphite** |
+| One conversion action | trial signup / demo request / waitlist / purchase                                     | trial signup                               |
+| Variance              | DESIGN_VARIANCE 1-10                                                                  | 7 (6 if pre-launch / waitlist only)        |
+| Signature bet         | one from [craft-intent.md](craft-intent.md) §3 marketing list                         | hero crop or floating proof card           |
 
 The first answer selects the composition. One page, ONE conversion action — every section either advances it or gets cut.
 
@@ -24,15 +24,15 @@ The first answer selects the composition. One page, ONE conversion action — ev
 
 Two decisions, in this order, and they are not the same decision. **What the fold argues** is yours to choose from the brief. **How it is laid out** is drawn, not chosen.
 
-Until 2026-08-13 this section shipped three ASCII diagrams, one per strategy, and the first was labelled *default*. Its geometry was text one side and a visual the other — which is the `split` composition class, the one `fold_candidates` deliberately draws last because *"it is the fold every generator reaches for unprompted."* Measured across seven landing builds, every fold that got built was one of the three geometries those diagrams prescribed, and none was the class the draw had offered. A drawn class cannot introduce variety while this file ships the answer with a picture, so the pictures are gone and the content grammar stayed.
+Until 2026-08-13 this section shipped three ASCII diagrams, one per strategy, and the first was labelled _default_. Its geometry was text one side and a visual the other — which is the `split` composition class, the one `fold_candidates` deliberately draws last because _"it is the fold every generator reaches for unprompted."_ Measured across seven landing builds, every fold that got built was one of the three geometries those diagrams prescribed, and none was the class the draw had offered. A drawn class cannot introduce variety while this file ships the answer with a picture, so the pictures are gone and the content grammar stayed.
 
 ### 1a — What it argues
 
-| Strategy | Lead with | Fold carries |
-|---|---|---|
-| **Product-forward** — live product to show | the product doing its job | badge (what's new, or none) · H1 2-3 lines · sub ≤2 sentences · primary + ghost CTA · one micro-trust line · a real product shot, cropped at the fold **and** an edge · at most one floating mini-card over it (live metric, notification) for depth |
-| **Message-forward** — pre-launch, waitlist, no product to show | the claim, in language | H1 as the largest thing on the page · sub one sentence · email input with the join CTA attached to it · proof placed off-centre on purpose (avatars + count one side, badge the other) · an abstract motif rather than a screenshot |
-| **Proof-forward** — sales-led, B2B service | evidence before argument | compact H1 + sub + demo CTA · an outcome strip of exactly 3 specific metrics in large numerals · a case block: quote + attributed face + numbers · capability rows alternating beneath |
+| Strategy                                                       | Lead with                 | Fold carries                                                                                                                                                                                                                                         |
+| -------------------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Product-forward** — live product to show                     | the product doing its job | badge (what's new, or none) · H1 2-3 lines · sub ≤2 sentences · primary + ghost CTA · one micro-trust line · a real product shot, cropped at the fold **and** an edge · at most one floating mini-card over it (live metric, notification) for depth |
+| **Message-forward** — pre-launch, waitlist, no product to show | the claim, in language    | H1 as the largest thing on the page · sub one sentence · email input with the join CTA attached to it · proof placed off-centre on purpose (avatars + count one side, badge the other) · an abstract motif rather than a screenshot                  |
+| **Proof-forward** — sales-led, B2B service                     | evidence before argument  | compact H1 + sub + demo CTA · an outcome strip of exactly 3 specific metrics in large numerals · a case block: quote + attributed face + numbers · capability rows alternating beneath                                                               |
 
 No strategy is a default. A brief with a live product picks product-forward; a brief without one cannot.
 
@@ -50,7 +50,7 @@ Anything else the draw offers is legitimate. If it draws a class that fights the
 
 ### 1c — Verify what you actually built
 
-Render it and call **`check_fold` with `expected_class`** set to the class you committed to. Without that argument it reports what the fold *is* and cannot tell you whether it is what you intended — and it will say so rather than imply agreement.
+Render it and call **`check_fold` with `expected_class`** set to the class you committed to. Without that argument it reports what the fold _is_ and cannot tell you whether it is what you intended — and it will say so rather than imply agreement.
 
 If it reports drift, the geometry moved while you were writing. Fix the build to match the class, or record in the brief that the class changed and why. A declared class the code does not honour is worse than no declaration: it reads as compliance to anyone auditing the transcript.
 
