@@ -1522,22 +1522,41 @@ export default function Notebook({
                 <section className="projects-page">
                   <h1>プロジェクト</h1>
                   <div className="project-grid">
-                    {projects.map((project) => (
-                      <a
-                        className="project-tile"
-                        key={project.slug}
-                        href={`/projects/${project.slug}`}
-                      >
-                        <img src={project.thumbnail} alt="" />
-                        <div>
-                          <h2>
-                            {project.title} <ArrowUpRight size={16} />
-                          </h2>
-                          <p>{project.summary}</p>
-                          <span>{project.stack.join(" · ")}</span>
+                    {projects.map((project) => {
+                      const card = (
+                        <>
+                          <img src={project.thumbnail} alt="" />
+                          <div>
+                            <h2>
+                              {project.title}{" "}
+                              {project.links.source && (
+                                <ArrowUpRight size={16} />
+                              )}
+                            </h2>
+                            <p>{project.summary}</p>
+                            <span>{project.stack.join(" · ")}</span>
+                          </div>
+                        </>
+                      );
+                      return project.links.source ? (
+                        <a
+                          className="project-tile"
+                          key={project.slug}
+                          href={project.links.source}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {card}
+                        </a>
+                      ) : (
+                        <div
+                          className="project-tile project-tile-static"
+                          key={project.slug}
+                        >
+                          {card}
                         </div>
-                      </a>
-                    ))}
+                      );
+                    })}
                   </div>
                 </section>
               ) : item ? (

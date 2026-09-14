@@ -78,7 +78,7 @@ export const projects: Project[] = [
       "API呼び出しを抑えるキャッシュを導入",
     ],
     decisions: ["投稿内容をAPIで判定し、対象のDOM要素を非表示にする構成。"],
-    links: {},
+    links: { source: "https://github.com/kamesan1577/jisshu4-g11-t4-backend" },
     thumbnail: "/project-tools.svg",
   },
 ];
