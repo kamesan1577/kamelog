@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { projects } from "@/lib/public-profile";
 import "../engineering.css";
 
@@ -11,7 +12,7 @@ export const metadata: Metadata = {
 export default function ProjectsPage() {
   return (
     <main className="project-article">
-      <a href="/">← kamelog</a>
+      <Link href="/">← kamelog</Link>
       <h1>Projects</h1>
       <p>設計から実装、運用まで取り組んだもの。</p>
       <div className="engineering-works">
