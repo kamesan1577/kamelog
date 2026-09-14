@@ -23,13 +23,29 @@ export function EngineeringProfile() {
       <section aria-labelledby="works-title">
         <h2 id="works-title">Selected Works</h2>
         <div className="engineering-works">
-          {projects.map((project) => (
-            <a key={project.slug} href={`/projects/${project.slug}`}>
-              <strong>{project.title}</strong>
-              <span>{project.summary}</span>
-              <small>詳しく見る →</small>
-            </a>
-          ))}
+          {projects.map((project) => {
+            const card = (
+              <>
+                <strong>{project.title}</strong>
+                <span>{project.summary}</span>
+                <small>{project.links.source ? "GitHubで見る ↗" : "詳細はこのページに掲載"}</small>
+              </>
+            );
+            return project.links.source ? (
+              <a
+                key={project.slug}
+                href={project.links.source}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {card}
+              </a>
+            ) : (
+              <div className="engineering-work-static" key={project.slug}>
+                {card}
+              </div>
+            );
+          })}
         </div>
         <a className="engineering-more" href="/projects">
           すべてのプロジェクトを見る →
