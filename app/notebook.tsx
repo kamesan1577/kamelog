@@ -60,7 +60,13 @@ import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
 import { buildXIntentUrl } from "@/lib/x-intent.mjs";
 import threadStyles from "./tweet-thread-bridge.module.css";
+import {
+  EngineeringProfile,
+  ContactLinks,
+} from "@/components/engineering-profile";
+import { contact, projects } from "@/lib/public-profile";
 import "./landing.css";
+import "./engineering.css";
 
 type Kind = "blog" | "tweet" | "vlog";
 type BlogEditorMode = "edit" | "preview" | "split";
@@ -1366,7 +1372,7 @@ export default function Notebook({
           </div>
           <a
             className="side-link"
-            href="https://github.com/kamesan1577"
+            href={contact.github}
             target="_blank"
             rel="noreferrer"
           >
@@ -1516,36 +1522,22 @@ export default function Notebook({
                 <section className="projects-page">
                   <h1>プロジェクト</h1>
                   <div className="project-grid">
-                    <a
-                      className="project-tile"
-                      href="https://github.com/kamesan1577/kamelog"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <img src="/project-api.svg" alt="kamelogのサムネイル" />
-                      <div>
-                        <h2>
-                          kamelog <ArrowUpRight size={16} />
-                        </h2>
-                        <p>ブログ・つぶやき・vlogをまとめる個人サイト</p>
-                        <span>TypeScript</span>
-                      </div>
-                    </a>
-                    <a
-                      className="project-tile"
-                      href="https://qiita.com/kamesan1577"
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <img src="/project-tools.svg" alt="Qiitaのサムネイル" />
-                      <div>
-                        <h2>
-                          Qiita <ArrowUpRight size={16} />
-                        </h2>
-                        <p>技術記事</p>
-                        <span>Qiita</span>
-                      </div>
-                    </a>
+                    {projects.map((project) => (
+                      <a
+                        className="project-tile"
+                        key={project.slug}
+                        href={`/projects/${project.slug}`}
+                      >
+                        <img src={project.thumbnail} alt="" />
+                        <div>
+                          <h2>
+                            {project.title} <ArrowUpRight size={16} />
+                          </h2>
+                          <p>{project.summary}</p>
+                          <span>{project.stack.join(" · ")}</span>
+                        </div>
+                      </a>
+                    ))}
                   </div>
                 </section>
               ) : item ? (
@@ -1617,10 +1609,16 @@ export default function Notebook({
                 <section className="landing-page">
                   <div className="landing-intro">
                     <div className="landing-copy">
-                      <h1>kamelog</h1>
+                      <h1>
+                        かめさん{" "}
+                        <span className="engineering-role">
+                          Backend Engineer
+                        </span>
+                      </h1>
                       <p className="landing-lead">
-                        ブログ、つぶやき、短い動画、個人制作をまとめています。
+                        Goを中心に、自社Webサービスのバックエンド開発をしています。APIやデータベースの実装から、複数システムにまたがる機能設計、他職種との仕様調整まで担当しています。個人ではWebサービスの設計・実装から自宅サーバーでの運用までしています。
                       </p>
+                      <ContactLinks />
                       <div className="landing-actions">
                         <button
                           className="landing-primary"
@@ -1639,19 +1637,16 @@ export default function Notebook({
                       <div>
                         <span>プロフィール</span>
                         <h2>{profile.name}</h2>
-                        <p>@kamesan1577 · Webバックエンドエンジニア</p>
+                        <p>@kamesan1577 · Backend Engineer</p>
                       </div>
                       <p className="landing-bio">{profile.bio}</p>
-                      <a
-                        href="https://github.com/kamesan1577"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
+                      <a href={contact.github} target="_blank" rel="noreferrer">
                         GitHubでコードを見る <ArrowUpRight size={14} />
                       </a>
                     </aside>
                   </div>
 
+                  <EngineeringProfile />
                   <div className="landing-lower">
                     <div className="content-index">
                       <div className="landing-section-title">
@@ -1735,33 +1730,6 @@ export default function Notebook({
                       )}
                     </div>
                   </div>
-
-                  <section
-                    className="landing-about"
-                    aria-labelledby="about-title"
-                  >
-                    <div className="landing-section-title">
-                      <h2 id="about-title">About me</h2>
-                    </div>
-                    <ol className="career-list">
-                      <li>
-                        <time dateTime="2021">2021</time>
-                        <div>
-                          <strong>大学入学</strong>
-                          <p>
-                            情報系の学部で、ソフトウェア開発と情報技術を学ぶ。
-                          </p>
-                        </div>
-                      </li>
-                      <li>
-                        <time dateTime="2025">2025</time>
-                        <div>
-                          <strong>大学卒業・エンタメ系企業へ入社</strong>
-                          <p>自社Webサービスの開発に携わる。</p>
-                        </div>
-                      </li>
-                    </ol>
-                  </section>
                 </section>
               ) : (
                 <>
@@ -2013,11 +1981,7 @@ export default function Notebook({
                 <h2>{profile.name}</h2>
                 <span className="profile-handle">@kamesan1577</span>
                 <p>{profile.bio}</p>
-                <a
-                  href="https://github.com/kamesan1577"
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <a href={contact.github} target="_blank" rel="noreferrer">
                   GitHub
                   <ArrowUpRight size={14} />
                 </a>

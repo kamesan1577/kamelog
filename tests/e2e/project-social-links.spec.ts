@@ -14,9 +14,9 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
     const projects = page.locator(".projects-page");
     await expect(projects).toBeVisible();
     const cards = projects.locator(".project-tile");
-    await expect(cards).toHaveCount(2);
+    await expect(cards).toHaveCount(3);
 
-    for (let index = 0; index < 2; index += 1) {
+    for (let index = 0; index < 3; index += 1) {
       const box = await cards.nth(index).boundingBox();
       expect(box).not.toBeNull();
       if (!box) throw new Error("project card geometry unavailable");
@@ -28,11 +28,12 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
       );
     }
 
-    const qiitaImage = projects.locator(
-      'a.project-tile[href="https://qiita.com/kamesan1577"] img',
-    );
-    await expect(qiitaImage).toHaveAttribute("src", "/qiita-project.svg");
-    await expect(qiitaImage).toHaveAttribute("alt", "Qiita");
+    await expect(projects.locator('a[href="/projects/kamelog"]')).toBeVisible();
+    await expect(
+      projects.locator('a[href="/projects/home-lab"]'),
+    ).toBeVisible();
+    await expect(projects.locator('a[href="/projects/heitan"]')).toBeVisible();
+    await expect(projects.getByRole("link", { name: /Qiita/ })).toHaveCount(0);
 
     if (width === 320) {
       const cardBox = await cards.first().boundingBox();

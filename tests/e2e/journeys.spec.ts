@@ -23,11 +23,11 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "kamelog", exact: true }),
+    page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
   ).toBeVisible();
   await expect(page.getByText("プロフィール", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "About me" })).toBeVisible();
-  await expect(page.getByText("大学卒業・エンタメ系企業へ入社")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Experience" })).toBeVisible();
+  await expect(page.getByText(/東洋大学 情報連携学部/)).toBeVisible();
   await expect(
     page.locator(".content-cards").getByRole("button", { name: /ブログ/ }),
   ).toBeVisible();
@@ -401,7 +401,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
 
   await page.locator(".site-name").click();
   await expect(
-    page.getByRole("heading", { name: "kamelog", exact: true }),
+    page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
   ).toBeVisible();
   await expect(page.locator(".featured-post")).toContainText("架空のブログ");
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
@@ -413,7 +413,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".detail-page")).toBeVisible();
   await page.getByRole("button", { name: "戻る", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "kamelog", exact: true }),
+    page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
   ).toBeVisible();
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page
