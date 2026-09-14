@@ -28,11 +28,12 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
       );
     }
 
-    await expect(projects.locator('a[href="/projects/kamelog"]')).toBeVisible();
     await expect(
-      projects.locator('a[href="/projects/home-lab"]'),
+      projects.locator('a[href="https://github.com/kamesan1577/kamelog"]'),
     ).toBeVisible();
-    await expect(projects.locator('a[href="/projects/heitan"]')).toBeVisible();
+    await expect(projects.locator('a[href="/projects/home-lab"]')).toHaveCount(0);
+    await expect(projects.locator('a[href="/projects/heitan"]')).toHaveCount(0);
+    await expect(projects.locator(".project-tile-static")).toHaveCount(2);
     await expect(projects.getByRole("link", { name: /Qiita/ })).toHaveCount(0);
 
     if (width === 320) {
