@@ -1,0 +1,19 @@
+[data-ds="detail-page"] > [data-ds="post-meta"] {
+  margin-bottom: 24px;
+}
+
+[data-ds="detail-page"] [data-ds="post-actions"] {
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+[data-ds="detail-page"] > h1 {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+[data-ds="detail-page"] .detail-video {
+  width: 100%;
+  margin-top: 20px;
+  border-radius: 7px;
+}

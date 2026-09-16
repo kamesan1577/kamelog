@@ -496,22 +496,6 @@ textarea:focus {
   color: #999;
   margin-bottom: 30px;
 }
-.detail-page > .post-meta {
-  margin-bottom: 24px;
-}
-.detail-page .post-actions {
-  border-top: 1px solid #eee;
-  padding-top: 20px;
-}
-.detail-page > h1 {
-  font-size: 28px;
-  font-weight: 700;
-}
-.detail-video {
-  width: 100%;
-  margin-top: 20px;
-  border-radius: 7px;
-}
 .page-icon {
   margin-bottom: 15px;
   color: #c2bfb8;
