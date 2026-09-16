@@ -561,14 +561,6 @@ textarea:focus {
   color: #8e8b84;
   padding: 8px;
 }
-.pinned {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: #99968d;
-  font-size: 12px;
-  margin-bottom: 12px;
-}
 .tweet-body {
   font-size: 15px;
   line-height: 1.95;
