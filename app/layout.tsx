@@ -10,7 +10,6 @@ import "./detail-actions.css";
 import "./brand-theme.css";
 import "./mobile-nav-layout.css";
 import "./tweet-link-preview.css";
-import "./project-social-links.css";
 import "./federation.css";
 import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";

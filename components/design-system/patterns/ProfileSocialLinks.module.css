@@ -1,0 +1,133 @@
+/* Public profile account links: brand marks only, with accessible labels supplied by the bridge. */
+[data-ds="profile-card"] > a[data-kamelog-profile-social-source],
+[data-ds="landing-profile"] > a[data-kamelog-profile-social-source] {
+  display: none;
+}
+
+[data-ds="profile-social-links"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+[data-ds="profile-card"]
+  [data-ds="profile-social-links"]
+  [data-ds^="profile-social-link-"],
+[data-ds="landing-profile"]
+  [data-ds="profile-social-links"]
+  [data-ds^="profile-social-link-"] {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 36px;
+  border: 1px solid #e4e2dd;
+  border-radius: 6px;
+  background: #fff;
+  padding: 0;
+}
+
+[data-ds="profile-card"]
+  [data-ds="profile-social-links"]
+  [data-ds^="profile-social-link-"]:hover,
+[data-ds="landing-profile"]
+  [data-ds="profile-social-links"]
+  [data-ds^="profile-social-link-"]:hover {
+  background: #f7f7f5;
+  border-color: #d8d5cf;
+}
+
+[data-ds="profile-card"]
+  [data-ds="profile-social-links"]
+  [data-ds^="profile-social-link-"]
+  img,
+[data-ds="landing-profile"]
+  [data-ds="profile-social-links"]
+  [data-ds^="profile-social-link-"]
+  img {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* Qiita requires the green brand icon and sufficient contrast/clear space. */
+[data-ds="profile-card"]
+  [data-ds="profile-social-links"]
+  [data-ds="profile-social-link-qiita"],
+[data-ds="landing-profile"]
+  [data-ds="profile-social-links"]
+  [data-ds="profile-social-link-qiita"] {
+  background: #3d4040;
+  border-color: #3d4040;
+}
+
+[data-ds="profile-card"]
+  [data-ds="profile-social-links"]
+  [data-ds="profile-social-link-qiita"]:hover,
+[data-ds="landing-profile"]
+  [data-ds="profile-social-links"]
+  [data-ds="profile-social-link-qiita"]:hover {
+  background: #3d4040;
+  border-color: #292b2b;
+}
+
+/* Project thumbnails are artwork/logos, so never crop them to satisfy card geometry. */
+[data-ds="projects-page"],
+[data-ds="project-list"],
+[data-ds="project-tile"],
+[data-ds="project-tile"] > div {
+  min-width: 0;
+}
+
+[data-ds="project-list"] {
+  width: 100%;
+}
+
+[data-ds="project-tile"] img {
+  object-fit: contain;
+}
+
+[data-ds="project-tile"] img[data-kamelog-qiita-thumbnail] {
+  background: #3d4040;
+}
+
+@media (max-width: 640px) {
+  \:global(.site-layout) \:global(.content-grid),
+  \:global(.main-content),
+  [data-ds="projects-page"],
+  [data-ds="project-list"],
+  [data-ds="project-tile"] {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  [data-ds="project-tile"] {
+    grid-template-columns: minmax(118px, 40%) minmax(0, 1fr);
+  }
+
+  [data-ds="project-tile"] img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: auto;
+    object-fit: contain;
+  }
+
+  [data-ds="project-tile"] h2,
+  [data-ds="project-tile"] p {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 360px) {
+  [data-ds="project-tile"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-ds="project-tile"] img {
+    height: auto;
+    aspect-ratio: 16 / 9;
+  }
+}
