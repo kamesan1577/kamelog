@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import "@/components/design-system/patterns/LinkPreview.module.css";
 import { firstHttpUrl, splitTweetText } from "@/lib/tweet-links.mjs";
 
 type LinkPreview = {
@@ -94,7 +95,7 @@ function removeDuplicateCards(body: HTMLElement) {
 function inlineLink(url: string) {
   const link = document.createElement("a");
   link.dataset.ds = "tweet-inline-link";
-  link.className = "tweet-inline-link";
+  link.dataset.ds = "tweet-inline-link";
   link.href = url;
   link.target = "_blank";
   link.rel = "noopener noreferrer";
@@ -108,7 +109,7 @@ function inlineLink(url: string) {
 function previewCard(url: string, preview: LinkPreview) {
   const card = document.createElement("a");
   card.dataset.ds = "tweet-link-card";
-  card.className = `tweet-link-card`;
+  card.dataset.ds = "tweet-link-card";
   card.href = url;
   card.target = "_blank";
   card.rel = "noopener noreferrer";
@@ -126,7 +127,7 @@ function previewCard(url: string, preview: LinkPreview) {
   }
 
   const copy = document.createElement("span");
-  copy.className = "tweet-link-card-copy";
+  copy.dataset.ds = "tweet-link-card-copy";
   const site = document.createElement("small");
   site.textContent = preview.siteName || new URL(url).hostname;
   const title = document.createElement("strong");
@@ -134,7 +135,7 @@ function previewCard(url: string, preview: LinkPreview) {
   copy.append(site, title);
   if (preview.description) {
     const description = document.createElement("span");
-    description.className = "tweet-link-card-description";
+    description.dataset.ds = "tweet-link-card-description";
     description.textContent = preview.description;
     copy.append(description);
   }
