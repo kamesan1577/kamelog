@@ -2,8 +2,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const cssUrl = new URL("../../app/composer-layout.css", import.meta.url);
-const mobileCssUrl = new URL("../../app/mobile-composer.css", import.meta.url);
+const cssUrl = new URL(
+  "../../components/design-system/patterns/ComposerLayout.css",
+  import.meta.url,
+);
+const mobileCssUrl = new URL(
+  "../../components/design-system/patterns/MobileComposer.css",
+  import.meta.url,
+);
 const layoutUrl = new URL("../../app/layout.tsx", import.meta.url);
 
 test("keeps the inline image attachment separate from post-type actions", async () => {
