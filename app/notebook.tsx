@@ -51,6 +51,7 @@ import { BlogEditorWorkspace } from "@/components/design-system/patterns/BlogEdi
 import { EditorFooter } from "@/components/design-system/patterns/EditorFooter";
 import { MediaGallery } from "@/components/design-system/patterns/MediaGallery";
 import { PostActions } from "@/components/design-system/patterns/PostActions";
+import { XShareIcon } from "@/components/design-system/primitives/XShareIcon";
 import { MediaUploadField } from "@/components/design-system/patterns/MediaUploadField";
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
@@ -1547,7 +1548,7 @@ export default function Notebook({
           window.open(intent, "_blank", "noopener,noreferrer");
         }}
       >
-        <X size={16} />
+        <XShareIcon />
         Xで共有
       </button>
       {login && (
