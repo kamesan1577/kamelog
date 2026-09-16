@@ -2,11 +2,7 @@ import type { Metadata } from "next";
 import { PreviewShell } from "./notebook";
 import SitePage from "./site-page";
 import { getStore } from "@/server/runtime.mjs";
-import {
-  ogImageUrl,
-  postUrl,
-  seoDescription,
-} from "@/server/seo.mjs";
+import { ogImageUrl, postUrl, seoDescription } from "@/server/seo.mjs";
 import { socialCopy } from "@/lib/social";
 
 export const dynamic = "force-dynamic";
