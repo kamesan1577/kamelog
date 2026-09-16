@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 Phase 0〜3で移行マップ、AppShell、SideNavigation、MobileNavigationを追加し、既存のホームナビゲーションへ接続した。PR #124〜#128をstackedで作成。UI契約、公開検査、型、lint、本番build、モバイルナビE2Eは成功。全E2Eは24/25成功で、残るjourneyのvlog動画表示失敗はFFmpeg/fixture依存の既存課題として未解決。ホストのmake checkはFFmpeg未導入でmedia testが失敗するため、Storybook component testはPlaywright containerで成功確認した。
+
 2026-09-16 Issue #98: Storybook 10、addon-vitest、Design System token、primitive/layout、colocated Storyを追加。/lintをESLint 9へ統合し、Design System領域で6 ruleをerror化。check:uiは依存方向・Story必須・legacy CSS allowlistを検査し、Playwright visual regressionは390/768/1440pxを対象とする。Node 24/FFmpeg/Playwright containerでcomponent 13件、visual 3件、unit 75件、make check全体が成功。既存UI全面移行は#99。
 
 2026-09-14 Issue #102: トップの技術プロフィール、実務の取り組み、Selected Works、学歴・資格・連絡先を型付き公開データから表示。Projectsに3件の内部詳細ページを追加し、Qiitaを作品一覧から移した。`make check` は成功。Chromium配布元がtimeout/502を返してブラウザを取得できず、ローカル `make e2e` はブラウザ起動前に停止。PR CIでE2Eを確認する。実機確認は未実施。
