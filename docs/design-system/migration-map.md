@@ -96,7 +96,7 @@ test-id justification:
 | `.landing-page`, `.landing-profile`, `.content-cards`       | `notion-polish.spec.ts`, `journeys.spec.ts` | semantic sections and visual regression fixture |
 | `.post-focus`, `.tweet-body`                                | journey/detail/thread tests                 | article/body semantics                          |
 | `.editor-dialog`, `.mobile-editor-header`, `.editor-footer` | `journeys.spec.ts`                          | dialog/action regions                           |
-| `.federation-settings`                                      | `journeys.spec.ts`                          | settings section accessible name                |
+| `[data-ds="owner-federation"]`                              | `journeys.spec.ts`                          | owner federation settings semantic region       |
 
 Geometry assertions in `notion-polish.spec.ts` and
 `mobile-nav-layout.spec.ts` are visual-regression candidates. User actions in
