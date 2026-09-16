@@ -87,7 +87,7 @@ import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
 import { buildXIntentUrl } from "@/lib/x-intent.mjs";
-import threadStyles from "./tweet-thread-bridge.module.css";
+import threadStyles from "@/components/design-system/patterns/TweetThreadBridge.module.css";
 import {
   EngineeringProfile,
   ContactLinks,
