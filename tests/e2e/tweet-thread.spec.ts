@@ -57,7 +57,7 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
     .click();
 
   const rootPost = page
-    .locator("article.post")
+    .locator('article[data-ds="post-card"]')
     .filter({ hasText: "スレッドの架空ルート投稿" });
   await expect(rootPost).toBeVisible();
   await rootPost.locator('[data-ds="post-preview"]').click();

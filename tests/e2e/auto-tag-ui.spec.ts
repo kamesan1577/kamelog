@@ -64,7 +64,7 @@ test("automatic tag labels", async ({ page }) => {
   await composer.getByRole("button", { name: "投稿", exact: true }).click();
 
   const post = page
-    .locator("article.post")
+    .locator('article[data-ds="post-card"]')
     .filter({ hasText: taggedPost.body });
   const autoTagName = "自動タグ 自動タグ候補";
   const autoTag = page.getByLabel(autoTagName);

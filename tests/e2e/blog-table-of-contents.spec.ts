@@ -80,7 +80,7 @@ test("blog table of contents renders above the article on desktop", async ({
     .getByRole("navigation", { name: "目次" })
     .boundingBox();
   const markdownBox = await page
-    .locator("#toc-fixture .markdown")
+    .locator('#toc-fixture [data-ds="detail-markdown"]')
     .boundingBox();
   expect(tocBox).not.toBeNull();
   expect(markdownBox).not.toBeNull();
