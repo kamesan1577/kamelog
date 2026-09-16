@@ -102,6 +102,15 @@ type Draft = {
   savedAt: string;
   images?: string[];
 };
+type FederationStatus =
+  | { enabled: false; host: string }
+  | {
+      enabled: true;
+      host: string;
+      username: string;
+      handle: string;
+      actorUrl: string;
+    };
 type NavigationState = {
   view: View;
   post: string | null;
@@ -463,6 +472,7 @@ export default function Notebook({
       await signIn();
       const saved = await api<Draft[]>("drafts");
       setDrafts(saved);
+      await loadFederationStatus();
     });
     if (authenticated) setLogin(true);
   };
@@ -519,6 +529,21 @@ export default function Notebook({
   const [name, setName] = useState(""),
     [bio, setBio] = useState(""),
     [icon, setIcon] = useState("");
+  const [federationStatus, setFederationStatus] =
+      useState<FederationStatus | null>(null),
+    [federationUsername, setFederationUsername] = useState(""),
+    [federationError, setFederationError] = useState(""),
+    [federationBusy, setFederationBusy] = useState(false),
+    [federationLoadError, setFederationLoadError] = useState(false);
+  const loadFederationStatus = async () => {
+    try {
+      const status = await api<FederationStatus>("federation/status");
+      setFederationStatus(status);
+      setFederationLoadError(false);
+    } catch {
+      setFederationLoadError(true);
+    }
+  };
   const [vMode, setVMode] = useState<"camera" | "upload">("camera"),
     [seconds, setSeconds] = useState(2),
     [clip, setClip] = useState(""),
@@ -619,7 +644,10 @@ export default function Notebook({
         setLogin(session.authenticated);
         if (session.authenticated) {
           const saved = await api<Draft[]>("drafts");
-          if (!cancelled) setDrafts(saved);
+          if (!cancelled) {
+            setDrafts(saved);
+            await loadFederationStatus();
+          }
         }
       })
       .catch(() => toast.error("接続できません。再読み込みしてください。"));
@@ -1517,6 +1545,148 @@ export default function Notebook({
                   >
                     保存
                   </Button>
+                  <section
+                    className="federation-settings"
+                    aria-labelledby="federation-heading"
+                  >
+                    <div className="federation-settings-heading">
+                      <Globe size={18} aria-hidden="true" />
+                      <div>
+                        <h2 id="federation-heading">Fediverse</h2>
+                        <p>
+                          ActivityPubに対応すると、Fediverseからこのサイトをフォローできます。
+                        </p>
+                      </div>
+                    </div>
+                    {federationLoadError ? (
+                      <div className="federation-load-error" role="alert">
+                        <p>Fediverse設定を読み込めませんでした。</p>
+                        <Button
+                          type="button"
+                          onClick={() => void loadFederationStatus()}
+                        >
+                          再試行
+                        </Button>
+                      </div>
+                    ) : !federationStatus ? (
+                      <p className="federation-state" role="status">
+                        設定を読み込んでいます
+                      </p>
+                    ) : federationStatus.enabled ? (
+                      <div className="federation-enabled">
+                        <p className="federation-state">
+                          <Check size={16} aria-hidden="true" />
+                          有効
+                        </p>
+                        <strong>{federationStatus.handle}</strong>
+                        <Button
+                          type="button"
+                          onClick={() => {
+                            void navigator.clipboard
+                              .writeText(federationStatus.handle)
+                              .then(() =>
+                                toast.success("アドレスをコピーしました"),
+                              )
+                              .catch(() =>
+                                toast.error("コピーできませんでした"),
+                              );
+                          }}
+                        >
+                          アドレスをコピー
+                        </Button>
+                      </div>
+                    ) : (
+                      <form
+                        className="federation-setup"
+                        aria-busy={federationBusy}
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          const username = federationUsername
+                            .trim()
+                            .toLowerCase();
+                          if (!/^[a-z0-9_]{1,64}$/.test(username)) {
+                            setFederationError(
+                              "半角小文字、数字、アンダースコアを1〜64文字で入力してください。",
+                            );
+                            return;
+                          }
+                          setFederationBusy(true);
+                          setFederationError("");
+                          void api<FederationStatus>(
+                            "federation/setup",
+                            "POST",
+                            { username },
+                          )
+                            .then((status) => {
+                              setFederationStatus(status);
+                              toast.success("ActivityPubを有効にしました");
+                            })
+                            .catch((error) => {
+                              setFederationError(
+                                error instanceof Error
+                                  ? error.message
+                                  : "有効化できませんでした。",
+                              );
+                            })
+                            .finally(() => setFederationBusy(false));
+                        }}
+                      >
+                        <label htmlFor="federation-username">ユーザー名</label>
+                        <p
+                          className="federation-hint"
+                          id="federation-username-hint"
+                        >
+                          有効化後は変更できません。
+                        </p>
+                        <input
+                          id="federation-username"
+                          name="federation-username"
+                          value={federationUsername}
+                          autoComplete="off"
+                          autoCapitalize="none"
+                          spellCheck={false}
+                          maxLength={64}
+                          aria-describedby={
+                            federationError
+                              ? "federation-username-hint federation-username-error"
+                              : "federation-username-hint"
+                          }
+                          aria-invalid={Boolean(federationError)}
+                          onChange={(event) => {
+                            setFederationUsername(event.target.value);
+                            if (federationError) setFederationError("");
+                          }}
+                        />
+                        <div className="federation-handle-preview">
+                          <span>あなたのFediverseアドレス</span>
+                          <strong>
+                            @
+                            {federationUsername.trim().toLowerCase() ||
+                              "username"}
+                            @{federationStatus.host}
+                          </strong>
+                        </div>
+                        {federationError && (
+                          <p
+                            id="federation-username-error"
+                            className="federation-error"
+                            role="alert"
+                          >
+                            {federationError}
+                          </p>
+                        )}
+                        <Button
+                          variant="solid"
+                          type="submit"
+                          disabled={federationBusy}
+                        >
+                          {federationBusy
+                            ? "ActivityPubを有効にしています"
+                            : "ActivityPubを有効にする"}
+                        </Button>
+                      </form>
+                    )}
+                  </section>
                 </section>
               ) : view === "projects" ? (
                 <section className="projects-page">

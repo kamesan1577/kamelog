@@ -2,6 +2,7 @@
 
 個人のブログ・つぶやき・短尺vlog・プロジェクトをまとめる公開サイト。
 投稿者は単一オーナー。表示名・アイコン・自己紹介はアカウント画面から変更できる。
+オーナーはアカウント画面から単一のActivityPub identityを有効化できる。現在の対応範囲は [activitypub.md](activitypub.md) を正本とする。
 
 ## 公開UI
 
@@ -45,7 +46,7 @@ PCホームの画像添付は現在のつぶやきへ媒体を追加する操作
 ## 技術構成と境界
 
 Next.js / React / TypeScript、Node.js 24、SQLite、ローカル媒体、FFmpeg。
-API契約: [api.md](api.md)。検証: [development.md](development.md)。SEO / 検索公開仕様: [seo.md](seo.md)。
+API契約: [api.md](api.md)。ActivityPub契約: [activitypub.md](activitypub.md)。検証: [development.md](development.md)。SEO / 検索公開仕様: [seo.md](seo.md)。
 パスキーの暗号検証は保守されたWebAuthnライブラリへ任せ、自作しない。
 配布はDocker Compose。開発はホットリロード。本番はHTTPS reverse proxyの背後で動かす。
 本番デプロイ可否は [deployment.md](../../runbooks/deployment.md) とHANDOFFの検証証跡で判断する。

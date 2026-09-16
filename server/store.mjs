@@ -43,9 +43,23 @@ export class Store {
         model_version TEXT NOT NULL,
         training_hash TEXT NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS federation_identity(
+        id INTEGER PRIMARY KEY CHECK(id = 1),
+        username TEXT NOT NULL UNIQUE,
+        public_key_pem TEXT NOT NULL,
+        private_key_pem TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS federation_inbox_activities(
+        id TEXT PRIMARY KEY,
+        actor_id TEXT NOT NULL,
+        type TEXT NOT NULL,
+        received_at TEXT NOT NULL
+      );
       INSERT OR IGNORE INTO migrations VALUES(1);
       INSERT OR IGNORE INTO migrations VALUES(2);
-      INSERT OR IGNORE INTO migrations VALUES(3);`);
+      INSERT OR IGNORE INTO migrations VALUES(3);
+      INSERT OR IGNORE INTO migrations VALUES(4);`);
     this.db
       .prepare("SELECT id, data FROM posts")
       .all()
@@ -272,6 +286,44 @@ export class Store {
         .run(id, run.contentHash, run.modelVersion, run.trainingHash);
       return this.get("posts", id);
     });
+  }
+  federationIdentity() {
+    return this.db
+      .prepare(
+        `SELECT username,
+                public_key_pem AS publicKeyPem,
+                private_key_pem AS privateKeyPem,
+                created_at AS createdAt
+         FROM federation_identity WHERE id=1`,
+      )
+      .get();
+  }
+  createFederationIdentity(identity) {
+    return this.transaction(() => {
+      if (this.federationIdentity()) throw new Conflict("Already configured");
+      this.db
+        .prepare(
+          `INSERT INTO federation_identity
+           (id, username, public_key_pem, private_key_pem, created_at)
+           VALUES (1, ?, ?, ?, ?)`,
+        )
+        .run(
+          identity.username,
+          identity.publicKeyPem,
+          identity.privateKeyPem,
+          identity.createdAt,
+        );
+      return this.federationIdentity();
+    });
+  }
+  recordFederationActivity(activity) {
+    const result = this.db
+      .prepare(
+        `INSERT OR IGNORE INTO federation_inbox_activities
+         (id, actor_id, type, received_at) VALUES (?, ?, ?, ?)`,
+      )
+      .run(activity.id, activity.actorId, activity.type, activity.receivedAt);
+    return result.changes > 0;
   }
   schemaVersion() {
     return Number(

@@ -1,0 +1,150 @@
+.federation-settings {
+  margin-top: 42px;
+  padding-top: 28px;
+  border-top: 1px solid #e7e5df;
+}
+
+.federation-settings-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.federation-settings-heading > svg {
+  margin-top: 3px;
+  color: #858077;
+}
+
+.federation-settings h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.2px;
+}
+
+.federation-settings-heading p {
+  max-width: 520px;
+  margin: 6px 0 0;
+  color: #827d73;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.federation-state {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 24px 0 0;
+  color: #69655d;
+  font-size: 13px;
+}
+
+.federation-load-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.federation-load-error p {
+  margin: 0;
+  color: #934747;
+  font-size: 13px;
+}
+
+.federation-setup,
+.federation-enabled {
+  display: flex;
+  max-width: 520px;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-top: 24px;
+}
+
+.federation-setup > label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.federation-hint {
+  margin: 6px 0 10px;
+  color: #8c877d;
+  font-size: 12px;
+}
+
+.federation-setup > input {
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 11px;
+  border: 1px solid #d8d5ce;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 15px;
+}
+
+.federation-setup > input:focus-visible {
+  border-color: #37352f;
+  outline: 2px solid #37352f;
+  outline-offset: 2px;
+}
+
+.federation-setup > input[aria-invalid="true"] {
+  border-color: #9a4f4f;
+}
+
+.federation-handle-preview {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+  margin: 16px 0 20px;
+  padding: 13px 14px;
+  border: 1px solid #e8e6e0;
+  border-radius: 6px;
+  background: #f7f7f5;
+}
+
+.federation-handle-preview span {
+  color: #8c877d;
+  font-size: 12px;
+}
+
+.federation-handle-preview strong,
+.federation-enabled > strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.federation-error {
+  margin: -8px 0 16px;
+  color: #934747;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.federation-enabled {
+  gap: 15px;
+}
+
+.federation-enabled .federation-state {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .federation-settings {
+    margin-top: 36px;
+  }
+
+  .federation-setup > input {
+    font-size: 16px;
+  }
+
+  .federation-setup [data-slot="button"],
+  .federation-enabled [data-slot="button"] {
+    width: 100%;
+    min-height: 44px;
+  }
+}

@@ -68,6 +68,56 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .click();
   await expect(page).toHaveURL("/");
   await expect(page.locator(".mobile-create")).toBeVisible();
+  await page.getByRole("button", { name: "管理", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "アカウント", exact: true }),
+  ).toBeVisible();
+  const federationUsername = page.getByLabel("ユーザー名", { exact: true });
+  await expect(federationUsername).toBeVisible();
+  await expect
+    .poll(() =>
+      federationUsername.evaluate(
+        (element) => getComputedStyle(element).fontSize,
+      ),
+    )
+    .toBe("16px");
+  await federationUsername.fill("kamesan");
+  await expect(
+    page.getByText("@kamesan@localhost:3000", { exact: true }),
+  ).toBeVisible();
+  await page.locator(".federation-settings").screenshot({
+    path: testInfo.outputPath("federation-setup-mobile.png"),
+  });
+  const federationSetup = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/federation/setup") &&
+      response.request().method() === "POST",
+  );
+  await page
+    .getByRole("button", { name: "ActivityPubを有効にする", exact: true })
+    .click();
+  const federationSetupResponse = await federationSetup;
+  expect(federationSetupResponse.status()).toBe(201);
+  expect(JSON.stringify(await federationSetupResponse.json())).not.toContain(
+    "PRIVATE KEY",
+  );
+  await expect(
+    page.getByText("@kamesan@localhost:3000", { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "管理", exact: true }).click();
+  await expect(page.getByText("有効", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("ユーザー名", { exact: true })).toHaveCount(0);
+  expect(await page.locator("body").innerText()).not.toContain("PRIVATE KEY");
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.locator(".federation-settings").screenshot({
+    path: testInfo.outputPath("federation-enabled-desktop.png"),
+  });
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
+    .click();
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.locator(".mobile-create").click();
   const mobileTweetBody = page.getByPlaceholder("本文", { exact: true });
   await expect(mobileTweetBody).toBeFocused();

@@ -21,6 +21,10 @@
 | POST                      | /api/auth/login/options    | 認証challenge生成                                       |
 | POST                      | /api/auth/login/verify     | WebAuthn認証response検証                                |
 | POST                      | /api/auth/logout           | session失効                                             |
+| GET                       | /api/federation/status     | owner限定の有効状態・handle                             |
+| POST                      | /api/federation/setup      | owner限定の一度だけのidentity初期化                     |
+
+ActivityPub server-to-server endpointは `/api` と別の公開routeで提供する。詳細は [activitypub.md](activitypub.md) を参照する。`POST /activitypub/inbox` はbrowser Origin/sessionではなくHTTP signatureを認証境界にする。
 
 ## 入力
 

@@ -16,6 +16,11 @@ import {
 } from "./validation.mjs";
 import { Conflict, SESSION_TTL_SECONDS } from "./store.mjs";
 import { convertVideo, saveImage } from "./media.mjs";
+import {
+  createFederationIdentity,
+  federationStatus,
+  InvalidFederationUsername,
+} from "./activitypub.mjs";
 
 export function configuration(env = process.env) {
   const origin = env.KAMELOG_ORIGIN || "http://localhost:3000";
@@ -304,6 +309,19 @@ export function createAPI(store, config) {
         });
       }
       if (!owner) return json({ error: "Unauthorized" }, 401);
+      if (path[0] === "federation" && path[1] === "status" && method === "GET")
+        return json(federationStatus(store, config));
+      if (
+        path[0] === "federation" &&
+        path[1] === "setup" &&
+        method === "POST"
+      ) {
+        const input = await body();
+        if (!input || typeof input.username !== "string")
+          return json({ error: "Invalid input" }, 400);
+        createFederationIdentity(store, input.username);
+        return json(federationStatus(store, config), 201);
+      }
       if (path[0] === "media" && method === "POST")
         return url.searchParams.get("kind") === "image"
           ? json(
@@ -398,6 +416,8 @@ export function createAPI(store, config) {
         return json({ error: "Payload too large" }, 413);
       if (error?.name === "ZodError" || error instanceof SyntaxError)
         return json({ error: "Invalid input" }, 400);
+      if (error instanceof InvalidFederationUsername)
+        return json({ error: "ユーザー名を確認してください。" }, 400);
       // No request bodies, tokens or raw exception messages in responses/logs.
       return json(
         { error: "操作に失敗しました。入力を保持して再試行してください。" },

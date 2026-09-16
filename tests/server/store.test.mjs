@@ -38,6 +38,12 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
       type: "image/png",
       extension: "png",
     });
+    store.createFederationIdentity({
+      username: "fixture",
+      publicKeyPem: "fictional-public-key",
+      privateKeyPem: "fictional-private-key",
+      createdAt: "2026-09-16T00:00:00.000Z",
+    });
     store.close();
     store = new Store(join(root, "source"));
     assert.equal(store.get("posts", "fictional").body, "fixture");
@@ -47,6 +53,10 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
     const restored = new Store(join(root, "restored"));
     assert.equal(restored.get("posts", "fictional").body, "fixture");
     assert.equal(restored.get("posts", "fictional").views, 2);
+    assert.equal(
+      restored.federationIdentity().privateKeyPem,
+      "fictional-private-key",
+    );
     assert.equal(
       await readFile(
         join(
@@ -96,7 +106,7 @@ test("adds view counts to an existing schema without rewriting posts", async () 
     database.close();
 
     const migrated = new Store(root);
-    assert.equal(migrated.schemaVersion(), 3);
+    assert.equal(migrated.schemaVersion(), 4);
     assert.equal(migrated.get("posts", "legacy-post").views, 0);
     assert.equal(migrated.recordView("legacy-post").views, 1);
     assert.equal(migrated.get("posts", "legacy-post").body, "legacy fixture");
