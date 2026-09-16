@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-16 Issue #98: Storybook 10、addon-vitest、Design System token、primitive/layout、colocated Storyを追加。/lintをESLint 9へ統合し、Design System領域で6 ruleをerror化。check:uiは依存方向・Story必須・legacy CSS allowlistを検査し、Playwright visual regressionは390/768/1440pxを対象とする。Node 24/FFmpeg/Playwright containerでcomponent 13件、visual 3件、unit 75件、make check全体が成功。既存UI全面移行は#99。
+
 2026-09-14 Issue #102: トップの技術プロフィール、実務の取り組み、Selected Works、学歴・資格・連絡先を型付き公開データから表示。Projectsに3件の内部詳細ページを追加し、Qiitaを作品一覧から移した。`make check` は成功。Chromium配布元がtimeout/502を返してブラウザを取得できず、ローカル `make e2e` はブラウザ起動前に停止。PR CIでE2Eを確認する。実機確認は未実施。
 
 2026-09-13 Issue #96: X Web Intentを新規投稿に追加。つぶやき・ブログは初回ON、vlogはOFF、端末で種別ごとに保存。公式twitter-textで280 weighted charactersを検証し、保存失敗時の空タブ閉鎖とポップアップ遮断時の手動リンクを実装。CIおよび実機確認はPRで追跡する。

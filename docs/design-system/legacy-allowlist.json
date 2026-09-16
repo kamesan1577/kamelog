@@ -1,0 +1,22 @@
+{
+  "css": [
+    "app/blog-toc.css",
+    "app/brand-theme.css",
+    "app/composer-layout.css",
+    "app/detail-actions.css",
+    "app/engineering.css",
+    "app/federation.css",
+    "app/federation/federation-guide.module.css",
+    "app/full-page-blog-editor.css",
+    "app/globals.css",
+    "app/landing.css",
+    "app/not-found.module.css",
+    "app/mobile-blog-editor.css",
+    "app/mobile-composer.css",
+    "app/mobile-nav-layout.css",
+    "app/project-social-links.css",
+    "app/tweet-link-preview.css",
+    "app/tweet-thread-bridge.module.css",
+    "app/x-share-logo.css"
+  ]
+}

@@ -11,11 +11,15 @@
     "start": "next start",
     "test": "node --test tests/server/*.test.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint --max-warnings=0 app server tests/server scripts/check*.mjs",
+    "lint": "eslint --max-warnings=0 app components/design-system .storybook server tests/server scripts/check*.mjs *.config.*",
     "format:check": "prettier --check app lib server scripts tests *.mjs *.ts *.json *.md .github .codex adr docs ops runbooks spec",
     "test:e2e": "playwright test",
     "check:public": "node scripts/check-public-repo.mjs",
-    "check:ui": "node scripts/check-ui.mjs"
+    "check:ui": "node scripts/check-ui.mjs",
+    "storybook": "storybook dev -p 6006",
+    "storybook:build": "storybook build",
+    "test:storybook": "vitest --project=storybook run",
+    "test:visual": "playwright test --config=playwright.storybook.config.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -53,18 +57,26 @@
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
+    "@shadcn/lint": "^0.1.0",
+    "@storybook/addon-vitest": "^10.6.0",
+    "@storybook/nextjs-vite": "^10.6.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "22.19.19",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
     "@types/twitter-text": "^3.1.10",
+    "@vitest/browser": "^4.1.0",
+    "@vitest/browser-playwright": "^4.1.0",
     "eslint": "9.39.4",
     "eslint-config-next": "16.3.4",
+    "playwright": "^1.63.0",
     "prettier": "3.9.6",
+    "storybook": "^10.6.0",
     "tailwindcss": "4.3.3",
     "tw-animate-css": "^1.4.0",
     "typescript": "5.9.3",
-    "vite": "8.2.2"
+    "vite": "8.2.2",
+    "vitest": "^4.1.0"
   },
   "type": "module"
 }

@@ -11,8 +11,7 @@
 
 ## 変更手順
 
-- UIを変更する場合は `.codex/skills/kamelog-ui-contract/SKILL.md` を読む。
-- UIの設計・実装・レビューでは `.codex/skills/ui-craft/SKILL.md` も読み、必要な参照資料だけを使う。kamelog固有の仕様、既存のデザイントークン、利用者が指定した方向性を優先する。チャットからは「UI Craftを使って」と指定できる。
+- UIを変更する場合は `.codex/skills/kamelog-ui-contract/SKILL.md` を読む。 UIの設計・実装・レビューでは `.codex/skills/ui-craft/SKILL.md` を読み、Design Systemのtoken・primitive・layoutとStorybook storyを優先する。
 - 認証・保存・媒体・復元を変更する場合は `.codex/skills/kamelog-data-safety/SKILL.md` を読む。
 - 不具合は再現テストを追加してから修正する。失敗をskipやretryで隠さない。
 - 設計変更はADR、利用者の振る舞いの変更は現行仕様、実装状況はHANDOFFへ同じ変更で反映する。
