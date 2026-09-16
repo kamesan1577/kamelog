@@ -13,8 +13,11 @@ type SitemapPost = {
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const posts = getStore().list("posts") as SitemapPost[];
+  const home = homeUrl();
   return [
-    { url: homeUrl() },
+    { url: home },
+    { url: new URL("/timeline", home).toString() },
+    { url: new URL("/projects", home).toString() },
     ...posts
       .filter((post) => post.kind === "blog")
       .map((post) => ({
