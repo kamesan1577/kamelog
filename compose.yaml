@@ -26,7 +26,10 @@ x-app: &app
 services:
   app-blue:
     <<: *app
-    build: .
+    build:
+      context: .
+      args:
+        KAMELOG_BUILD_SHA: ${KAMELOG_BUILD_SHA:-}
   app-green:
     <<: *app
   federation-worker:

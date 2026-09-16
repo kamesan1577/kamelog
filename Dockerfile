@@ -1,16 +1,18 @@
 FROM node:24-bookworm-slim AS build
+ARG KAMELOG_BUILD_SHA
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_TELEMETRY_DISABLED=1 KAMELOG_BUILD_SHA=${KAMELOG_BUILD_SHA}
 RUN npm run build
 RUN npm prune --omit=dev
 
 FROM node:24-bookworm-slim AS runtime
+ARG KAMELOG_BUILD_SHA
 RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000 KAMELOG_DATA_DIR=/data
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000 KAMELOG_DATA_DIR=/data KAMELOG_BUILD_SHA=${KAMELOG_BUILD_SHA}
 COPY --from=build --chown=node:node /app/.next/standalone ./
 # The standalone trace covers the web server, not the separately executed federation worker.
 COPY --from=build --chown=node:node /app/node_modules ./node_modules

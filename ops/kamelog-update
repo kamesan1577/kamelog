@@ -78,7 +78,7 @@ log "creating an online SQLite and immutable-media backup"
 "${compose[@]}" run --rm --no-deps -v "$BACKUP_ROOT:/backups" app-blue node scripts/admin.mjs backup /data "/backups/$backup_name"
 log "deploying CI-approved revision $remote_sha"
 git checkout --quiet --detach "$remote_sha"
-"${compose[@]}" build app-blue
+KAMELOG_BUILD_SHA="$remote_sha" "${compose[@]}" build app-blue
 deploy_replica app-blue
 deploy_replica app-green
 "${compose[@]}" up -d --no-deps federation-worker
