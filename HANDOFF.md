@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with landing semantic regions. The home landing/profile sections now expose data-ds boundaries, and representative E2E assertions no longer select them through CSS class names. lint/typecheck/format/UI/public checks are pending for this stacked change.
+
 2026-09-17 Issue #99 migration continued with blog reading tools. The generated table of contents now exposes a Design System data-ds boundary and its existing responsive reading-rail styles target that semantic boundary. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
 
 2026-09-17 Issue #99 migration continued with TimelineItem. Local timeline posts now enter the shared TimelineItem boundary, which delegates the existing PostCard semantics and keeps feature-owned content/actions intact. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.

@@ -2110,7 +2110,7 @@ export default function Notebook({
                   )}
                 </section>
               ) : view === "home" ? (
-                <section className="landing-page">
+                <section data-ds="landing-page" className="landing-page">
                   <div className="landing-intro">
                     <div className="landing-copy">
                       <h1>
@@ -2136,7 +2136,10 @@ export default function Notebook({
                         </button>
                       </div>
                     </div>
-                    <aside className="landing-profile">
+                    <aside
+                      data-ds="landing-profile"
+                      className="landing-profile"
+                    >
                       <Avatar value={profile.icon} large />
                       <div>
                         <span>プロフィール</span>
