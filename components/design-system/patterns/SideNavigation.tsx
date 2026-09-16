@@ -48,7 +48,7 @@ export function SideNavigation({
               {item.label}
             </span>
             {item.count != null && (
-              <span className="text-ds-xs text-ds-tertiary">{item.count}</span>
+              <span className="ds-text-xs text-ds-tertiary">{item.count}</span>
             )}
           </Button>
         ))}

@@ -41,6 +41,7 @@ import { Button } from "@/components/notion/button";
 import { SideNavigation } from "@/components/design-system/patterns/SideNavigation";
 import { MobileNavigation } from "@/components/design-system/patterns/MobileNavigation";
 import { PageHeader } from "@/components/design-system/patterns/PageHeader";
+import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -2203,52 +2204,41 @@ export default function Notebook({
 
                   <EngineeringProfile />
                   <div className="landing-lower">
-                    <div className="content-index">
-                      <div className="landing-section-title">
-                        <h2>コンテンツ</h2>
-                      </div>
-                      <div className="content-cards">
-                        {(
-                          [
-                            {
-                              id: "blog",
-                              icon: FileText,
-                              title: "ブログ",
-                              text: "技術、開発、個人制作についての記事",
-                            },
-                            {
-                              id: "tweet",
-                              icon: MessageCircle,
-                              title: "つぶやき",
-                              text: "日々の短いメモ",
-                            },
-                            {
-                              id: "vlog",
-                              icon: Video,
-                              title: "vlog",
-                              text: "数秒から30秒までの動画",
-                            },
-                          ] as const
-                        ).map(({ id, icon: Icon, title: cardTitle, text }) => (
-                          <button
-                            key={id}
-                            onClick={() => {
-                              nav("timeline");
-                              setFilter(id);
-                            }}
-                          >
-                            <span className={`content-icon ${id}`}>
-                              <Icon size={18} />
-                            </span>
-                            <span className="content-card-copy">
-                              <strong>{cardTitle}</strong>
-                              <small>{text}</small>
-                            </span>
-                            <b>{posts.filter((p) => p.kind === id).length}</b>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    <ContentIndex
+                      className="content-index"
+                      items={
+                        [
+                          {
+                            id: "blog",
+                            icon: <FileText size={18} />,
+                            title: "ブログ",
+                            description: "技術、開発、個人制作についての記事",
+                            count: posts.filter((p) => p.kind === "blog")
+                              .length,
+                          },
+                          {
+                            id: "tweet",
+                            icon: <MessageCircle size={18} />,
+                            title: "つぶやき",
+                            description: "日々の短いメモ",
+                            count: posts.filter((p) => p.kind === "tweet")
+                              .length,
+                          },
+                          {
+                            id: "vlog",
+                            icon: <Video size={18} />,
+                            title: "vlog",
+                            description: "数秒から30秒までの動画",
+                            count: posts.filter((p) => p.kind === "vlog")
+                              .length,
+                          },
+                        ] as const
+                      }
+                      onSelect={(id) => {
+                        nav("timeline");
+                        setFilter(id as Kind);
+                      }}
+                    />
 
                     <div className="featured-area">
                       <div className="landing-section-title">

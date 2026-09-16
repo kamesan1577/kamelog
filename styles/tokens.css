@@ -31,7 +31,7 @@
   --ds-sidebar-width: 13.875rem;
 }
 
-inline {
+@theme inline {
   --color-ds-page: var(--ds-color-bg-page);
   --color-ds-surface: var(--ds-color-bg-surface);
   --color-ds-hover: var(--ds-color-bg-hover);
@@ -52,8 +52,10 @@ inline {
   --radius-ds-sm: var(--ds-radius-sm);
   --radius-ds-md: var(--ds-radius-md);
   --radius-ds-pill: var(--ds-radius-pill);
-  --font-size-ds-xs: var(--ds-font-size-xs);
-  --font-size-ds-sm: var(--ds-font-size-sm);
+  --text-ds-xs: var(--ds-font-size-xs);
+  --text-ds-sm: var(--ds-font-size-sm);
+  --text-ds-md: var(--ds-font-size-md);
+  --text-ds-lg: var(--ds-font-size-lg);
   --max-width-ds-page: var(--ds-page-width);
 }
 
@@ -71,6 +73,30 @@ inline {
 }
 @utility mt-ds-1 {
   margin-top: var(--ds-space-1);
+}
+@utility ds-text-xs {
+  font-size: var(--ds-font-size-xs);
+}
+@utility ds-text-sm {
+  font-size: var(--ds-font-size-sm);
+}
+@utility ds-text-md {
+  font-size: var(--ds-font-size-md);
+}
+@utility ds-text-lg {
+  font-size: var(--ds-font-size-lg);
+}
+@utility space-y-ds-3 {
+  :where(& > :not(:last-child)) {
+    margin-block-start: 0;
+    margin-block-end: var(--ds-space-3);
+  }
+}
+@utility gap-ds-2 {
+  gap: var(--ds-space-2);
+}
+@utility p-ds-3 {
+  padding: var(--ds-space-3);
 }
 @utility px-ds-4 {
   padding-inline: var(--ds-space-4);

@@ -5,7 +5,7 @@ import { AppShell } from "./AppShell";
 
 const navigation = (
   <div className="flex flex-col gap-ds-4 px-ds-4 py-ds-6">
-    <p className="text-ds-sm font-medium">kamelog</p>
+    <p className="ds-text-sm font-medium">kamelog</p>
     <Button variant="ghost" size="sm">
       ホーム
     </Button>
@@ -20,10 +20,10 @@ const meta = {
   component: AppShell,
   args: {
     sidebar: navigation,
-    header: <div className="px-ds-4 py-ds-6 text-ds-sm">タイムライン</div>,
+    header: <div className="px-ds-4 py-ds-6 ds-text-sm">タイムライン</div>,
     children: (
       <div className="mx-auto max-w-ds-page px-ds-4 py-ds-6">
-        <h1 className="text-ds-lg font-semibold">コンテンツ</h1>
+        <h1 className="ds-text-lg font-semibold">コンテンツ</h1>
       </div>
     ),
     mobileNavigation: (

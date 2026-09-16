@@ -18,11 +18,11 @@ export function PageHeader({
       className={cn("border-b border-ds-border pb-ds-4", className)}
       {...props}
     >
-      <h1 className="text-ds-lg font-semibold leading-tight text-ds-primary">
+      <h1 className="ds-text-lg font-semibold leading-tight text-ds-primary">
         {title}
       </h1>
       {description && (
-        <p className="mt-ds-1 text-ds-sm text-ds-secondary">{description}</p>
+        <p className="mt-ds-1 ds-text-sm text-ds-secondary">{description}</p>
       )}
     </section>
   );

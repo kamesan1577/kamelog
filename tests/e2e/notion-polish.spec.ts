@@ -24,7 +24,7 @@ test("landing polish keeps desktop and mobile controls readable", async ({
   });
 
   const contentRow = page
-    .locator(".content-cards")
+    .getByRole("region", { name: "コンテンツ" })
     .getByRole("button", { name: /ブログ/ });
   await contentRow.hover();
   await expect(contentRow).toHaveCSS("background-color", "rgb(247, 247, 245)");
