@@ -29,7 +29,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.getByRole("heading", { name: "Experience" })).toBeVisible();
   await expect(page.getByText(/東洋大学 情報連携学部/)).toBeVisible();
   await expect(
-    page.locator(".content-cards").getByRole("button", { name: /ブログ/ }),
+    page
+      .getByRole("region", { name: "コンテンツ" })
+      .getByRole("button", { name: /ブログ/ }),
   ).toBeVisible();
   await expect(page.locator(".desktop-composer")).toHaveCount(0);
   await expect(page.locator(".mobile-create")).toHaveCount(0);
