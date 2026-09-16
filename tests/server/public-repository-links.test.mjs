@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const page = readFileSync("app/page.tsx", "utf8");
+const page = readFileSync("app/site-page.tsx", "utf8");
 const nextConfig = readFileSync("next.config.ts", "utf8");
 
 test("public page exposes source and issue links for kamelog", () => {
