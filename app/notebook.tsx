@@ -49,6 +49,7 @@ import { InlineComposer } from "@/components/design-system/patterns/InlineCompos
 import { BlogEditorToolbar } from "@/components/design-system/patterns/BlogEditorToolbar";
 import { BlogEditorWorkspace } from "@/components/design-system/patterns/BlogEditorWorkspace";
 import { EditorFooter } from "@/components/design-system/patterns/EditorFooter";
+import { MediaUploadField } from "@/components/design-system/patterns/MediaUploadField";
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
@@ -3257,30 +3258,28 @@ export default function Notebook({
                   onDrop={(event) => droppedImages(event, "tweet")}
                 />
               )}
-              <div className="editor-media-row">
-                <label className="image-upload-button">
-                  <ImageIcon />
-                  {kind === "blog"
+              <MediaUploadField
+                className="editor-media-row"
+                labelClassName="image-upload-button"
+                icon={<ImageIcon />}
+                label={
+                  kind === "blog"
                     ? "画像を本文末尾へ追加"
-                    : `画像を追加（${editorImages.length}/4）`}
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/gif"
-                    multiple={kind === "tweet"}
-                    disabled={
-                      uploadingImages ||
-                      (kind === "tweet" && editorImages.length >= 4)
-                    }
-                    onChange={(event) =>
-                      void uploadImages(
-                        Array.from(event.target.files || []),
-                        kind === "blog" ? "blog" : "tweet",
-                      )
-                    }
-                  />
-                </label>
-                {uploadingImages && <span>アップロード中…</span>}
-              </div>
+                    : `画像を追加（${editorImages.length}/4）`
+                }
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                multiple={kind === "tweet"}
+                disabled={
+                  uploadingImages ||
+                  (kind === "tweet" && editorImages.length >= 4)
+                }
+                onFilesSelected={(files) =>
+                  void uploadImages(files, kind === "blog" ? "blog" : "tweet")
+                }
+                status={
+                  uploadingImages ? <span>アップロード中…</span> : undefined
+                }
+              />
               {kind === "tweet" && editorImages.length > 0 && (
                 <div className="composer-images">
                   <ImageGallery images={editorImages} />
