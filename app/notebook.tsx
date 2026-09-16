@@ -46,6 +46,7 @@ import { PostMeta } from "@/components/design-system/patterns/PostMeta";
 import { PostPreview } from "@/components/design-system/patterns/PostPreview";
 import { PostCard } from "@/components/design-system/patterns/PostCard";
 import { InlineComposer } from "@/components/design-system/patterns/InlineComposer";
+import { BlogEditorToolbar } from "@/components/design-system/patterns/BlogEditorToolbar";
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
@@ -3033,7 +3034,7 @@ export default function Notebook({
                 />
               )}
               {kind === "blog" && (
-                <div
+                <BlogEditorToolbar
                   className="editor-tools"
                   role="toolbar"
                   aria-label="Markdown記法"
@@ -3220,7 +3221,7 @@ export default function Notebook({
                       <Maximize2 size={15} />
                     )}
                   </button>
-                </div>
+                </BlogEditorToolbar>
               )}
               {kind === "blog" ? (
                 <div className={"blog-editor-workspace mode-" + blogEditorMode}>
