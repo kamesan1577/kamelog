@@ -41,7 +41,7 @@
   background: #f2f1ee;
 }
 
-[data-ds="tweet-link-card"]-copy {
+[data-ds="tweet-link-card-copy"] {
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -50,7 +50,7 @@
   padding: 12px 13px;
 }
 
-[data-ds="tweet-link-card"]-copy small {
+[data-ds="tweet-link-card-copy"] small {
   overflow: hidden;
   color: #98948b;
   font-size: 11px;
@@ -58,7 +58,7 @@
   white-space: nowrap;
 }
 
-[data-ds="tweet-link-card"]-copy strong {
+[data-ds="tweet-link-card-copy"] strong {
   display: -webkit-box;
   overflow: hidden;
   font-size: 14px;
@@ -68,7 +68,7 @@
   -webkit-line-clamp: 2;
 }
 
-[data-ds="tweet-link-card"]-description {
+[data-ds="tweet-link-card-description"] {
   display: -webkit-box;
   overflow: hidden;
   color: #817c72;
@@ -93,7 +93,7 @@
     min-height: 84px;
   }
 
-  [data-ds="tweet-link-card"]-copy {
+  [data-ds="tweet-link-card-copy"] {
     padding: 10px 11px;
   }
 }
