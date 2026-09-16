@@ -345,8 +345,7 @@ textarea:focus {
   justify-content: space-between;
 }
 .page-heading h1,
-.settings-page h1,
-.portal-page h1 {
+.settings-page h1 {
   font-weight: 750;
   font-size: 32px;
   letter-spacing: -1.3px;
@@ -371,8 +370,7 @@ textarea:focus {
 .mobile-create {
   display: none;
 }
-.settings-page,
-.portal-page {
+.settings-page {
   padding-bottom: 60px;
 }
 .setting-avatar {
@@ -391,8 +389,7 @@ textarea:focus {
   font-size: 13px;
   cursor: pointer;
 }
-.upload-label input,
-.video-upload input {
+.upload-label input {
   display: none;
 }
 .emoji-options {
@@ -429,70 +426,6 @@ textarea:focus {
 .field textarea {
   height: 110px;
   resize: vertical;
-}
-.mock-note {
-  background: #f5f5f2;
-  padding: 15px;
-  margin-top: 32px;
-  color: #8c8579;
-  font-size: 13px;
-  line-height: 1.8;
-  display: flex;
-  gap: 10px;
-  border-radius: 4px;
-}
-.note-icon {
-  border: 1px solid #aaa69b;
-  border-radius: 50%;
-  width: 17px;
-  height: 17px;
-  line-height: 15px;
-  text-align: center;
-  flex-shrink: 0;
-  margin-top: 3px;
-  font-family: serif;
-}
-.portal-page > h2 {
-  font-size: 14px;
-  font-weight: 600;
-  margin: 37px 0 14px;
-}
-.video-upload {
-  border: 1px dashed #ddd;
-  border-radius: 5px;
-  padding: 15px;
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 12px;
-}
-.video-upload video {
-  max-height: 150px;
-}
-.video-upload label {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  cursor: pointer;
-  font-size: 14px;
-}
-.video-upload > button {
-  color: #2383e2;
-  font-size: 13px;
-}
-.video-upload small {
-  font-size: 12px;
-  color: #999;
-}
-.shortcut-list > div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 14px 0;
-  font-size: 14px;
-}
-.shortcut-list kbd {
-  font-size: 12px;
 }
 @media (min-width: 1450px) {
   .content-grid {
