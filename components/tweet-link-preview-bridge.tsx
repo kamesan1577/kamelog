@@ -109,7 +109,6 @@ function inlineLink(url: string) {
 function previewCard(url: string, preview: LinkPreview) {
   const card = document.createElement("a");
   card.dataset.ds = "tweet-link-card";
-  card.dataset.ds = "tweet-link-card";
   card.href = url;
   card.target = "_blank";
   card.rel = "noopener noreferrer";
