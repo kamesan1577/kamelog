@@ -1,0 +1,25 @@
+[data-ds="right-sidebar"] {
+  padding-top: 4px;
+}
+
+[data-ds="side-search"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 22px 0;
+  padding: 8px 10px;
+  border: 1px solid #eae8e2;
+  border-radius: 5px;
+  color: #a6a197;
+}
+
+[data-ds="side-search"] input {
+  width: 100%;
+  min-width: 0;
+  font-size: 12px;
+}
+
+[data-ds="side-search"] kbd {
+  padding: 0;
+  border: 0;
+}

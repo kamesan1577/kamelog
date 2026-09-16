@@ -484,28 +484,6 @@ textarea:focus {
   color: #918e86;
   margin: 0;
 }
-.right-sidebar {
-  padding-top: 4px;
-}
-.side-search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border: 1px solid #eae8e2;
-  border-radius: 5px;
-  margin: 22px 0;
-  color: #a6a197;
-}
-.side-search input {
-  width: 100%;
-  min-width: 0;
-  font-size: 12px;
-}
-.side-search kbd {
-  border: 0;
-  padding: 0;
-}
 .aside-section {
   margin: 28px 0;
 }
@@ -1135,7 +1113,6 @@ textarea:focus {
 
 /* Reading content stays comfortable on both layouts. */
 .topic-list button,
-.side-search input,
 .profile-card p,
 .page-subtitle {
   font-size: 14px;
