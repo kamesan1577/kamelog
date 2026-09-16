@@ -44,7 +44,7 @@ import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
 import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToolbar";
 import { PostMeta } from "@/components/design-system/patterns/PostMeta";
 import { PostPreview } from "@/components/design-system/patterns/PostPreview";
-import { PostCard } from "@/components/design-system/patterns/PostCard";
+import { TimelineItem } from "@/components/design-system/patterns/TimelineItem";
 import { InlineComposer } from "@/components/design-system/patterns/InlineComposer";
 import { BlogEditorToolbar } from "@/components/design-system/patterns/BlogEditorToolbar";
 import { BlogEditorWorkspace } from "@/components/design-system/patterns/BlogEditorWorkspace";
@@ -2423,7 +2423,7 @@ export default function Notebook({
                               </div>
                             </article>
                           ) : (
-                            <PostCard
+                            <TimelineItem
                               className={"post " + p.kind}
                               kind={p.kind}
                               key={p.id}
@@ -2501,7 +2501,7 @@ export default function Notebook({
                                 />
                               )}
                               {actions(p)}
-                            </PostCard>
+                            </TimelineItem>
                           ),
                         )}
                         {!shown.length && (

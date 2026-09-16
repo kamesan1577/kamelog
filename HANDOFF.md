@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with TimelineItem. Local timeline posts now enter the shared TimelineItem boundary, which delegates the existing PostCard semantics and keeps feature-owned content/actions intact. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
+
 2026-09-17 Issue #99 migration continued with owner account regions. Account settings, profile/avatar controls, federation settings, following management, and federation setup now expose semantic data-ds boundaries; the Fediverse section also uses the shared OwnerSection pattern while preserving existing behavior and CSS hooks. CI for stacked PR #144 is green; #145 verification is pending.
 
 2026-09-17 Issue #99 selector migration continued. Journey tests now prefer data-ds contracts for composer, dialog, gallery, post preview/card, projects, federation, mobile create, and editor footer; a sidebar icon assertion now uses navigation/button roles. lint, typecheck, UI semantic guardrails, and format check passed.
