@@ -45,6 +45,7 @@ export function ProjectList({
         return project.source ? (
           <a
             data-ds="project-tile"
+            data-ds-variant="external"
             className={tileClassName}
             key={project.slug}
             href={project.source}
