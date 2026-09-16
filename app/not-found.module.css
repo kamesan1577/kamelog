@@ -1,0 +1,154 @@
+.page {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--kamelog-paper, #f6f5f4);
+  color: var(--kamelog-ink, #37352f);
+}
+
+.shell {
+  display: flex;
+  width: min(100%, 1040px);
+  min-height: 100vh;
+  min-height: 100dvh;
+  flex-direction: column;
+  margin: 0 auto;
+  padding: 30px clamp(24px, 6vw, 64px);
+}
+
+.brand {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 44px;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.brand:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.content {
+  width: 100%;
+  max-width: 640px;
+  margin: auto 0;
+  padding: 56px 0 92px;
+}
+
+.errorCode {
+  display: flex;
+  align-items: center;
+  gap: 0.035em;
+  width: fit-content;
+  font-size: clamp(100px, 19vw, 176px);
+  font-weight: 750;
+  letter-spacing: -0.055em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.misplacedZero {
+  display: inline-block;
+  padding: 0.005em 0.035em 0.045em;
+  border: 1.5px dashed #bcb8b0;
+  border-radius: 7px;
+  background: #fff;
+  box-shadow: 4px 5px 0 #e8e6e0;
+  color: #aaa59c;
+  transform: translateY(-5px) rotate(-5deg);
+  transition: transform 180ms ease;
+}
+
+.misplacedZero:hover {
+  transform: translateY(-1px) rotate(-1deg);
+}
+
+.content h1 {
+  margin: 36px 0 0;
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.4;
+}
+
+.description {
+  max-width: 480px;
+  margin: 14px 0 0;
+  color: #726e66;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.primaryLink,
+.secondaryLink {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 16px;
+  border: 1px solid var(--kamelog-ink, #37352f);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 650;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
+}
+
+.primaryLink {
+  background: var(--kamelog-ink, #37352f);
+  color: #fff;
+}
+
+.primaryLink:hover {
+  background: var(--kamelog-ink-hover, #292824);
+}
+
+.secondaryLink {
+  border-color: var(--kamelog-line, #dededb);
+  background: #fff;
+}
+
+.secondaryLink:hover {
+  background: var(--kamelog-soft, #efefed);
+}
+
+@media (max-width: 640px) {
+  .shell {
+    padding: 20px 24px;
+  }
+
+  .content {
+    padding: 42px 0 76px;
+  }
+
+  .errorCode {
+    font-size: clamp(92px, 25vw, 130px);
+  }
+
+  .content h1 {
+    margin-top: 30px;
+  }
+
+  .actions {
+    gap: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .misplacedZero,
+  .primaryLink,
+  .secondaryLink {
+    transition: none;
+  }
+}
