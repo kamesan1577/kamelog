@@ -7,14 +7,13 @@ import {
   viewFromPathname,
 } from "../../lib/navigation.mjs";
 
-test("main views have stable shareable paths", () => {
+test("public main views have stable shareable paths", () => {
   assert.equal(pathnameForView("home"), "/");
   assert.equal(pathnameForView("timeline"), "/timeline");
   assert.equal(pathnameForView("projects"), "/projects");
-  assert.equal(pathnameForView("account"), "/account");
   assert.equal(viewFromPathname("/timeline"), "timeline");
   assert.equal(viewFromPathname("/projects"), "projects");
-  assert.equal(viewFromPathname("/account"), "account");
+  assert.equal(viewFromPathname("/account"), null);
 });
 
 test("post detail remains on the existing root query URL", () => {
