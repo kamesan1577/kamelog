@@ -2089,7 +2089,9 @@ export default function Notebook({
                     ) : item.kind === "vlog" ? (
                       <VlogFrame post={item} />
                     ) : (
-                      <p className="tweet-body">{item.body}</p>
+                      <p data-ds="tweet-body" className="tweet-body">
+                        {item.body}
+                      </p>
                     )}
                     {item.kind === "tweet" && (
                       <ImageGallery images={item.images} />
@@ -2968,7 +2970,7 @@ export default function Notebook({
                     />
                   </label>
                 )}
-                <div className="vlog-overlay">
+                <div data-ds="vlog-overlay" className="vlog-overlay">
                   <time>{vtime}</time>
                   {caption && <p>{caption}</p>}
                 </div>
@@ -3443,7 +3445,7 @@ function VlogFrame({ post }: { post: Post }) {
               minute: "2-digit",
             })}
         </time>
-        {post.body && <p>{post.body}</p>}
+        {post.body && <p data-ds="vlog-caption">{post.body}</p>}
       </div>
       {post.video && looping && (
         <button

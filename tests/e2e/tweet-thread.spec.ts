@@ -75,9 +75,9 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
   await page.getByRole("button", { name: "つなげる" }).click();
 
   await expect(page).toHaveURL(/\?post=/);
-  await expect(page.locator(".detail-page .tweet-body")).toHaveText(
-    "スレッドの架空の続き",
-  );
+  await expect(
+    page.locator('[data-ds="detail-page"] [data-ds="tweet-body"]'),
+  ).toHaveText("スレッドの架空の続き");
   await expect(
     page.getByText("スレッドの架空ルート投稿", { exact: true }),
   ).toBeVisible();
