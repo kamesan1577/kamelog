@@ -113,6 +113,8 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 
 ## 検証済み
 
+- 2026-09-17 Issue #99 CSS migration status: 404, TOC, X share, profile/project, link preview, federation guide, editor/composer, detail actions, navigation, tweet thread, landing, engineering, brand theme, and the global style layer have moved out of the app CSS boundary. The legacy allowlist is empty; selector-level extraction from styles/globals.css remains incomplete. typecheck, check:ui, check:public, and diff check passed.
+
 - 2026-09-17 Issue #99の404画面を`NotFoundState`パターンへ移行し、colocated Storybook storyを追加した。`app/not-found.module.css`を削除してlegacy allowlistを17ファイルへ削減。typecheck、check:ui、check:public、diff checkを実行済み。CIの`check` / `e2e` / `container`はPRで確認する。
 
 - 2026-09-16 ActivityPub Phase 6でlocal federated postへのLike/EmojiReact受信、Actor単位dedupe、Undo/Delete、local likesとのquery時合算を追加した。`make check`（unit 73件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。同一Actorのreaction置換、古いUndoの無効化、現在reactionのUndo/Delete、非following Actor、投稿編集後のlocal likes非汚染、backup/restoreをunit testで確認した。
