@@ -42,6 +42,7 @@ import { MobileNavigation } from "@/components/design-system/patterns/MobileNavi
 import { PageHeader } from "@/components/design-system/patterns/PageHeader";
 import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
 import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToolbar";
+import { PostMeta } from "@/components/design-system/patterns/PostMeta";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -1506,30 +1507,16 @@ export default function Notebook({
     return url.toString();
   };
   const meta = (p: Post) => (
-    <div className="post-meta">
-      <Avatar value={profile.icon} />
-      <b>{profile.name}</b>
-      <span>·</span>
-      <time dateTime={p.date}>
-        {new Date(p.date).toLocaleDateString("ja-JP", {
-          month: "numeric",
-          day: "numeric",
-        })}
-      </time>
-      {p.kind === "blog" && p.updatedAt && (
-        <>
-          <span>·</span>
-          <time dateTime={p.updatedAt} title="最終更新日">
-            更新{" "}
-            {new Date(p.updatedAt).toLocaleDateString("ja-JP", {
-              month: "numeric",
-              day: "numeric",
-            })}
-          </time>
-        </>
-      )}
-      <span className={"type-label " + p.kind}>{label[p.kind]}</span>
-    </div>
+    <PostMeta
+      className="post-meta"
+      avatar={<Avatar value={profile.icon} />}
+      author={profile.name}
+      kind={p.kind}
+      date={p.date}
+      updatedAt={p.updatedAt}
+      kindLabel={label[p.kind]}
+      kindLabelClassName={"type-label " + p.kind}
+    />
   );
   const actions = (p: Post) => (
     <div className="post-actions">

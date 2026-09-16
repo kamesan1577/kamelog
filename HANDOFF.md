@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with a colocated PostMeta pattern. Timeline/detail metadata now shares one Design System component while the app boundary retains the approved legacy CSS hooks. lint, typecheck, UI semantic guardrails, format, Storybook build, and public-repo check passed; local Storybook browser tests remain unavailable because Chromium is not installed. CI verification is pending on the stacked PR.
+
 2026-09-17 Issue #99 migration continued through PR #132: PageHeader、ContentIndex、ProjectListを追加し、account/projects/timeline/landingの表示を段階移行した。token theme生成と文字utilityの境界も修正。ProjectListのProjects E2E 7件、Storybook 19件、typecheck、lint、format、UI契約、公開検査、本番buildを確認済み。全体の残りはTimeline/Post/Detail、Composer、Blog editor、Owner UIとlegacy CSS撤去。
 
 2026-09-17 Issue #99 Phase 0〜3で移行マップ、AppShell、SideNavigation、MobileNavigationを追加し、既存のホームナビゲーションへ接続した。PR #124〜#128をstackedで作成。UI契約、公開検査、型、lint、本番build、モバイルナビE2Eは成功。全E2Eは24/25成功で、残るjourneyのvlog動画表示失敗はFFmpeg/fixture依存の既存課題として未解決。ホストのmake checkはFFmpeg未導入でmedia testが失敗するため、Storybook component testはPlaywright containerで成功確認した。
