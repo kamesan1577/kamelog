@@ -108,6 +108,18 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.getByRole("button", { name: "管理", exact: true }).click();
   await expect(page.getByText("有効", { exact: true })).toBeVisible();
   await expect(page.getByLabel("ユーザー名", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "フォロー管理", exact: true }),
+  ).toBeVisible();
+  const federationFollowHandle = page.getByLabel("Fediverseアドレス");
+  await expect(federationFollowHandle).toBeVisible();
+  await expect
+    .poll(() =>
+      federationFollowHandle.evaluate(
+        (element) => getComputedStyle(element).fontSize,
+      ),
+    )
+    .toBe("16px");
   expect(await page.locator("body").innerText()).not.toContain("PRIVATE KEY");
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.locator(".federation-settings").screenshot({

@@ -38,6 +38,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - ブログは初回公開日時を保持し、公開後のタイトル/本文編集時だけ最終更新日時を保存して公開表示する。固定/解除では最終更新日時を動かさない。
 - 自動タグ付けは投稿APIから分離したローカル分類バッチで実行する。手動タグ付き投稿を教師データにしたTF-IDF＋文字bigram分類で既存タグだけを提案し、`post_tags` に由来・信頼度・本文ハッシュ・分類器版を保存する。APIの`tags`・検索・タグ一覧では手動タグと自動タグを統合する。systemd timerは1時間間隔でDocker上のバッチを起動する。
 - ActivityPub identityはアカウント画面から一度だけ初期化し、usernameとserver生成RSA key pairをSQLiteへ保存する。未設定時はWebFinger/Actorを404にし、設定後はWebFinger、Person Actor、icon、outbox/followers/followingを公開する。inboxはDigest・HTTP署名・Date、Actor key、1MiB上限、activity ID一意性を検証する。Followを自動Acceptし、つぶやき/ブログのCreate・Update・Deleteをlocal transaction内のSQLite queueへ積み、別workerがHTTP署名、SSRF検証、retry/backoff付きでsharedInboxへ配送する。
+- Accountのフォロー管理からremote handleをWebFinger解決し、Follow/Undoをdurable queueへ積む。Accept/Reject/failed状態をSQLiteへ保存し、Accept済みActorのCreate/Update/Delete/Announce/Undoだけをsanitized remote cacheとowner用timeline entryへ正規化する。remote cacheはlocal postsへ混在させず、表示とmedia proxyは後続Phaseで扱う。
 - つぶやき詳細はルート投稿でも「スレッド」見出し・全件数・表示中の投稿を常に示し、親投稿・表示中・子孫投稿を上から下へ読める一つの画面として表示する。
 - AGENTS、仕様、不変条件、ADR、脅威モデル、runbook、リポジトリ固有skillsを整備。
 - 公開プロフィールは `@kamesan1577`、公開リンクはGitHubとQiitaを表示する。投稿・下書き・設定の実データは初期化しない。
@@ -48,6 +49,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 
 ## 検証済み
 
+- 2026-09-16 ActivityPub Phase 3でremote handleのWebFinger解決、outgoing Follow/Undo、Accept/Reject/failed状態、Accountのfollowing管理、Accept済みActorのCreate/Update/Delete/Announce/Undoと専用cacheを追加した。`make check`（unit 69件、typecheck、lint、format、production build、public-repo check）が成功。backup/restoreでfollowingとremote timeline cacheの復元も確認した。ローカル環境にPlaywright Chromiumがないため、追加したfollowing管理のmobile/desktop E2Eはstacked PR CIで確認する。
 - 2026-09-16 ActivityPub Phase 1で `npm test`（62件）、typecheck、lint、format check、production build、public-repo checkが成功。owner-only setup、鍵の再open/backup/restore、WebFinger/Actor、署名改ざん拒否、inbox idempotency、SSRF private/redirect拒否、remote HTML sanitizationをunit testで確認した。Playwright journeyへ390px初期設定、1280px有効状態、再読込後永続、private key非露出とスクリーンショットを追加した。ローカルE2EはChromium配布元が30秒timeoutを繰り返し、browser取得前に停止したため未実施。PR CIの `e2e` で確認する。
 - 2026-09-16 ActivityPub Phase 2で投稿ごとのfederationEnabled、tweet/blog Note、Create/Update/Delete、Follow自動Accept/Undo、followers、SQLite durable delivery、別worker、sharedInbox dedupe、署名付き配送、retry/backoff/dead state、worker診断を追加した。`npm test`（66件）、typecheck、lint、format check、production build、public-repo checkが成功。ローカル環境にDocker CLIとPlaywright Chromiumがないため、Compose実buildと追加E2Eはstacked PR CIの `container` / `e2e` で確認する。
 - 2026-09-11 つぶやきスレッド詳細再設計後、`make check`（公開検査、既存UI契約、型、lint、unit、本番build）が成功。ルートでも見出し・全件数・表示中を示し、親・現在・子孫の読順を固定するE2Eを追加した。ローカルE2EはPlaywright Chromium配布元のtimeout/502でブラウザを取得できず起動前に停止したため、PR CIの `e2e` で確認する。

@@ -1,5 +1,12 @@
 "use client";
-import { isValidElement, useEffect, useId, useRef, useState } from "react";
+import {
+  isValidElement,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -113,6 +120,15 @@ type FederationStatus =
       handle: string;
       actorUrl: string;
     };
+type FederationFollowing = {
+  actorId: string;
+  handle: string | null;
+  preferredUsername: string;
+  displayName: string;
+  state: "pending" | "accepted" | "rejected" | "failed";
+  updatedAt: string;
+  lastError: string | null;
+};
 type NavigationState = {
   view: View;
   post: string | null;
@@ -538,14 +554,73 @@ export default function Notebook({
     [federationUsername, setFederationUsername] = useState(""),
     [federationError, setFederationError] = useState(""),
     [federationBusy, setFederationBusy] = useState(false),
-    [federationLoadError, setFederationLoadError] = useState(false);
-  const loadFederationStatus = async () => {
+    [federationLoadError, setFederationLoadError] = useState(false),
+    [federationFollowing, setFederationFollowing] = useState<
+      FederationFollowing[]
+    >([]),
+    [federationFollowHandle, setFederationFollowHandle] = useState(""),
+    [federationFollowError, setFederationFollowError] = useState(""),
+    [federationFollowBusy, setFederationFollowBusy] = useState(false);
+  const loadFederationFollowing = useCallback(async () => {
+    const following = await api<FederationFollowing[]>("federation/following");
+    setFederationFollowing(following);
+  }, []);
+  const loadFederationStatus = useCallback(async () => {
     try {
       const status = await api<FederationStatus>("federation/status");
       setFederationStatus(status);
       setFederationLoadError(false);
+      if (status.enabled)
+        try {
+          await loadFederationFollowing();
+        } catch {
+          setFederationFollowError(
+            "フォロー一覧を読み込めませんでした。再読み込みしてください。",
+          );
+        }
+      else setFederationFollowing([]);
     } catch {
       setFederationLoadError(true);
+    }
+  }, [loadFederationFollowing]);
+  const federationFollow = async () => {
+    const handle = federationFollowHandle.trim();
+    if (!/^@?[^@\s]+@[^@\s]+$/.test(handle)) {
+      setFederationFollowError(
+        "@ユーザー名@サーバー名の形式で入力してください。",
+      );
+      return;
+    }
+    setFederationFollowBusy(true);
+    setFederationFollowError("");
+    try {
+      await api("federation/follow", "POST", { handle });
+      setFederationFollowHandle("");
+      await loadFederationFollowing();
+      toast.success("フォローリクエストを送信しました");
+    } catch (error) {
+      setFederationFollowError(
+        error instanceof Error ? error.message : "フォローできませんでした。",
+      );
+    } finally {
+      setFederationFollowBusy(false);
+    }
+  };
+  const federationUnfollow = async (actorId: string) => {
+    setFederationFollowBusy(true);
+    setFederationFollowError("");
+    try {
+      await api("federation/follow", "DELETE", { actorId });
+      await loadFederationFollowing();
+      toast.success("フォローを解除しました");
+    } catch (error) {
+      setFederationFollowError(
+        error instanceof Error
+          ? error.message
+          : "フォローを解除できませんでした。",
+      );
+    } finally {
+      setFederationFollowBusy(false);
     }
   };
   const [vMode, setVMode] = useState<"camera" | "upload">("camera"),
@@ -689,7 +764,7 @@ export default function Notebook({
       cancelled = true;
       objectUrls.forEach(URL.revokeObjectURL);
     };
-  }, []);
+  }, [loadFederationStatus]);
   useEffect(() => {
     if (ready)
       try {
@@ -1621,26 +1696,123 @@ export default function Notebook({
                       </p>
                     ) : federationStatus.enabled ? (
                       <div className="federation-enabled">
-                        <p className="federation-state">
-                          <Check size={16} aria-hidden="true" />
-                          有効
-                        </p>
-                        <strong>{federationStatus.handle}</strong>
-                        <Button
-                          type="button"
-                          onClick={() => {
-                            void navigator.clipboard
-                              .writeText(federationStatus.handle)
-                              .then(() =>
-                                toast.success("アドレスをコピーしました"),
-                              )
-                              .catch(() =>
-                                toast.error("コピーできませんでした"),
-                              );
-                          }}
+                        <div className="federation-identity">
+                          <p className="federation-state">
+                            <Check size={16} aria-hidden="true" />
+                            有効
+                          </p>
+                          <strong>{federationStatus.handle}</strong>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              void navigator.clipboard
+                                .writeText(federationStatus.handle)
+                                .then(() =>
+                                  toast.success("アドレスをコピーしました"),
+                                )
+                                .catch(() =>
+                                  toast.error("コピーできませんでした"),
+                                );
+                            }}
+                          >
+                            アドレスをコピー
+                          </Button>
+                        </div>
+                        <section
+                          className="federation-following"
+                          aria-labelledby="federation-following-heading"
                         >
-                          アドレスをコピー
-                        </Button>
+                          <div>
+                            <h3 id="federation-following-heading">
+                              フォロー管理
+                            </h3>
+                            <p>
+                              Fediverseのアドレスから相手を探してフォローします。
+                            </p>
+                          </div>
+                          <form
+                            className="federation-follow-form"
+                            aria-busy={federationFollowBusy}
+                            onSubmit={(event) => {
+                              event.preventDefault();
+                              void federationFollow();
+                            }}
+                          >
+                            <label htmlFor="federation-follow-handle">
+                              Fediverseアドレス
+                            </label>
+                            <div>
+                              <input
+                                id="federation-follow-handle"
+                                name="federation-follow-handle"
+                                value={federationFollowHandle}
+                                placeholder="@alice@example.social"
+                                autoComplete="off"
+                                autoCapitalize="none"
+                                spellCheck={false}
+                                maxLength={384}
+                                aria-invalid={Boolean(federationFollowError)}
+                                onChange={(event) => {
+                                  setFederationFollowHandle(event.target.value);
+                                  if (federationFollowError)
+                                    setFederationFollowError("");
+                                }}
+                              />
+                              <Button
+                                variant="solid"
+                                type="submit"
+                                disabled={federationFollowBusy}
+                              >
+                                フォロー
+                              </Button>
+                            </div>
+                          </form>
+                          {federationFollowError && (
+                            <p className="federation-error" role="alert">
+                              {federationFollowError}
+                            </p>
+                          )}
+                          {federationFollowing.length ? (
+                            <ul className="federation-follow-list">
+                              {federationFollowing.map((following) => (
+                                <li key={following.actorId}>
+                                  <div>
+                                    <strong>{following.displayName}</strong>
+                                    <span>
+                                      {following.handle ||
+                                        `@${following.preferredUsername}`}
+                                    </span>
+                                  </div>
+                                  <span
+                                    className={`federation-follow-state is-${following.state}`}
+                                  >
+                                    {
+                                      {
+                                        pending: "承認待ち",
+                                        accepted: "フォロー中",
+                                        rejected: "拒否",
+                                        failed: "失敗",
+                                      }[following.state]
+                                    }
+                                  </span>
+                                  <Button
+                                    type="button"
+                                    disabled={federationFollowBusy}
+                                    onClick={() =>
+                                      void federationUnfollow(following.actorId)
+                                    }
+                                  >
+                                    フォロー解除
+                                  </Button>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="federation-follow-empty">
+                              まだフォローしているアカウントはありません。
+                            </p>
+                          )}
+                        </section>
                       </div>
                     ) : (
                       <form

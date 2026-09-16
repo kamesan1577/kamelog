@@ -5,13 +5,14 @@ import {
   generateKeyPairSync,
   timingSafeEqual,
 } from "node:crypto";
-import sanitizeHtml from "sanitize-html";
 import {
   fetchFederationJson,
   normalizeFederationUrl,
 } from "./federation-fetch.mjs";
 import { ACTIVITY_STREAMS, localPostObject } from "./federation-outbound.mjs";
 import { readBounded } from "./validation.mjs";
+import { processIncomingRemoteActivity } from "./federation-remote.mjs";
+export { sanitizeRemoteHtml } from "./federation-content.mjs";
 
 const ACTIVITY_CONTENT_TYPE =
   'application/ld+json; profile="https://www.w3.org/ns/activitystreams"';
@@ -94,38 +95,6 @@ export function federationStatus(store, config) {
   };
 }
 
-export function sanitizeRemoteHtml(value) {
-  return sanitizeHtml(String(value || ""), {
-    allowedTags: [
-      "p",
-      "br",
-      "a",
-      "span",
-      "strong",
-      "em",
-      "code",
-      "pre",
-      "blockquote",
-      "ul",
-      "ol",
-      "li",
-    ],
-    allowedAttributes: { a: ["href", "rel"] },
-    allowedSchemes: ["http", "https"],
-    allowProtocolRelative: false,
-    transformTags: {
-      a: (_tagName, attributes) => ({
-        tagName: "a",
-        attribs: {
-          href: attributes.href || "",
-          rel: "nofollow noopener noreferrer",
-        },
-      }),
-    },
-    disallowedTagsMode: "discard",
-  });
-}
-
 function actorDocument(store, config, identity) {
   const profile = store.get("settings", "profile");
   const actor = `${config.origin}/activitypub/actor`;
@@ -162,7 +131,10 @@ function collection(store, config, name) {
       ? store.federationOutboxActivities()
       : name === "followers"
         ? store.federationFollowers().map(({ actorId }) => actorId)
-        : [];
+        : store
+            .federationFollowingList()
+            .filter(({ state }) => state === "accepted")
+            .map(({ actorId }) => actorId);
   return {
     "@context": ACTIVITY_STREAMS,
     id: `${config.origin}/activitypub/${name}`,
@@ -383,36 +355,7 @@ async function inbox(store, request, options) {
     });
     return new Response(null, { status: 202 });
   }
-  if (activity.type === "Undo") {
-    const undone = activity.object;
-    const followId =
-      typeof undone === "string"
-        ? undone
-        : undone?.type === "Follow" &&
-            undone.actor === actor.id &&
-            (undone.object === localActor || undone.object?.id === localActor)
-          ? undone.id
-          : null;
-    store.transaction(() => {
-      if (
-        !store.recordFederationActivity({
-          id: activity.id,
-          actorId: actor.id,
-          type: activity.type,
-          receivedAt,
-        })
-      )
-        return;
-      if (followId) store.removeFederationFollower(actor.id, String(followId));
-    });
-    return new Response(null, { status: 202 });
-  }
-  store.recordFederationActivity({
-    id: activity.id,
-    actorId: actor.id,
-    type: activity.type.slice(0, 80),
-    receivedAt,
-  });
+  await processIncomingRemoteActivity(store, activity, actor, options);
   return new Response(null, { status: 202 });
 }
 

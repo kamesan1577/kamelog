@@ -24,6 +24,11 @@ import {
   localPostObject,
 } from "../../server/federation-outbound.mjs";
 import { processNextFederationDelivery } from "../../server/federation-worker.mjs";
+import {
+  followRemoteActor,
+  processIncomingRemoteActivity,
+  unfollowRemoteActor,
+} from "../../server/federation-remote.mjs";
 import { Store } from "../../server/store.mjs";
 
 const origin = "https://example.test";
@@ -254,6 +259,9 @@ test("signed inbox input is idempotent", async () => {
     const fetchJson = async () => ({
       value: {
         id: actorUrl,
+        type: "Person",
+        preferredUsername: "alice",
+        inbox: `${actorUrl}/inbox`,
         publicKey: {
           id: `${actorUrl}#main-key`,
           owner: actorUrl,
@@ -477,6 +485,8 @@ test("signed Follow is accepted once and Undo removes the follower", async () =>
     const actorUrl = "https://remote.example/users/alice";
     const remoteActor = {
       id: actorUrl,
+      type: "Person",
+      preferredUsername: "alice",
       inbox: `${actorUrl}/inbox`,
       endpoints: { sharedInbox: "https://remote.example/inbox" },
       publicKey: {
@@ -533,6 +543,238 @@ test("signed Follow is accepted once and Undo removes the follower", async () =>
       202,
     );
     assert.equal(store.federationFollowers().length, 0);
+  });
+});
+
+test("remote handles enqueue Follow and Undo through the durable outbox", async () => {
+  await withStore("kamelog-federation-following-", async (store) => {
+    createFederationIdentity(store, "kamesan");
+    const actorUrl = "https://remote.example/users/alice";
+    const fetchJson = async (url) => {
+      const value = String(url);
+      if (value.includes("/.well-known/webfinger"))
+        return {
+          value: {
+            subject: "acct:alice@remote.example",
+            links: [
+              {
+                rel: "self",
+                type: "application/activity+json",
+                href: actorUrl,
+              },
+            ],
+          },
+        };
+      assert.equal(value, actorUrl);
+      return {
+        value: {
+          id: actorUrl,
+          type: "Person",
+          preferredUsername: "alice",
+          name: "Alice",
+          inbox: `${actorUrl}/inbox`,
+          endpoints: { sharedInbox: "https://remote.example/inbox" },
+        },
+      };
+    };
+    const following = await followRemoteActor(
+      store,
+      config,
+      "@alice@remote.example",
+      { fetchJson, now: new Date("2026-09-16T12:00:00Z") },
+    );
+    assert.equal(following.handle, "@alice@remote.example");
+    assert.equal(following.state, "pending");
+    assert.equal(store.federationOutboxActivities()[0].type, "Follow");
+    assert.equal(store.federationDiagnostics().pendingDeliveries, 1);
+
+    assert.deepEqual(
+      unfollowRemoteActor(
+        store,
+        config,
+        actorUrl,
+        new Date("2026-09-16T12:01:00Z"),
+      ),
+      { ok: true },
+    );
+    assert.equal(store.federationFollowing(actorUrl), null);
+    const undo = store.federationOutboxActivities()[0];
+    assert.equal(undo.type, "Undo");
+    assert.equal(undo.object.type, "Follow");
+  });
+});
+
+test("accepted remote activities maintain a sanitized, idempotent timeline", async () => {
+  await withStore("kamelog-federation-timeline-", async (store) => {
+    createFederationIdentity(store, "kamesan");
+    const actorUrl = "https://remote.example/users/alice";
+    const actor = {
+      id: actorUrl,
+      type: "Person",
+      preferredUsername: "alice",
+      name: "Alice",
+      inbox: `${actorUrl}/inbox`,
+    };
+    const following = await followRemoteActor(
+      store,
+      config,
+      "alice@remote.example",
+      {
+        now: new Date("2026-09-16T12:00:00Z"),
+        fetchJson: async (url) =>
+          String(url).includes("webfinger")
+            ? {
+                value: {
+                  links: [
+                    {
+                      rel: "self",
+                      type: "application/activity+json",
+                      href: actorUrl,
+                    },
+                  ],
+                },
+              }
+            : { value: actor },
+      },
+    );
+    await processIncomingRemoteActivity(
+      store,
+      {
+        id: `${actorUrl}/activities/accept`,
+        type: "Accept",
+        actor: actorUrl,
+        object: following.followActivityId,
+      },
+      actor,
+      { now: new Date("2026-09-16T12:01:00Z") },
+    );
+    assert.equal(store.federationFollowing(actorUrl).state, "accepted");
+    const handler = createActivityPubHandler(store, config);
+    assert.deepEqual(
+      (
+        await (
+          await handler(new Request(`${origin}/activitypub/following`))
+        ).json()
+      ).orderedItems,
+      [actorUrl],
+    );
+
+    const objectId = `${actorUrl}/notes/1`;
+    const note = {
+      id: objectId,
+      type: "Note",
+      attributedTo: actorUrl,
+      to: ["https://www.w3.org/ns/activitystreams#Public"],
+      content: "<p>Hello <strong>world</strong><script>bad()</script></p>",
+      url: objectId,
+      published: "2026-09-16T12:02:00Z",
+      attachment: [
+        {
+          type: "Document",
+          mediaType: "image/png",
+          url: "https://remote.example/media/1.png",
+        },
+      ],
+    };
+    const create = {
+      id: `${actorUrl}/activities/create-1`,
+      type: "Create",
+      actor: actorUrl,
+      object: note,
+    };
+    assert.equal(
+      await processIncomingRemoteActivity(store, create, actor, {
+        now: new Date("2026-09-16T12:02:00Z"),
+      }),
+      true,
+    );
+    assert.equal(
+      await processIncomingRemoteActivity(store, create, actor),
+      false,
+    );
+    assert.equal(store.federationTimeline().length, 1);
+    assert.equal(
+      store.federationTimeline()[0].contentHtml.includes("script"),
+      false,
+    );
+    assert.equal(store.federationTimeline()[0].attachments.length, 1);
+
+    await processIncomingRemoteActivity(
+      store,
+      {
+        id: `${actorUrl}/activities/update-1`,
+        type: "Update",
+        actor: actorUrl,
+        object: { ...note, content: "<p>Updated</p>" },
+      },
+      actor,
+      { now: new Date("2026-09-16T12:03:00Z") },
+    );
+    assert.equal(
+      store.federationRemoteObject(objectId).contentHtml,
+      "<p>Updated</p>",
+    );
+
+    await processIncomingRemoteActivity(
+      store,
+      {
+        id: `${actorUrl}/activities/delete-1`,
+        type: "Delete",
+        actor: actorUrl,
+        object: objectId,
+      },
+      actor,
+      { now: new Date("2026-09-16T12:04:00Z") },
+    );
+    assert.equal(store.federationTimeline().length, 0);
+    assert.equal(
+      store.federationRemoteObject(objectId).deletedAt,
+      "2026-09-16T12:04:00.000Z",
+    );
+
+    const boostedId = "https://elsewhere.example/notes/boosted";
+    const announce = {
+      id: `${actorUrl}/activities/announce-1`,
+      type: "Announce",
+      actor: actorUrl,
+      published: "2026-09-16T12:05:00Z",
+      object: {
+        id: boostedId,
+        type: "Note",
+        attributedTo: "https://elsewhere.example/users/bob",
+        to: ["https://www.w3.org/ns/activitystreams#Public"],
+        content: "<p>Boosted</p>",
+      },
+    };
+    await processIncomingRemoteActivity(store, announce, actor, {
+      now: new Date("2026-09-16T12:05:00Z"),
+    });
+    assert.equal(store.federationTimeline()[0].activityType, "Announce");
+    await processIncomingRemoteActivity(
+      store,
+      {
+        id: `${actorUrl}/activities/undo-announce-1`,
+        type: "Undo",
+        actor: actorUrl,
+        object: announce,
+      },
+      actor,
+      { now: new Date("2026-09-16T12:06:00Z") },
+    );
+    assert.equal(store.federationTimeline().length, 0);
+
+    await processIncomingRemoteActivity(
+      store,
+      {
+        id: `${actorUrl}/activities/reject`,
+        type: "Reject",
+        actor: actorUrl,
+        object: following.followActivityId,
+      },
+      actor,
+      { now: new Date("2026-09-16T12:07:00Z") },
+    );
+    assert.equal(store.federationFollowing(actorUrl).state, "rejected");
   });
 });
 

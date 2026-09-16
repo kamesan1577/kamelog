@@ -23,6 +23,9 @@
 | POST                      | /api/auth/logout           | session失効                                             |
 | GET                       | /api/federation/status     | owner限定の有効状態・handle・配送/worker診断            |
 | POST                      | /api/federation/setup      | owner限定の一度だけのidentity初期化                     |
+| GET                       | /api/federation/following  | owner限定のfollowing一覧と状態                          |
+| POST                      | /api/federation/follow     | handleをWebFinger解決しFollowをqueueへ登録              |
+| DELETE                    | /api/federation/follow     | actorIdのUndo(Follow)をqueueへ登録                      |
 
 ActivityPub server-to-server endpointは `/api` と別の公開routeで提供する。詳細は [activitypub.md](activitypub.md) を参照する。`POST /activitypub/inbox` はbrowser Origin/sessionではなくHTTP signatureを認証境界にする。
 
@@ -36,6 +39,7 @@ ActivityPub server-to-server endpointは `/api` と別の公開routeで提供す
 vlogのvideoとつぶやきのimagesは種類が一致する登録済み媒体のAPI pathだけを許可する。timeはHH:mm、captionは改行不可。
 更新はrevisionをbodyに渡す。削除はIf-Matchにrevisionを渡す。競合は409であり無条件上書きしない。
 federationEnabledはidentity設定済みのブログ/つぶやきだけtrueにできる。省略した更新では既存値を維持する。local保存とoutbound queue登録は同じtransactionで行い、remote配送結果はAPI応答を失敗させない。
+federation followのPOST bodyは `handle`、DELETE bodyはfollowing一覧で取得した `actorId` を受け取る。任意URLをfetchするAPIにはせず、handleはserver側でWebFingerから解決する。Accept/Reject、remote object、timeline cacheは公開APIへ返さない。
 下書きはkind=blog/tweet、title、body、更新時revision。
 プロフィールはname（80）、bio（500）、icon（短い絵文字または制限された画像data URL）。
 

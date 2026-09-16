@@ -54,11 +54,15 @@
 
 .federation-setup,
 .federation-enabled {
-  display: flex;
   max-width: 520px;
+  margin-top: 24px;
+}
+
+.federation-setup,
+.federation-identity {
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
-  margin-top: 24px;
 }
 
 .federation-setup > label {
@@ -111,7 +115,7 @@
 }
 
 .federation-handle-preview strong,
-.federation-enabled > strong {
+.federation-identity > strong {
   max-width: 100%;
   overflow-wrap: anywhere;
   font-size: 14px;
@@ -126,11 +130,140 @@
 }
 
 .federation-enabled {
+  width: 100%;
+}
+
+.federation-identity {
   gap: 15px;
 }
 
-.federation-enabled .federation-state {
+.federation-identity .federation-state {
   margin: 0;
+}
+
+.federation-following {
+  width: 100%;
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px solid #e7e5df;
+}
+
+.federation-following h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.federation-following > div > p {
+  margin: 6px 0 0;
+  color: #827d73;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.federation-follow-form {
+  margin-top: 18px;
+}
+
+.federation-follow-form > label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.federation-follow-form > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.federation-follow-form input {
+  width: 100%;
+  min-height: 44px;
+  padding: 9px 11px;
+  border: 1px solid #d8d5ce;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 15px;
+}
+
+.federation-follow-form input:focus-visible {
+  border-color: #37352f;
+  outline: 2px solid #37352f;
+  outline-offset: 2px;
+}
+
+.federation-follow-form input[aria-invalid="true"] {
+  border-color: #9a4f4f;
+}
+
+.federation-following > .federation-error {
+  margin: 10px 0 0;
+}
+
+.federation-follow-list {
+  padding: 0;
+  margin: 20px 0 0;
+  list-style: none;
+}
+
+.federation-follow-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid #eeece7;
+}
+
+.federation-follow-list li > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.federation-follow-list strong,
+.federation-follow-list li > div > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.federation-follow-list strong {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.federation-follow-list li > div > span,
+.federation-follow-empty {
+  color: #8c877d;
+  font-size: 12px;
+}
+
+.federation-follow-state {
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: #efeee9;
+  color: #69655d;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.federation-follow-state.is-accepted {
+  background: #e9f0e7;
+  color: #4e684b;
+}
+
+.federation-follow-state.is-rejected,
+.federation-follow-state.is-failed {
+  background: #f4e9e7;
+  color: #934747;
+}
+
+.federation-follow-empty {
+  margin: 20px 0 0;
 }
 
 @media (max-width: 640px) {
@@ -142,8 +275,26 @@
     font-size: 16px;
   }
 
+  .federation-follow-form input {
+    font-size: 16px;
+  }
+
+  .federation-follow-form > div {
+    grid-template-columns: 1fr;
+  }
+
+  .federation-follow-list li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .federation-follow-list li [data-slot="button"] {
+    grid-column: 1 / -1;
+  }
+
   .federation-setup [data-slot="button"],
-  .federation-enabled [data-slot="button"] {
+  .federation-identity [data-slot="button"],
+  .federation-follow-form [data-slot="button"],
+  .federation-follow-list [data-slot="button"] {
     width: 100%;
     min-height: 44px;
   }

@@ -20,7 +20,7 @@ domainは `KAMELOG_ORIGIN` のhostを使う。ActivityPub専用のenable、usern
 - `GET /activitypub/objects/:postId`
 - `GET /activitypub/activities/...`
 
-Actorは既存profileの表示名、bio、iconを参照する。outboxは生成済みactivity、followersは承認済みremote Actor、followingは現段階では空のOrderedCollectionを返す。ローカルobject/activity URLは一度配送した識別子を維持する。
+Actorは既存profileの表示名、bio、iconを参照する。outboxは生成済みactivity、followersはlocal Actorをfollow中のremote Actor、followingはlocal ActorからのFollowがAccept済みのremote Actorを返す。ローカルobject/activity URLは一度配送した識別子を維持する。
 
 ## ローカル投稿とfollowers
 
@@ -41,6 +41,14 @@ outbound activityとremote inbox単位のdeliveryをSQLiteへ保存する。loca
 workerは処理中jobを5分後に回収可能とし、一時的なnetwork error、408、429、5xxを指数backoff（最大6時間、既定8 attempt）で再試行する。他の4xxと上限到達はdead stateにする。redirect先もURL/DNS/IPを再検証し、移動後のURLへ署名し直す。1件の失敗で他deliveryを止めない。
 
 owner限定status APIはpending/dead件数、follower数、最終inbox受信時刻、worker heartbeatを返す。logはactivity type、remote domain、status、retry countだけを出し、本文・署名・鍵を出さない。
+
+## Outgoing Followとremote cache
+
+ownerはAccountの `フォロー管理` へ完全な `@user@domain` を入力する。serverはWebFingerのself linkを解決し、Actor ID、inbox/sharedInbox、表示名、usernameをSQLiteへ保存して `Follow` をdurable queueへ積む。状態はpending、accepted、rejected、failedのいずれかで、署名済み `Accept` / `Reject` は元Follow IDと送信Actorが一致する行だけを更新する。配送が恒久失敗したFollowはfailedにする。解除時は元Followをobjectにした `Undo` をqueueへ積み、followingから削除する。
+
+Accept済みのfollowingから届いたpublic `Note` だけを専用のremote object cacheへ保存する。`Create` はtimeline entryを作成し、`Update` は同じobject ID・actorのcacheだけを更新し、`Delete` はtombstone化してtimelineから隠す。`Announce` は埋め込みNoteまたは安全にdereferenceしたNoteを保存し、`Undo(Announce)` は対応entryを隠す。followしていないActorの投稿activityはidempotency記録だけを行い、timeline cacheへ入れない。
+
+remote objectはlocal `posts` に混在させない。本文は保存前にallowlist sanitizeし、画像attachmentはHTTPS URLと対応MIMEを最大4件まで正規化する。このPhaseではbrowserへremote URLを直接表示せず、media proxy/cacheとowner timeline表示は後続Phaseで追加する。
 
 ## HTTP signature
 

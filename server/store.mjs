@@ -89,11 +89,53 @@ export class Store {
         id INTEGER PRIMARY KEY CHECK(id = 1),
         last_heartbeat_at TEXT NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS federation_remote_actors(
+        actor_id TEXT PRIMARY KEY,
+        handle TEXT UNIQUE,
+        inbox_url TEXT NOT NULL,
+        shared_inbox_url TEXT,
+        preferred_username TEXT NOT NULL,
+        display_name TEXT NOT NULL,
+        icon_url TEXT,
+        fetched_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS federation_following(
+        actor_id TEXT PRIMARY KEY REFERENCES federation_remote_actors(actor_id) ON DELETE CASCADE,
+        state TEXT NOT NULL CHECK(state IN ('pending', 'accepted', 'rejected', 'failed')),
+        follow_activity_id TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        last_error TEXT
+      );
+      CREATE TABLE IF NOT EXISTS federation_remote_objects(
+        object_id TEXT PRIMARY KEY,
+        actor_id TEXT NOT NULL,
+        type TEXT NOT NULL,
+        content_html TEXT NOT NULL,
+        url TEXT NOT NULL,
+        published_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        attachments TEXT NOT NULL,
+        received_at TEXT NOT NULL,
+        deleted_at TEXT
+      );
+      CREATE TABLE IF NOT EXISTS federation_timeline_entries(
+        activity_id TEXT PRIMARY KEY,
+        actor_id TEXT NOT NULL,
+        type TEXT NOT NULL CHECK(type IN ('Create', 'Announce')),
+        object_id TEXT NOT NULL REFERENCES federation_remote_objects(object_id),
+        published_at TEXT NOT NULL,
+        received_at TEXT NOT NULL,
+        deleted_at TEXT
+      );
+      CREATE INDEX IF NOT EXISTS federation_timeline_order
+        ON federation_timeline_entries(deleted_at, published_at DESC, activity_id);
       INSERT OR IGNORE INTO migrations VALUES(1);
       INSERT OR IGNORE INTO migrations VALUES(2);
       INSERT OR IGNORE INTO migrations VALUES(3);
       INSERT OR IGNORE INTO migrations VALUES(4);
-      INSERT OR IGNORE INTO migrations VALUES(5);`);
+      INSERT OR IGNORE INTO migrations VALUES(5);
+      INSERT OR IGNORE INTO migrations VALUES(6);`);
     this.db
       .prepare("SELECT id, data FROM posts")
       .all()
@@ -365,6 +407,15 @@ export class Store {
       .run(activity.id, activity.actorId, activity.type, activity.receivedAt);
     return result.changes > 0;
   }
+  hasFederationActivity(id) {
+    return Boolean(
+      this.db
+        .prepare(
+          "SELECT 1 AS found FROM federation_inbox_activities WHERE id=?",
+        )
+        .get(id),
+    );
+  }
   federationFollowers() {
     return this.db
       .prepare(
@@ -470,6 +521,237 @@ export class Store {
       .all(Math.max(1, Math.min(100, limit)))
       .map(({ body }) => JSON.parse(body));
   }
+  saveFederationRemoteActor(actor) {
+    this.db
+      .prepare(
+        `INSERT INTO federation_remote_actors
+         (actor_id, handle, inbox_url, shared_inbox_url, preferred_username,
+          display_name, icon_url, fetched_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         ON CONFLICT(actor_id) DO UPDATE SET
+           handle=COALESCE(excluded.handle, federation_remote_actors.handle),
+           inbox_url=excluded.inbox_url,
+           shared_inbox_url=excluded.shared_inbox_url,
+           preferred_username=excluded.preferred_username,
+           display_name=excluded.display_name,
+           icon_url=excluded.icon_url,
+           fetched_at=excluded.fetched_at`,
+      )
+      .run(
+        actor.actorId,
+        actor.handle || null,
+        actor.inboxUrl,
+        actor.sharedInboxUrl || null,
+        actor.preferredUsername,
+        actor.displayName,
+        actor.iconUrl || null,
+        actor.fetchedAt,
+      );
+    return this.federationRemoteActor(actor.actorId);
+  }
+  federationRemoteActor(actorId) {
+    return (
+      this.db
+        .prepare(
+          `SELECT actor_id AS actorId, handle, inbox_url AS inboxUrl,
+                  shared_inbox_url AS sharedInboxUrl,
+                  preferred_username AS preferredUsername,
+                  display_name AS displayName, icon_url AS iconUrl,
+                  fetched_at AS fetchedAt
+           FROM federation_remote_actors WHERE actor_id=?`,
+        )
+        .get(actorId) || null
+    );
+  }
+  saveFederationFollowing(following) {
+    this.db
+      .prepare(
+        `INSERT INTO federation_following
+         (actor_id, state, follow_activity_id, created_at, updated_at, last_error)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT(actor_id) DO UPDATE SET
+           state=excluded.state,
+           follow_activity_id=excluded.follow_activity_id,
+           updated_at=excluded.updated_at,
+           last_error=excluded.last_error`,
+      )
+      .run(
+        following.actorId,
+        following.state,
+        following.followActivityId,
+        following.createdAt,
+        following.updatedAt,
+        following.lastError || null,
+      );
+    return this.federationFollowing(following.actorId);
+  }
+  federationFollowing(actorId) {
+    return (
+      this.db
+        .prepare(
+          `SELECT following.actor_id AS actorId, actors.handle,
+                  actors.preferred_username AS preferredUsername,
+                  actors.display_name AS displayName,
+                  actors.icon_url AS iconUrl,
+                  following.state,
+                  following.follow_activity_id AS followActivityId,
+                  following.created_at AS createdAt,
+                  following.updated_at AS updatedAt,
+                  following.last_error AS lastError
+           FROM federation_following following
+           JOIN federation_remote_actors actors ON actors.actor_id=following.actor_id
+           WHERE following.actor_id=?`,
+        )
+        .get(actorId) || null
+    );
+  }
+  federationFollowingList() {
+    return this.db
+      .prepare(
+        `SELECT following.actor_id AS actorId, actors.handle,
+                actors.preferred_username AS preferredUsername,
+                actors.display_name AS displayName,
+                actors.icon_url AS iconUrl, following.state,
+                following.follow_activity_id AS followActivityId,
+                following.created_at AS createdAt,
+                following.updated_at AS updatedAt,
+                following.last_error AS lastError
+         FROM federation_following following
+         JOIN federation_remote_actors actors ON actors.actor_id=following.actor_id
+         ORDER BY following.created_at DESC`,
+      )
+      .all();
+  }
+  updateFederationFollowingState(actorId, followActivityId, state, now) {
+    const result = this.db
+      .prepare(
+        `UPDATE federation_following SET state=?, updated_at=?, last_error=NULL
+         WHERE actor_id=? AND follow_activity_id=?`,
+      )
+      .run(state, now, actorId, followActivityId);
+    return result.changes > 0;
+  }
+  removeFederationFollowing(actorId) {
+    return (
+      this.db
+        .prepare("DELETE FROM federation_following WHERE actor_id=?")
+        .run(actorId).changes > 0
+    );
+  }
+  saveFederationRemoteObject(object) {
+    const existing = this.federationRemoteObject(object.objectId);
+    if (existing && existing.actorId !== object.actorId) return false;
+    this.db
+      .prepare(
+        `INSERT INTO federation_remote_objects
+         (object_id, actor_id, type, content_html, url, published_at, updated_at,
+          attachments, received_at, deleted_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+         ON CONFLICT(object_id) DO UPDATE SET
+           type=excluded.type,
+           content_html=excluded.content_html,
+           url=excluded.url,
+           published_at=excluded.published_at,
+           updated_at=excluded.updated_at,
+           attachments=excluded.attachments,
+           received_at=excluded.received_at,
+           deleted_at=NULL`,
+      )
+      .run(
+        object.objectId,
+        object.actorId,
+        object.type,
+        object.contentHtml,
+        object.url,
+        object.publishedAt,
+        object.updatedAt,
+        JSON.stringify(object.attachments || []),
+        object.receivedAt,
+      );
+    return true;
+  }
+  federationRemoteObject(objectId) {
+    const row = this.db
+      .prepare(
+        `SELECT object_id AS objectId, actor_id AS actorId, type,
+                content_html AS contentHtml, url, published_at AS publishedAt,
+                updated_at AS updatedAt, attachments,
+                received_at AS receivedAt, deleted_at AS deletedAt
+         FROM federation_remote_objects WHERE object_id=?`,
+      )
+      .get(objectId);
+    return row ? { ...row, attachments: JSON.parse(row.attachments) } : null;
+  }
+  deleteFederationRemoteObject(objectId, actorId, now) {
+    const result = this.db
+      .prepare(
+        `UPDATE federation_remote_objects SET deleted_at=?, received_at=?
+         WHERE object_id=? AND actor_id=? AND deleted_at IS NULL`,
+      )
+      .run(now, now, objectId, actorId);
+    if (result.changes)
+      this.db
+        .prepare(
+          `UPDATE federation_timeline_entries SET deleted_at=?
+           WHERE object_id=? AND deleted_at IS NULL`,
+        )
+        .run(now, objectId);
+    return result.changes > 0;
+  }
+  saveFederationTimelineEntry(entry) {
+    this.db
+      .prepare(
+        `INSERT OR IGNORE INTO federation_timeline_entries
+         (activity_id, actor_id, type, object_id, published_at, received_at, deleted_at)
+         VALUES (?, ?, ?, ?, ?, ?, NULL)`,
+      )
+      .run(
+        entry.activityId,
+        entry.actorId,
+        entry.type,
+        entry.objectId,
+        entry.publishedAt,
+        entry.receivedAt,
+      );
+  }
+  federationTimeline(limit = 50) {
+    return this.db
+      .prepare(
+        `SELECT entries.activity_id AS activityId,
+                entries.actor_id AS actorId,
+                entries.type AS activityType,
+                entries.published_at AS activityPublishedAt,
+                actors.handle, actors.preferred_username AS preferredUsername,
+                actors.display_name AS displayName, actors.icon_url AS iconUrl,
+                objects.object_id AS objectId, objects.type,
+                objects.content_html AS contentHtml, objects.url,
+                objects.published_at AS publishedAt,
+                objects.updated_at AS updatedAt, objects.attachments
+         FROM federation_timeline_entries entries
+         JOIN federation_remote_objects objects
+           ON objects.object_id=entries.object_id
+         JOIN federation_remote_actors actors
+           ON actors.actor_id=entries.actor_id
+         WHERE entries.deleted_at IS NULL AND objects.deleted_at IS NULL
+         ORDER BY entries.published_at DESC, entries.activity_id DESC
+         LIMIT ?`,
+      )
+      .all(Math.max(1, Math.min(100, Number(limit) || 50)))
+      .map((row) => ({
+        ...row,
+        attachments: JSON.parse(row.attachments),
+      }));
+  }
+  undoFederationTimelineEntry(activityId, actorId, now) {
+    return (
+      this.db
+        .prepare(
+          `UPDATE federation_timeline_entries SET deleted_at=?
+           WHERE activity_id=? AND actor_id=? AND deleted_at IS NULL`,
+        )
+        .run(now, activityId, actorId).changes > 0
+    );
+  }
   claimFederationDelivery(now = Date.now(), staleAfterMs = 5 * 60_000) {
     return this.transaction(() => {
       this.db
@@ -549,6 +831,20 @@ export class Store {
         String(error).slice(0, 240),
         id,
       );
+    if (dead)
+      this.db
+        .prepare(
+          `UPDATE federation_following
+           SET state='failed', updated_at=?, last_error=?
+           WHERE follow_activity_id=(
+             SELECT activities.id
+             FROM federation_deliveries deliveries
+             JOIN federation_outbound_activities activities
+               ON activities.id=deliveries.activity_id
+             WHERE deliveries.id=? AND activities.type='Follow'
+           )`,
+        )
+        .run(new Date(now).toISOString(), String(error).slice(0, 240), id);
     return { dead, nextAttemptAt: dead ? null : now + backoff };
   }
   federationDiagnostics(now = Date.now()) {
@@ -575,6 +871,9 @@ export class Store {
       pendingDeliveries: (counts.pending || 0) + (counts.processing || 0),
       failedDeliveries: counts.dead || 0,
       followerCount: this.federationFollowers().length,
+      followingCount: this.federationFollowingList().filter(
+        ({ state }) => state === "accepted",
+      ).length,
       lastInboxAt: lastInbox?.receivedAt || null,
       worker: {
         healthy: Boolean(heartbeat && now - Date.parse(heartbeat) < 30_000),

@@ -50,6 +50,40 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
       followActivityId: "https://remote.example/follows/1",
       followedAt: "2026-09-16T00:00:00.000Z",
     });
+    store.saveFederationRemoteActor({
+      actorId: "https://remote.example/users/bob",
+      handle: "@bob@remote.example",
+      inboxUrl: "https://remote.example/users/bob/inbox",
+      preferredUsername: "bob",
+      displayName: "Bob",
+      fetchedAt: "2026-09-16T00:00:00.000Z",
+    });
+    store.saveFederationFollowing({
+      actorId: "https://remote.example/users/bob",
+      state: "accepted",
+      followActivityId: "https://example.test/activitypub/activities/follow/1",
+      createdAt: "2026-09-16T00:00:00.000Z",
+      updatedAt: "2026-09-16T00:00:01.000Z",
+    });
+    store.saveFederationRemoteObject({
+      objectId: "https://remote.example/notes/1",
+      actorId: "https://remote.example/users/bob",
+      type: "Note",
+      contentHtml: "<p>backup fixture</p>",
+      url: "https://remote.example/notes/1",
+      publishedAt: "2026-09-16T00:00:02.000Z",
+      updatedAt: "2026-09-16T00:00:02.000Z",
+      attachments: [],
+      receivedAt: "2026-09-16T00:00:03.000Z",
+    });
+    store.saveFederationTimelineEntry({
+      activityId: "https://remote.example/activities/create/1",
+      actorId: "https://remote.example/users/bob",
+      type: "Create",
+      objectId: "https://remote.example/notes/1",
+      publishedAt: "2026-09-16T00:00:02.000Z",
+      receivedAt: "2026-09-16T00:00:03.000Z",
+    });
     store.enqueueFederationActivity(
       {
         id: "https://example.test/activitypub/activities/fixture",
@@ -74,6 +108,11 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
       "fictional-private-key",
     );
     assert.equal(restored.federationFollowers().length, 1);
+    assert.equal(restored.federationFollowingList()[0].state, "accepted");
+    assert.equal(
+      restored.federationTimeline()[0].contentHtml,
+      "<p>backup fixture</p>",
+    );
     assert.equal(restored.federationDiagnostics().pendingDeliveries, 1);
     assert.equal(
       await readFile(
@@ -124,7 +163,7 @@ test("adds view counts to an existing schema without rewriting posts", async () 
     database.close();
 
     const migrated = new Store(root);
-    assert.equal(migrated.schemaVersion(), 5);
+    assert.equal(migrated.schemaVersion(), 6);
     assert.equal(migrated.get("posts", "legacy-post").views, 0);
     assert.equal(migrated.recordView("legacy-post").views, 1);
     assert.equal(migrated.get("posts", "legacy-post").body, "legacy fixture");
@@ -136,6 +175,52 @@ test("adds view counts to an existing schema without rewriting posts", async () 
     );
     migrated.close();
   } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+test("a permanently failed Follow delivery updates following state", async () => {
+  const root = await mkdtemp(join(tmpdir(), "kamelog-follow-failure-"));
+  const store = new Store(root);
+  try {
+    const actorId = "https://remote.example/users/alice";
+    const activityId = "https://example.test/activitypub/activities/follow/1";
+    store.saveFederationRemoteActor({
+      actorId,
+      handle: "@alice@remote.example",
+      inboxUrl: `${actorId}/inbox`,
+      preferredUsername: "alice",
+      displayName: "Alice",
+      fetchedAt: "2026-09-16T00:00:00.000Z",
+    });
+    store.saveFederationFollowing({
+      actorId,
+      state: "pending",
+      followActivityId: activityId,
+      createdAt: "2026-09-16T00:00:00.000Z",
+      updatedAt: "2026-09-16T00:00:00.000Z",
+    });
+    store.enqueueFederationActivity(
+      {
+        id: activityId,
+        type: "Follow",
+        objectId: actorId,
+        body: { id: activityId, type: "Follow", object: actorId },
+        createdAt: "2026-09-16T00:00:00.000Z",
+        nextAttemptAt: 0,
+      },
+      [`${actorId}/inbox`],
+    );
+    const delivery = store.claimFederationDelivery(1);
+    const result = store.failFederationDelivery(delivery.id, {
+      status: 400,
+      error: "HTTP 400",
+      now: Date.parse("2026-09-16T00:01:00.000Z"),
+    });
+    assert.equal(result.dead, true);
+    assert.equal(store.federationFollowing(actorId).state, "failed");
+    assert.equal(store.federationFollowing(actorId).lastError, "HTTP 400");
+  } finally {
+    store.close();
     await rm(root, { recursive: true, force: true });
   }
 });
