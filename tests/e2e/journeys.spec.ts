@@ -52,8 +52,8 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".preview-shell")).toHaveCount(0);
   expect((await page.request.get("/api/drafts")).status()).toBe(401);
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.locator(".mobile-search")).toBeVisible();
-  await expect(page.locator(".right-sidebar")).toBeHidden();
+  await expect(page.locator('[data-ds="mobile-search"]')).toBeVisible();
+  await expect(page.locator('[data-ds="right-sidebar"]')).toBeHidden();
   const cdp = await context.newCDPSession(page);
   await cdp.send("WebAuthn.enable");
   await cdp.send("WebAuthn.addVirtualAuthenticator", {
@@ -148,7 +148,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
       mobileTweetBody.evaluate((element) => getComputedStyle(element).fontSize),
     )
     .toBe("16px");
-  const mobileEditorHeader = page.locator(".mobile-editor-header");
+  const mobileEditorHeader = page.locator('[data-ds="mobile-editor-header"]');
   const mobilePublish = mobileEditorHeader.getByRole("button", {
     name: "投稿",
     exact: true,
@@ -488,7 +488,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
   ).toBeVisible();
-  await expect(page.locator(".featured-post")).toContainText("架空のブログ");
+  await expect(page.locator('[data-ds="featured-post"]')).toContainText(
+    "架空のブログ",
+  );
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page.goBack();
   await expect(page.locator(".detail-page")).toBeVisible();
@@ -567,8 +569,8 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     page.getByRole("link", { name: "元の投稿を開く" }).first(),
   ).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.locator(".fediverse-mode-switch")).toBeVisible();
-  await page.locator(".fediverse-timeline").screenshot({
+  await expect(page.locator('[data-ds="fediverse-mode-switch"]')).toBeVisible();
+  await page.locator('[data-ds="fediverse-timeline"]').screenshot({
     path: testInfo.outputPath("fediverse-timeline-mobile.png"),
   });
   const refreshed = page.waitForResponse((response) =>
