@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
+import "./MediaGallery.css";
 
 export interface MediaGalleryProps {
   images?: string[];
