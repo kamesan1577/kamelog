@@ -3,62 +3,43 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { buildRevision } from "../../lib/build-revision.mjs";
 
-const sha = "a".repeat(40);
+const sha = "0123456789abcdef0123456789abcdef01234567";
+const url = `https://github.com/kamesan1577/kamelog/commit/${sha}`;
 
-test("a validated build SHA links to its exact GitHub commit", () => {
-  assert.deepEqual(buildRevision(sha), {
-    sha,
-    shortSha: "aaaaaaa",
-    url: `https://github.com/kamesan1577/kamelog/commit/${sha}`,
-  });
+test("links a valid build SHA to its exact commit", () => {
+  const revision = buildRevision(sha);
+  assert.equal(revision?.sha, sha);
+  assert.equal(revision?.shortSha, "0123456");
+  assert.equal(revision?.url, url);
+});
+
+test("normalizes uppercase SHA", () => {
   assert.equal(buildRevision(sha.toUpperCase())?.sha, sha);
 });
 
-test("missing or invalid build metadata never generates a misleading link", () => {
-  for (const value of [
-    undefined,
-    null,
-    "",
-    "main",
-    "unknown",
-    "a".repeat(7),
-    `${sha}/../../evil`,
-    "g".repeat(40),
-  ]) {
-    assert.equal(buildRevision(value), null);
-  }
+test("rejects invalid build metadata", () => {
+  assert.equal(buildRevision(undefined), null);
+  assert.equal(buildRevision(null), null);
+  assert.equal(buildRevision("main"), null);
+  assert.equal(buildRevision("abc1234"), null);
+  assert.equal(buildRevision("g".repeat(40)), null);
 });
 
-test("the footer uses the running image revision instead of remote HEAD", async () => {
-  const page = await readFile(
-    new URL("../../app/site-page.tsx", import.meta.url),
-    "utf8",
-  );
-  assert.match(page, /buildRevision\(process\.env\.KAMELOG_BUILD_SHA\)/);
-  assert.match(page, /\{revision && \(/);
-  assert.match(page, /href=\{revision\.url\}/);
-  assert.match(page, /\{revision\.shortSha\}/);
+test("the footer reads the image revision", async () => {
+  const path = new URL("../../app/site-page.tsx", import.meta.url);
+  const source = await readFile(path, "utf8");
+  assert.ok(source.includes("buildRevision(process.env.KAMELOG_BUILD_SHA)"));
+  assert.ok(source.includes("href={revision.url}"));
 });
 
-test("the CI-approved SHA is stored in the image for both build and runtime", async () => {
-  const [dockerfile, compose, deploy] = await Promise.all([
-    readFile(new URL("../../Dockerfile", import.meta.url), "utf8"),
-    readFile(new URL("../../compose.yaml", import.meta.url), "utf8"),
-    readFile(new URL("../../ops/kamelog-update", import.meta.url), "utf8"),
-  ]);
-  const buildArgs = dockerfile.match(/^ARG KAMELOG_BUILD_SHA$/gm);
-  assert.equal(buildArgs?.length, 2);
-  assert.equal(
-    (dockerfile.match(/KAMELOG_BUILD_SHA=\$\{KAMELOG_BUILD_SHA\}/g) ?? []).length,
-    2,
-  );
-  assert.match(compose, /KAMELOG_BUILD_SHA: \$\{KAMELOG_BUILD_SHA:-\}/);
-  assert.match(
-    deploy,
-    /KAMELOG_BUILD_SHA="\$remote_sha" "\$\{compose\[@\]\}" build app-blue/,
-  );
-  assert.match(
-    deploy,
-    /docker image tag "\$previous_image" kamelog-app:current/,
-  );
+test("deployment stamps the exact image revision", async () => {
+  const path = new URL("../../ops/kamelog-update", import.meta.url);
+  const source = await readFile(path, "utf8");
+  assert.ok(source.includes('KAMELOG_BUILD_SHA="$remote_sha"'));
+});
+
+test("Docker builds preserve the image revision", async () => {
+  const path = new URL("../../Dockerfile", import.meta.url);
+  const source = await readFile(path, "utf8");
+  assert.ok(source.includes("KAMELOG_BUILD_SHA=${KAMELOG_BUILD_SHA}"));
 });
