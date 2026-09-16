@@ -568,28 +568,6 @@ textarea:focus {
   margin: 14px 0 8px;
   color: #625e54;
 }
-.tags {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin: 13px 0 0;
-  flex-wrap: wrap;
-}
-.tags [data-slot="badge"] {
-  font-size: 12px;
-  padding: 1px 6px;
-  background: #f0efeb;
-  color: #888174;
-  border: none;
-  border-radius: 3px;
-}
-.tags [data-slot="badge"].bg-\[\#e7f3f8\] {
-  background: #edf4f7;
-  color: #397392;
-}
-.tags button:hover {
-  opacity: 0.7;
-}
 .read-time {
   margin-left: auto;
   font-size: 12px;
@@ -1531,10 +1509,6 @@ textarea:focus {
 }
 
 /* Reading content stays comfortable on both layouts. */
-.tags [data-slot="badge"],
-.read-time {
-  font-size: 12px;
-}
 .composer-kinds button,
 [data-ds="timeline-tabs"] [data-slot="tabs-trigger"],
 .topic-list button,
