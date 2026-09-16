@@ -50,6 +50,7 @@ import { BlogEditorToolbar } from "@/components/design-system/patterns/BlogEdito
 import { BlogEditorWorkspace } from "@/components/design-system/patterns/BlogEditorWorkspace";
 import { EditorFooter } from "@/components/design-system/patterns/EditorFooter";
 import { MediaGallery } from "@/components/design-system/patterns/MediaGallery";
+import { PostActions } from "@/components/design-system/patterns/PostActions";
 import { MediaUploadField } from "@/components/design-system/patterns/MediaUploadField";
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
@@ -1510,7 +1511,7 @@ export default function Notebook({
     />
   );
   const actions = (p: Post) => (
-    <div className="post-actions">
+    <PostActions className="post-actions">
       <button
         className={liked.includes(p.id) ? "liked" : ""}
         onClick={() =>
@@ -1589,7 +1590,7 @@ export default function Notebook({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-    </div>
+    </PostActions>
   );
   return (
     <div className="notebook">

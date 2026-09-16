@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with PostActions. Like, link-copy, X-share, and owner menu behavior now share a semantic action-group shell without moving their callbacks. lint, typecheck, UI semantic guardrails, and format check passed.
+
 2026-09-17 Issue #99 migration continued with MediaGallery. Attached image grids and the existing lightbox state/semantics now live in a shared pattern; the app keeps the approved grid hooks and media URLs. lint, typecheck, UI semantic guardrails, and format check passed.
 
 2026-09-17 Issue #99 migration continued with MediaUploadField. Blog/tweet image selection now shares the upload-field shell while optimization, destination, limits, and persistence remain feature-owned. lint, typecheck, UI semantic guardrails, and format check passed.
