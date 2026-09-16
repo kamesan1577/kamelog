@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "highlight.js/styles/github.css";
-import "./globals.css";
+import "../styles/globals.css";
 import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";
 import "../components/design-system/patterns/ComposerLayout.css";
