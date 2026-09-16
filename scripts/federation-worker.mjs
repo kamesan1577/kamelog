@@ -14,7 +14,8 @@ for (let attempt = 0; attempt < 10; attempt += 1) {
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
 }
-if (!store) throw new Error("Federation worker database did not become available");
+if (!store)
+  throw new Error("Federation worker database did not become available");
 const controller = new AbortController();
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => controller.abort());
