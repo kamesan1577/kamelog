@@ -60,6 +60,9 @@ inline {
 @utility max-w-ds-page {
   max-width: var(--ds-page-width);
 }
+@utility ds-shell-grid {
+  grid-template-columns: var(--ds-sidebar-width) minmax(0, 1fr);
+}
 @utility px-ds-4 {
   padding-inline: var(--ds-space-4);
 }
