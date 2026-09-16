@@ -488,13 +488,6 @@ textarea:focus {
   color: #8e8b84;
   padding: 8px;
 }
-.tweet-body {
-  font-size: 15px;
-  line-height: 1.95;
-  white-space: pre-wrap;
-  margin: 14px 0 8px;
-  color: #625e54;
-}
 .right-sidebar {
   padding-top: 4px;
 }
@@ -1114,18 +1107,6 @@ textarea:focus {
   }
   .post {
     padding-top: 20px;
-  }
-  .post-focus h2 {
-    font-size: 18px;
-    line-height: 1.6;
-  }
-  .post-focus > p:not(.tweet-body) {
-    font-size: 13px;
-    line-height: 1.9;
-  }
-  .tweet-body {
-    font-size: 14px;
-    line-height: 1.95;
   }
   .post-actions {
     margin-top: 13px;

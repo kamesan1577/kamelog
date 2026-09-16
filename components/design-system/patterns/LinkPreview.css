@@ -1,4 +1,9 @@
 [data-ds="tweet-body"] {
+  margin: 14px 0 8px;
+  color: #625e54;
+  font-size: 15px;
+  line-height: 1.95;
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -95,5 +100,10 @@
 
   [data-ds="tweet-link-card-copy"] {
     padding: 10px 11px;
+  }
+}
+@media (max-width: 640px) {
+  [data-ds="tweet-body"] {
+    font-size: 14px;
   }
 }

@@ -31,3 +31,15 @@
   line-height: 1.95;
   white-space: pre-wrap;
 }
+
+@media (max-width: 640px) {
+  [data-ds="post-preview"] h2 {
+    font-size: 18px;
+    line-height: 1.6;
+  }
+
+  [data-ds="post-preview"] > p:not(.tweet-body) {
+    font-size: 13px;
+    line-height: 1.9;
+  }
+}
