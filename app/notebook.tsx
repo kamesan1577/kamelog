@@ -93,7 +93,7 @@ import {
   ContactLinks,
 } from "@/components/engineering-profile";
 import { contact, projects } from "@/lib/public-profile";
-import "./landing.css";
+import "../components/design-system/patterns/Landing.css";
 import "./engineering.css";
 
 type Kind = "blog" | "tweet" | "vlog";
