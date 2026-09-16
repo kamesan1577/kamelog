@@ -38,7 +38,7 @@ test("missing post IDs share the 404 page and can reach the timeline", async ({
   await expect(
     page.getByRole("heading", { name: "ページが見つかりません" }),
   ).toBeVisible();
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+  await expect(page.locator('meta[name="robots"]').first()).toHaveAttribute(
     "content",
     /noindex/,
   );
