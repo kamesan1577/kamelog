@@ -5,6 +5,7 @@ import { FederationTimelineLink } from "@/components/federation-timeline-link";
 import { getStore } from "@/server/runtime.mjs";
 import { blogStructuredData, websiteStructuredData } from "@/server/seo.mjs";
 import { publicFederationReposts } from "@/server/federation-reposts.mjs";
+import { buildRevision } from "@/lib/build-revision.mjs";
 
 function StructuredData({ value }: { value: Record<string, unknown> }) {
   return (
@@ -18,6 +19,8 @@ function StructuredData({ value }: { value: Record<string, unknown> }) {
 }
 
 function SourceFooter() {
+  const revision = buildRevision(process.env.KAMELOG_BUILD_SHA);
+
   return (
     <footer
       aria-label="kamelogの開発情報"
@@ -68,6 +71,21 @@ function SourceFooter() {
           />
         </a>
       </div>
+      {revision && (
+        <div className="mx-auto mt-3 flex max-w-5xl justify-end text-[10px] text-[#858078]">
+          <span>Build · </span>
+          <a
+            className="ml-1 font-mono underline underline-offset-2 hover:text-[#625e56] focus-visible:text-[#625e56]"
+            href={revision.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={revision.sha}
+            aria-label={`稼働中のビルド ${revision.sha} のコミットを開く`}
+          >
+            {revision.shortSha}
+          </a>
+        </div>
+      )}
     </footer>
   );
 }
