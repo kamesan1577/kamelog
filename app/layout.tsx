@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "highlight.js/styles/github.css";
 import "./globals.css";
 import "../styles/tokens.css";
-import "./mobile-blog-editor.css";
+import "../components/design-system/patterns/MobileBlogEditor.css";
 import "./composer-layout.css";
 import "./mobile-composer.css";
 import "../components/design-system/patterns/FullPageBlogEditor.css";
