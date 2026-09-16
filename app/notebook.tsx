@@ -56,6 +56,7 @@ import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { OwnerSection } from "@/components/design-system/patterns/OwnerSection";
 import { ProfileCard } from "@/components/design-system/patterns/ProfileCard";
+import { EmptyState } from "@/components/design-system/patterns/EmptyState";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -2527,7 +2528,7 @@ export default function Notebook({
                           ),
                         )}
                         {!shown.length && (
-                          <div className="empty-state">
+                          <EmptyState className="empty-state">
                             <p>該当する投稿はありません。</p>
                             <Button
                               onClick={() => {
@@ -2538,7 +2539,7 @@ export default function Notebook({
                             >
                               解除
                             </Button>
-                          </div>
+                          </EmptyState>
                         )}
                         <div className="feed-count">{shown.length}件</div>
                       </div>
@@ -2582,9 +2583,9 @@ export default function Notebook({
                       {!federationTimelineError &&
                         !federationTimelineBusy &&
                         !federationTimeline.length && (
-                          <div className="empty-state">
+                          <EmptyState className="empty-state">
                             <p>受信した投稿はまだありません。</p>
-                          </div>
+                          </EmptyState>
                         )}
                       <div className="fediverse-feed">
                         {federationTimeline.map((timelineItem) => (
