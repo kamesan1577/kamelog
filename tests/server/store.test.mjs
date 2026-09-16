@@ -44,6 +44,22 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
       privateKeyPem: "fictional-private-key",
       createdAt: "2026-09-16T00:00:00.000Z",
     });
+    store.saveFederationFollower({
+      actorId: "https://remote.example/users/alice",
+      inboxUrl: "https://remote.example/inbox",
+      followActivityId: "https://remote.example/follows/1",
+      followedAt: "2026-09-16T00:00:00.000Z",
+    });
+    store.enqueueFederationActivity(
+      {
+        id: "https://example.test/activitypub/activities/fixture",
+        type: "Create",
+        objectId: "https://example.test/activitypub/objects/fixture",
+        body: { type: "Create", object: { type: "Note" } },
+        createdAt: "2026-09-16T00:00:00.000Z",
+      },
+      ["https://remote.example/inbox"],
+    );
     store.close();
     store = new Store(join(root, "source"));
     assert.equal(store.get("posts", "fictional").body, "fixture");
@@ -57,6 +73,8 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
       restored.federationIdentity().privateKeyPem,
       "fictional-private-key",
     );
+    assert.equal(restored.federationFollowers().length, 1);
+    assert.equal(restored.federationDiagnostics().pendingDeliveries, 1);
     assert.equal(
       await readFile(
         join(
@@ -106,7 +124,7 @@ test("adds view counts to an existing schema without rewriting posts", async () 
     database.close();
 
     const migrated = new Store(root);
-    assert.equal(migrated.schemaVersion(), 4);
+    assert.equal(migrated.schemaVersion(), 5);
     assert.equal(migrated.get("posts", "legacy-post").views, 0);
     assert.equal(migrated.recordView("legacy-post").views, 1);
     assert.equal(migrated.get("posts", "legacy-post").body, "legacy fixture");

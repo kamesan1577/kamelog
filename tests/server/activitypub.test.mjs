@@ -17,7 +17,13 @@ import { createAPI, configuration } from "../../server/api.mjs";
 import {
   fetchFederationJson,
   normalizeFederationUrl,
+  postFederationActivity,
 } from "../../server/federation-fetch.mjs";
+import {
+  enqueuePostFederationTransition,
+  localPostObject,
+} from "../../server/federation-outbound.mjs";
+import { processNextFederationDelivery } from "../../server/federation-worker.mjs";
 import { Store } from "../../server/store.mjs";
 
 const origin = "https://example.test";
@@ -308,4 +314,295 @@ test("federation fetch blocks private targets and revalidates redirects", async 
       request: async () => ({ redirect: "https://127.0.0.1/internal" }),
     }),
   );
+  await assert.rejects(() =>
+    postFederationActivity("https://public.example/inbox", "{}", () => ({}), {
+      lookup: async () => [{ address: "8.8.8.8", family: 4 }],
+      request: async () => ({
+        status: 307,
+        redirect: "https://169.254.169.254/latest/meta-data",
+      }),
+    }),
+  );
+});
+
+test("local tweets and blogs serialize as public Notes", async () => {
+  await withStore("kamelog-federation-notes-", async (store) => {
+    store.save("media", "11111111-1111-4111-8111-111111111111", {
+      kind: "image",
+      type: "image/png",
+      extension: "png",
+    });
+    const tweet = {
+      id: "tweet-1",
+      revision: 1,
+      kind: "tweet",
+      title: "",
+      body: "<hello>\nworld",
+      date: "2026-09-16T00:00:00.000Z",
+      images: ["/api/media/11111111-1111-4111-8111-111111111111"],
+      federationEnabled: true,
+    };
+    const note = localPostObject(store, config, tweet);
+    assert.equal(note.type, "Note");
+    assert.equal(note.content, "<p>&lt;hello&gt;<br>world</p>");
+    assert.equal(note.url, `${origin}/?post=tweet-1`);
+    assert.equal(note.attachment[0].mediaType, "image/png");
+    assert.equal(
+      note.attachment[0].url,
+      `${origin}/api/media/11111111-1111-4111-8111-111111111111`,
+    );
+
+    const blog = localPostObject(store, config, {
+      ...tweet,
+      id: "blog-1",
+      kind: "blog",
+      title: "SQLite <運用>",
+      body: "本文 ".repeat(200),
+      images: [],
+    });
+    assert.match(blog.content, /SQLite &lt;運用&gt;/);
+    assert.match(blog.content, /続きを読む/);
+    assert.ok(blog.content.length < 800);
+    assert.equal(blog.url, `${origin}/?post=blog-1`);
+  });
+});
+
+test("post federation state enqueues Create, Update and Delete atomically", async () => {
+  await withStore("kamelog-federation-posts-", async (store) => {
+    createFederationIdentity(store, "kamesan");
+    store.saveFederationFollower({
+      actorId: "https://remote.example/users/alice",
+      inboxUrl: "https://remote.example/users/alice/inbox",
+      sharedInboxUrl: "https://remote.example/inbox",
+      followActivityId: "https://remote.example/follows/1",
+      followedAt: "2026-09-16T00:00:00.000Z",
+    });
+    const session = store.createSession();
+    const api = createAPI(store, config);
+    const call = (path, method, value, revision) =>
+      api(
+        new Request(`${origin}/api/${path}`, {
+          method,
+          headers: {
+            origin,
+            cookie: `__Host-kamelog-session=${session}`,
+            "content-type": "application/json",
+            ...(revision === undefined ? {} : { "if-match": String(revision) }),
+          },
+          body: value === undefined ? undefined : JSON.stringify(value),
+        }),
+      );
+    const created = await (
+      await call("posts", "POST", {
+        kind: "tweet",
+        body: "federated",
+        federationEnabled: true,
+      })
+    ).json();
+    assert.equal(created.federationEnabled, true);
+    assert.deepEqual(
+      store.federationOutboxActivities().map(({ type }) => type),
+      ["Create"],
+    );
+    assert.equal(store.federationDiagnostics().pendingDeliveries, 1);
+    const publicHandler = createActivityPubHandler(store, config);
+    const objectResponse = await publicHandler(
+      new Request(`${origin}/activitypub/objects/${created.id}`),
+    );
+    assert.equal(objectResponse.status, 200);
+    assert.equal((await objectResponse.json()).type, "Note");
+    const outboxResponse = await publicHandler(
+      new Request(`${origin}/activitypub/outbox`),
+    );
+    assert.equal((await outboxResponse.json()).totalItems, 1);
+
+    const pinned = await (
+      await call(`posts/${created.id}`, "PUT", {
+        kind: "tweet",
+        body: created.body,
+        pinned: true,
+        revision: created.revision,
+        federationEnabled: true,
+      })
+    ).json();
+    assert.equal(store.federationOutboxActivities().length, 1);
+    const updated = await (
+      await call(`posts/${created.id}`, "PUT", {
+        kind: "tweet",
+        body: "updated",
+        revision: pinned.revision,
+        federationEnabled: true,
+      })
+    ).json();
+    const disabled = await (
+      await call(`posts/${created.id}`, "PUT", {
+        kind: "tweet",
+        body: updated.body,
+        revision: updated.revision,
+        federationEnabled: false,
+      })
+    ).json();
+    assert.deepEqual(
+      store.federationOutboxActivities().map(({ type }) => type),
+      ["Delete", "Update", "Create"],
+    );
+    const enabled = await (
+      await call(`posts/${created.id}`, "PUT", {
+        kind: "tweet",
+        body: disabled.body,
+        revision: disabled.revision,
+        federationEnabled: true,
+      })
+    ).json();
+    assert.equal(
+      (await call(`posts/${created.id}`, "DELETE", undefined, enabled.revision))
+        .status,
+      200,
+    );
+    assert.deepEqual(
+      store.federationOutboxActivities().map(({ type }) => type),
+      ["Delete", "Create", "Delete", "Update", "Create"],
+    );
+  });
+});
+
+test("signed Follow is accepted once and Undo removes the follower", async () => {
+  await withStore("kamelog-federation-follow-", async (store) => {
+    createFederationIdentity(store, "kamesan");
+    const { publicKey, privateKey } = generateKeyPairSync("rsa", {
+      modulusLength: 2048,
+      publicKeyEncoding: { type: "spki", format: "pem" },
+      privateKeyEncoding: { type: "pkcs8", format: "pem" },
+    });
+    const actorUrl = "https://remote.example/users/alice";
+    const remoteActor = {
+      id: actorUrl,
+      inbox: `${actorUrl}/inbox`,
+      endpoints: { sharedInbox: "https://remote.example/inbox" },
+      publicKey: {
+        id: `${actorUrl}#main-key`,
+        owner: actorUrl,
+        publicKeyPem: publicKey,
+      },
+    };
+    const handler = createActivityPubHandler(store, config, {
+      now: new Date("2026-09-16T12:00:00Z"),
+      fetchJson: async () => ({ value: remoteActor }),
+    });
+    const follow = {
+      id: "https://remote.example/activities/follow-1",
+      type: "Follow",
+      actor: actorUrl,
+      object: `${origin}/activitypub/actor`,
+    };
+    const deliver = (activity) => {
+      const bytes = Buffer.from(JSON.stringify(activity));
+      return handler(
+        new Request(`${origin}/activitypub/inbox`, {
+          method: "POST",
+          headers: signFederationRequest(
+            `${origin}/activitypub/inbox`,
+            "POST",
+            bytes,
+            { actorUrl, privateKeyPem: privateKey },
+            new Date("2026-09-16T12:00:00Z"),
+          ),
+          body: bytes,
+        }),
+      );
+    };
+    assert.equal((await deliver(follow)).status, 202);
+    assert.equal((await deliver(follow)).status, 202);
+    assert.equal(store.federationFollowers().length, 1);
+    assert.equal(
+      store.federationFollowers()[0].sharedInboxUrl,
+      remoteActor.endpoints.sharedInbox,
+    );
+    assert.equal(store.federationOutboxActivities()[0].type, "Accept");
+    assert.equal(store.federationDiagnostics().pendingDeliveries, 1);
+
+    assert.equal(
+      (
+        await deliver({
+          id: "https://remote.example/activities/undo-1",
+          type: "Undo",
+          actor: actorUrl,
+          object: follow,
+        })
+      ).status,
+      202,
+    );
+    assert.equal(store.federationFollowers().length, 0);
+  });
+});
+
+test("delivery worker retries transient failures and signs each attempt", async () => {
+  await withStore("kamelog-federation-worker-", async (store) => {
+    createFederationIdentity(store, "kamesan");
+    const post = {
+      id: "worker-post",
+      revision: 1,
+      kind: "tweet",
+      title: "",
+      body: "queued",
+      date: "2026-09-16T00:00:00.000Z",
+      federationEnabled: true,
+    };
+    store.saveFederationFollower({
+      actorId: "https://remote.example/users/alice",
+      inboxUrl: "https://remote.example/inbox",
+      followActivityId: "https://remote.example/follows/1",
+      followedAt: post.date,
+    });
+    enqueuePostFederationTransition(
+      store,
+      config,
+      post,
+      null,
+      new Date(post.date),
+    );
+    let signed = false;
+    const first = await processNextFederationDelivery(store, config, {
+      now: new Date("2026-09-16T00:00:01.000Z"),
+      postActivity: async (url, body, sign) => {
+        const headers = sign(new URL(url), body);
+        signed = headers.signature.includes("#main-key");
+        return { status: 503 };
+      },
+    });
+    assert.equal(signed, true);
+    assert.equal(first.state, "pending");
+    assert.equal(store.federationDiagnostics().pendingDeliveries, 1);
+    assert.equal(
+      await processNextFederationDelivery(store, config, {
+        now: new Date("2026-09-16T00:00:02.000Z"),
+        postActivity: async () => ({ status: 202 }),
+      }),
+      null,
+    );
+    const completed = await processNextFederationDelivery(store, config, {
+      now: new Date("2026-09-16T00:00:11.000Z"),
+      postActivity: async () => ({ status: 202 }),
+    });
+    assert.equal(completed.state, "succeeded");
+    assert.equal(store.federationDiagnostics().pendingDeliveries, 0);
+
+    store.enqueueFederationActivity(
+      {
+        id: `${origin}/activitypub/activities/rejected`,
+        type: "Delete",
+        objectId: `${origin}/activitypub/objects/rejected`,
+        body: { type: "Delete" },
+        createdAt: "2026-09-16T00:00:12.000Z",
+        nextAttemptAt: Date.parse("2026-09-16T00:00:12.000Z"),
+      },
+      ["https://remote.example/inbox"],
+    );
+    const rejected = await processNextFederationDelivery(store, config, {
+      now: new Date("2026-09-16T00:00:12.000Z"),
+      postActivity: async () => ({ status: 400 }),
+    });
+    assert.equal(rejected.state, "dead");
+    assert.equal(store.federationDiagnostics().failedDeliveries, 1);
+  });
 });

@@ -16,6 +16,8 @@ COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/server ./server
 COPY --from=build --chown=node:node /app/scripts/admin.mjs ./scripts/admin.mjs
 COPY --from=build --chown=node:node /app/scripts/auto-tag.mjs ./scripts/auto-tag.mjs
+COPY --from=build --chown=node:node /app/scripts/federation-worker.mjs ./scripts/federation-worker.mjs
+COPY --from=build --chown=node:node /app/scripts/federation-worker-health.mjs ./scripts/federation-worker-health.mjs
 RUN mkdir /data && chown node:node /data
 USER node
 EXPOSE 3000

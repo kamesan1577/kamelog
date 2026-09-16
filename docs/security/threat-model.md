@@ -10,6 +10,7 @@
 | Markdown      | script実行、危険URL、図へのコード混入     | HTML無効、URL allowlist、React escaping、Mermaid strict mode、埋め込みhost/id検証                                             |
 | リンクpreview | SSRF、DNS rebinding、過大HTML、内部到達   | scheme/port制限、全DNS結果のpublic判定、検証IP固定、redirect再検証、時間/512KiB/回数上限                                      |
 | Federation    | 署名偽造、replay、SSRF、remote HTML実行   | Digest/HTTP署名/Date検証、activity ID一意、HTTPS/public IP/検証IP固定、redirect再検証、HTML allowlist、本文/鍵をlogへ出さない |
+| 外部配送      | remote停止、redirect SSRF、queue重複/消失 | local transaction内queue、sharedInbox dedupe、検証済みIP固定、redirect後再署名、timeout、指数backoff、attempt上限/dead state  |
 | バックアップ  | 不整合、改竄、上書き                      | DB backup、hash manifest、空復元先、停止中操作                                                                                |
 | 運用          | proxy偽装、秘密露出                       | HTTPS Origin固定、cookie Secure、proxyでrequest上限、汎用エラー                                                               |
 

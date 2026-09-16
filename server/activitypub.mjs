@@ -6,10 +6,13 @@ import {
   timingSafeEqual,
 } from "node:crypto";
 import sanitizeHtml from "sanitize-html";
-import { fetchFederationJson } from "./federation-fetch.mjs";
+import {
+  fetchFederationJson,
+  normalizeFederationUrl,
+} from "./federation-fetch.mjs";
+import { ACTIVITY_STREAMS, localPostObject } from "./federation-outbound.mjs";
 import { readBounded } from "./validation.mjs";
 
-const ACTIVITY_STREAMS = "https://www.w3.org/ns/activitystreams";
 const ACTIVITY_CONTENT_TYPE =
   'application/ld+json; profile="https://www.w3.org/ns/activitystreams"';
 const USERNAME_PATTERN = /^[a-z0-9_]{1,64}$/;
@@ -87,6 +90,7 @@ export function federationStatus(store, config) {
     host,
     handle: `@${identity.username}@${host}`,
     actorUrl: `${config.origin}/activitypub/actor`,
+    ...store.federationDiagnostics(),
   };
 }
 
@@ -152,13 +156,19 @@ function actorDocument(store, config, identity) {
   };
 }
 
-function collection(config, name) {
+function collection(store, config, name) {
+  const orderedItems =
+    name === "outbox"
+      ? store.federationOutboxActivities()
+      : name === "followers"
+        ? store.federationFollowers().map(({ actorId }) => actorId)
+        : [];
   return {
     "@context": ACTIVITY_STREAMS,
     id: `${config.origin}/activitypub/${name}`,
     type: "OrderedCollection",
-    totalItems: 0,
-    orderedItems: [],
+    totalItems: orderedItems.length,
+    orderedItems,
   };
 }
 
@@ -315,11 +325,93 @@ async function inbox(store, request, options) {
     activity.actor !== actor.id
   )
     return jsonResponse({ error: "Invalid activity" }, 400, "application/json");
+  const receivedAt = (options.now || new Date()).toISOString();
+  const localActor = `${options.config.origin}/activitypub/actor`;
+  if (activity.type === "Follow") {
+    const objectId =
+      typeof activity.object === "string"
+        ? activity.object
+        : activity.object?.id;
+    if (objectId !== localActor || typeof actor.inbox !== "string")
+      return jsonResponse({ error: "Invalid Follow" }, 400, "application/json");
+    const inboxUrl = normalizeFederationUrl(
+      actor.inbox,
+      options.fetchOptions,
+    ).toString();
+    const sharedInboxUrl = actor.endpoints?.sharedInbox
+      ? normalizeFederationUrl(
+          actor.endpoints.sharedInbox,
+          options.fetchOptions,
+        ).toString()
+      : null;
+    store.transaction(() => {
+      if (
+        !store.recordFederationActivity({
+          id: activity.id,
+          actorId: actor.id,
+          type: activity.type,
+          receivedAt,
+        })
+      )
+        return;
+      store.saveFederationFollower({
+        actorId: actor.id,
+        inboxUrl,
+        sharedInboxUrl,
+        followActivityId: activity.id,
+        followedAt: receivedAt,
+      });
+      const acceptId = `${options.config.origin}/activitypub/activities/accept/${createHash("sha256").update(activity.id).digest("hex")}`;
+      store.enqueueFederationActivity(
+        {
+          id: acceptId,
+          type: "Accept",
+          objectId: activity.id,
+          createdAt: receivedAt,
+          nextAttemptAt: Date.parse(receivedAt),
+          body: {
+            "@context": ACTIVITY_STREAMS,
+            id: acceptId,
+            type: "Accept",
+            actor: localActor,
+            object: activity,
+            to: [actor.id],
+          },
+        },
+        [sharedInboxUrl || inboxUrl],
+      );
+    });
+    return new Response(null, { status: 202 });
+  }
+  if (activity.type === "Undo") {
+    const undone = activity.object;
+    const followId =
+      typeof undone === "string"
+        ? undone
+        : undone?.type === "Follow" &&
+            undone.actor === actor.id &&
+            (undone.object === localActor || undone.object?.id === localActor)
+          ? undone.id
+          : null;
+    store.transaction(() => {
+      if (
+        !store.recordFederationActivity({
+          id: activity.id,
+          actorId: actor.id,
+          type: activity.type,
+          receivedAt,
+        })
+      )
+        return;
+      if (followId) store.removeFederationFollower(actor.id, String(followId));
+    });
+    return new Response(null, { status: 202 });
+  }
   store.recordFederationActivity({
     id: activity.id,
     actorId: actor.id,
     type: activity.type.slice(0, 80),
-    receivedAt: new Date().toISOString(),
+    receivedAt,
   });
   return new Response(null, { status: 202 });
 }
@@ -357,9 +449,28 @@ export function createActivityPubHandler(store, config, options = {}) {
         return iconResponse(store);
       for (const name of ["outbox", "followers", "following"])
         if (url.pathname === `/activitypub/${name}` && request.method === "GET")
-          return jsonResponse(collection(config, name));
+          return jsonResponse(collection(store, config, name));
+      if (
+        url.pathname.startsWith("/activitypub/objects/") &&
+        request.method === "GET"
+      ) {
+        const id = decodeURIComponent(
+          url.pathname.slice("/activitypub/objects/".length),
+        );
+        const post = store.get("posts", id);
+        if (!post?.federationEnabled || post.kind === "vlog") return notFound();
+        return jsonResponse(localPostObject(store, config, post));
+      }
+      if (
+        url.pathname.startsWith("/activitypub/activities/") &&
+        request.method === "GET"
+      ) {
+        const id = `${config.origin}${url.pathname}`;
+        const activity = store.federationOutboundActivity(id);
+        return activity ? jsonResponse(activity.body) : notFound();
+      }
       if (url.pathname === "/activitypub/inbox" && request.method === "POST")
-        return await inbox(store, request, options);
+        return await inbox(store, request, { ...options, config });
       return notFound();
     } catch (error) {
       if (error instanceof RangeError)

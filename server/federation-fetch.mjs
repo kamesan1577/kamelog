@@ -117,11 +117,55 @@ function requestDocument(url, resolved, options) {
         response.on("end", () => resolve({ body: Buffer.concat(chunks) }));
       },
     );
-    request.setTimeout(options.timeoutMs, () =>
-      request.destroy(new Error("federation request timed out")),
+    const timeout = setTimeout(
+      () => request.destroy(new Error("federation request timed out")),
+      options.timeoutMs,
     );
+    request.on("close", () => clearTimeout(timeout));
     request.on("error", reject);
     request.end();
+  });
+}
+
+function requestActivity(url, resolved, options, body, headers) {
+  return new Promise((resolve, reject) => {
+    const transport = url.protocol === "https:" ? https : http;
+    const request = transport.request(
+      url,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "content-length": String(body.length),
+          "user-agent": "kamelog-federation/1.0",
+        },
+        lookup: (_hostname, lookupOptions, callback) => {
+          if (typeof lookupOptions === "object" && lookupOptions.all) {
+            callback(null, [resolved]);
+            return;
+          }
+          callback(null, resolved.address, resolved.family);
+        },
+        ...(url.protocol === "https:" ? { servername: hostnameOf(url) } : {}),
+      },
+      (response) => {
+        const status = response.statusCode || 0;
+        const location = response.headers.location;
+        response.resume();
+        if ([301, 302, 303, 307, 308].includes(status) && location) {
+          resolve({ status, redirect: new URL(location, url).href });
+          return;
+        }
+        resolve({ status });
+      },
+    );
+    const timeout = setTimeout(
+      () => request.destroy(new Error("federation request timed out")),
+      options.timeoutMs,
+    );
+    request.on("close", () => clearTimeout(timeout));
+    request.on("error", reject);
+    request.end(body);
   });
 }
 
@@ -161,4 +205,38 @@ export async function fetchFederationDocument(value, options = {}) {
 export async function fetchFederationJson(value, options = {}) {
   const { body, url } = await fetchFederationDocument(value, options);
   return { value: JSON.parse(body.toString("utf8")), url };
+}
+
+export async function postFederationActivity(
+  value,
+  bodyValue,
+  signHeaders,
+  options = {},
+) {
+  const settings = {
+    allowHttp: options.allowHttp === true,
+    allowPrivateNetwork: options.allowPrivateNetwork === true,
+    allowNonDefaultPort: options.allowNonDefaultPort === true,
+    lookup: options.lookup,
+    timeoutMs: options.timeoutMs || DEFAULT_TIMEOUT_MS,
+    maxRedirects: options.maxRedirects ?? DEFAULT_MAX_REDIRECTS,
+  };
+  const body = Buffer.isBuffer(bodyValue)
+    ? bodyValue
+    : Buffer.from(bodyValue || "");
+  let url = normalizeFederationUrl(value, settings);
+  const send = options.request || requestActivity;
+  for (let redirects = 0; redirects <= settings.maxRedirects; redirects += 1) {
+    const resolved = await resolveFederationAddress(url, settings);
+    const headers = signHeaders(url, body);
+    const result = await send(url, resolved, settings, body, headers);
+    if (result.redirect) {
+      if (redirects === settings.maxRedirects)
+        throw new Error("too many federation redirects");
+      url = normalizeFederationUrl(result.redirect, settings);
+      continue;
+    }
+    return { status: result.status, url };
+  }
+  throw new Error("federation delivery failed");
 }

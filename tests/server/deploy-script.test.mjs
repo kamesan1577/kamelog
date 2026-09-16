@@ -22,12 +22,17 @@ test("deployment backs up online and rolls the two app replicas one at a time", 
   const build = script.indexOf('"${compose[@]}" build app-blue', checkout);
   const blue = script.indexOf("deploy_replica app-blue", build);
   const green = script.indexOf("deploy_replica app-green", blue);
+  const worker = script.indexOf(
+    '"${compose[@]}" up -d --no-deps federation-worker',
+    green,
+  );
   assert.ok(
     backup >= 0 &&
       checkout > backup &&
       build > checkout &&
       blue > build &&
-      green > blue,
+      green > blue &&
+      worker > green,
   );
   assert.doesNotMatch(script, /stop app/);
   assert.doesNotMatch(script, /down\s+(?:[^\n]*\s)?-v/);
@@ -35,6 +40,7 @@ test("deployment backs up online and rolls the two app replicas one at a time", 
 test("deployment health checks, disk space and attempts a code rollback", () => {
   assert.match(script, /curl --fail --silent --show-error "\$HEALTH_URL"/);
   assert.match(script, /healthcheck_replica/);
+  assert.match(script, /healthcheck_worker/);
   assert.match(
     script,
     /docker image tag "\$previous_image" kamelog-app:current/,
@@ -55,6 +61,8 @@ test("compose keeps a gateway in front of two application replicas", async () =>
   assert.match(compose, /gateway:/);
   assert.match(compose, /app-blue:/);
   assert.match(compose, /app-green:/);
+  assert.match(compose, /federation-worker:/);
+  assert.match(compose, /scripts\/federation-worker-health\.mjs/);
   assert.match(compose, /127\.0\.0\.1:3000:3000/);
   assert.match(gateway, /server app-blue:3000 resolve/);
   assert.match(gateway, /server app-green:3000 resolve/);

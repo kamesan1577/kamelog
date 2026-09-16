@@ -79,6 +79,7 @@ type Post = {
   body: string;
   date: string;
   updatedAt?: string;
+  federationUpdatedAt?: string;
   tags: string[];
   autoTags?: {
     tag: string;
@@ -92,6 +93,7 @@ type Post = {
   time?: string;
   pinned?: boolean;
   images?: string[];
+  federationEnabled?: boolean;
 };
 type Draft = {
   revision?: number;
@@ -518,6 +520,8 @@ export default function Notebook({
     [inlineBody, setInlineBody] = useState(""),
     [editorImages, setEditorImages] = useState<string[]>([]),
     [inlineImages, setInlineImages] = useState<string[]>([]),
+    [editorFederationEnabled, setEditorFederationEnabled] = useState(true),
+    [inlineFederationEnabled, setInlineFederationEnabled] = useState(true),
     [xIntent, setXIntent] = useState<Record<Kind, boolean>>({
       blog: true,
       tweet: true,
@@ -625,6 +629,25 @@ export default function Notebook({
       </span>
     </label>
   );
+  const federationToggle = (
+    target: Kind,
+    checked: boolean,
+    setChecked: (value: boolean) => void,
+  ) =>
+    federationStatus?.enabled && target !== "vlog" ? (
+      <label className="x-intent-toggle federation-post-toggle">
+        <span>Fediverseにも配信</span>
+        <input
+          type="checkbox"
+          role="switch"
+          checked={checked}
+          onChange={(event) => setChecked(event.target.checked)}
+        />
+        <span className="x-intent-track" aria-hidden="true">
+          <span />
+        </span>
+      </label>
+    ) : null;
   const xFallbackAction = xFallback && (
     <a
       className="x-intent-fallback"
@@ -856,10 +879,17 @@ export default function Notebook({
     setTitle(t);
     setBody(b);
     setEditorImages(p?.images ?? d?.images ?? []);
+    setEditorFederationEnabled(p ? p.federationEnabled === true : true);
     setEditId(p?.id || null);
     setDraftId(d?.id || null);
     setEditorStart(
-      JSON.stringify({ k, t, b, images: p?.images ?? d?.images ?? [] }),
+      JSON.stringify({
+        k,
+        t,
+        b,
+        images: p?.images ?? d?.images ?? [],
+        federation: p ? p.federationEnabled === true : true,
+      }),
     );
     setBlogEditorMode("edit");
     setFullPageEditor(false);
@@ -885,9 +915,18 @@ export default function Notebook({
       setTitle("");
       setBody("");
       setEditorImages([]);
+      setEditorFederationEnabled(true);
       setEditId(null);
       setDraftId(null);
-      setEditorStart(JSON.stringify({ k: "tweet", t: "", b: "", images: [] }));
+      setEditorStart(
+        JSON.stringify({
+          k: "tweet",
+          t: "",
+          b: "",
+          images: [],
+          federation: true,
+        }),
+      );
       setBlogEditorMode("edit");
       setFullPageEditor(false);
       setEditorDrafts(false);
@@ -903,8 +942,13 @@ export default function Notebook({
     );
   }, [editor, kind, blogEditorMode]);
   const dirty =
-    JSON.stringify({ k: kind, t: title, b: body, images: editorImages }) !==
-    editorStart;
+    JSON.stringify({
+      k: kind,
+      t: title,
+      b: body,
+      images: editorImages,
+      federation: editorFederationEnabled,
+    }) !== editorStart;
   const askClose = () => {
     if (kind === "vlog") {
       closeComposer();
@@ -961,6 +1005,7 @@ export default function Notebook({
             tags: old?.tags || [],
             pinned: old?.pinned || false,
             images: kind === "tweet" ? editorImages : [],
+            federationEnabled: editorFederationEnabled,
             ...(old ? { revision: old.revision } : {}),
           },
         );
@@ -1002,6 +1047,7 @@ export default function Notebook({
           tags: [],
           pinned: false,
           images: inlineImages,
+          federationEnabled: inlineFederationEnabled,
         });
         setPosts((ps) => [saved, ...ps]);
         setInlineBody("");
@@ -1322,6 +1368,7 @@ export default function Notebook({
                     revision: p.revision,
                     ...(p.video ? { video: p.video, time: p.time } : {}),
                     images: p.images || [],
+                    federationEnabled: p.federationEnabled === true,
                   });
                   await refresh();
                 })
@@ -1985,6 +2032,11 @@ export default function Notebook({
                       )}
                       <div className="composer-kinds">
                         {xToggle("tweet")}
+                        {federationToggle(
+                          "tweet",
+                          inlineFederationEnabled,
+                          setInlineFederationEnabled,
+                        )}
                         <label className="image-upload-button">
                           <ImageIcon />
                           画像
@@ -2335,6 +2387,7 @@ export default function Notebook({
                         setTitle(draft.title);
                         setBody(draft.body);
                         setEditorImages(draft.images || []);
+                        setEditorFederationEnabled(true);
                         setEditId(null);
                         setDraftId(draft.id);
                         setEditorStart(
@@ -2343,6 +2396,7 @@ export default function Notebook({
                             t: draft.title,
                             b: draft.body,
                             images: draft.images || [],
+                            federation: true,
                           }),
                         );
                         setEditorDrafts(false);
@@ -2388,6 +2442,11 @@ export default function Notebook({
             </TabsList>
           </Tabs>
           {xToggle(kind)}
+          {federationToggle(
+            kind,
+            editorFederationEnabled,
+            setEditorFederationEnabled,
+          )}
           {kind === "vlog" ? (
             <>
               <Tabs

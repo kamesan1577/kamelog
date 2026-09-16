@@ -145,6 +145,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   const xSwitch = page.getByRole("switch", { name: "Xにも投稿" });
   await expect(xSwitch).toBeChecked();
+  await expect(
+    page.getByRole("switch", { name: "Fediverseにも配信" }),
+  ).toBeChecked();
   await page.locator(".editor-dialog").screenshot({
     path: testInfo.outputPath("landing-x-intent-mobile.png"),
   });
@@ -195,6 +198,11 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
       .locator(".desktop-composer")
       .getByRole("switch", { name: "Xにも投稿" }),
   ).not.toBeChecked();
+  await expect(
+    page
+      .locator(".desktop-composer")
+      .getByRole("switch", { name: "Fediverseにも配信" }),
+  ).toBeChecked();
   await page.keyboard.press("n");
   const modalBody = page.getByPlaceholder("本文", { exact: true });
   await expect(modalBody).toBeFocused();
@@ -502,6 +510,19 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     (post: { title: string }) => post.title === "架空のブログ",
   );
   expect(blog.id).toBe(openedPostId);
+  expect(blog.federationEnabled).toBe(true);
+  expect(
+    posts.find(
+      (post: { body: string }) =>
+        post.body === "ホームから直接投稿する架空のつぶやき",
+    ).federationEnabled,
+  ).toBe(true);
+  const outbox = await (await page.request.get("/activitypub/outbox")).json();
+  expect(
+    outbox.orderedItems.some(
+      (activity: { type: string }) => activity.type === "Create",
+    ),
+  ).toBe(true);
   const shared = await page.request.get("/?post=" + blog.id);
   expect(await shared.text()).toContain('property="og:image"');
   const og = await page.request.get("/og?post=" + blog.id);

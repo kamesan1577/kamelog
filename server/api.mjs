@@ -21,6 +21,10 @@ import {
   federationStatus,
   InvalidFederationUsername,
 } from "./activitypub.mjs";
+import {
+  enqueuePostFederationDelete,
+  enqueuePostFederationTransition,
+} from "./federation-outbound.mjs";
 
 export function configuration(env = process.env) {
   const origin = env.KAMELOG_ORIGIN || "http://localhost:3000";
@@ -349,7 +353,14 @@ export function createAPI(store, config) {
       if (["posts", "drafts"].includes(path[0])) {
         const table = path[0];
         if (method === "DELETE") {
-          store.remove(table, path[1], Number(req.headers.get("if-match")));
+          store.remove(
+            table,
+            path[1],
+            Number(req.headers.get("if-match")),
+            table === "posts"
+              ? (post) => enqueuePostFederationDelete(store, config, post)
+              : undefined,
+          );
           return json({ ok: true });
         }
         if (method === "POST" || method === "PUT") {
@@ -385,6 +396,23 @@ export function createAPI(store, config) {
           )
             return json({ error: "Unknown image" }, 400);
           const now = new Date().toISOString();
+          const federationEnabled =
+            table === "posts" &&
+            Boolean(store.federationIdentity()) &&
+            input.kind !== "vlog" &&
+            (input.federationEnabled ?? old?.federationEnabled) === true;
+          const federationContentChanged =
+            !old ||
+            old.kind !== input.kind ||
+            old.title !== input.title ||
+            old.body !== input.body ||
+            JSON.stringify(old.images || []) !==
+              JSON.stringify(input.images || []);
+          const federationUpdatedAt = federationEnabled
+            ? !old?.federationEnabled || federationContentChanged
+              ? now
+              : old.federationUpdatedAt || old.updatedAt || old.date
+            : old?.federationUpdatedAt;
           return json(
             store.save(
               table,
@@ -396,10 +424,24 @@ export function createAPI(store, config) {
                   ? { tags: extractHashtags(input.title, input.body) }
                   : {}),
                 ...(table === "posts"
-                  ? { date: old?.date || now, likes: old?.likes || 0 }
+                  ? {
+                      date: old?.date || now,
+                      likes: old?.likes || 0,
+                      federationEnabled,
+                      ...(federationUpdatedAt ? { federationUpdatedAt } : {}),
+                    }
                   : { savedAt: now }),
               },
               input.revision,
+              table === "posts"
+                ? (saved, previous) =>
+                    enqueuePostFederationTransition(
+                      store,
+                      config,
+                      saved,
+                      previous,
+                    )
+                : undefined,
             ),
             method === "POST" ? 201 : 200,
           );

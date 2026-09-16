@@ -17,8 +17,30 @@ domainは `KAMELOG_ORIGIN` のhostを使う。ActivityPub専用のenable、usern
 - `GET /activitypub/outbox`
 - `GET /activitypub/followers`
 - `GET /activitypub/following`
+- `GET /activitypub/objects/:postId`
+- `GET /activitypub/activities/...`
 
-Actorは既存profileの表示名、bio、iconを参照する。現段階のoutbox/followers/followingは空のOrderedCollectionであり、inboxは署名済みactivityを検証してidempotency recordへ保存する。FollowやCreate等の状態反映・配送は後続phaseで追加する。
+Actorは既存profileの表示名、bio、iconを参照する。outboxは生成済みactivity、followersは承認済みremote Actor、followingは現段階では空のOrderedCollectionを返す。ローカルobject/activity URLは一度配送した識別子を維持する。
+
+## ローカル投稿とfollowers
+
+ActivityPub有効化後の新規つぶやき・ブログはUIで `Fediverseにも配信` が既定ONになる。vlogは対象外。投稿ごとの `federationEnabled` をSQLiteのpost dataへ保存し、次の遷移をlocal postと同じtransactionでoutbound activityへ変換する。
+
+- OFFからON: `Create(Note)`
+- ONの本文・タイトル・画像変更: `Update(Note)`
+- ONからOFF、またはONの投稿削除: `Delete(Tombstone)`
+
+つぶやきはescaped HTML本文、canonical URL、公開画像、published/updatedをNoteへ載せる。ブログはタイトル、240文字以内の概要、canonical URLをNoteへ載せ、記事全文をremote側の正本にしない。固定状態だけの変更ではUpdateを生成しない。既存投稿は `federationEnabled=false` として扱い、明示操作なしに過去分を一括配送しない。
+
+署名済み `Follow` はlocal Actor宛てだけを自動承認し、Actorのinbox/sharedInbox、元Follow IDを保存して `Accept` をqueueへ積む。同じsharedInboxは投稿activityごとに1配送へまとめる。`Undo(Follow)` は元Follow IDと署名Actorが一致したfollowerだけを削除する。
+
+## Durable delivery worker
+
+outbound activityとremote inbox単位のdeliveryをSQLiteへ保存する。local post APIはremote通信を行わず成功し、`federation-worker` Compose serviceが同じimage・volumeからpending jobを取得してHTTP署名付きPOSTを行う。
+
+workerは処理中jobを5分後に回収可能とし、一時的なnetwork error、408、429、5xxを指数backoff（最大6時間、既定8 attempt）で再試行する。他の4xxと上限到達はdead stateにする。redirect先もURL/DNS/IPを再検証し、移動後のURLへ署名し直す。1件の失敗で他deliveryを止めない。
+
+owner限定status APIはpending/dead件数、follower数、最終inbox受信時刻、worker heartbeatを返す。logはactivity type、remote domain、status、retry countだけを出し、本文・署名・鍵を出さない。
 
 ## HTTP signature
 

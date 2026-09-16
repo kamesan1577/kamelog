@@ -56,10 +56,44 @@ export class Store {
         type TEXT NOT NULL,
         received_at TEXT NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS federation_followers(
+        actor_id TEXT PRIMARY KEY,
+        inbox_url TEXT NOT NULL,
+        shared_inbox_url TEXT,
+        follow_activity_id TEXT NOT NULL,
+        followed_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS federation_outbound_activities(
+        id TEXT PRIMARY KEY,
+        type TEXT NOT NULL,
+        object_id TEXT NOT NULL,
+        body TEXT NOT NULL,
+        created_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS federation_deliveries(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        activity_id TEXT NOT NULL REFERENCES federation_outbound_activities(id) ON DELETE CASCADE,
+        inbox_url TEXT NOT NULL,
+        state TEXT NOT NULL CHECK(state IN ('pending', 'processing', 'succeeded', 'dead')),
+        attempts INTEGER NOT NULL DEFAULT 0,
+        next_attempt_at INTEGER NOT NULL,
+        claimed_at INTEGER,
+        last_status INTEGER,
+        last_error TEXT,
+        completed_at TEXT,
+        UNIQUE(activity_id, inbox_url)
+      );
+      CREATE INDEX IF NOT EXISTS federation_deliveries_ready
+        ON federation_deliveries(state, next_attempt_at, id);
+      CREATE TABLE IF NOT EXISTS federation_worker_state(
+        id INTEGER PRIMARY KEY CHECK(id = 1),
+        last_heartbeat_at TEXT NOT NULL
+      );
       INSERT OR IGNORE INTO migrations VALUES(1);
       INSERT OR IGNORE INTO migrations VALUES(2);
       INSERT OR IGNORE INTO migrations VALUES(3);
-      INSERT OR IGNORE INTO migrations VALUES(4);`);
+      INSERT OR IGNORE INTO migrations VALUES(4);
+      INSERT OR IGNORE INTO migrations VALUES(5);`);
     this.db
       .prepare("SELECT id, data FROM posts")
       .all()
@@ -173,7 +207,7 @@ export class Store {
     if (!["posts", "drafts", "settings", "credentials", "media"].includes(name))
       throw new Error("Unknown collection");
   }
-  save(table, id, value, revision) {
+  save(table, id, value, revision, afterSave) {
     this.table(table);
     if (!["posts", "drafts"].includes(table)) {
       this.db
@@ -222,16 +256,22 @@ export class Store {
             )
             .run(id, tag);
       }
-      return this.get(table, id);
+      const saved = this.get(table, id);
+      afterSave?.(saved, old);
+      return saved;
     });
   }
-  remove(table, id, revision) {
+  remove(table, id, revision, afterRemove) {
     this.table(table);
     if (["posts", "drafts"].includes(table)) {
-      const result = this.db
-        .prepare(`DELETE FROM ${table} WHERE id=? AND revision=?`)
-        .run(id, revision);
-      if (!result.changes) throw new Conflict("Revision conflict");
+      return this.transaction(() => {
+        const old = this.get(table, id);
+        const result = this.db
+          .prepare(`DELETE FROM ${table} WHERE id=? AND revision=?`)
+          .run(id, revision);
+        if (!result.changes) throw new Conflict("Revision conflict");
+        afterRemove?.(old);
+      });
     } else this.db.prepare(`DELETE FROM ${table} WHERE id=?`).run(id);
   }
   recordView(id) {
@@ -324,6 +364,231 @@ export class Store {
       )
       .run(activity.id, activity.actorId, activity.type, activity.receivedAt);
     return result.changes > 0;
+  }
+  federationFollowers() {
+    return this.db
+      .prepare(
+        `SELECT actor_id AS actorId, inbox_url AS inboxUrl,
+                shared_inbox_url AS sharedInboxUrl,
+                follow_activity_id AS followActivityId,
+                followed_at AS followedAt
+         FROM federation_followers ORDER BY followed_at DESC`,
+      )
+      .all();
+  }
+  federationFollower(actorId) {
+    return (
+      this.db
+        .prepare(
+          `SELECT actor_id AS actorId, inbox_url AS inboxUrl,
+                  shared_inbox_url AS sharedInboxUrl,
+                  follow_activity_id AS followActivityId,
+                  followed_at AS followedAt
+           FROM federation_followers WHERE actor_id=?`,
+        )
+        .get(actorId) || null
+    );
+  }
+  saveFederationFollower(follower) {
+    this.db
+      .prepare(
+        `INSERT INTO federation_followers
+         (actor_id, inbox_url, shared_inbox_url, follow_activity_id, followed_at)
+         VALUES (?, ?, ?, ?, ?)
+         ON CONFLICT(actor_id) DO UPDATE SET
+           inbox_url=excluded.inbox_url,
+           shared_inbox_url=excluded.shared_inbox_url,
+           follow_activity_id=excluded.follow_activity_id,
+           followed_at=excluded.followed_at`,
+      )
+      .run(
+        follower.actorId,
+        follower.inboxUrl,
+        follower.sharedInboxUrl || null,
+        follower.followActivityId,
+        follower.followedAt,
+      );
+    return this.federationFollower(follower.actorId);
+  }
+  removeFederationFollower(actorId, followActivityId) {
+    const result = followActivityId
+      ? this.db
+          .prepare(
+            "DELETE FROM federation_followers WHERE actor_id=? AND follow_activity_id=?",
+          )
+          .run(actorId, followActivityId)
+      : this.db
+          .prepare("DELETE FROM federation_followers WHERE actor_id=?")
+          .run(actorId);
+    return result.changes > 0;
+  }
+  federationFollowerInboxes() {
+    return this.db
+      .prepare(
+        `SELECT DISTINCT COALESCE(shared_inbox_url, inbox_url) AS inboxUrl
+         FROM federation_followers ORDER BY inboxUrl`,
+      )
+      .all()
+      .map(({ inboxUrl }) => inboxUrl);
+  }
+  enqueueFederationActivity(activity, inboxes) {
+    this.db
+      .prepare(
+        `INSERT OR IGNORE INTO federation_outbound_activities
+         (id, type, object_id, body, created_at) VALUES (?, ?, ?, ?, ?)`,
+      )
+      .run(
+        activity.id,
+        activity.type,
+        activity.objectId,
+        JSON.stringify(activity.body),
+        activity.createdAt,
+      );
+    const enqueue = this.db.prepare(
+      `INSERT OR IGNORE INTO federation_deliveries
+       (activity_id, inbox_url, state, attempts, next_attempt_at)
+       VALUES (?, ?, 'pending', 0, ?)`,
+    );
+    for (const inbox of new Set(inboxes))
+      enqueue.run(activity.id, inbox, activity.nextAttemptAt ?? Date.now());
+  }
+  federationOutboundActivity(id) {
+    const row = this.db
+      .prepare(
+        `SELECT id, type, object_id AS objectId, body, created_at AS createdAt
+         FROM federation_outbound_activities WHERE id=?`,
+      )
+      .get(id);
+    return row ? { ...row, body: JSON.parse(row.body) } : null;
+  }
+  federationOutboxActivities(limit = 100) {
+    return this.db
+      .prepare(
+        `SELECT body FROM federation_outbound_activities
+         ORDER BY created_at DESC, rowid DESC LIMIT ?`,
+      )
+      .all(Math.max(1, Math.min(100, limit)))
+      .map(({ body }) => JSON.parse(body));
+  }
+  claimFederationDelivery(now = Date.now(), staleAfterMs = 5 * 60_000) {
+    return this.transaction(() => {
+      this.db
+        .prepare(
+          `UPDATE federation_deliveries
+           SET state='pending', claimed_at=NULL, next_attempt_at=?
+           WHERE state='processing' AND claimed_at<?`,
+        )
+        .run(now, now - staleAfterMs);
+      const candidate = this.db
+        .prepare(
+          `SELECT id FROM federation_deliveries
+           WHERE state='pending' AND next_attempt_at<=?
+           ORDER BY next_attempt_at, id LIMIT 1`,
+        )
+        .get(now);
+      if (!candidate) return null;
+      this.db
+        .prepare(
+          `UPDATE federation_deliveries
+           SET state='processing', claimed_at=?, attempts=attempts+1
+           WHERE id=? AND state='pending'`,
+        )
+        .run(now, candidate.id);
+      return this.db
+        .prepare(
+          `SELECT deliveries.id, deliveries.inbox_url AS inboxUrl,
+                  deliveries.attempts, activities.id AS activityId,
+                  activities.type, activities.object_id AS objectId,
+                  activities.body
+           FROM federation_deliveries deliveries
+           JOIN federation_outbound_activities activities
+             ON activities.id=deliveries.activity_id
+           WHERE deliveries.id=?`,
+        )
+        .get(candidate.id);
+    });
+  }
+  completeFederationDelivery(id, status, now = new Date()) {
+    this.db
+      .prepare(
+        `UPDATE federation_deliveries
+         SET state='succeeded', last_status=?, last_error=NULL,
+             completed_at=?, claimed_at=NULL
+         WHERE id=? AND state='processing'`,
+      )
+      .run(status, now.toISOString(), id);
+  }
+  failFederationDelivery(
+    id,
+    {
+      status = null,
+      error = "delivery failed",
+      now = Date.now(),
+      maxAttempts = 8,
+    },
+  ) {
+    const delivery = this.db
+      .prepare("SELECT attempts FROM federation_deliveries WHERE id=?")
+      .get(id);
+    if (!delivery) return null;
+    const retryable =
+      status === null || status === 408 || status === 429 || status >= 500;
+    const dead = !retryable || delivery.attempts >= maxAttempts;
+    const backoff = Math.min(6 * 60 * 60_000, 5_000 * 2 ** delivery.attempts);
+    this.db
+      .prepare(
+        `UPDATE federation_deliveries
+         SET state=?, next_attempt_at=?, claimed_at=NULL,
+             last_status=?, last_error=?
+         WHERE id=? AND state='processing'`,
+      )
+      .run(
+        dead ? "dead" : "pending",
+        dead ? now : now + backoff,
+        status,
+        String(error).slice(0, 240),
+        id,
+      );
+    return { dead, nextAttemptAt: dead ? null : now + backoff };
+  }
+  federationDiagnostics(now = Date.now()) {
+    const counts = Object.fromEntries(
+      this.db
+        .prepare(
+          "SELECT state, count(*) AS count FROM federation_deliveries GROUP BY state",
+        )
+        .all()
+        .map(({ state, count }) => [state, Number(count)]),
+    );
+    const lastInbox = this.db
+      .prepare(
+        "SELECT received_at AS receivedAt FROM federation_inbox_activities ORDER BY received_at DESC LIMIT 1",
+      )
+      .get();
+    const worker = this.db
+      .prepare(
+        "SELECT last_heartbeat_at AS lastHeartbeatAt FROM federation_worker_state WHERE id=1",
+      )
+      .get();
+    const heartbeat = worker?.lastHeartbeatAt || null;
+    return {
+      pendingDeliveries: (counts.pending || 0) + (counts.processing || 0),
+      failedDeliveries: counts.dead || 0,
+      followerCount: this.federationFollowers().length,
+      lastInboxAt: lastInbox?.receivedAt || null,
+      worker: {
+        healthy: Boolean(heartbeat && now - Date.parse(heartbeat) < 30_000),
+        lastHeartbeatAt: heartbeat,
+      },
+    };
+  }
+  heartbeatFederationWorker(now = new Date()) {
+    this.db
+      .prepare(
+        `INSERT INTO federation_worker_state(id, last_heartbeat_at) VALUES(1, ?)
+         ON CONFLICT(id) DO UPDATE SET last_heartbeat_at=excluded.last_heartbeat_at`,
+      )
+      .run(now.toISOString());
   }
   schemaVersion() {
     return Number(
