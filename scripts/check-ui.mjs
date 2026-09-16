@@ -1,10 +1,62 @@
-import { readFileSync } from "node:fs";
-import { createHash } from "node:crypto";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import path from "node:path";
 import assert from "node:assert/strict";
-// Approved CSS at the initial public snapshot. Backend changes may not redesign it.
-assert.equal(
-  createHash("sha256").update(readFileSync("app/globals.css")).digest("hex"),
-  "3a723aeb509d151b9fba24ad3acbd220b50982020955f6549a31260ac153174d",
-  "Approved UI CSS changed. An explicit design decision is required.",
+
+const root = process.cwd();
+const designSystem = path.join(root, "components", "design-system");
+const allowlistPath = path.join(
+  root,
+  "docs",
+  "design-system",
+  "legacy-allowlist.json",
 );
-console.log("Approved CSS unchanged");
+const allowlist = JSON.parse(readFileSync(allowlistPath, "utf8"));
+
+function files(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const file = path.join(dir, entry.name);
+    return entry.isDirectory() ? files(file) : [file];
+  });
+}
+
+assert.equal(
+  existsSync(designSystem),
+  true,
+  "Design System directory is required",
+);
+for (const file of files(designSystem).filter(
+  (file) => /\.(tsx|ts)$/.test(file) && !file.endsWith(".stories.tsx"),
+)) {
+  const source = readFileSync(file, "utf8");
+  assert.equal(
+    /from ["']@\/app\//.test(source),
+    false,
+    `${path.relative(root, file)} imports a page layer`,
+  );
+  assert.equal(
+    /from ["'](?:react-markdown|radix-ui|@base-ui)/.test(source),
+    false,
+    `${path.relative(root, file)} imports a third-party primitive directly`,
+  );
+  const story = file.replace(/\.(tsx|ts)$/, ".stories.tsx");
+  assert.equal(
+    existsSync(story),
+    true,
+    `${path.relative(root, file)} must have a colocated Storybook story`,
+  );
+}
+
+const legacyFiles = files(path.join(root, "app")).filter((file) =>
+  /\.css$/.test(file),
+);
+const newLegacy = legacyFiles
+  .map((file) => path.relative(root, file))
+  .filter((file) => !allowlist.css.includes(file));
+assert.deepEqual(
+  newLegacy,
+  [],
+  `Untracked legacy CSS files: ${newLegacy.join(", ")}`,
+);
+console.log(
+  `UI semantic guardrails passed (${allowlist.css.length} legacy CSS files tracked)`,
+);

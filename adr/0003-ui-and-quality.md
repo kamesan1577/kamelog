@@ -27,3 +27,5 @@ Issueは作業の追跡、リポジトリ内文書は仕様の正本。
 同Issueの追加レビューを受け、コンテンツ種別アイコンは薄いグレー面と細い全周罫線、経歴の年は背景を持たない文字表示へ戻す。カードの片側だけを太い罫線で強調する意匠はAI生成的に見えるため採用しない。強調は情報階層、文字の太さ、全周罫線、余白で表現する。
 
 2026-09-08、利用者の明示依頼に基づき、スマホ下部ナビゲーションのホーム・タイムライン・プロジェクトを画面幅の3等分となる等幅タップ領域へ変更する。項目順、アイコン、遷移、高さ、下部固定、投稿FABの位置関係は維持する。
+
+2026-09-16 Issue #98: Without changing the approved screen CSS, establish the Design System token, primitive/layout, Storybook, ESLint semantic guardrail, and Playwright visual regression foundation. Full migration of existing UI is deferred to #99.

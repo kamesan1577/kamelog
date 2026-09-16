@@ -1,4 +1,4 @@
-.PHONY: setup dev build test lint check public-repo-check e2e docker-dev docker-up
+.PHONY: setup dev build test lint check public-repo-check e2e storybook storybook-build storybook-test visual docker-dev docker-up
 setup:
 	npm ci
 dev:
@@ -20,8 +20,18 @@ check: public-repo-check
 	npm test
 	npm run build
 	node --test tests/ui-components.test.mjs
+	npm run storybook:build
+	npm run test:storybook
 e2e:
 	npm run test:e2e
+storybook:
+	npm run storybook
+storybook-build:
+	npm run storybook:build
+storybook-test:
+	npm run test:storybook
+visual:
+	npm run test:visual
 docker-dev:
 	docker compose -f compose.dev.yaml up --build
 docker-up:

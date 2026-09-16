@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-16 Issue #98: Storybook 10, addon-vitest, Design System tokens, primitives/layout, and colocated stories were added. @shadcn/lint is integrated into ESLint 9 with the six requested rules as errors for the Design System area. check:ui now validates dependency direction, Story presence, and a non-growing legacy CSS allowlist instead of pinning globals.css. Playwright visual regression covers 390, 768, and 1440px. Component tests (13) and visual tests (3) passed in the official Playwright container. Existing unit tests (75) passed with Node 24 and FFmpeg. Host make check stopped at one media test because FFmpeg is unavailable; CI installs browser and OS dependencies. Full UI migration remains #99.
+
 2026-09-14 Issue #102: トップの技術プロフィール、実務の取り組み、Selected Works、学歴・資格・連絡先を型付き公開データから表示。Projectsに3件の内部詳細ページを追加し、Qiitaを作品一覧から移した。`make check` は成功。Chromium配布元がtimeout/502を返してブラウザを取得できず、ローカル `make e2e` はブラウザ起動前に停止。PR CIでE2Eを確認する。実機確認は未実施。
 
 2026-09-13 Issue #96: X Web Intentを新規投稿に追加。つぶやき・ブログは初回ON、vlogはOFF、端末で種別ごとに保存。公式twitter-textで280 weighted charactersを検証し、保存失敗時の空タブ閉鎖とポップアップ遮断時の手動リンクを実装。CIおよび実機確認はPRで追跡する。
@@ -53,6 +55,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 
 ## 検証済み
 
+- 2026-09-16 ActivityPub Phase 8で、隔離した2 Actor fixtureを追加した。署名付きinboxとdurable workerを通し、Follow→Accept→公開Note→受信→RP/Announce→Undo(Announce)の配送を確認した。既存のbackup/restore回帰はidentity、followers/following、remote timeline、RP、reaction、pending deliveryを空の復元先へ復元し、改竄backupを拒否することを確認している。隔離ポート・一時Chromium/FFmpeg/FFprobe環境でPlaywright 19件も成功した。Mastodon系・Misskey系の実機相互運用は公開HTTPS環境と外部アカウントでのみ実施できるため未確認。
 - 2026-09-16 ActivityPub Phase 6でlocal federated postへのLike/EmojiReact受信、Actor単位dedupe、Undo/Delete、local likesとのquery時合算を追加した。`make check`（unit 73件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。同一Actorのreaction置換、古いUndoの無効化、現在reactionのUndo/Delete、非following Actor、投稿編集後のlocal likes非汚染、backup/restoreをunit testで確認した。
 - 2026-09-16 ActivityPub Phase 5でownerのremote投稿RP/解除、公開Timelineの「すべて」へのRP混在、Announce/Undoのdurable配送、remote Delete連動、公開RP画像の限定配信を追加した。`make check`（unit 72件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。RP APIの認証、二重RP拒否、別Actor Delete拒否、unfollow後の正規Actor Delete、backup/restore、公開画像のRP解除後404をunit testで確認した。
 - 2026-09-16 ActivityPub Phase 4でowner-only Fediverse timeline、self投稿、cursor、refresh、original link、remote image proxy/cacheを追加した。`make check`（unit 71件、typecheck、lint、format、production build、public-repo check）が成功。未ログインAPI拒否、local URLへのattachment置換、cursor、不正画像拒否、cache再利用、remote Delete後のfile/mapping無効化をunit testで確認した。ローカル環境にPlaywright Chromiumがないため、追加したmode切替・self表示・refresh・390px screenshotはstacked PR CIで確認する。
@@ -88,6 +91,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - 実ドメインとTLS reverse proxy。
 - 実機iOS/Androidでのパスキー、投稿モーダル初期フォーカス・ソフトウェアキーボード・フォーカス時自動ズームなし、横向き撮影、既存動画upload。
 - 永続volumeから別ディレクトリへの復元訓練とオフホスト暗号化backup。
+- Mastodon系とMisskey系の公開HTTPS実装を使うActivityPub相互運用（handle検索、Follow、Create/Update/Delete、Like、RP/Undo）。
 - GitHub required checks `check` / `e2e` / `container` の有効化。
 - Cloudflare Tunnelを含むホスト再起動試験。
 - SEO変更後の公開originでmobile / desktop LighthouseとCrUX INP、公開/直結TTFBを再計測する。

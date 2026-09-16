@@ -18,6 +18,7 @@
 閲覧・共有のE2Eは、投稿詳細URLと詳細内の戻る、ブラウザの戻る/進むが同期することも確認する。
 
 `make check` は公開検査・型検査・lint・テスト・本番buildを集約する。
+Storybookのcatalogは `npm run storybook`、production buildは `npm run storybook:build`、Storybook component testは `npm run test:storybook`、固定viewportのvisual regressionは `npm run test:visual` で実行する。CIのcheckはNode 24とPlaywrightのOS依存を導入してStorybook build/component testを実行し、e2e jobはvisual regressionも実行する。
 `make e2e` は実アプリに対してブラウザjourneyを実行する。retryは0、fixtureは固定、テスト間でデータを隔離する。
 CIはcheck/e2e/containerを別jobとして失敗を可視化する。失敗成果物は架空データに限定する。
 受入条件を弱める変更、テスト削除、baseline更新はその理由と承認を必要とする。
@@ -28,3 +29,5 @@ systemdがアプリのboot起動と更新timerを管理し、更新scriptは成�
 GitHub Actions runnerへ本番サーバー資格情報を渡さない。
 自動更新はオンライン整合backup後に新imageをbuildし、常駐gateway配下のblue/greenを個別health確認しながら1系統ずつ更新する。片系更新中は他方が応答し、health失敗時は直前コードへ戻す。
 schema非互換時のデータrollbackは自動化せず、runbookに従い別volumeへ復元する。
+
+Storybook commands: `npm run storybook`, `npm run storybook:build`, `npm run test:storybook`, and `npm run test:visual`. CI installs Node 24 and Playwright OS dependencies before running the Storybook and visual gates.
