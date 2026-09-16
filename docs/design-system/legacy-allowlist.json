@@ -5,7 +5,6 @@
     "app/detail-actions.css",
     "app/engineering.css",
     "app/federation.css",
-    "app/federation/federation-guide.module.css",
     "app/full-page-blog-editor.css",
     "app/globals.css",
     "app/landing.css",
