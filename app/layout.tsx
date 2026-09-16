@@ -18,19 +18,25 @@ import { ImageUploadBridge } from "@/components/image-upload-bridge";
 import { NavigationUrlBridge } from "@/components/navigation-url-bridge";
 import { ProfileSocialLinksBridge } from "@/components/profile-social-links-bridge";
 import { TweetLinkPreviewBridge } from "@/components/tweet-link-preview-bridge";
-import { homeUrl, ogImageUrl, siteOrigin } from "@/server/seo.mjs";
+import {
+  homeUrl,
+  ogImageUrl,
+  SITE_DESCRIPTION,
+  SITE_TITLE,
+  siteOrigin,
+} from "@/server/seo.mjs";
 
 const canonical = homeUrl();
 const image = ogImageUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin()),
-  title: "kamelog",
-  description: "ブログ、つぶやき、vlogをまとめる個人サイト。",
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
   alternates: { canonical },
   openGraph: {
-    title: "kamelog",
-    description: "ブログ、つぶやき、vlogをまとめる個人サイト。",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     siteName: "kamelog",
     type: "website",
     url: canonical,
@@ -38,8 +44,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "kamelog",
-    description: "ブログ、つぶやき、vlogをまとめる個人サイト。",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     images: [image],
   },
   other: { "twitter:url": canonical },

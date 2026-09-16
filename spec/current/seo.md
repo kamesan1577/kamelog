@@ -1,5 +1,11 @@
 # SEO / 検索エンジン向け公開仕様
 
+## ホームの検索・共有表示
+
+- ホームのタイトルは `kamelog | かめさんのテックブログ`、説明文は `作ったもの、考えたこと、たまに日常。Webエンジニア・かめさんのブログとつぶやき、動画をまとめています。` とする。
+- 通常のtitle/description、Open Graph、Twitterカード、WebSite JSON-LDの説明文を一致させる。WebSiteのnameとsiteNameはブランド名 `kamelog` を維持する。
+- サイト上のロゴ・名称、投稿固有のタイトルと説明文は変更しない。
+
 ## 公開URL
 
 - 公開URLのoriginは `KAMELOG_ORIGIN` を正本とする。

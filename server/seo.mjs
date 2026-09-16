@@ -1,5 +1,7 @@
 const PRODUCTION_ORIGIN = "https://kamesan.org";
-const SITE_DESCRIPTION = "ブログ、つぶやき、vlogをまとめる個人サイト。";
+export const SITE_TITLE = "kamelog | かめさんのテックブログ";
+export const SITE_DESCRIPTION =
+  "作ったもの、考えたこと、たまに日常。Webエンジニア・かめさんのブログとつぶやき、動画をまとめています。";
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 export function siteOrigin(env = process.env) {
