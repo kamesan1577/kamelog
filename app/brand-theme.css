@@ -90,7 +90,8 @@ textarea:focus {
   border-bottom-color: var(--kamelog-ink);
 }
 
-.feed-tabs [data-slot="tabs-trigger"][data-state="active"]::after {
+[data-ds="timeline-tabs"]
+  [data-slot="tabs-trigger"][data-state="active"]::after {
   background: var(--kamelog-ink);
 }
 
