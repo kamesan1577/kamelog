@@ -42,6 +42,7 @@ import { SideNavigation } from "@/components/design-system/patterns/SideNavigati
 import { MobileNavigation } from "@/components/design-system/patterns/MobileNavigation";
 import { PageHeader } from "@/components/design-system/patterns/PageHeader";
 import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
+import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -2058,43 +2059,19 @@ export default function Notebook({
               ) : view === "projects" ? (
                 <section className="projects-page">
                   <PageHeader title="プロジェクト" />
-                  <div className="project-grid">
-                    {projects.map((project) => {
-                      const card = (
-                        <>
-                          <img src={project.thumbnail} alt="" />
-                          <div>
-                            <h2>
-                              {project.title}{" "}
-                              {project.links.source && (
-                                <ArrowUpRight size={16} />
-                              )}
-                            </h2>
-                            <p>{project.summary}</p>
-                            <span>{project.stack.join(" · ")}</span>
-                          </div>
-                        </>
-                      );
-                      return project.links.source ? (
-                        <a
-                          className="project-tile"
-                          key={project.slug}
-                          href={project.links.source}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {card}
-                        </a>
-                      ) : (
-                        <div
-                          className="project-tile project-tile-static"
-                          key={project.slug}
-                        >
-                          {card}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <ProjectList
+                    className="project-grid"
+                    tileClassName="project-tile"
+                    staticTileClassName="project-tile project-tile-static"
+                    items={projects.map((project) => ({
+                      slug: project.slug,
+                      title: project.title,
+                      summary: project.summary,
+                      stack: project.stack,
+                      thumbnail: project.thumbnail,
+                      source: project.links.source,
+                    }))}
+                  />
                 </section>
               ) : item ? (
                 <section
