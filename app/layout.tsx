@@ -8,7 +8,7 @@ import "../components/design-system/patterns/MobileComposer.css";
 import "../components/design-system/patterns/FullPageBlogEditor.css";
 import "../components/design-system/patterns/LinkPreview.css";
 import "../components/design-system/patterns/DetailActions.css";
-import "./brand-theme.css";
+import "../styles/brand-theme.css";
 import "./mobile-nav-layout.css";
 import "../components/design-system/patterns/ProfileSocialLinks.css";
 import "./federation.css";
