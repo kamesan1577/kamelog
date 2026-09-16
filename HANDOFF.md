@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with a colocated PostCard pattern. Timeline local posts now share a semantic card shell with pinned state while feature-owned content and actions remain unchanged. lint, typecheck, UI semantic guardrails, and format check passed; stacked CI verification is pending.
+
 2026-09-17 Issue #99 migration continued with a colocated PostPreview pattern. Timeline blog/tweet excerpts now share the Design System rendering boundary while vlog-specific media remains feature-owned. lint, typecheck, UI semantic guardrails, format, and public-repo check passed. Storybook build passed; browser component tests remain blocked locally by missing Chromium, while stacked CI verification is pending.
 
 2026-09-17 Issue #99 migration continued with a colocated PostMeta pattern. Timeline/detail metadata now shares one Design System component while the app boundary retains the approved legacy CSS hooks. lint, typecheck, UI semantic guardrails, format, Storybook build, and public-repo check passed; local Storybook browser tests remain unavailable because Chromium is not installed. CI verification is pending on the stacked PR.
