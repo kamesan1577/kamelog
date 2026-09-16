@@ -69,7 +69,7 @@ test("federation guide keeps URL and history", async ({ page }) => {
   await expect(page).toHaveURL(/\/federation$/);
 });
 
-test("direct federation visit preserves query and history", async ({ page }) => {
+test("direct federation preserves query and history", async ({ page }) => {
   await page.goto("/");
   await page.goto("/federation?source=timeline");
   await expect(page).toHaveURL(/\/federation\?source=timeline$/);
