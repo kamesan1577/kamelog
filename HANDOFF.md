@@ -42,6 +42,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - ActivityPub有効化済みオーナーのTimelineに `kamelog | Fediverse` modeを追加し、Accept済みfollowingの受信投稿・Announceと自分のfederation対象投稿をcursor付きowner APIから表示する。refreshは受信済みstateだけを再取得する。remote画像はowner-only local URLへ置換し、SSRF、MIME、magic、寸法、8MiB上限を検証したうえで最大256MiBの再取得可能cacheへ保存する。
 - owner-only Fediverse timelineのremote投稿をRPすると、公開Timelineの「すべて」へ `かめさんがRP` として表示し、Announceをdurable queueへ積む。解除はUndo(Announce)を積み、remote Deleteでも同じtransactionで公開RPを無効化してUndoを積む。公開remote画像は有効なRPへ結び付く登録済みmappingだけを配信する。
 - local federated postへのLikeとEmojiReactをremote Actor単位で最大1件の「いいね」に正規化し、既存local likesへquery時に合算する。Undo/Deleteは同じActorの現在のreaction IDだけを解除し、古いUndoで置換後のreactionを消さない。remote内訳は公開しない。
+- `/federation` にActivityPub対応、現在のhandle、標準的な接続手順、inbound/outbound対応表、公開endpointを示す簡潔な公開ガイドを置く。通常画面のfooterとsitemapから到達でき、kamelog固有の登録や独自protocolは要求しない。
 - つぶやき詳細はルート投稿でも「スレッド」見出し・全件数・表示中の投稿を常に示し、親投稿・表示中・子孫投稿を上から下へ読める一つの画面として表示する。
 - AGENTS、仕様、不変条件、ADR、脅威モデル、runbook、リポジトリ固有skillsを整備。
 - 公開プロフィールは `@kamesan1577`、公開リンクはGitHubとQiitaを表示する。投稿・下書き・設定の実データは初期化しない。

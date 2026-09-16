@@ -18,6 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: home },
     { url: new URL("/timeline", home).toString() },
     { url: new URL("/projects", home).toString() },
+    { url: new URL("/federation", home).toString() },
     ...posts
       .filter((post) => post.kind === "blog")
       .map((post) => ({

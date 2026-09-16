@@ -56,7 +56,11 @@ ActivityPub有効化済みかつログイン中だけ、既存Timelineに `kamel
 
 remote cardはsanitized content、display name、handle、受信できた画像、original URLを表示する。Announceはannouncerを `○○がRP` として示す。remote iconはbrowserから直接取得せず、現段階では文字fallback avatarを使う。
 
-remote画像はowner-onlyのlocal URLへ置換し、初回表示時にserverが取得する。既存SSRF境界に加え、画像Content-Type、magic bytes、寸法、1件8MiBを検証する。cache directoryは256MiBを上限に古いfileから削除し、再取得可能なためbackupへ含めない。remote objectのUpdate/Delete後は旧mappingから画像を配信しない。videoや未対応媒体はproxyせずoriginal postへ誘導する。
+remote画像はlocal URLへ置換し、owner timelineまたは公開中RPの初回表示時にserverが取得する。未ログインには有効な公開RPと結び付くmappingだけを配信する。既存SSRF境界に加え、画像Content-Type、magic bytes、寸法、1件8MiBを検証する。cache directoryは256MiBを上限に古いfileから削除し、再取得可能なためbackupへ含めない。remote objectのUpdate/Delete後は旧mappingから画像を配信しない。videoや未対応媒体はproxyせずoriginal postへ誘導する。
+
+## Public federation guide
+
+`/federation` は一般visitorと他実装の開発者向けに、現在のFediverseアドレス、WebFingerから始める標準的な接続手順、inbound/outbound activity support matrix、公開endpointを表示する。kamelog固有の事前登録、API key、独自protocolは要求しない。長大なActivityPub入門や管理手順は公開ページへ載せず、W3C仕様とIssue窓口へ案内する。
 
 ## Public RP
 

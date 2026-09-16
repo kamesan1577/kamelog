@@ -21,7 +21,7 @@ remote mediaは受信時に無制限に保存せず、ownerがtimelineを表示�
 - inboxはHTTP request signatureとDigestを検証する。
 - Actor/WebFinger/object取得はHTTPS、公開IP、既定port、redirect再検証、DNS解決後の接続先固定、時間・response size・Content-Type上限を必須にする。
 - remote HTMLはallowlist sanitization後だけ保存・表示する。
-- activity IDを一意にし、再送を二重処理しない。
+- activity IDを一意にし、再送を二重処理しない。reactionはlocal postと署名Actorの組を一意にし、現在のactivity IDだけをUndoできる。
 - private keyとremote本文をresponse、HTML、log、Git、CI artifactへ出さない。
 
 ## 帰結

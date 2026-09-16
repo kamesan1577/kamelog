@@ -45,3 +45,19 @@ test("projects route delegates to the existing main UI", async () => {
   assert.doesNotMatch(source, /engineering-works/);
   assert.doesNotMatch(source, /public-profile/);
 });
+
+test("federation guide documents standard interoperability and is discoverable", async () => {
+  const [page, footer, sitemap] = await Promise.all([
+    readFile("app/federation/page.tsx", "utf8"),
+    readFile("app/site-page.tsx", "utf8"),
+    readFile("app/sitemap.ts", "utf8"),
+  ]);
+  assert.match(page, /ActivityPubに対応しています/);
+  assert.match(page, /特別なkamelogアカウントや接続申請は必要ありません/);
+  assert.match(page, /GET \/\.well-known\/webfinger/);
+  assert.match(page, /POST \/activitypub\/inbox/);
+  assert.match(page, /Like \/ EmojiReact \/ Undo/);
+  assert.match(page, /Like \/ Reply \/ DM/);
+  assert.match(footer, /href="\/federation"/);
+  assert.match(sitemap, /new URL\("\/federation", home\)/);
+});

@@ -23,6 +23,7 @@ bootstrap tokenは32文字以上の暗号学的乱数を管理環境で生成し
 `/setup` でパスキーを登録する。通常の公開画面は `/`。
 ログイン入口は折り畳みの「•••」。追加パスキーはログイン後 `/setup` から登録できる。
 ActivityPubを使う場合はownerでログインし、アカウント画面のFediverse欄からusernameを確認して一度だけ有効化する。private keyを画面やenvへコピーする作業はない。
+有効化後は `/federation` に表示されるFediverseアドレスと対応表を確認する。WebFinger、Actor、inbox等のendpointを手作業で登録する必要はない。
 
 localhostだけで確認する場合は `KAMELOG_ORIGIN=http://localhost:3000` を使用できる。
 公開ホストのHTTPはアプリが拒否する。実行プロセス/volumeは専用OSユーザーで管理する。
