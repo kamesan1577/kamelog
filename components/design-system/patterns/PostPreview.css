@@ -1,0 +1,33 @@
+[data-ds="post-preview"] {
+  display: block;
+  width: 100%;
+  border-radius: 3px;
+  text-align: left;
+}
+
+[data-ds="post-preview"] h2 {
+  margin: 12px 0 7px;
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.65;
+  letter-spacing: -0.2px;
+}
+
+[data-ds="post-preview"] > p:not(.tweet-body) {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #8d887e;
+  font-size: 16px;
+  line-height: 1.95;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+[data-ds="post-preview"] > .tweet-body {
+  margin: 14px 0 8px;
+  color: #625e54;
+  font-size: 16px;
+  line-height: 1.95;
+  white-space: pre-wrap;
+}

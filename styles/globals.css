@@ -573,29 +573,6 @@ textarea:focus {
   font-size: 12px;
   margin-bottom: 12px;
 }
-.post-focus {
-  display: block;
-  text-align: left;
-  width: 100%;
-  border-radius: 3px;
-}
-.post-focus h2 {
-  font-size: 19px;
-  font-weight: 650;
-  line-height: 1.65;
-  letter-spacing: -0.4px;
-  margin: 12px 0 7px;
-}
-.post-focus > p:not(.tweet-body) {
-  font-size: 14px;
-  line-height: 1.95;
-  color: #8d887e;
-  margin: 0;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
 .tweet-body {
   font-size: 15px;
   line-height: 1.95;
@@ -1566,10 +1543,6 @@ textarea:focus {
 }
 
 /* Reading content stays comfortable on both layouts. */
-.post-focus > p:not(.tweet-body),
-.tweet-body {
-  font-size: 16px;
-}
 .tags [data-slot="badge"],
 .read-time {
   font-size: 12px;
@@ -1584,12 +1557,6 @@ textarea:focus {
 }
 .mobile-nav button span {
   font-size: 12px;
-}
-.profile-card p {
-  line-height: 1.8;
-}
-.post-focus h2 {
-  letter-spacing: -0.2px;
 }
 .breadcrumb-right button {
   min-height: 32px;
