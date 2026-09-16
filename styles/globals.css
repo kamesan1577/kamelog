@@ -1570,12 +1570,8 @@ textarea:focus {
 .tweet-body {
   font-size: 16px;
 }
-.post-meta b,
-.post-meta time,
-.type-label,
 .tags [data-slot="badge"],
-.read-time,
-.post-actions button {
+.read-time {
   font-size: 12px;
 }
 .composer-kinds button,
