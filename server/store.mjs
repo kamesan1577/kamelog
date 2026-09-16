@@ -146,6 +146,15 @@ export class Store {
         created_at TEXT NOT NULL,
         undone_at TEXT
       );
+      CREATE TABLE IF NOT EXISTS federation_remote_reactions(
+        post_id TEXT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+        actor_id TEXT NOT NULL REFERENCES federation_remote_actors(actor_id) ON DELETE CASCADE,
+        activity_id TEXT NOT NULL UNIQUE,
+        reaction_type TEXT NOT NULL CHECK(reaction_type IN ('Like', 'EmojiReact')),
+        reacted_at TEXT NOT NULL,
+        undone_at TEXT,
+        PRIMARY KEY(post_id, actor_id)
+      );
       INSERT OR IGNORE INTO migrations VALUES(1);
       INSERT OR IGNORE INTO migrations VALUES(2);
       INSERT OR IGNORE INTO migrations VALUES(3);
@@ -153,7 +162,8 @@ export class Store {
       INSERT OR IGNORE INTO migrations VALUES(5);
       INSERT OR IGNORE INTO migrations VALUES(6);
       INSERT OR IGNORE INTO migrations VALUES(7);
-      INSERT OR IGNORE INTO migrations VALUES(8);`);
+      INSERT OR IGNORE INTO migrations VALUES(8);
+      INSERT OR IGNORE INTO migrations VALUES(9);`);
     this.db
       .prepare(
         `SELECT object_id AS objectId, attachments
@@ -207,45 +217,49 @@ export class Store {
     const rows = this.db
       .prepare(
         table === "posts"
-          ? `SELECT posts.*, COALESCE(post_views.count, 0) AS views
+          ? `SELECT posts.*, COALESCE(post_views.count, 0) AS views,
+                    (SELECT COUNT(*) FROM federation_remote_reactions reactions
+                     WHERE reactions.post_id=posts.id
+                       AND reactions.undone_at IS NULL) AS federation_likes
              FROM posts LEFT JOIN post_views ON post_views.post_id = posts.id`
           : `SELECT * FROM ${table}`,
       )
       .all();
-    return rows.map((row) =>
-      this.#withPostTags(
-        {
-          ...JSON.parse(row.data),
-          id: row.id,
-          ...(row.revision ? { revision: row.revision } : {}),
-          ...(table === "posts" ? { views: Number(row.views) } : {}),
-        },
-        table,
-      ),
-    );
+    return rows.map((row) => this.#rowValue(row, table));
   }
   get(table, id) {
     this.table(table);
     const row = this.db
       .prepare(
         table === "posts"
-          ? `SELECT posts.*, COALESCE(post_views.count, 0) AS views
+          ? `SELECT posts.*, COALESCE(post_views.count, 0) AS views,
+                    (SELECT COUNT(*) FROM federation_remote_reactions reactions
+                     WHERE reactions.post_id=posts.id
+                       AND reactions.undone_at IS NULL) AS federation_likes
              FROM posts LEFT JOIN post_views ON post_views.post_id = posts.id
              WHERE posts.id=?`
           : `SELECT * FROM ${table} WHERE id=?`,
       )
       .get(id);
-    return row
-      ? this.#withPostTags(
-          {
-            ...JSON.parse(row.data),
-            id: row.id,
-            ...(row.revision ? { revision: row.revision } : {}),
-            ...(table === "posts" ? { views: Number(row.views) } : {}),
-          },
-          table,
-        )
-      : null;
+    return row ? this.#rowValue(row, table) : null;
+  }
+  #rowValue(row, table) {
+    const data = JSON.parse(row.data);
+    return this.#withPostTags(
+      {
+        ...data,
+        id: row.id,
+        ...(row.revision ? { revision: row.revision } : {}),
+        ...(table === "posts"
+          ? {
+              views: Number(row.views),
+              likes:
+                Number(data.likes || 0) + Number(row.federation_likes || 0),
+            }
+          : {}),
+      },
+      table,
+    );
   }
   #withPostTags(value, table) {
     if (table !== "posts") return value;
@@ -276,6 +290,10 @@ export class Store {
       ],
       ...(autoTags.length ? { autoTags } : {}),
     };
+  }
+  localPostLikes(id) {
+    const row = this.db.prepare("SELECT data FROM posts WHERE id=?").get(id);
+    return row ? Number(JSON.parse(row.data).likes || 0) : 0;
   }
   table(name) {
     if (!["posts", "drafts", "settings", "credentials", "media"].includes(name))
@@ -963,6 +981,46 @@ export class Store {
         ...row,
         attachments: JSON.parse(row.attachments),
       }));
+  }
+  saveFederationRemoteReaction(reaction) {
+    this.db
+      .prepare(
+        `INSERT INTO federation_remote_reactions
+         (post_id, actor_id, activity_id, reaction_type, reacted_at, undone_at)
+         VALUES (?, ?, ?, ?, ?, NULL)
+         ON CONFLICT(post_id, actor_id) DO UPDATE SET
+           activity_id=excluded.activity_id,
+           reaction_type=excluded.reaction_type,
+           reacted_at=excluded.reacted_at,
+           undone_at=NULL`,
+      )
+      .run(
+        reaction.postId,
+        reaction.actorId,
+        reaction.activityId,
+        reaction.type,
+        reaction.reactedAt,
+      );
+  }
+  undoFederationRemoteReaction(activityId, actorId, now) {
+    return (
+      this.db
+        .prepare(
+          `UPDATE federation_remote_reactions SET undone_at=?
+           WHERE activity_id=? AND actor_id=? AND undone_at IS NULL`,
+        )
+        .run(now, activityId, actorId).changes > 0
+    );
+  }
+  federationRemoteReactionCount(postId) {
+    return Number(
+      this.db
+        .prepare(
+          `SELECT COUNT(*) AS count FROM federation_remote_reactions
+           WHERE post_id=? AND undone_at IS NULL`,
+        )
+        .get(postId).count,
+    );
   }
   claimFederationDelivery(now = Date.now(), staleAfterMs = 5 * 60_000) {
     return this.transaction(() => {

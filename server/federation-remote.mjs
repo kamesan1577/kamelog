@@ -4,7 +4,11 @@ import {
   fetchFederationJson,
   normalizeFederationUrl,
 } from "./federation-fetch.mjs";
-import { ACTIVITY_STREAMS, PUBLIC_AUDIENCE } from "./federation-outbound.mjs";
+import {
+  ACTIVITY_STREAMS,
+  localObjectUrl,
+  PUBLIC_AUDIENCE,
+} from "./federation-outbound.mjs";
 import { sanitizeRemoteHtml } from "./federation-content.mjs";
 import { enqueueFederationRepostUndo } from "./federation-reposts.mjs";
 
@@ -21,6 +25,7 @@ const IMAGE_TYPES = new Set([
   "image/webp",
   "image/gif",
 ]);
+const POSITIVE_REACTIONS = new Set(["Like", "EmojiReact"]);
 
 export class InvalidFederationHandle extends TypeError {}
 
@@ -271,6 +276,23 @@ function followed(store, actorId) {
   return store.federationFollowing(actorId)?.state === "accepted";
 }
 
+function localReactionPost(store, config, object) {
+  if (!config) return null;
+  const objectId = activityObjectId(object);
+  const prefix = `${config.origin}/activitypub/objects/`;
+  if (!objectId?.startsWith(prefix)) return null;
+  let postId;
+  try {
+    postId = decodeURIComponent(objectId.slice(prefix.length));
+  } catch {
+    return null;
+  }
+  const post = store.get("posts", postId);
+  return post?.federationEnabled && localObjectUrl(config, postId) === objectId
+    ? post
+    : null;
+}
+
 export async function processIncomingRemoteActivity(
   store,
   activity,
@@ -324,6 +346,8 @@ export async function processIncomingRemoteActivity(
     if (activity.type === "Undo") {
       const undone = activity.object;
       const undoneId = activityObjectId(undone);
+      if (undoneId)
+        store.undoFederationRemoteReaction(undoneId, actor.actorId, receivedAt);
       if (undoneId && (typeof undone === "string" || undone?.type === "Follow"))
         store.removeFederationFollower(actor.actorId, undoneId);
       if (
@@ -331,6 +355,18 @@ export async function processIncomingRemoteActivity(
         (typeof undone === "string" || undone?.type === "Announce")
       )
         store.undoFederationTimelineEntry(undoneId, actor.actorId, receivedAt);
+      return true;
+    }
+    if (POSITIVE_REACTIONS.has(activity.type)) {
+      const post = localReactionPost(store, options.config, activity.object);
+      if (post)
+        store.saveFederationRemoteReaction({
+          postId: post.id,
+          actorId: actor.actorId,
+          activityId: activity.id,
+          type: activity.type,
+          reactedAt: receivedAt,
+        });
       return true;
     }
     if (!followed(store, actor.actorId) && activity.type !== "Delete")
@@ -357,6 +393,14 @@ export async function processIncomingRemoteActivity(
     if (activity.type === "Delete") {
       const objectId = activityObjectId(activity.object);
       if (objectId) {
+        if (
+          store.undoFederationRemoteReaction(
+            objectId,
+            actor.actorId,
+            receivedAt,
+          )
+        )
+          return true;
         const normalizedObjectId = normalizedUrl(
           objectId,
           options.fetchOptions,

@@ -21,6 +21,7 @@ import {
 } from "../../server/federation-fetch.mjs";
 import {
   enqueuePostFederationTransition,
+  localObjectUrl,
   localPostObject,
 } from "../../server/federation-outbound.mjs";
 import { processNextFederationDelivery } from "../../server/federation-worker.mjs";
@@ -1064,6 +1065,150 @@ test("RP publishes Announce, supports Undo and follows remote Delete", async () 
       true,
     );
     assert.equal(store.federationOutboxActivities()[0].type, "Undo");
+  });
+});
+
+test("positive remote reactions aggregate once per actor and support Undo", async () => {
+  await withStore("kamelog-federation-reactions-", async (store) => {
+    createFederationIdentity(store, "kamesan");
+    const post = store.save("posts", "local-post", {
+      kind: "tweet",
+      title: "",
+      body: "Federated post",
+      tags: [],
+      likes: 8,
+      images: [],
+      date: "2026-09-16T12:00:00.000Z",
+      federationEnabled: true,
+    });
+    const target = localObjectUrl(config, post.id);
+    const actorId = "https://remote.example/users/alice";
+    const actor = {
+      id: actorId,
+      type: "Person",
+      preferredUsername: "alice",
+      name: "Alice",
+      inbox: `${actorId}/inbox`,
+    };
+    const receive = (activity, seconds) =>
+      processIncomingRemoteActivity(store, activity, actor, {
+        config,
+        now: new Date(`2026-09-16T12:00:${seconds}Z`),
+      });
+    const firstLikeId = `${actorId}/activities/like/1`;
+    const firstLike = {
+      id: firstLikeId,
+      type: "Like",
+      actor: actorId,
+      object: target,
+    };
+    assert.equal(await receive(firstLike, "01"), true);
+    assert.equal(await receive(firstLike, "02"), false);
+    assert.equal(store.federationRemoteReactionCount(post.id), 1);
+    assert.equal(store.localPostLikes(post.id), 8);
+    assert.equal(store.get("posts", post.id).likes, 9);
+
+    const emojiReactId = `${actorId}/activities/emoji-react/1`;
+    await receive(
+      {
+        id: emojiReactId,
+        type: "EmojiReact",
+        actor: actorId,
+        object: target,
+        content: "👍",
+      },
+      "03",
+    );
+    assert.equal(store.federationRemoteReactionCount(post.id), 1);
+    assert.equal(store.get("posts", post.id).likes, 9);
+
+    await receive(
+      {
+        id: `${actorId}/activities/undo/1`,
+        type: "Undo",
+        actor: actorId,
+        object: { id: firstLikeId, type: "Like" },
+      },
+      "04",
+    );
+    assert.equal(store.get("posts", post.id).likes, 9);
+    await receive(
+      {
+        id: `${actorId}/activities/undo/2`,
+        type: "Undo",
+        actor: actorId,
+        object: { id: emojiReactId, type: "EmojiReact" },
+      },
+      "05",
+    );
+    assert.equal(store.get("posts", post.id).likes, 8);
+
+    const replacementId = `${actorId}/activities/like/2`;
+    await receive(
+      {
+        id: replacementId,
+        type: "Like",
+        actor: actorId,
+        object: target,
+      },
+      "06",
+    );
+    await receive(
+      {
+        id: `${actorId}/activities/delete-reaction/1`,
+        type: "Delete",
+        actor: actorId,
+        object: replacementId,
+      },
+      "07",
+    );
+    assert.equal(store.get("posts", post.id).likes, 8);
+
+    const otherActorId = "https://elsewhere.example/users/bob";
+    await processIncomingRemoteActivity(
+      store,
+      {
+        id: `${otherActorId}/activities/like/1`,
+        type: "Like",
+        actor: otherActorId,
+        object: target,
+      },
+      {
+        id: otherActorId,
+        type: "Person",
+        preferredUsername: "bob",
+        name: "Bob",
+        inbox: `${otherActorId}/inbox`,
+      },
+      { config, now: new Date("2026-09-16T12:00:08Z") },
+    );
+    assert.equal(store.get("posts", post.id).likes, 9);
+
+    const session = store.createSession();
+    const api = createAPI(store, config);
+    const edited = await api(
+      new Request(`${origin}/api/posts/${post.id}`, {
+        method: "PUT",
+        headers: {
+          origin,
+          cookie: `__Host-kamelog-session=${session}`,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          revision: post.revision,
+          kind: "tweet",
+          title: "",
+          body: "Edited federated post",
+          tags: [],
+          images: [],
+          pinned: false,
+          federationEnabled: true,
+        }),
+      }),
+    );
+    assert.equal(edited.status, 200);
+    assert.equal((await edited.json()).likes, 9);
+    assert.equal(store.localPostLikes(post.id), 8);
   });
 });
 

@@ -41,6 +41,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - Accountのフォロー管理からremote handleをWebFinger解決し、Follow/Undoをdurable queueへ積む。Accept/Reject/failed状態をSQLiteへ保存し、Accept済みActorのCreate/Update/Delete/Announce/Undoだけをsanitized remote cacheとowner用timeline entryへ正規化する。remote cacheはlocal postsへ混在させず、表示とmedia proxyは後続Phaseで扱う。
 - ActivityPub有効化済みオーナーのTimelineに `kamelog | Fediverse` modeを追加し、Accept済みfollowingの受信投稿・Announceと自分のfederation対象投稿をcursor付きowner APIから表示する。refreshは受信済みstateだけを再取得する。remote画像はowner-only local URLへ置換し、SSRF、MIME、magic、寸法、8MiB上限を検証したうえで最大256MiBの再取得可能cacheへ保存する。
 - owner-only Fediverse timelineのremote投稿をRPすると、公開Timelineの「すべて」へ `かめさんがRP` として表示し、Announceをdurable queueへ積む。解除はUndo(Announce)を積み、remote Deleteでも同じtransactionで公開RPを無効化してUndoを積む。公開remote画像は有効なRPへ結び付く登録済みmappingだけを配信する。
+- local federated postへのLikeとEmojiReactをremote Actor単位で最大1件の「いいね」に正規化し、既存local likesへquery時に合算する。Undo/Deleteは同じActorの現在のreaction IDだけを解除し、古いUndoで置換後のreactionを消さない。remote内訳は公開しない。
 - つぶやき詳細はルート投稿でも「スレッド」見出し・全件数・表示中の投稿を常に示し、親投稿・表示中・子孫投稿を上から下へ読める一つの画面として表示する。
 - AGENTS、仕様、不変条件、ADR、脅威モデル、runbook、リポジトリ固有skillsを整備。
 - 公開プロフィールは `@kamesan1577`、公開リンクはGitHubとQiitaを表示する。投稿・下書き・設定の実データは初期化しない。
@@ -51,6 +52,7 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 
 ## 検証済み
 
+- 2026-09-16 ActivityPub Phase 6でlocal federated postへのLike/EmojiReact受信、Actor単位dedupe、Undo/Delete、local likesとのquery時合算を追加した。`make check`（unit 73件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。同一Actorのreaction置換、古いUndoの無効化、現在reactionのUndo/Delete、非following Actor、投稿編集後のlocal likes非汚染、backup/restoreをunit testで確認した。
 - 2026-09-16 ActivityPub Phase 5でownerのremote投稿RP/解除、公開Timelineの「すべて」へのRP混在、Announce/Undoのdurable配送、remote Delete連動、公開RP画像の限定配信を追加した。`make check`（unit 72件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。RP APIの認証、二重RP拒否、別Actor Delete拒否、unfollow後の正規Actor Delete、backup/restore、公開画像のRP解除後404をunit testで確認した。
 - 2026-09-16 ActivityPub Phase 4でowner-only Fediverse timeline、self投稿、cursor、refresh、original link、remote image proxy/cacheを追加した。`make check`（unit 71件、typecheck、lint、format、production build、public-repo check）が成功。未ログインAPI拒否、local URLへのattachment置換、cursor、不正画像拒否、cache再利用、remote Delete後のfile/mapping無効化をunit testで確認した。ローカル環境にPlaywright Chromiumがないため、追加したmode切替・self表示・refresh・390px screenshotはstacked PR CIで確認する。
 - 2026-09-16 ActivityPub Phase 3でremote handleのWebFinger解決、outgoing Follow/Undo、Accept/Reject/failed状態、Accountのfollowing管理、Accept済みActorのCreate/Update/Delete/Announce/Undoと専用cacheを追加した。`make check`（unit 69件、typecheck、lint、format、production build、public-repo check）が成功。backup/restoreでfollowingとremote timeline cacheの復元も確認した。ローカル環境にPlaywright Chromiumがないため、追加したfollowing管理のmobile/desktop E2Eはstacked PR CIで確認する。

@@ -96,6 +96,13 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
         "https://example.test/activitypub/activities/announce/fixture",
       createdAt: "2026-09-16T00:00:04.000Z",
     });
+    store.saveFederationRemoteReaction({
+      postId: "fictional",
+      actorId: "https://remote.example/users/bob",
+      activityId: "https://remote.example/activities/like/1",
+      type: "Like",
+      reactedAt: "2026-09-16T00:00:05.000Z",
+    });
     store.db.prepare("DELETE FROM federation_remote_media").run();
     store.enqueueFederationActivity(
       {
@@ -136,6 +143,8 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
       restored.federationPublicReposts()[0].objectId,
       "https://remote.example/notes/1",
     );
+    assert.equal(restored.federationRemoteReactionCount("fictional"), 1);
+    assert.equal(restored.get("posts", "fictional").likes, 1);
     assert.equal(restored.federationDiagnostics().pendingDeliveries, 1);
     assert.equal(
       await readFile(
@@ -186,7 +195,7 @@ test("adds view counts to an existing schema without rewriting posts", async () 
     database.close();
 
     const migrated = new Store(root);
-    assert.equal(migrated.schemaVersion(), 8);
+    assert.equal(migrated.schemaVersion(), 9);
     assert.equal(migrated.get("posts", "legacy-post").views, 0);
     assert.equal(migrated.recordView("legacy-post").views, 1);
     assert.equal(migrated.get("posts", "legacy-post").body, "legacy fixture");

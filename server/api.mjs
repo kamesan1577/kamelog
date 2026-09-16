@@ -549,7 +549,7 @@ export function createAPI(store, config, options = {}) {
                 ...(table === "posts"
                   ? {
                       date: old?.date || now,
-                      likes: old?.likes || 0,
+                      likes: old ? store.localPostLikes(id) : 0,
                       federationEnabled,
                       ...(federationUpdatedAt ? { federationUpdatedAt } : {}),
                     }

@@ -120,7 +120,7 @@ SQLite backup APIのsnapshotを先に作り、DB登録前に確定して以後�
 日次30世代、月次の復元訓練を標準とする。自動削除は復元成功後に運用者が設定する。
 バックアップは0700の場所に置き、オフホスト転送前に暗号化する。復号鍵は別保管する。
 ActivityPub identityとprivate keyもSQLite snapshotへ含まれる。復元後にkey pairを再生成しない。同じ `KAMELOG_ORIGIN` なら同じActorとして継続できるが、domain変更restoreでは同一federation identityの継続を保証しない。
-followers、following、remote object/timeline state、公開RP状態、投稿ごとのfederationEnabled、outbound activity、pending/dead deliveryも同じsnapshotへ含まれる。復元後はworkerを起動するとpending deliveryを再開する。復元検証では `docker compose exec federation-worker node scripts/federation-worker-health.mjs` とowner限定statusのpending/dead件数を確認する。
+followers、following、remote object/timeline state、公開RP状態、remote reaction状態、投稿ごとのfederationEnabled、outbound activity、pending/dead deliveryも同じsnapshotへ含まれる。復元後はworkerを起動するとpending deliveryを再開する。復元検証では `docker compose exec federation-worker node scripts/federation-worker-health.mjs` とowner限定statusのpending/dead件数を確認する。
 `federation-media/` は検証済みremote画像の再取得可能なcacheであり、backupへ含めない。restore後はownerがFediverse timelineを開いたときに必要な画像だけを再取得する。
 
 ## 復旧

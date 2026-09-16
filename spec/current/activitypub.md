@@ -66,6 +66,14 @@ remote画像はowner-onlyのlocal URLへ置換し、初回表示時にserverが�
 
 元Actorから同じobject IDのDeleteを受信した場合は、objectをtombstone化するtransaction内でRPを無効化し、Undo(Announce)をqueueへ登録する。別ActorによるDeleteではRPもobjectも変更しない。
 
+## Incoming reactions
+
+署名を検証したremote Actorからlocal federated postへ届く `Like` と、positive reaction extensionとして確認済みの `EmojiReact` を受信する。reactionは `(local post ID, remote Actor ID)` を一意に保存し、同じActorが種類やactivity IDを変えても公開countへの加算は最大1件にする。follow関係はreaction受信の条件にしない。
+
+`Undo` は同じActorの現在有効なreaction activity IDと一致した場合だけ無効化する。古いreactionを新しいreactionで置き換えた後に古いUndoが届いても、現在のreactionを消さない。reaction activity自体を対象にした `Delete` も同じ解除として扱う。activity IDの再送は共通のinbox idempotency境界で二重処理しない。
+
+対象objectは現在 `federationEnabled=true` のlocal postを表す正規のActivityPub object URLだけとする。remote postの観測可能でない総reaction数は推測せず、owner timelineと公開RP cardへ架空のcountを表示しない。
+
 ## HTTP signature
 
 inboxは `(request-target)`、`host`、`date`、`digest` を含むRSA-SHA256署名を必須にする。Digestはraw request bodyに対して検証し、Dateは10分以内に制限する。署名keyはremote Actor documentから取得し、`publicKey.id` とownerを照合する。失敗、改ざん、stale requestは拒否する。
