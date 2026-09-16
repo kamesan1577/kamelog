@@ -979,26 +979,6 @@ textarea:focus {
     box-shadow: 0 3px 12px #0003;
     z-index: 20;
   }
-  .editor-dialog {
-    padding: 21px !important;
-    gap: 12px !important;
-  }
-  .editor-dialog [data-slot="dialog-title"] {
-    font-size: 18px;
-  }
-  .editor-caption {
-    font-size: 12px !important;
-  }
-  .editor-tools {
-    gap: 12px;
-  }
-  .body-input {
-    min-height: 180px;
-    font-size: 14px;
-  }
-  .title-input {
-    font-size: 23px;
-  }
   .markdown {
     font-size: 15px;
   }
@@ -2037,7 +2017,6 @@ textarea:focus {
     height: 40px;
     border-radius: 10px;
   }
-  .body-input,
   .caption-field input,
   .inline-tweet {
     font-size: 16px;
