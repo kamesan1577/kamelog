@@ -31,7 +31,7 @@
   --ds-sidebar-width: 13.875rem;
 }
 
-@theme inline {
+inline {
   --color-ds-page: var(--ds-color-bg-page);
   --color-ds-surface: var(--ds-color-bg-surface);
   --color-ds-hover: var(--ds-color-bg-hover);
@@ -52,10 +52,8 @@
   --radius-ds-sm: var(--ds-radius-sm);
   --radius-ds-md: var(--ds-radius-md);
   --radius-ds-pill: var(--ds-radius-pill);
-  --text-ds-xs: var(--ds-font-size-xs);
-  --text-ds-sm: var(--ds-font-size-sm);
-  --text-ds-md: var(--ds-font-size-md);
-  --text-ds-lg: var(--ds-font-size-lg);
+  --font-size-ds-xs: var(--ds-font-size-xs);
+  --font-size-ds-sm: var(--ds-font-size-sm);
   --max-width-ds-page: var(--ds-page-width);
 }
 
