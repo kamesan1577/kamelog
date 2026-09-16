@@ -15,35 +15,35 @@ behavior coverage, and visual approval.
 | Shared primitives    | `components/design-system/primitives/*` | Feature-facing primitives                  | keep/adapt                      |
 | Layout               | `components/design-system/layout/*`     | Shared shell and page layout               | keep/adapt                      |
 | Feature rendering    | `app/notebook.tsx`                      | Patterns, then feature components          | replace incrementally           |
-| Global presentation  | `app/globals.css`                       | Token-backed layout/pattern CSS            | adapt, then delete legacy rules |
+| Global presentation  | `styles/globals.css`                    | Token-backed layout/pattern CSS            | adapt, then delete legacy rules |
 | Feature presentation | `app/*.css`                             | Pattern styles or colocated feature styles | replace incrementally           |
 | Behavior integration | `components/*-bridge.tsx`, `lib/*`      | Keep outside the visual layer              | keep                            |
 
 ## CSS responsibility inventory
 
-The legacy allowlist currently contains 18 CSS files. Their primary
+The legacy allowlist is now empty; the shared styles have moved into the Design System style layer, while selector-level extraction from `styles/globals.css` remains in progress. Their primary
 responsibilities are:
 
-| File                                         | Responsibility                                                  | Target pattern/primitive                                       | Decision          |
-| -------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------- | ----------------- |
-| `app/globals.css`                            | shell, navigation, timeline, composer, editor and shared states | `AppShell`, `Navigation`, `TimelineItem`, `Composer`, `Dialog` | split and replace |
-| `app/landing.css`                            | top/about/projects landing presentation                         | `PageHeader`, `ContentIndex`, `ProjectList`                    | replace           |
-| `app/engineering.css`                        | profile, works, career and skills sections                      | `ProfileSection`, `ProjectList`                                | adapt             |
-| `app/composer-layout.css`                    | desktop composer geometry                                       | `Composer`                                                     | replace           |
-| `app/mobile-composer.css`                    | mobile composer geometry and keyboard-safe actions              | `Composer`                                                     | replace           |
-| `app/mobile-blog-editor.css`                 | mobile Markdown editor controls                                 | `BlogEditor`                                                   | replace           |
-| `app/full-page-blog-editor.css`              | full-page/split editor layout                                   | `BlogEditor`                                                   | replace           |
-| `app/blog-toc.css`                           | blog TOC and reading rail                                       | `BlogReadingTools`, `TableOfContents`                          | replace           |
-| `app/detail-actions.css`                     | detail-page action rail/floating bar                            | `PostActions`                                                  | replace           |
-| `app/tweet-link-preview.css`                 | link preview card                                               | `LinkPreview`                                                  | replace           |
-| `app/tweet-thread-bridge.module.css`         | thread detail presentation                                      | `ThreadView`                                                   | adapt             |
-| `app/mobile-nav-layout.css`                  | mobile navigation and FAB                                       | `MobileNavigation`, `CreateButton`                             | replace           |
-| `app/brand-theme.css`                        | brand colors and page surfaces                                  | tokens                                                         | absorb            |
-| `app/federation.css`                         | owner federation settings/timeline                              | `FederationSettings`, `FederationTimeline`                     | replace           |
-| `app/federation/federation-guide.module.css` | public federation guide                                         | `Guide`, `Matrix`                                              | adapt             |
-| `app/project-social-links.css`               | project external links                                          | `ExternalLinkList`                                             | replace           |
-| `app/x-share-logo.css`                       | X share mark                                                    | shared icon primitive                                          | replace           |
-| `app/not-found.module.css`                   | 404 page                                                        | `NotFoundState`                                                | complete          |
+| File                                                | Responsibility                                                  | Target pattern/primitive                                       | Decision          |
+| --------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------- | ----------------- |
+| `styles/globals.css`                                | shell, navigation, timeline, composer, editor and shared states | `AppShell`, `Navigation`, `TimelineItem`, `Composer`, `Dialog` | split and replace |
+| `components/design-system/patterns/Landing.css`     | top/about/projects landing presentation                         | `PageHeader`, `ContentIndex`, `ProjectList`                    | replace           |
+| `components/design-system/patterns/Engineering.css` | profile, works, career and skills sections                      | `ProfileSection`, `ProjectList`                                | adapt             |
+| `app/composer-layout.css`                           | desktop composer geometry                                       | `Composer`                                                     | replace           |
+| `app/mobile-composer.css`                           | mobile composer geometry and keyboard-safe actions              | `Composer`                                                     | replace           |
+| `app/mobile-blog-editor.css`                        | mobile Markdown editor controls                                 | `BlogEditor`                                                   | replace           |
+| `app/full-page-blog-editor.css`                     | full-page/split editor layout                                   | `BlogEditor`                                                   | replace           |
+| `app/blog-toc.css`                                  | blog TOC and reading rail                                       | `BlogReadingTools`, `TableOfContents`                          | replace           |
+| `app/detail-actions.css`                            | detail-page action rail/floating bar                            | `PostActions`                                                  | replace           |
+| `app/tweet-link-preview.css`                        | link preview card                                               | `LinkPreview`                                                  | replace           |
+| `app/tweet-thread-bridge.module.css`                | thread detail presentation                                      | `ThreadView`                                                   | adapt             |
+| `app/mobile-nav-layout.css`                         | mobile navigation and FAB                                       | `MobileNavigation`, `CreateButton`                             | replace           |
+| `app/brand-theme.css`                               | brand colors and page surfaces                                  | tokens                                                         | absorb            |
+| `components/design-system/patterns/Federation.css`  | owner federation settings/timeline                              | `FederationSettings`, `FederationTimeline`                     | replace           |
+| `app/federation/federation-guide.module.css`        | public federation guide                                         | `Guide`, `Matrix`                                              | adapt             |
+| `app/project-social-links.css`                      | project external links                                          | `ExternalLinkList`                                             | replace           |
+| `app/x-share-logo.css`                              | X share mark                                                    | shared icon primitive                                          | replace           |
+| `app/not-found.module.css`                          | 404 page                                                        | `NotFoundState`                                                | complete          |
 
 ## `globals.css` visual responsibilities to extract
 
