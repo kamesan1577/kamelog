@@ -469,7 +469,7 @@
 }
 
 /* Issue #52: make it obvious that timeline blog cards open longer content. */
-.post:has(.type-label.blog) .post-focus:not(.vlog-button)::after {
+[data-ds="post-card"][data-ds-kind="blog"] [data-ds="post-preview"]::after {
   content: "続きを読む →";
   display: inline-flex;
   margin-top: 10px;
@@ -479,7 +479,7 @@
   line-height: 1.5;
 }
 
-.post:has(.type-label.blog) .post-focus:not(.vlog-button):hover::after {
+[data-ds="post-card"][data-ds-kind="blog"] [data-ds="post-preview"]:hover::after {
   color: #37352f;
   text-decoration: underline;
   text-underline-offset: 3px;
