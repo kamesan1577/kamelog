@@ -13,7 +13,7 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
 
     const projects = page.locator('[data-ds="projects-page"]');
     await expect(projects).toBeVisible();
-    const cards = projects.locator(".project-tile");
+    const cards = projects.locator('[data-ds="project-tile"]');
     await expect(cards).toHaveCount(3);
 
     for (let index = 0; index < 3; index += 1) {
@@ -40,7 +40,9 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
       ),
     ).toBeVisible();
     await expect(projects.locator('a[href="/projects/heitan"]')).toHaveCount(0);
-    await expect(projects.locator(".project-tile-static")).toHaveCount(1);
+    await expect(
+      projects.locator('[data-ds="project-tile"][data-ds-variant="static"]'),
+    ).toHaveCount(1);
     await expect(projects.getByRole("link", { name: /Qiita/ })).toHaveCount(0);
 
     if (width === 320) {
