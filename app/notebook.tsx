@@ -54,6 +54,7 @@ import { PostActions } from "@/components/design-system/patterns/PostActions";
 import { MediaUploadField } from "@/components/design-system/patterns/MediaUploadField";
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
+import { OwnerSection } from "@/components/design-system/patterns/OwnerSection";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -1795,20 +1796,13 @@ export default function Notebook({
                   >
                     保存
                   </Button>
-                  <section
+                  <OwnerSection
                     data-ds="owner-federation"
                     className="federation-settings"
-                    aria-labelledby="federation-heading"
+                    title="Fediverse"
+                    description="ActivityPubに対応すると、Fediverseからこのサイトをフォローできます。"
+                    icon={<Globe size={18} aria-hidden="true" />}
                   >
-                    <div className="federation-settings-heading">
-                      <Globe size={18} aria-hidden="true" />
-                      <div>
-                        <h2 id="federation-heading">Fediverse</h2>
-                        <p>
-                          ActivityPubに対応すると、Fediverseからこのサイトをフォローできます。
-                        </p>
-                      </div>
-                    </div>
                     {federationLoadError ? (
                       <div className="federation-load-error" role="alert">
                         <p>Fediverse設定を読み込めませんでした。</p>
@@ -2036,7 +2030,7 @@ export default function Notebook({
                         </Button>
                       </form>
                     )}
-                  </section>
+                  </OwnerSection>
                 </section>
               ) : view === "projects" ? (
                 <section data-ds="projects-page" className="projects-page">

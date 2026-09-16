@@ -4,13 +4,13 @@
   border-top: 1px solid #e7e5df;
 }
 
-.federation-settings-heading {
+[data-ds="owner-federation"] > header {
   display: flex;
   align-items: flex-start;
   gap: 12px;
 }
 
-.federation-settings-heading > svg {
+[data-ds="owner-federation"] > header > svg {
   margin-top: 3px;
   color: #858077;
 }
@@ -22,7 +22,7 @@
   letter-spacing: -0.2px;
 }
 
-.federation-settings-heading p {
+[data-ds="owner-federation"] > header p {
   max-width: 520px;
   margin: 6px 0 0;
   color: #827d73;
