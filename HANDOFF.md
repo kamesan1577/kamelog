@@ -113,6 +113,8 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 
 ## 検証済み
 
+- 2026-09-17 Issue #99の404画面を`NotFoundState`パターンへ移行し、colocated Storybook storyを追加した。`app/not-found.module.css`を削除してlegacy allowlistを17ファイルへ削減。typecheck、check:ui、check:public、diff checkを実行済み。CIの`check` / `e2e` / `container`はPRで確認する。
+
 - 2026-09-16 ActivityPub Phase 6でlocal federated postへのLike/EmojiReact受信、Actor単位dedupe、Undo/Delete、local likesとのquery時合算を追加した。`make check`（unit 73件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。同一Actorのreaction置換、古いUndoの無効化、現在reactionのUndo/Delete、非following Actor、投稿編集後のlocal likes非汚染、backup/restoreをunit testで確認した。
 - 2026-09-16 ActivityPub Phase 5でownerのremote投稿RP/解除、公開Timelineの「すべて」へのRP混在、Announce/Undoのdurable配送、remote Delete連動、公開RP画像の限定配信を追加した。`make check`（unit 72件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。RP APIの認証、二重RP拒否、別Actor Delete拒否、unfollow後の正規Actor Delete、backup/restore、公開画像のRP解除後404をunit testで確認した。
 - 2026-09-16 ActivityPub Phase 4でowner-only Fediverse timeline、self投稿、cursor、refresh、original link、remote image proxy/cacheを追加した。`make check`（unit 71件、typecheck、lint、format、production build、public-repo check）が成功。未ログインAPI拒否、local URLへのattachment置換、cursor、不正画像拒否、cache再利用、remote Delete後のfile/mapping無効化をunit testで確認した。ローカル環境にPlaywright Chromiumがないため、追加したmode切替・self表示・refresh・390px screenshotはstacked PR CIで確認する。
