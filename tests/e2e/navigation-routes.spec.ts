@@ -39,7 +39,7 @@ test("public main views keep their URL across navigation and reload", async ({
 
 test("federation guide keeps URL and history", async ({ page }) => {
   await page.goto("/timeline");
-  const heading = page.locator(".page-heading");
+  const heading = page.locator('[data-ds="page-header"]');
   const notice = heading.getByText("ActivityPubに対応しています。");
   await expect(notice).toBeVisible();
   const guideLink = heading.getByRole("link", { name: "対応範囲を見る" });

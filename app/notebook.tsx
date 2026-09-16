@@ -324,7 +324,7 @@ function EmbeddedLink({ href }: { href: string }) {
 
 export function Markdown({ text }: { text: string }) {
   return (
-    <div className="markdown">
+    <div data-ds="detail-markdown" className="markdown">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[[rehypeHighlight, { detect: false }]]}
@@ -2055,6 +2055,7 @@ export default function Notebook({
                 </section>
               ) : item ? (
                 <section
+                  data-ds="detail-page"
                   className={`detail-page${
                     item.kind === "tweet" ? " tweet-thread-detail" : ""
                   }`}
