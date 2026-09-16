@@ -1,0 +1,18 @@
+.note {
+  margin: 0;
+  color: #746f66;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.link {
+  color: var(--kamelog-ink);
+  text-decoration: underline;
+  text-decoration-color: #b4afa6;
+  text-underline-offset: 3px;
+}
+
+.link:hover {
+  color: var(--kamelog-ink-hover);
+  text-decoration-color: currentColor;
+}
