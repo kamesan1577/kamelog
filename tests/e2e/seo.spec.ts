@@ -9,19 +9,17 @@ test("public SEO endpoints expose one production canonical and structured data",
   const description =
     "作ったもの、考えたこと、たまに日常。Webエンジニア・かめさんのブログとつぶやき、動画をまとめています。";
   await expect(page).toHaveTitle(title);
-  for (const selector of [
-    'meta[name="description"]',
-    'meta[property="og:description"]',
-    'meta[name="twitter:description"]',
-  ]) {
-    await expect(page.locator(selector)).toHaveAttribute("content", description);
-  }
-  for (const selector of [
-    'meta[property="og:title"]',
-    'meta[name="twitter:title"]',
-  ]) {
-    await expect(page.locator(selector)).toHaveAttribute("content", title);
-  }
+
+  const metaDescription = page.locator('meta[name="description"]');
+  await expect(metaDescription).toHaveAttribute("content", description);
+  const ogTitle = page.locator('meta[property="og:title"]');
+  await expect(ogTitle).toHaveAttribute("content", title);
+  const ogDescription = page.locator('meta[property="og:description"]');
+  await expect(ogDescription).toHaveAttribute("content", description);
+  const twitterTitle = page.locator('meta[name="twitter:title"]');
+  await expect(twitterTitle).toHaveAttribute("content", title);
+  const twitterDescription = page.locator('meta[name="twitter:description"]');
+  await expect(twitterDescription).toHaveAttribute("content", description);
 
   const rootUrl = /^https:\/\/kamesan\.org\/?$/;
   const canonical = page.locator('link[rel="canonical"]');
