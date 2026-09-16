@@ -2036,7 +2036,7 @@ export default function Notebook({
                   </section>
                 </section>
               ) : view === "projects" ? (
-                <section className="projects-page">
+                <section data-ds="projects-page" className="projects-page">
                   <PageHeader title="プロジェクト" />
                   <ProjectList
                     className="project-grid"
@@ -2687,7 +2687,7 @@ export default function Notebook({
               </div>
               {(view !== "timeline" || timelineMode === "kamelog") && (
                 <>
-                  <label className="side-search">
+                  <label data-ds="side-search" className="side-search">
                     <Search size={16} />
                     <input
                       value={query}
@@ -2757,6 +2757,7 @@ export default function Notebook({
           />
           {login && (
             <button
+              data-ds="mobile-create"
               className="mobile-create"
               onClick={() => openEditor("tweet")}
               aria-label="投稿を作成"
@@ -2768,6 +2769,7 @@ export default function Notebook({
       </div>
       <Dialog open={editor} onOpenChange={(o) => !o && askClose()}>
         <DialogContent
+          data-ds="editor-dialog"
           className={
             "editor-dialog " +
             (kind === "vlog" ? "vlog-dialog " : "") +

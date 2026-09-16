@@ -14,12 +14,12 @@ test("public main views keep their URL across navigation and reload", async ({
     .first()
     .click();
   await expect(page).toHaveURL(/\/projects$/);
-  await expect(page.locator(".projects-page")).toBeVisible();
+  await expect(page.locator('[data-ds="projects-page"]')).toBeVisible();
   await expect(page.locator(".project-article")).toHaveCount(0);
 
   await page.reload();
   await expect(page).toHaveURL(/\/projects$/);
-  await expect(page.locator(".projects-page")).toBeVisible();
+  await expect(page.locator('[data-ds="projects-page"]')).toBeVisible();
 
   await page.goBack();
   await expect(page).toHaveURL(/\/timeline$/);
