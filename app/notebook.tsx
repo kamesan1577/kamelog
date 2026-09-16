@@ -40,6 +40,7 @@ import {
 import { Button } from "@/components/notion/button";
 import { SideNavigation } from "@/components/design-system/patterns/SideNavigation";
 import { MobileNavigation } from "@/components/design-system/patterns/MobileNavigation";
+import { PageHeader } from "@/components/design-system/patterns/PageHeader";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -1756,7 +1757,7 @@ export default function Notebook({
             <main className="main-content">
               {view === "account" && login ? (
                 <section className="settings-page">
-                  <h1>アカウント</h1>
+                  <PageHeader title="アカウント" />
                   <div className="setting-avatar">
                     <Avatar value={icon || profile.icon} large />
                     <label className="upload-label">
@@ -2055,7 +2056,7 @@ export default function Notebook({
                 </section>
               ) : view === "projects" ? (
                 <section className="projects-page">
-                  <h1>プロジェクト</h1>
+                  <PageHeader title="プロジェクト" />
                   <div className="project-grid">
                     {projects.map((project) => {
                       const card = (
@@ -2287,9 +2288,7 @@ export default function Notebook({
                 </section>
               ) : (
                 <>
-                  <section className="page-heading">
-                    <h1>タイムライン</h1>
-                  </section>
+                  <PageHeader className="page-heading" title="タイムライン" />
                   {timelineMode === "kamelog" && (
                     <label className="home-search mobile-search">
                       <Search size={17} />

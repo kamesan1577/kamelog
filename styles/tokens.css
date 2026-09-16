@@ -66,6 +66,12 @@ inline {
 @utility ds-mobile-navigation-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+@utility pb-ds-4 {
+  padding-bottom: var(--ds-space-4);
+}
+@utility mt-ds-1 {
+  margin-top: var(--ds-space-1);
+}
 @utility px-ds-4 {
   padding-inline: var(--ds-space-4);
 }
