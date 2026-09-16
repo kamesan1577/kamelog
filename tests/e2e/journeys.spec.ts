@@ -49,7 +49,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
       .getByRole("button")
       .first(),
   ).toBeVisible();
-  await expect(page.locator(".preview-shell")).toHaveCount(0);
+  await expect(page.locator('[data-ds="preview-shell"]')).toHaveCount(0);
   expect((await page.request.get("/api/drafts")).status()).toBe(401);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator('[data-ds="mobile-search"]')).toBeVisible();
@@ -521,25 +521,33 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .getByRole("heading", { name: "架空のブログ", exact: true })
     .click();
 
-  await expect(page.locator(".markdown strong")).toHaveText("太字");
-  await expect(page.locator(".markdown ul > li").first()).toHaveText(
-    "箇条書き",
+  await expect(page.locator('[data-ds="detail-markdown"] strong')).toHaveText(
+    "太字",
   );
+  await expect(
+    page.locator('[data-ds="detail-markdown"] ul > li').first(),
+  ).toHaveText("箇条書き");
   expect(
     await page
-      .locator(".markdown ul")
+      .locator('[data-ds="detail-markdown"] ul')
       .first()
       .evaluate((element) => getComputedStyle(element).listStyleType),
   ).not.toBe("none");
-  await expect(page.locator('.markdown input[type="checkbox"]')).toHaveCount(2);
-  await expect(page.locator(".markdown pre code.hljs")).toContainText(
-    "const answer = 42;",
-  );
-  await expect(page.locator(".markdown .hljs-keyword")).toHaveText("const");
-  await expect(page.locator(".mermaid-diagram svg")).toBeVisible();
+  await expect(
+    page.locator('[data-ds="detail-markdown"] input[type="checkbox"]'),
+  ).toHaveCount(2);
+  await expect(
+    page.locator('[data-ds="detail-markdown"] pre code.hljs'),
+  ).toContainText("const answer = 42;");
+  await expect(
+    page.locator('[data-ds="detail-markdown"] .hljs-keyword'),
+  ).toHaveText("const");
+  await expect(page.locator('[data-ds="mermaid-diagram"] svg')).toBeVisible();
   await expect(page.getByTitle("YouTube動画")).toBeVisible();
   await expect(page.getByTitle("Xの投稿")).toBeVisible();
-  await expect(page.locator(".markdown script")).toHaveCount(0);
+  await expect(page.locator('[data-ds="detail-markdown"] script')).toHaveCount(
+    0,
+  );
   await expect(
     page.getByRole("button", { name: "リンクをコピー" }),
   ).toBeVisible();
@@ -601,9 +609,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .first()
     .click();
   await expect(page.getByRole("tab", { name: "Fediverse" })).toHaveCount(0);
-  await page.locator(".admin-access summary").click();
+  await page.locator('[data-ds="admin-access"] summary').click();
   await page
-    .locator(".admin-access")
+    .locator('[data-ds="admin-access"]')
     .getByRole("button", { name: "ログイン", exact: true })
     .click();
   await page

@@ -4,7 +4,8 @@ import { useEffect } from "react";
 
 import { buildTocEntries } from "@/lib/blog-toc.mjs";
 
-const DETAIL_MARKDOWN_SELECTOR = ".detail-page .markdown";
+const DETAIL_MARKDOWN_SELECTOR =
+  '[data-ds="detail-page"] [data-ds="detail-markdown"]';
 const HEADING_SELECTOR = "h2,h3,h4,h5,h6";
 const TOC_ATTRIBUTE = "data-kamelog-blog-toc";
 const GENERATED_HEADING_ATTRIBUTE = "data-kamelog-toc-generated";

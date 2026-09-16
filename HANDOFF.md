@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with reader/editor semantic regions. Preview shell, Markdown output, Mermaid output, help dialog, active filters, and admin access now expose data-ds contracts; blog and owner journey assertions use semantic boundaries. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
+
 2026-09-17 Issue #99 migration continued with post/video semantic contracts. Tweet previews, vlog frames/captions, detail tweet bodies, and site navigation assertions now use data-ds boundaries instead of implementation-only class selectors. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
 
 2026-09-17 Issue #99 migration continued with composer/editor contracts. The inline composer toolbar and editor modal mode now expose semantic state boundaries, and journey assertions use those contracts for upload, authoring, and full-page transitions. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
