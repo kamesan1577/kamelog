@@ -87,7 +87,7 @@ test("mobile timeline shows a single federation link", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/timeline");
   const guideLink = page
-    .locator(".page-heading")
+    .locator('[data-ds="page-header"]')
     .getByRole("link", { name: "対応範囲を見る" });
   await expect(guideLink).toBeVisible();
   await expect(guideLink).toHaveCount(1);
