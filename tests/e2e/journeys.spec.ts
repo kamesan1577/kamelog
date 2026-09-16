@@ -239,22 +239,26 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .first()
     .click();
   await expect(page.locator(".tweet-body")).toHaveText(draftBody);
-  await expect(page.locator(".tweet-link-card")).toHaveCount(1);
+  await expect(page.locator('[data-ds="tweet-link-card"]')).toHaveCount(1);
   await page
     .locator('[data-ds="post-preview"]')
     .filter({ hasText: draftBody })
     .evaluate((button: HTMLButtonElement) => button.click());
-  await expect(page.locator(".detail-page .tweet-link-card")).toHaveCount(1);
+  await expect(
+    page.locator('[data-ds="detail-page"] [data-ds="tweet-link-card"]'),
+  ).toHaveCount(1);
   for (let index = 0; index < 3; index += 1) {
     await page
       .getByRole("button", { name: "プロジェクト", exact: true })
       .first()
       .click();
     await expect(page.locator('[data-ds="projects-page"]')).toBeVisible();
-    await expect(page.locator(".tweet-link-card")).toHaveCount(0);
+    await expect(page.locator('[data-ds="tweet-link-card"]')).toHaveCount(0);
     await page.goBack();
     await expect(page.locator(".detail-page")).toBeVisible();
-    await expect(page.locator(".detail-page .tweet-link-card")).toHaveCount(1);
+    await expect(
+      page.locator('[data-ds="detail-page"] [data-ds="tweet-link-card"]'),
+    ).toHaveCount(1);
   }
   await page.getByRole("button", { name: "戻る", exact: true }).click();
   const inlineTweet = page.getByPlaceholder("いまどうしてる？");
