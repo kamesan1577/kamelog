@@ -27,6 +27,7 @@ export const postSchema = z
     body: z.string().max(100_000),
     tags: z.array(z.string().min(1).max(40)).max(20).default([]),
     pinned: z.boolean().default(false),
+    federationEnabled: z.boolean().optional(),
     parentId: id.optional(),
     time: z
       .string()

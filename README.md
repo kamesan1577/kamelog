@@ -13,6 +13,7 @@
 - SQLiteとローカル媒体ディレクトリへの永続化
 - 整合性manifest付きbackup/restoreと認証復旧CLI
 - 非rootのDocker Compose構成
+- 単一ActorのActivityPub配信、owner専用Fediverse TL、RP、reaction集約
 
 ## 開発
 

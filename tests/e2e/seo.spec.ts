@@ -5,6 +5,22 @@ test("public SEO endpoints expose one production canonical and structured data",
 }) => {
   await page.goto("/");
 
+  const title = "kamelog | かめさんのテックブログ";
+  const description =
+    "作ったもの、考えたこと、たまに日常。Webエンジニア・かめさんのブログとつぶやき、動画をまとめています。";
+  await expect(page).toHaveTitle(title);
+
+  const metaDescription = page.locator('meta[name="description"]');
+  await expect(metaDescription).toHaveAttribute("content", description);
+  const ogTitle = page.locator('meta[property="og:title"]');
+  await expect(ogTitle).toHaveAttribute("content", title);
+  const ogDescription = page.locator('meta[property="og:description"]');
+  await expect(ogDescription).toHaveAttribute("content", description);
+  const twitterTitle = page.locator('meta[name="twitter:title"]');
+  await expect(twitterTitle).toHaveAttribute("content", title);
+  const twitterDescription = page.locator('meta[name="twitter:description"]');
+  await expect(twitterDescription).toHaveAttribute("content", description);
+
   const rootUrl = /^https:\/\/kamesan\.org\/?$/;
   const canonical = page.locator('link[rel="canonical"]');
   await expect(canonical).toHaveCount(1);
@@ -23,7 +39,8 @@ test("public SEO endpoints expose one production canonical and structured data",
     .evaluateAll((elements) =>
       elements.map((element) => JSON.parse(element.textContent || "{}")),
     );
-  expect(structured.some((value) => value["@type"] === "WebSite")).toBe(true);
+  const website = structured.find((value) => value["@type"] === "WebSite");
+  expect(website?.description).toBe(description);
   expect(structured.some((value) => value["@type"] === "Person")).toBe(true);
 
   const robots = await page.request.get("/robots.txt");

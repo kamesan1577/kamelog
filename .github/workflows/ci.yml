@@ -62,8 +62,10 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: landing-visual-${{ github.run_id }}
-          path: test-results/**/landing-*.png
+          name: ui-visual-${{ github.run_id }}
+          path: |
+            test-results/**/landing-*.png
+            test-results/**/federation-*.png
           if-no-files-found: ignore
           retention-days: 3
       - uses: actions/upload-artifact@v7
@@ -100,4 +102,14 @@ jobs:
             sleep 1
           done
           exit 1
+      - name: Federation worker startup smoke test
+        run: |
+          docker run -d --name kamelog-worker-ci -e KAMELOG_ORIGIN=http://localhost:3000 kamelog:ci node scripts/federation-worker.mjs
+          trap 'docker rm -f kamelog-worker-ci' EXIT
+          healthy=0
+          for attempt in $(seq 1 10); do
+            if docker exec kamelog-worker-ci node scripts/federation-worker-health.mjs; then healthy=1; break; fi
+            sleep 1
+          done
+          if test "$healthy" != 1; then docker logs kamelog-worker-ci; exit 1; fi
       - run: docker build -f Dockerfile.dev -t kamelog:dev-ci .

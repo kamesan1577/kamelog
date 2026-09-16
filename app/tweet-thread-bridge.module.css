@@ -1,30 +1,89 @@
 .before,
 .after {
-  margin-top: 14px;
+  margin-top: 0;
 }
 
-.label {
-  display: block;
-  margin-bottom: 8px;
-  color: #78736b;
+.header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 4px 0 24px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #dedbd4;
+}
+
+.header h1 {
+  margin: 2px 0 0;
+  color: #37352f;
+  font-size: 24px;
+  font-weight: 720;
+  letter-spacing: -0.03em;
+}
+
+.eyebrow {
+  color: #9b968c;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.count {
+  color: #8b867e;
   font-size: 12px;
-  font-weight: 600;
+}
+
+.ancestors,
+.children {
+  display: grid;
+  gap: 8px;
+}
+
+.ancestors {
+  margin-bottom: 8px;
+}
+
+.current {
+  padding: 18px 18px 16px;
+  border: 1px solid #d7d2c9;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(55, 53, 47, 0.04);
+}
+
+.currentLabel {
+  display: block;
+  margin-bottom: 14px;
+  color: #777168;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.current :global(.post-meta) {
+  margin-bottom: 22px;
+}
+
+.current :global(.post-actions) {
+  margin-top: 24px;
 }
 
 .card {
+  position: relative;
   display: block;
   width: calc(100% - var(--thread-indent, 0px));
-  padding: 12px 14px;
-  border: 1px solid #e7e4de;
-  border-radius: 10px;
-  background: #fff;
+  padding: 14px 42px 14px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #f3f1ed;
   color: inherit;
   text-align: left;
   cursor: pointer;
 }
 
 .card:hover {
-  background: #faf9f7;
+  border-color: #ded9d0;
+  background: #eeece7;
 }
 
 .cardMeta {
@@ -40,7 +99,31 @@
   display: block;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  line-height: 1.65;
+  line-height: 1.6;
+}
+
+.openLabel {
+  position: absolute;
+  top: 50%;
+  right: 13px;
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  width: 15px;
+  color: #918b81;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0.72;
+  transform: translateY(-50%);
+  transition:
+    width 160ms ease,
+    opacity 160ms ease;
+}
+
+.card:hover .openLabel,
+.card:focus-visible .openLabel {
+  width: 104px;
+  opacity: 1;
 }
 
 .images {
@@ -57,16 +140,17 @@
   object-fit: cover;
 }
 
-.connector {
-  width: 2px;
-  height: 14px;
-  margin: 0 auto;
-  border-radius: 999px;
-  background: #ddd9d1;
+.children {
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid #ebe8e2;
 }
 
-.children {
-  margin-top: 4px;
+.sectionLabel {
+  margin-bottom: 2px;
+  color: #827d74;
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .append {
@@ -176,11 +260,27 @@
 @media (max-width: 640px) {
   .before,
   .after {
-    margin-top: 12px;
+    margin-top: 0;
+  }
+
+  .header {
+    margin-bottom: 18px;
+  }
+
+  .header h1 {
+    font-size: 22px;
   }
 
   .card {
-    padding: 11px 12px;
+    padding: 12px 36px 12px 13px;
+  }
+
+  .current {
+    padding: 15px 14px 13px;
+  }
+
+  .openLabel {
+    right: 10px;
   }
 
   .images img {

@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  SITE_DESCRIPTION,
+  SITE_TITLE,
   blogStructuredData,
   homeUrl,
   ogImageUrl,
@@ -50,6 +52,16 @@ test("public origin must be an origin without credentials or paths", () => {
       KAMELOG_ORIGIN: "https://user:pass@example.com",
     }),
   );
+});
+
+test("homepage search copy is shared with structured data and fallback descriptions", () => {
+  assert.equal(SITE_TITLE, "kamelog | かめさんのテックブログ");
+  assert.equal(
+    SITE_DESCRIPTION,
+    "作ったもの、考えたこと、たまに日常。Webエンジニア・かめさんのブログとつぶやき、動画をまとめています。",
+  );
+  assert.equal(websiteStructuredData(null)[0].description, SITE_DESCRIPTION);
+  assert.equal(seoDescription(""), SITE_DESCRIPTION);
 });
 
 test("SEO description strips markdown and truncates long bodies", () => {

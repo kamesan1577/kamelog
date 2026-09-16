@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   page,
   context,
-}) => {
+}, testInfo) => {
   await page.route("**/api/link-preview?*", async (route) => {
     await route.fulfill({
       status: 200,
@@ -23,11 +23,11 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
   await expect(
-    page.getByRole("heading", { name: "kamelog", exact: true }),
+    page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
   ).toBeVisible();
   await expect(page.getByText("プロフィール", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "About me" })).toBeVisible();
-  await expect(page.getByText("大学卒業・エンタメ系企業へ入社")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Experience" })).toBeVisible();
+  await expect(page.getByText(/東洋大学 情報連携学部/)).toBeVisible();
   await expect(
     page.locator(".content-cards").getByRole("button", { name: /ブログ/ }),
   ).toBeVisible();
@@ -68,6 +68,68 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .click();
   await expect(page).toHaveURL("/");
   await expect(page.locator(".mobile-create")).toBeVisible();
+  await page.getByRole("button", { name: "管理", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "アカウント", exact: true }),
+  ).toBeVisible();
+  const federationUsername = page.getByLabel("ユーザー名", { exact: true });
+  await expect(federationUsername).toBeVisible();
+  await expect
+    .poll(() =>
+      federationUsername.evaluate(
+        (element) => getComputedStyle(element).fontSize,
+      ),
+    )
+    .toBe("16px");
+  await federationUsername.fill("kamesan");
+  await expect(
+    page.getByText("@kamesan@localhost:3000", { exact: true }),
+  ).toBeVisible();
+  await page.locator(".federation-settings").screenshot({
+    path: testInfo.outputPath("federation-setup-mobile.png"),
+  });
+  const federationSetup = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/federation/setup") &&
+      response.request().method() === "POST",
+  );
+  await page
+    .getByRole("button", { name: "ActivityPubを有効にする", exact: true })
+    .click();
+  const federationSetupResponse = await federationSetup;
+  expect(federationSetupResponse.status()).toBe(201);
+  expect(JSON.stringify(await federationSetupResponse.json())).not.toContain(
+    "PRIVATE KEY",
+  );
+  await expect(
+    page.getByText("@kamesan@localhost:3000", { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "管理", exact: true }).click();
+  await expect(page.getByText("有効", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("ユーザー名", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "フォロー管理", exact: true }),
+  ).toBeVisible();
+  const federationFollowHandle = page.getByLabel("Fediverseアドレス");
+  await expect(federationFollowHandle).toBeVisible();
+  await expect
+    .poll(() =>
+      federationFollowHandle.evaluate(
+        (element) => getComputedStyle(element).fontSize,
+      ),
+    )
+    .toBe("16px");
+  expect(await page.locator("body").innerText()).not.toContain("PRIVATE KEY");
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.locator(".federation-settings").screenshot({
+    path: testInfo.outputPath("federation-enabled-desktop.png"),
+  });
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
+    .click();
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.locator(".mobile-create").click();
   const mobileTweetBody = page.getByPlaceholder("本文", { exact: true });
   await expect(mobileTweetBody).toBeFocused();
@@ -93,6 +155,20 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     }),
   ).toBeHidden();
   await page.setViewportSize({ width: 390, height: 844 });
+  const xSwitch = page.getByRole("switch", { name: "Xにも投稿" });
+  await expect(xSwitch).toBeChecked();
+  await expect(
+    page.getByRole("switch", { name: "Fediverseにも配信" }),
+  ).toBeChecked();
+  await page.locator(".editor-dialog").screenshot({
+    path: testInfo.outputPath("landing-x-intent-mobile.png"),
+  });
+  await xSwitch.uncheck();
+  await expect
+    .poll(() =>
+      page.evaluate(() => localStorage.getItem("kamelog:x-intent:tweet")),
+    )
+    .toBe("false");
   await mobileTweetBody.fill(draftBody);
   await page.keyboard.press("Escape");
   await expect(
@@ -126,6 +202,19 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .first()
     .click();
   await expect(page.locator(".desktop-composer")).toBeVisible();
+  await page.locator(".desktop-composer").screenshot({
+    path: testInfo.outputPath("landing-x-intent-desktop.png"),
+  });
+  await expect(
+    page
+      .locator(".desktop-composer")
+      .getByRole("switch", { name: "Xにも投稿" }),
+  ).not.toBeChecked();
+  await expect(
+    page
+      .locator(".desktop-composer")
+      .getByRole("switch", { name: "Fediverseにも配信" }),
+  ).toBeChecked();
   await page.keyboard.press("n");
   const modalBody = page.getByPlaceholder("本文", { exact: true });
   await expect(modalBody).toBeFocused();
@@ -218,7 +307,18 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     1,
   );
   await inlineTweet.fill("ホームから直接投稿する架空のつぶやき");
+  await page
+    .locator(".desktop-composer")
+    .getByRole("switch", { name: "Xにも投稿" })
+    .check();
+  const xPopup = page.waitForEvent("popup");
   await inlineTweet.press("Control+Enter");
+  const xTab = await xPopup;
+  await expect(xTab).toHaveURL(/x\.com\/intent\/tweet\?text=/);
+  expect(new URL(xTab.url()).searchParams.get("text")).toContain(
+    "ホームから直接投稿する架空のつぶやき\n",
+  );
+  await xTab.close();
   await expect(page.locator(".tweet-body").first()).toHaveText(
     "ホームから直接投稿する架空のつぶやき",
   );
@@ -371,7 +471,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
 
   await page.locator(".site-name").click();
   await expect(
-    page.getByRole("heading", { name: "kamelog", exact: true }),
+    page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
   ).toBeVisible();
   await expect(page.locator(".featured-post")).toContainText("架空のブログ");
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
@@ -383,7 +483,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".detail-page")).toBeVisible();
   await page.getByRole("button", { name: "戻る", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "kamelog", exact: true }),
+    page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
   ).toBeVisible();
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page
@@ -422,6 +522,46 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     (post: { title: string }) => post.title === "架空のブログ",
   );
   expect(blog.id).toBe(openedPostId);
+  expect(blog.federationEnabled).toBe(true);
+  expect(
+    posts.find(
+      (post: { body: string }) =>
+        post.body === "ホームから直接投稿する架空のつぶやき",
+    ).federationEnabled,
+  ).toBe(true);
+  const outbox = await (await page.request.get("/activitypub/outbox")).json();
+  expect(
+    outbox.orderedItems.some(
+      (activity: { type: string }) => activity.type === "Create",
+    ),
+  ).toBe(true);
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
+    .click();
+  const fediverseResponse = page.waitForResponse((response) =>
+    response.url().includes("/api/federation/timeline"),
+  );
+  await page.getByRole("tab", { name: "Fediverse", exact: true }).click();
+  expect((await fediverseResponse).status()).toBe(200);
+  await expect(page.locator(".timeline-toolbar")).toHaveCount(0);
+  await expect(
+    page.getByText("ホームから直接投稿する架空のつぶやき", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "元の投稿を開く" }).first(),
+  ).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator(".fediverse-mode-switch")).toBeVisible();
+  await page.locator(".fediverse-timeline").screenshot({
+    path: testInfo.outputPath("fediverse-timeline-mobile.png"),
+  });
+  const refreshed = page.waitForResponse((response) =>
+    response.url().includes("/api/federation/timeline"),
+  );
+  await page.getByRole("button", { name: "Fediverseを更新" }).click();
+  expect((await refreshed).status()).toBe(200);
+  await page.setViewportSize({ width: 1280, height: 900 });
   const shared = await page.request.get("/?post=" + blog.id);
   expect(await shared.text()).toContain('property="og:image"');
   const og = await page.request.get("/og?post=" + blog.id);
@@ -429,6 +569,11 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   expect(og.headers()["content-type"]).toContain("image/png");
   await page.getByRole("button", { name: "ログアウト", exact: true }).click();
   await expect(page.locator(".desktop-composer")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
+    .click();
+  await expect(page.getByRole("tab", { name: "Fediverse" })).toHaveCount(0);
   await page.locator(".admin-access summary").click();
   await page
     .locator(".admin-access")

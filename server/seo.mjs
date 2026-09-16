@@ -1,5 +1,7 @@
 const PRODUCTION_ORIGIN = "https://kamesan.org";
-const SITE_DESCRIPTION = "ブログ、つぶやき、vlogをまとめる個人サイト。";
+export const SITE_TITLE = "kamelog | かめさんのテックブログ";
+export const SITE_DESCRIPTION =
+  "作ったもの、考えたこと、たまに日常。Webエンジニア・かめさんのブログとつぶやき、動画をまとめています。";
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
 export function siteOrigin(env = process.env) {
@@ -76,7 +78,16 @@ export function websiteStructuredData(profile, env = process.env) {
       "@id": personId,
       name: profile?.name || "かめさん",
       url: home,
-      sameAs: ["https://github.com/kamesan1577"],
+      jobTitle: "Backend Engineer",
+      alumniOf: {
+        "@type": "CollegeOrUniversity",
+        name: "東洋大学 情報連携学部（INIAD）",
+      },
+      sameAs: [
+        "https://github.com/kamesan1577",
+        "https://x.com/kamesaniniad",
+        "https://qiita.com/kamesan1577",
+      ],
     },
   ];
 }

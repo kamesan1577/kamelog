@@ -1,5 +1,11 @@
 # SEO / 検索エンジン向け公開仕様
 
+## ホームの検索・共有表示
+
+- ホームのタイトルは `kamelog | かめさんのテックブログ`、説明文は `作ったもの、考えたこと、たまに日常。Webエンジニア・かめさんのブログとつぶやき、動画をまとめています。` とする。
+- 通常のtitle/description、Open Graph、Twitterカード、WebSite JSON-LDの説明文を一致させる。WebSiteのnameとsiteNameはブランド名 `kamelog` を維持する。
+- サイト上のロゴ・名称、投稿固有のタイトルと説明文は変更しない。
+
 ## 公開URL
 
 - 公開URLのoriginは `KAMELOG_ORIGIN` を正本とする。
@@ -7,7 +13,7 @@
 - ホームのcanonicalは常に `/` とする。
 - 投稿詳細は既存の `/?post=<id>` をcanonicalとし、`preview` / `embed` など表示用クエリをcanonicalへ含めない。
 - `preview=1` / `embed=1` は検索対象にしない。
-- 存在しない `post` IDは404として扱う。
+- 存在しないURLと `post` IDは404として扱い、kamelog専用の404画面からホームとタイムラインへ移動できるようにする。
 
 ## robots / sitemap
 
@@ -22,7 +28,7 @@
 
 - ホームは `WebSite` と公開プロフィール範囲の `Person` JSON-LDを出力する。
 - `sameAs` は実際に公開しているプロフィールURLだけを使う。
-- ブログ詳細は `BlogPosting` JSON-LDを出力し、`headline`、本文から生成した `description`、`datePublished`、`dateModified`、`author`、`mainEntityOfPage`、OGPと同一の `image` を含める。
+- ブログ詳細は `BlogPosting` JSON-LDを出力し、`headline`、本文から生成した `description`、`datePublished`、`dateModified`、`author`、`mainEntityOfPage`、OGPと同一の `image` を含む。
 - つぶやき・vlogへ `BlogPosting` / `Article` を誤適用しない。
 - ブログのcanonical・OGP URL・`twitter:url`・JSON-LDのURLは同じ正規URLへ揃える。
 - JSON-LDへ下書き、認証情報、非公開設定を含めない。
