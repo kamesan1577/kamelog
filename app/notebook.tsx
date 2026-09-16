@@ -94,7 +94,7 @@ import {
 } from "@/components/engineering-profile";
 import { contact, projects } from "@/lib/public-profile";
 import "../components/design-system/patterns/Landing.css";
-import "./engineering.css";
+import "../components/design-system/patterns/Engineering.css";
 
 type Kind = "blog" | "tweet" | "vlog";
 type BlogEditorMode = "edit" | "preview" | "split";
