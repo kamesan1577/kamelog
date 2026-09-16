@@ -95,7 +95,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByText("@kamesan@localhost:3000", { exact: true }),
   ).toBeVisible();
-  await page.locator('[data-ds="federation-settings"]').screenshot({
+  await page.locator('[data-ds="owner-federation"]').screenshot({
     path: testInfo.outputPath("federation-setup-mobile.png"),
   });
   const federationSetup = page.waitForResponse(
@@ -132,7 +132,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .toBe("16px");
   expect(await page.locator("body").innerText()).not.toContain("PRIVATE KEY");
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.locator('[data-ds="federation-settings"]').screenshot({
+  await page.locator('[data-ds="owner-federation"]').screenshot({
     path: testInfo.outputPath("federation-enabled-desktop.png"),
   });
   await page
