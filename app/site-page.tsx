@@ -3,6 +3,7 @@ import Notebook from "./notebook";
 import TweetThreadBridge from "./tweet-thread-bridge";
 import { getStore } from "@/server/runtime.mjs";
 import { blogStructuredData, websiteStructuredData } from "@/server/seo.mjs";
+import { publicFederationReposts } from "@/server/federation-reposts.mjs";
 
 function StructuredData({ value }: { value: Record<string, unknown> }) {
   return (
@@ -40,6 +41,10 @@ function SourceFooter() {
         >
           不具合・要望をIssueで報告
         </a>
+        <span aria-hidden="true">·</span>
+        <a className="underline underline-offset-4" href="/federation">
+          ActivityPub対応
+        </a>
       </div>
       <div className="mx-auto mt-5 max-w-5xl border-t border-[#eceae5] pt-4">
         <p className="mb-2 font-medium text-[#625e56]">相互リンク</p>
@@ -73,6 +78,7 @@ export default async function SitePage({
 }) {
   const store = getStore();
   const posts = store.list("posts");
+  const reposts = publicFederationReposts(store);
   const selectedPost = selectedPostId
     ? posts.find(({ id }: { id: string }) => id === selectedPostId)
     : undefined;
@@ -96,6 +102,7 @@ export default async function SitePage({
       ))}
       <Notebook
         initialPosts={posts}
+        initialReposts={reposts}
         initialProfile={profile}
         initialSelected={selectedPostId}
       />

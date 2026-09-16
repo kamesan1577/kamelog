@@ -37,6 +37,12 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - ブログ投稿は既存モーダルからフルページ編集へ切り替え可能。編集・リアルタイムプレビュー・左右分割を切り替え、狭い画面では分割ペインを上下に配置する。
 - ブログは初回公開日時を保持し、公開後のタイトル/本文編集時だけ最終更新日時を保存して公開表示する。固定/解除では最終更新日時を動かさない。
 - 自動タグ付けは投稿APIから分離したローカル分類バッチで実行する。手動タグ付き投稿を教師データにしたTF-IDF＋文字bigram分類で既存タグだけを提案し、`post_tags` に由来・信頼度・本文ハッシュ・分類器版を保存する。APIの`tags`・検索・タグ一覧では手動タグと自動タグを統合する。systemd timerは1時間間隔でDocker上のバッチを起動する。
+- ActivityPub identityはアカウント画面から一度だけ初期化し、usernameとserver生成RSA key pairをSQLiteへ保存する。未設定時はWebFinger/Actorを404にし、設定後はWebFinger、Person Actor、icon、outbox/followers/followingを公開する。inboxはDigest・HTTP署名・Date、Actor key、1MiB上限、activity ID一意性を検証する。Followを自動Acceptし、つぶやき/ブログのCreate・Update・Deleteをlocal transaction内のSQLite queueへ積み、別workerがHTTP署名、SSRF検証、retry/backoff付きでsharedInboxへ配送する。
+- Accountのフォロー管理からremote handleをWebFinger解決し、Follow/Undoをdurable queueへ積む。Accept/Reject/failed状態をSQLiteへ保存し、Accept済みActorのCreate/Update/Delete/Announce/Undoだけをsanitized remote cacheとowner用timeline entryへ正規化する。remote cacheはlocal postsへ混在させず、表示とmedia proxyは後続Phaseで扱う。
+- ActivityPub有効化済みオーナーのTimelineに `kamelog | Fediverse` modeを追加し、Accept済みfollowingの受信投稿・Announceと自分のfederation対象投稿をcursor付きowner APIから表示する。refreshは受信済みstateだけを再取得する。remote画像はowner-only local URLへ置換し、SSRF、MIME、magic、寸法、8MiB上限を検証したうえで最大256MiBの再取得可能cacheへ保存する。
+- owner-only Fediverse timelineのremote投稿をRPすると、公開Timelineの「すべて」へ `かめさんがRP` として表示し、Announceをdurable queueへ積む。解除はUndo(Announce)を積み、remote Deleteでも同じtransactionで公開RPを無効化してUndoを積む。公開remote画像は有効なRPへ結び付く登録済みmappingだけを配信する。
+- local federated postへのLikeとEmojiReactをremote Actor単位で最大1件の「いいね」に正規化し、既存local likesへquery時に合算する。Undo/Deleteは同じActorの現在のreaction IDだけを解除し、古いUndoで置換後のreactionを消さない。remote内訳は公開しない。
+- `/federation` にActivityPub対応、現在のhandle、標準的な接続手順、inbound/outbound対応表、公開endpointを示す簡潔な公開ガイドを置く。通常画面のfooterとsitemapから到達でき、kamelog固有の登録や独自protocolは要求しない。
 - つぶやき詳細はルート投稿でも「スレッド」見出し・全件数・表示中の投稿を常に示し、親投稿・表示中・子孫投稿を上から下へ読める一つの画面として表示する。
 - AGENTS、仕様、不変条件、ADR、脅威モデル、runbook、リポジトリ固有skillsを整備。
 - 公開プロフィールは `@kamesan1577`、公開リンクはGitHubとQiitaを表示する。投稿・下書き・設定の実データは初期化しない。
@@ -47,6 +53,12 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 
 ## 検証済み
 
+- 2026-09-16 ActivityPub Phase 6でlocal federated postへのLike/EmojiReact受信、Actor単位dedupe、Undo/Delete、local likesとのquery時合算を追加した。`make check`（unit 73件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。同一Actorのreaction置換、古いUndoの無効化、現在reactionのUndo/Delete、非following Actor、投稿編集後のlocal likes非汚染、backup/restoreをunit testで確認した。
+- 2026-09-16 ActivityPub Phase 5でownerのremote投稿RP/解除、公開Timelineの「すべて」へのRP混在、Announce/Undoのdurable配送、remote Delete連動、公開RP画像の限定配信を追加した。`make check`（unit 72件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。RP APIの認証、二重RP拒否、別Actor Delete拒否、unfollow後の正規Actor Delete、backup/restore、公開画像のRP解除後404をunit testで確認した。
+- 2026-09-16 ActivityPub Phase 4でowner-only Fediverse timeline、self投稿、cursor、refresh、original link、remote image proxy/cacheを追加した。`make check`（unit 71件、typecheck、lint、format、production build、public-repo check）が成功。未ログインAPI拒否、local URLへのattachment置換、cursor、不正画像拒否、cache再利用、remote Delete後のfile/mapping無効化をunit testで確認した。ローカル環境にPlaywright Chromiumがないため、追加したmode切替・self表示・refresh・390px screenshotはstacked PR CIで確認する。
+- 2026-09-16 ActivityPub Phase 3でremote handleのWebFinger解決、outgoing Follow/Undo、Accept/Reject/failed状態、Accountのfollowing管理、Accept済みActorのCreate/Update/Delete/Announce/Undoと専用cacheを追加した。`make check`（unit 69件、typecheck、lint、format、production build、public-repo check）が成功。backup/restoreでfollowingとremote timeline cacheの復元も確認した。ローカル環境にPlaywright Chromiumがないため、追加したfollowing管理のmobile/desktop E2Eはstacked PR CIで確認する。
+- 2026-09-16 ActivityPub Phase 1で `npm test`（62件）、typecheck、lint、format check、production build、public-repo checkが成功。owner-only setup、鍵の再open/backup/restore、WebFinger/Actor、署名改ざん拒否、inbox idempotency、SSRF private/redirect拒否、remote HTML sanitizationをunit testで確認した。Playwright journeyへ390px初期設定、1280px有効状態、再読込後永続、private key非露出とスクリーンショットを追加した。ローカルE2EはChromium配布元が30秒timeoutを繰り返し、browser取得前に停止したため未実施。PR CIの `e2e` で確認する。
+- 2026-09-16 ActivityPub Phase 2で投稿ごとのfederationEnabled、tweet/blog Note、Create/Update/Delete、Follow自動Accept/Undo、followers、SQLite durable delivery、別worker、sharedInbox dedupe、署名付き配送、retry/backoff/dead state、worker診断を追加した。`npm test`（66件）、typecheck、lint、format check、production build、public-repo checkが成功。ローカル環境にDocker CLIとPlaywright Chromiumがないため、Compose実buildと追加E2Eはstacked PR CIの `container` / `e2e` で確認する。
 - 2026-09-11 つぶやきスレッド詳細再設計後、`make check`（公開検査、既存UI契約、型、lint、unit、本番build）が成功。ルートでも見出し・全件数・表示中を示し、親・現在・子孫の読順を固定するE2Eを追加した。ローカルE2EはPlaywright Chromium配布元のtimeout/502でブラウザを取得できず起動前に停止したため、PR CIの `e2e` で確認する。
 - 2026-09-10 スマホ投稿ヘッダー変更後、`make check`（公開検査、既存UI契約、型、lint、unit、本番build）が成功。390px幅・表示高520pxで入力フォーカス中も投稿ボタンがviewport内に残り、PCでは新ヘッダーを表示しないE2Eを追加した。ローカルE2EはPlaywright Chromium配布元のtimeout/502でブラウザを取得できず未実施のため、PR CIの `e2e` で確認する。
 - ローカル `make check`: public-repo check、UI契約、型、lint、unit/API/media/backup test、本番build。

@@ -17,10 +17,13 @@
 
 Node 24、Docker Compose、FFmpegを使用。
 `KAMELOG_ORIGIN` に公開Originを設定する（例は https://example.test）。
+同じOriginをActivityPubのdomainとActor URLにも使用する。ActivityPub専用のusername、enable flag、private keyをenvへ追加しない。
 bootstrap tokenは32文字以上の暗号学的乱数を管理環境で生成し、ログやコマンド履歴に出さず環境へ設定する。
-`docker compose up --build -d` で起動し、HTTPS reverse proxyを127.0.0.1:3000へ接続する。
+`docker compose up --build -d` でblue/green app、gateway、`federation-worker` を起動し、HTTPS reverse proxyを127.0.0.1:3000へ接続する。workerはappと同じimage・SQLite volumeを使い、外部配送だけを非同期処理する。
 `/setup` でパスキーを登録する。通常の公開画面は `/`。
 ログイン入口は折り畳みの「•••」。追加パスキーはログイン後 `/setup` から登録できる。
+ActivityPubを使う場合はownerでログインし、アカウント画面のFediverse欄からusernameを確認して一度だけ有効化する。private keyを画面やenvへコピーする作業はない。
+有効化後は `/federation` に表示されるFediverseアドレスと対応表を確認する。WebFinger、Actor、inbox等のendpointを手作業で登録する必要はない。
 
 localhostだけで確認する場合は `KAMELOG_ORIGIN=http://localhost:3000` を使用できる。
 公開ホストのHTTPはアプリが拒否する。実行プロセス/volumeは専用OSユーザーで管理する。
@@ -117,6 +120,9 @@ SQLite backup APIのsnapshotを先に作り、DB登録前に確定して以後�
 日次backupをschedulerへ登録する。失敗時の通知も設定する。
 日次30世代、月次の復元訓練を標準とする。自動削除は復元成功後に運用者が設定する。
 バックアップは0700の場所に置き、オフホスト転送前に暗号化する。復号鍵は別保管する。
+ActivityPub identityとprivate keyもSQLite snapshotへ含まれる。復元後にkey pairを再生成しない。同じ `KAMELOG_ORIGIN` なら同じActorとして継続できるが、domain変更restoreでは同一federation identityの継続を保証しない。
+followers、following、remote object/timeline state、公開RP状態、remote reaction状態、投稿ごとのfederationEnabled、outbound activity、pending/dead deliveryも同じsnapshotへ含まれる。復元後はworkerを起動するとpending deliveryを再開する。復元検証では `docker compose exec federation-worker node scripts/federation-worker-health.mjs` とowner限定statusのpending/dead件数を確認する。
+`federation-media/` は検証済みremote画像の再取得可能なcacheであり、backupへ含めない。restore後はownerがFediverse timelineを開いたときに必要な画像だけを再取得する。
 
 ## 復旧
 

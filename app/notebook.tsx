@@ -1,5 +1,12 @@
 "use client";
-import { isValidElement, useEffect, useId, useRef, useState } from "react";
+import {
+  isValidElement,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -20,6 +27,7 @@ import {
   Pencil,
   Pin,
   Plus,
+  RefreshCw,
   Search,
   Settings,
   Share2,
@@ -79,6 +87,7 @@ type Post = {
   body: string;
   date: string;
   updatedAt?: string;
+  federationUpdatedAt?: string;
   tags: string[];
   autoTags?: {
     tag: string;
@@ -92,6 +101,7 @@ type Post = {
   time?: string;
   pinned?: boolean;
   images?: string[];
+  federationEnabled?: boolean;
 };
 type Draft = {
   revision?: number;
@@ -101,6 +111,57 @@ type Draft = {
   body: string;
   savedAt: string;
   images?: string[];
+};
+type FederationStatus =
+  | { enabled: false; host: string }
+  | {
+      enabled: true;
+      host: string;
+      username: string;
+      handle: string;
+      actorUrl: string;
+    };
+type FederationFollowing = {
+  actorId: string;
+  handle: string | null;
+  preferredUsername: string;
+  displayName: string;
+  state: "pending" | "accepted" | "rejected" | "failed";
+  updatedAt: string;
+  lastError: string | null;
+};
+type FederationTimelineItem = {
+  id: string;
+  source: "remote" | "self";
+  activityType: "Create" | "Announce";
+  actorId: string;
+  displayName: string;
+  handle: string;
+  objectId: string;
+  contentHtml: string;
+  url: string;
+  publishedAt: string;
+  updatedAt?: string;
+  activityPublishedAt: string;
+  attachments: { type: string; url: string }[];
+  reposted?: boolean;
+};
+type FederationTimelineResponse = {
+  items: FederationTimelineItem[];
+  nextCursor: string | null;
+};
+type PublicRepost = {
+  id: string;
+  kind: "repost";
+  objectId: string;
+  displayName: string;
+  handle: string;
+  contentHtml: string;
+  url: string;
+  date: string;
+  publishedAt: string;
+  likes: number;
+  attachments: { type: string; url: string }[];
 };
 type NavigationState = {
   view: View;
@@ -432,10 +493,12 @@ export function PreviewShell() {
 
 export default function Notebook({
   initialPosts = [],
+  initialReposts = [],
   initialProfile,
   initialSelected = null,
 }: {
   initialPosts?: Post[];
+  initialReposts?: PublicRepost[];
   initialProfile?: { name: string; icon: string; bio: string };
   initialSelected?: string | null;
 }) {
@@ -456,13 +519,19 @@ export default function Notebook({
     }
   };
   const refresh = async () => {
-    setPosts(await api<Post[]>("posts"));
+    const [nextPosts, nextReposts] = await Promise.all([
+      api<Post[]>("posts"),
+      api<PublicRepost[]>("federation/reposts"),
+    ]);
+    setPosts(nextPosts);
+    setPublicReposts(nextReposts);
   };
   const logIn = async () => {
     const authenticated = await guard(async () => {
       await signIn();
       const saved = await api<Draft[]>("drafts");
       setDrafts(saved);
+      await loadFederationStatus();
     });
     if (authenticated) setLogin(true);
   };
@@ -471,9 +540,13 @@ export default function Notebook({
       await api("auth/logout", "POST", {});
       setLogin(false);
       setDrafts([]);
+      setTimelineMode("kamelog");
+      setFederationTimeline([]);
       nav("home");
     });
   const [posts, setPosts] = useState<Post[]>(initialPosts),
+    [publicReposts, setPublicReposts] =
+      useState<PublicRepost[]>(initialReposts),
     [profile, setProfile] = useState(
       initialProfile ?? {
         name: "かめさん",
@@ -508,6 +581,8 @@ export default function Notebook({
     [inlineBody, setInlineBody] = useState(""),
     [editorImages, setEditorImages] = useState<string[]>([]),
     [inlineImages, setInlineImages] = useState<string[]>([]),
+    [editorFederationEnabled, setEditorFederationEnabled] = useState(true),
+    [inlineFederationEnabled, setInlineFederationEnabled] = useState(true),
     [xIntent, setXIntent] = useState<Record<Kind, boolean>>({
       blog: true,
       tweet: true,
@@ -519,6 +594,163 @@ export default function Notebook({
   const [name, setName] = useState(""),
     [bio, setBio] = useState(""),
     [icon, setIcon] = useState("");
+  const [federationStatus, setFederationStatus] =
+      useState<FederationStatus | null>(null),
+    [federationUsername, setFederationUsername] = useState(""),
+    [federationError, setFederationError] = useState(""),
+    [federationBusy, setFederationBusy] = useState(false),
+    [federationLoadError, setFederationLoadError] = useState(false),
+    [federationFollowing, setFederationFollowing] = useState<
+      FederationFollowing[]
+    >([]),
+    [federationFollowHandle, setFederationFollowHandle] = useState(""),
+    [federationFollowError, setFederationFollowError] = useState(""),
+    [federationFollowBusy, setFederationFollowBusy] = useState(false),
+    [timelineMode, setTimelineMode] = useState<"kamelog" | "fediverse">(
+      "kamelog",
+    ),
+    [federationTimeline, setFederationTimeline] = useState<
+      FederationTimelineItem[]
+    >([]),
+    [federationTimelineCursor, setFederationTimelineCursor] = useState<
+      string | null
+    >(null),
+    [federationTimelineBusy, setFederationTimelineBusy] = useState(false),
+    [federationTimelineError, setFederationTimelineError] = useState(""),
+    [federationRepostBusy, setFederationRepostBusy] = useState<string | null>(
+      null,
+    );
+  const loadFederationFollowing = useCallback(async () => {
+    const following = await api<FederationFollowing[]>("federation/following");
+    setFederationFollowing(following);
+  }, []);
+  const loadFederationStatus = useCallback(async () => {
+    try {
+      const status = await api<FederationStatus>("federation/status");
+      setFederationStatus(status);
+      setFederationLoadError(false);
+      if (status.enabled)
+        try {
+          await loadFederationFollowing();
+        } catch {
+          setFederationFollowError(
+            "フォロー一覧を読み込めませんでした。再読み込みしてください。",
+          );
+        }
+      else setFederationFollowing([]);
+    } catch {
+      setFederationLoadError(true);
+    }
+  }, [loadFederationFollowing]);
+  const federationFollow = async () => {
+    const handle = federationFollowHandle.trim();
+    if (!/^@?[^@\s]+@[^@\s]+$/.test(handle)) {
+      setFederationFollowError(
+        "@ユーザー名@サーバー名の形式で入力してください。",
+      );
+      return;
+    }
+    setFederationFollowBusy(true);
+    setFederationFollowError("");
+    try {
+      await api("federation/follow", "POST", { handle });
+      setFederationFollowHandle("");
+      await loadFederationFollowing();
+      toast.success("フォローリクエストを送信しました");
+    } catch (error) {
+      setFederationFollowError(
+        error instanceof Error ? error.message : "フォローできませんでした。",
+      );
+    } finally {
+      setFederationFollowBusy(false);
+    }
+  };
+  const federationUnfollow = async (actorId: string) => {
+    setFederationFollowBusy(true);
+    setFederationFollowError("");
+    try {
+      await api("federation/follow", "DELETE", { actorId });
+      await loadFederationFollowing();
+      toast.success("フォローを解除しました");
+    } catch (error) {
+      setFederationFollowError(
+        error instanceof Error
+          ? error.message
+          : "フォローを解除できませんでした。",
+      );
+    } finally {
+      setFederationFollowBusy(false);
+    }
+  };
+  const loadFederationTimeline = async (
+    cursor: string | null = null,
+    append = false,
+  ) => {
+    setFederationTimelineBusy(true);
+    setFederationTimelineError("");
+    try {
+      const result = await api<FederationTimelineResponse>(
+        `federation/timeline${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
+      );
+      setFederationTimeline((current) =>
+        append ? [...current, ...result.items] : result.items,
+      );
+      setFederationTimelineCursor(result.nextCursor);
+    } catch (error) {
+      setFederationTimelineError(
+        error instanceof Error
+          ? error.message
+          : "Fediverseを読み込めませんでした。",
+      );
+    } finally {
+      setFederationTimelineBusy(false);
+    }
+  };
+  const federationRepost = async (timelineItem: FederationTimelineItem) => {
+    setFederationRepostBusy(timelineItem.objectId);
+    try {
+      if (timelineItem.reposted) {
+        await api(
+          `federation/reposts/${encodeURIComponent(timelineItem.objectId)}`,
+          "DELETE",
+          {},
+        );
+        setPublicReposts((current) =>
+          current.filter((repost) => repost.objectId !== timelineItem.objectId),
+        );
+        setFederationTimeline((current) =>
+          current.map((item) =>
+            item.objectId === timelineItem.objectId
+              ? { ...item, reposted: false }
+              : item,
+          ),
+        );
+        toast.success("RPを取り消しました");
+      } else {
+        const repost = await api<PublicRepost>("federation/reposts", "POST", {
+          objectId: timelineItem.objectId,
+        });
+        setPublicReposts((current) => [
+          repost,
+          ...current.filter((item) => item.objectId !== repost.objectId),
+        ]);
+        setFederationTimeline((current) =>
+          current.map((item) =>
+            item.objectId === timelineItem.objectId
+              ? { ...item, reposted: true }
+              : item,
+          ),
+        );
+        toast.success("RPしました");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "RPを更新できませんでした。",
+      );
+    } finally {
+      setFederationRepostBusy(null);
+    }
+  };
   const [vMode, setVMode] = useState<"camera" | "upload">("camera"),
     [seconds, setSeconds] = useState(2),
     [clip, setClip] = useState(""),
@@ -600,6 +832,25 @@ export default function Notebook({
       </span>
     </label>
   );
+  const federationToggle = (
+    target: Kind,
+    checked: boolean,
+    setChecked: (value: boolean) => void,
+  ) =>
+    federationStatus?.enabled && target !== "vlog" ? (
+      <label className="x-intent-toggle federation-post-toggle">
+        <span>Fediverseにも配信</span>
+        <input
+          type="checkbox"
+          role="switch"
+          checked={checked}
+          onChange={(event) => setChecked(event.target.checked)}
+        />
+        <span className="x-intent-track" aria-hidden="true">
+          <span />
+        </span>
+      </label>
+    ) : null;
   const xFallbackAction = xFallback && (
     <a
       className="x-intent-fallback"
@@ -619,7 +870,10 @@ export default function Notebook({
         setLogin(session.authenticated);
         if (session.authenticated) {
           const saved = await api<Draft[]>("drafts");
-          if (!cancelled) setDrafts(saved);
+          if (!cancelled) {
+            setDrafts(saved);
+            await loadFederationStatus();
+          }
         }
       })
       .catch(() => toast.error("接続できません。再読み込みしてください。"));
@@ -638,7 +892,7 @@ export default function Notebook({
       cancelled = true;
       objectUrls.forEach(URL.revokeObjectURL);
     };
-  }, []);
+  }, [loadFederationStatus]);
   useEffect(() => {
     if (ready)
       try {
@@ -828,10 +1082,17 @@ export default function Notebook({
     setTitle(t);
     setBody(b);
     setEditorImages(p?.images ?? d?.images ?? []);
+    setEditorFederationEnabled(p ? p.federationEnabled === true : true);
     setEditId(p?.id || null);
     setDraftId(d?.id || null);
     setEditorStart(
-      JSON.stringify({ k, t, b, images: p?.images ?? d?.images ?? [] }),
+      JSON.stringify({
+        k,
+        t,
+        b,
+        images: p?.images ?? d?.images ?? [],
+        federation: p ? p.federationEnabled === true : true,
+      }),
     );
     setBlogEditorMode("edit");
     setFullPageEditor(false);
@@ -857,9 +1118,18 @@ export default function Notebook({
       setTitle("");
       setBody("");
       setEditorImages([]);
+      setEditorFederationEnabled(true);
       setEditId(null);
       setDraftId(null);
-      setEditorStart(JSON.stringify({ k: "tweet", t: "", b: "", images: [] }));
+      setEditorStart(
+        JSON.stringify({
+          k: "tweet",
+          t: "",
+          b: "",
+          images: [],
+          federation: true,
+        }),
+      );
       setBlogEditorMode("edit");
       setFullPageEditor(false);
       setEditorDrafts(false);
@@ -875,8 +1145,13 @@ export default function Notebook({
     );
   }, [editor, kind, blogEditorMode]);
   const dirty =
-    JSON.stringify({ k: kind, t: title, b: body, images: editorImages }) !==
-    editorStart;
+    JSON.stringify({
+      k: kind,
+      t: title,
+      b: body,
+      images: editorImages,
+      federation: editorFederationEnabled,
+    }) !== editorStart;
   const askClose = () => {
     if (kind === "vlog") {
       closeComposer();
@@ -933,6 +1208,7 @@ export default function Notebook({
             tags: old?.tags || [],
             pinned: old?.pinned || false,
             images: kind === "tweet" ? editorImages : [],
+            federationEnabled: editorFederationEnabled,
             ...(old ? { revision: old.revision } : {}),
           },
         );
@@ -974,6 +1250,7 @@ export default function Notebook({
           tags: [],
           pinned: false,
           images: inlineImages,
+          federationEnabled: inlineFederationEnabled,
         });
         setPosts((ps) => [saved, ...ps]);
         setInlineBody("");
@@ -1172,21 +1449,37 @@ export default function Notebook({
       }
     });
   };
-  const shown = posts
-    .filter(
-      (p) =>
-        (filter === "all" || p.kind === filter) &&
-        (!tag || p.tags.includes(tag)) &&
-        (!query ||
-          (p.title + " " + p.body + " " + p.tags)
-            .toLowerCase()
-            .includes(query.toLowerCase())),
-    )
-    .sort((a, b) =>
-      sort === "popular"
-        ? b.likes - a.likes
-        : +!!b.pinned - +!!a.pinned || b.date.localeCompare(a.date),
-    );
+  const shownPosts = posts.filter(
+    (p) =>
+      (filter === "all" || p.kind === filter) &&
+      (!tag || p.tags.includes(tag)) &&
+      (!query ||
+        (p.title + " " + p.body + " " + p.tags)
+          .toLowerCase()
+          .includes(query.toLowerCase())),
+  );
+  const shownReposts =
+    filter === "all" && !tag
+      ? publicReposts.filter(
+          (repost) =>
+            !query ||
+            (
+              repost.displayName +
+              " " +
+              repost.handle +
+              " " +
+              repost.contentHtml.replace(/<[^>]+>/g, " ")
+            )
+              .toLowerCase()
+              .includes(query.toLowerCase()),
+        )
+      : [];
+  const shown = [...shownPosts, ...shownReposts].sort((a, b) =>
+    sort === "popular"
+      ? b.likes - a.likes
+      : +(b.kind !== "repost" && !!b.pinned) -
+          +(a.kind !== "repost" && !!a.pinned) || b.date.localeCompare(a.date),
+  );
   const tags = Object.entries(
     posts.reduce<Record<string, number>>((counts, post) => {
       for (const postTag of post.tags) {
@@ -1294,6 +1587,7 @@ export default function Notebook({
                     revision: p.revision,
                     ...(p.video ? { video: p.video, time: p.time } : {}),
                     images: p.images || [],
+                    federationEnabled: p.federationEnabled === true,
                   });
                   await refresh();
                 })
@@ -1517,6 +1811,245 @@ export default function Notebook({
                   >
                     保存
                   </Button>
+                  <section
+                    className="federation-settings"
+                    aria-labelledby="federation-heading"
+                  >
+                    <div className="federation-settings-heading">
+                      <Globe size={18} aria-hidden="true" />
+                      <div>
+                        <h2 id="federation-heading">Fediverse</h2>
+                        <p>
+                          ActivityPubに対応すると、Fediverseからこのサイトをフォローできます。
+                        </p>
+                      </div>
+                    </div>
+                    {federationLoadError ? (
+                      <div className="federation-load-error" role="alert">
+                        <p>Fediverse設定を読み込めませんでした。</p>
+                        <Button
+                          type="button"
+                          onClick={() => void loadFederationStatus()}
+                        >
+                          再試行
+                        </Button>
+                      </div>
+                    ) : !federationStatus ? (
+                      <p className="federation-state" role="status">
+                        設定を読み込んでいます
+                      </p>
+                    ) : federationStatus.enabled ? (
+                      <div className="federation-enabled">
+                        <div className="federation-identity">
+                          <p className="federation-state">
+                            <Check size={16} aria-hidden="true" />
+                            有効
+                          </p>
+                          <strong>{federationStatus.handle}</strong>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              void navigator.clipboard
+                                .writeText(federationStatus.handle)
+                                .then(() =>
+                                  toast.success("アドレスをコピーしました"),
+                                )
+                                .catch(() =>
+                                  toast.error("コピーできませんでした"),
+                                );
+                            }}
+                          >
+                            アドレスをコピー
+                          </Button>
+                        </div>
+                        <section
+                          className="federation-following"
+                          aria-labelledby="federation-following-heading"
+                        >
+                          <div>
+                            <h3 id="federation-following-heading">
+                              フォロー管理
+                            </h3>
+                            <p>
+                              Fediverseのアドレスから相手を探してフォローします。
+                            </p>
+                          </div>
+                          <form
+                            className="federation-follow-form"
+                            aria-busy={federationFollowBusy}
+                            onSubmit={(event) => {
+                              event.preventDefault();
+                              void federationFollow();
+                            }}
+                          >
+                            <label htmlFor="federation-follow-handle">
+                              Fediverseアドレス
+                            </label>
+                            <div>
+                              <input
+                                id="federation-follow-handle"
+                                name="federation-follow-handle"
+                                value={federationFollowHandle}
+                                placeholder="@alice@example.social"
+                                autoComplete="off"
+                                autoCapitalize="none"
+                                spellCheck={false}
+                                maxLength={384}
+                                aria-invalid={Boolean(federationFollowError)}
+                                onChange={(event) => {
+                                  setFederationFollowHandle(event.target.value);
+                                  if (federationFollowError)
+                                    setFederationFollowError("");
+                                }}
+                              />
+                              <Button
+                                variant="solid"
+                                type="submit"
+                                disabled={federationFollowBusy}
+                              >
+                                フォロー
+                              </Button>
+                            </div>
+                          </form>
+                          {federationFollowError && (
+                            <p className="federation-error" role="alert">
+                              {federationFollowError}
+                            </p>
+                          )}
+                          {federationFollowing.length ? (
+                            <ul className="federation-follow-list">
+                              {federationFollowing.map((following) => (
+                                <li key={following.actorId}>
+                                  <div>
+                                    <strong>{following.displayName}</strong>
+                                    <span>
+                                      {following.handle ||
+                                        `@${following.preferredUsername}`}
+                                    </span>
+                                  </div>
+                                  <span
+                                    className={`federation-follow-state is-${following.state}`}
+                                  >
+                                    {
+                                      {
+                                        pending: "承認待ち",
+                                        accepted: "フォロー中",
+                                        rejected: "拒否",
+                                        failed: "失敗",
+                                      }[following.state]
+                                    }
+                                  </span>
+                                  <Button
+                                    type="button"
+                                    disabled={federationFollowBusy}
+                                    onClick={() =>
+                                      void federationUnfollow(following.actorId)
+                                    }
+                                  >
+                                    フォロー解除
+                                  </Button>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="federation-follow-empty">
+                              まだフォローしているアカウントはありません。
+                            </p>
+                          )}
+                        </section>
+                      </div>
+                    ) : (
+                      <form
+                        className="federation-setup"
+                        aria-busy={federationBusy}
+                        onSubmit={(event) => {
+                          event.preventDefault();
+                          const username = federationUsername
+                            .trim()
+                            .toLowerCase();
+                          if (!/^[a-z0-9_]{1,64}$/.test(username)) {
+                            setFederationError(
+                              "半角小文字、数字、アンダースコアを1〜64文字で入力してください。",
+                            );
+                            return;
+                          }
+                          setFederationBusy(true);
+                          setFederationError("");
+                          void api<FederationStatus>(
+                            "federation/setup",
+                            "POST",
+                            { username },
+                          )
+                            .then((status) => {
+                              setFederationStatus(status);
+                              toast.success("ActivityPubを有効にしました");
+                            })
+                            .catch((error) => {
+                              setFederationError(
+                                error instanceof Error
+                                  ? error.message
+                                  : "有効化できませんでした。",
+                              );
+                            })
+                            .finally(() => setFederationBusy(false));
+                        }}
+                      >
+                        <label htmlFor="federation-username">ユーザー名</label>
+                        <p
+                          className="federation-hint"
+                          id="federation-username-hint"
+                        >
+                          有効化後は変更できません。
+                        </p>
+                        <input
+                          id="federation-username"
+                          name="federation-username"
+                          value={federationUsername}
+                          autoComplete="off"
+                          autoCapitalize="none"
+                          spellCheck={false}
+                          maxLength={64}
+                          aria-describedby={
+                            federationError
+                              ? "federation-username-hint federation-username-error"
+                              : "federation-username-hint"
+                          }
+                          aria-invalid={Boolean(federationError)}
+                          onChange={(event) => {
+                            setFederationUsername(event.target.value);
+                            if (federationError) setFederationError("");
+                          }}
+                        />
+                        <div className="federation-handle-preview">
+                          <span>あなたのFediverseアドレス</span>
+                          <strong>
+                            @
+                            {federationUsername.trim().toLowerCase() ||
+                              "username"}
+                            @{federationStatus.host}
+                          </strong>
+                        </div>
+                        {federationError && (
+                          <p
+                            id="federation-username-error"
+                            className="federation-error"
+                            role="alert"
+                          >
+                            {federationError}
+                          </p>
+                        )}
+                        <Button
+                          variant="solid"
+                          type="submit"
+                          disabled={federationBusy}
+                        >
+                          {federationBusy
+                            ? "ActivityPubを有効にしています"
+                            : "ActivityPubを有効にする"}
+                        </Button>
+                      </form>
+                    )}
+                  </section>
                 </section>
               ) : view === "projects" ? (
                 <section className="projects-page">
@@ -1755,20 +2288,37 @@ export default function Notebook({
                   <section className="page-heading">
                     <h1>タイムライン</h1>
                   </section>
-                  <label className="home-search mobile-search">
-                    <Search size={17} />
-                    <input
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="投稿を検索"
-                    />
-                    {query && (
-                      <button onClick={() => setQuery("")}>
-                        <X size={15} />
-                      </button>
-                    )}
-                  </label>
-                  {login && (
+                  {timelineMode === "kamelog" && (
+                    <label className="home-search mobile-search">
+                      <Search size={17} />
+                      <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="投稿を検索"
+                      />
+                      {query && (
+                        <button onClick={() => setQuery("")}>
+                          <X size={15} />
+                        </button>
+                      )}
+                    </label>
+                  )}
+                  {login && federationStatus?.enabled && (
+                    <Tabs
+                      value={timelineMode}
+                      onValueChange={(value) => {
+                        const next = value as "kamelog" | "fediverse";
+                        setTimelineMode(next);
+                        if (next === "fediverse") void loadFederationTimeline();
+                      }}
+                    >
+                      <TabsList className="fediverse-mode-switch">
+                        <TabsTrigger value="kamelog">kamelog</TabsTrigger>
+                        <TabsTrigger value="fediverse">Fediverse</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  )}
+                  {login && timelineMode === "kamelog" && (
                     <div className="composer desktop-composer">
                       <div className="composer-start">
                         <Avatar value={profile.icon} />
@@ -1815,6 +2365,11 @@ export default function Notebook({
                       )}
                       <div className="composer-kinds">
                         {xToggle("tweet")}
+                        {federationToggle(
+                          "tweet",
+                          inlineFederationEnabled,
+                          setInlineFederationEnabled,
+                        )}
                         <label className="image-upload-button">
                           <ImageIcon />
                           画像
@@ -1864,129 +2419,332 @@ export default function Notebook({
                       </div>
                     </div>
                   )}
-                  <div className="timeline-toolbar">
-                    <Tabs
-                      value={filter}
-                      onValueChange={(v) => setFilter(v as "all" | Kind)}
-                    >
-                      <TabsList variant="line" className="feed-tabs">
-                        <TabsTrigger value="all">すべて</TabsTrigger>
-                        <TabsTrigger value="blog">ブログ</TabsTrigger>
-                        <TabsTrigger value="tweet">つぶやき</TabsTrigger>
-                        <TabsTrigger value="vlog">vlog</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="sort-button">
-                          <SlidersHorizontal size={17} />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setSort("new")}>
-                          新しい順 {sort === "new" && <Check />}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setSort("popular")}>
-                          いいね順 {sort === "popular" && <Check />}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  {tag && (
-                    <div className="filter-active">
-                      #{tag}
-                      <button onClick={() => setTag("")}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-                  <div className="feed">
-                    {shown.map((p) => (
-                      <article className={"post " + p.kind} key={p.id}>
-                        {p.pinned && (
-                          <div className="pinned">
-                            <Pin size={12} />
-                            固定
-                          </div>
-                        )}
-                        {meta(p)}
-                        {p.kind === "vlog" ? (
-                          <div className="post-focus vlog-button">
-                            <VlogFrame post={p} />
-                            <button
-                              className="open-vlog-detail"
-                              onClick={() => openPost(p.id)}
-                            >
-                              詳細
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            className="post-focus"
-                            onClick={() => openPost(p.id)}
-                          >
-                            {p.kind === "blog" ? (
-                              <>
-                                <h2>{p.title}</h2>
-                                <p>
-                                  {p.body
-                                    .split("\n")
-                                    .find((s) => s && !s.startsWith("#"))}
-                                </p>
-                              </>
-                            ) : (
-                              <p className="tweet-body">{p.body}</p>
-                            )}
-                          </button>
-                        )}
-                        {p.kind === "tweet" && (
-                          <ImageGallery images={p.images} />
-                        )}
-                        {p.tags.length > 0 && (
-                          <div className="tags">
-                            {p.tags.map((t) => {
-                              const automatic = p.autoTags?.some(
-                                (autoTag) => autoTag.tag === t,
-                              );
-                              return (
-                                <button key={t} onClick={() => setTag(t)}>
-                                  <Badge
-                                    variant={t === "Go" ? "blue" : "gray"}
-                                    title={
-                                      automatic
-                                        ? "自動で付与されたタグ"
-                                        : undefined
-                                    }
-                                    aria-label={
-                                      automatic ? `自動タグ ${t}` : undefined
-                                    }
-                                  >
-                                    {automatic ? `AI · ${t}` : t}
-                                  </Badge>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                        {actions(p)}
-                      </article>
-                    ))}
-                    {!shown.length && (
-                      <div className="empty-state">
-                        <p>該当する投稿はありません。</p>
-                        <Button
-                          onClick={() => {
-                            setQuery("");
-                            setFilter("all");
-                            setTag("");
-                          }}
+                  {timelineMode === "kamelog" ? (
+                    <>
+                      <div className="timeline-toolbar">
+                        <Tabs
+                          value={filter}
+                          onValueChange={(v) => setFilter(v as "all" | Kind)}
                         >
-                          解除
-                        </Button>
+                          <TabsList variant="line" className="feed-tabs">
+                            <TabsTrigger value="all">すべて</TabsTrigger>
+                            <TabsTrigger value="blog">ブログ</TabsTrigger>
+                            <TabsTrigger value="tweet">つぶやき</TabsTrigger>
+                            <TabsTrigger value="vlog">vlog</TabsTrigger>
+                          </TabsList>
+                        </Tabs>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="sort-button">
+                              <SlidersHorizontal size={17} />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setSort("new")}>
+                              新しい順 {sort === "new" && <Check />}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setSort("popular")}
+                            >
+                              いいね順 {sort === "popular" && <Check />}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                    )}
-                    <div className="feed-count">{shown.length}件</div>
-                  </div>
+                      {tag && (
+                        <div className="filter-active">
+                          #{tag}
+                          <button onClick={() => setTag("")}>
+                            <X size={14} />
+                          </button>
+                        </div>
+                      )}
+                      <div className="feed">
+                        {shown.map((p) =>
+                          p.kind === "repost" ? (
+                            <article className="post public-repost" key={p.id}>
+                              <p className="public-repost-label">
+                                {profile.name}がRP
+                              </p>
+                              <div className="fediverse-post-meta">
+                                <Avatar
+                                  value={
+                                    p.displayName.trim().slice(0, 1) || "•"
+                                  }
+                                />
+                                <div>
+                                  <strong>{p.displayName}</strong>
+                                  <span>{p.handle}</span>
+                                </div>
+                                <time dateTime={p.publishedAt}>
+                                  {new Date(p.publishedAt).toLocaleDateString(
+                                    "ja-JP",
+                                    { month: "numeric", day: "numeric" },
+                                  )}
+                                </time>
+                              </div>
+                              <div
+                                className="fediverse-content"
+                                dangerouslySetInnerHTML={{
+                                  __html: p.contentHtml,
+                                }}
+                              />
+                              {p.attachments.length > 0 && (
+                                <div className="fediverse-attachments">
+                                  {p.attachments.map((attachment) => (
+                                    <img
+                                      key={attachment.url}
+                                      src={attachment.url}
+                                      alt=""
+                                      loading="lazy"
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                              <div className="fediverse-post-actions">
+                                <a
+                                  href={p.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  元の投稿を開く
+                                  <ArrowUpRight size={14} />
+                                </a>
+                              </div>
+                            </article>
+                          ) : (
+                            <article className={"post " + p.kind} key={p.id}>
+                              {p.pinned && (
+                                <div className="pinned">
+                                  <Pin size={12} />
+                                  固定
+                                </div>
+                              )}
+                              {meta(p)}
+                              {p.kind === "vlog" ? (
+                                <div className="post-focus vlog-button">
+                                  <VlogFrame post={p} />
+                                  <button
+                                    className="open-vlog-detail"
+                                    onClick={() => openPost(p.id)}
+                                  >
+                                    詳細
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  className="post-focus"
+                                  onClick={() => openPost(p.id)}
+                                >
+                                  {p.kind === "blog" ? (
+                                    <>
+                                      <h2>{p.title}</h2>
+                                      <p>
+                                        {p.body
+                                          .split("\n")
+                                          .find((s) => s && !s.startsWith("#"))}
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <p className="tweet-body">{p.body}</p>
+                                  )}
+                                </button>
+                              )}
+                              {p.kind === "tweet" && (
+                                <ImageGallery images={p.images} />
+                              )}
+                              {p.tags.length > 0 && (
+                                <div className="tags">
+                                  {p.tags.map((t) => {
+                                    const automatic = p.autoTags?.some(
+                                      (autoTag) => autoTag.tag === t,
+                                    );
+                                    return (
+                                      <button key={t} onClick={() => setTag(t)}>
+                                        <Badge
+                                          variant={t === "Go" ? "blue" : "gray"}
+                                          title={
+                                            automatic
+                                              ? "自動で付与されたタグ"
+                                              : undefined
+                                          }
+                                          aria-label={
+                                            automatic
+                                              ? `自動タグ ${t}`
+                                              : undefined
+                                          }
+                                        >
+                                          {automatic ? `AI · ${t}` : t}
+                                        </Badge>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                              {actions(p)}
+                            </article>
+                          ),
+                        )}
+                        {!shown.length && (
+                          <div className="empty-state">
+                            <p>該当する投稿はありません。</p>
+                            <Button
+                              onClick={() => {
+                                setQuery("");
+                                setFilter("all");
+                                setTag("");
+                              }}
+                            >
+                              解除
+                            </Button>
+                          </div>
+                        )}
+                        <div className="feed-count">{shown.length}件</div>
+                      </div>
+                    </>
+                  ) : (
+                    <section
+                      className="fediverse-timeline"
+                      aria-labelledby="fediverse-timeline-heading"
+                    >
+                      <div className="fediverse-timeline-heading">
+                        <div>
+                          <h2 id="fediverse-timeline-heading">Fediverse</h2>
+                          <p>フォロー中の投稿と自分の配信済み投稿</p>
+                        </div>
+                        <button
+                          type="button"
+                          aria-label="Fediverseを更新"
+                          disabled={federationTimelineBusy}
+                          onClick={() => void loadFederationTimeline()}
+                        >
+                          <RefreshCw
+                            size={17}
+                            className={
+                              federationTimelineBusy ? "is-spinning" : ""
+                            }
+                          />
+                        </button>
+                      </div>
+                      {federationTimelineError && (
+                        <div className="fediverse-timeline-error" role="alert">
+                          <p>{federationTimelineError}</p>
+                          <Button
+                            type="button"
+                            onClick={() => void loadFederationTimeline()}
+                          >
+                            再試行
+                          </Button>
+                        </div>
+                      )}
+                      {!federationTimelineError &&
+                        !federationTimelineBusy &&
+                        !federationTimeline.length && (
+                          <div className="empty-state">
+                            <p>受信した投稿はまだありません。</p>
+                          </div>
+                        )}
+                      <div className="fediverse-feed">
+                        {federationTimeline.map((timelineItem) => (
+                          <article
+                            className="fediverse-post"
+                            key={timelineItem.id}
+                          >
+                            {timelineItem.activityType === "Announce" && (
+                              <p className="fediverse-announced">
+                                {timelineItem.displayName}がRP
+                              </p>
+                            )}
+                            <div className="fediverse-post-meta">
+                              <Avatar
+                                value={
+                                  timelineItem.source === "self"
+                                    ? profile.icon
+                                    : timelineItem.displayName
+                                        .trim()
+                                        .slice(0, 1) || "•"
+                                }
+                              />
+                              <div>
+                                <strong>{timelineItem.displayName}</strong>
+                                <span>{timelineItem.handle}</span>
+                              </div>
+                              <time dateTime={timelineItem.publishedAt}>
+                                {new Date(
+                                  timelineItem.publishedAt,
+                                ).toLocaleDateString("ja-JP", {
+                                  month: "numeric",
+                                  day: "numeric",
+                                })}
+                              </time>
+                            </div>
+                            <div
+                              className="fediverse-content"
+                              dangerouslySetInnerHTML={{
+                                __html: timelineItem.contentHtml,
+                              }}
+                            />
+                            {timelineItem.attachments.length > 0 && (
+                              <div className="fediverse-attachments">
+                                {timelineItem.attachments.map((attachment) => (
+                                  <img
+                                    key={attachment.url}
+                                    src={attachment.url}
+                                    alt=""
+                                    loading="lazy"
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            <div className="fediverse-post-actions">
+                              <a
+                                href={timelineItem.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                元の投稿を開く
+                                <ArrowUpRight size={14} />
+                              </a>
+                              {timelineItem.source === "remote" && (
+                                <button
+                                  type="button"
+                                  className={
+                                    timelineItem.reposted ? "is-reposted" : ""
+                                  }
+                                  disabled={
+                                    federationRepostBusy ===
+                                    timelineItem.objectId
+                                  }
+                                  onClick={() =>
+                                    void federationRepost(timelineItem)
+                                  }
+                                >
+                                  {timelineItem.reposted
+                                    ? "RPを取り消す"
+                                    : "RP"}
+                                </button>
+                              )}
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                      {federationTimelineCursor && (
+                        <Button
+                          type="button"
+                          className="fediverse-load-more"
+                          disabled={federationTimelineBusy}
+                          onClick={() =>
+                            void loadFederationTimeline(
+                              federationTimelineCursor,
+                              true,
+                            )
+                          }
+                        >
+                          さらに読み込む
+                        </Button>
+                      )}
+                    </section>
+                  )}
                 </>
               )}
             </main>
@@ -2005,43 +2763,49 @@ export default function Notebook({
                   <ArrowUpRight size={14} />
                 </a>
               </div>
-              <label className="side-search">
-                <Search size={16} />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="投稿を検索"
-                />
-                <kbd>/</kbd>
-              </label>
-              {tags.length > 0 && (
-                <div className="aside-section">
-                  <h3>タグ</h3>
-                  <div className="topic-list">
-                    {visibleTags.map(({ name, count }) => (
-                      <button
-                        key={name}
-                        className={tag === name ? "active" : ""}
-                        onClick={() => {
-                          nav("timeline");
-                          setTag(name);
-                          setFilter("all");
-                        }}
-                      >
-                        #{name}
-                        <small>{count}</small>
-                      </button>
-                    ))}
-                  </div>
-                  {visibleTagCount < tags.length && (
-                    <button
-                      className="tag-load-more"
-                      onClick={() => setVisibleTagCount((count) => count + 5)}
-                    >
-                      もっと見る
-                    </button>
+              {(view !== "timeline" || timelineMode === "kamelog") && (
+                <>
+                  <label className="side-search">
+                    <Search size={16} />
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="投稿を検索"
+                    />
+                    <kbd>/</kbd>
+                  </label>
+                  {tags.length > 0 && (
+                    <div className="aside-section">
+                      <h3>タグ</h3>
+                      <div className="topic-list">
+                        {visibleTags.map(({ name, count }) => (
+                          <button
+                            key={name}
+                            className={tag === name ? "active" : ""}
+                            onClick={() => {
+                              nav("timeline");
+                              setTag(name);
+                              setFilter("all");
+                            }}
+                          >
+                            #{name}
+                            <small>{count}</small>
+                          </button>
+                        ))}
+                      </div>
+                      {visibleTagCount < tags.length && (
+                        <button
+                          className="tag-load-more"
+                          onClick={() =>
+                            setVisibleTagCount((count) => count + 5)
+                          }
+                        >
+                          もっと見る
+                        </button>
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </aside>
           </div>
@@ -2165,6 +2929,7 @@ export default function Notebook({
                         setTitle(draft.title);
                         setBody(draft.body);
                         setEditorImages(draft.images || []);
+                        setEditorFederationEnabled(true);
                         setEditId(null);
                         setDraftId(draft.id);
                         setEditorStart(
@@ -2173,6 +2938,7 @@ export default function Notebook({
                             t: draft.title,
                             b: draft.body,
                             images: draft.images || [],
+                            federation: true,
                           }),
                         );
                         setEditorDrafts(false);
@@ -2218,6 +2984,11 @@ export default function Notebook({
             </TabsList>
           </Tabs>
           {xToggle(kind)}
+          {federationToggle(
+            kind,
+            editorFederationEnabled,
+            setEditorFederationEnabled,
+          )}
           {kind === "vlog" ? (
             <>
               <Tabs

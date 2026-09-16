@@ -16,6 +16,30 @@ import {
 } from "./validation.mjs";
 import { Conflict, SESSION_TTL_SECONDS } from "./store.mjs";
 import { convertVideo, saveImage } from "./media.mjs";
+import {
+  createFederationIdentity,
+  federationStatus,
+  InvalidFederationUsername,
+} from "./activitypub.mjs";
+import {
+  enqueuePostFederationDelete,
+  enqueuePostFederationTransition,
+} from "./federation-outbound.mjs";
+import {
+  followRemoteActor,
+  InvalidFederationHandle,
+  unfollowRemoteActor,
+} from "./federation-remote.mjs";
+import { federationRemoteImage } from "./federation-media.mjs";
+import {
+  InvalidFederationCursor,
+  ownerFederationTimeline,
+} from "./federation-timeline.mjs";
+import {
+  createFederationRepost,
+  publicFederationReposts,
+  undoFederationRepost,
+} from "./federation-reposts.mjs";
 
 export function configuration(env = process.env) {
   const origin = env.KAMELOG_ORIGIN || "http://localhost:3000";
@@ -45,7 +69,7 @@ const equal = (a, b) =>
     createHash("sha256").update(a).digest(),
     createHash("sha256").update(b).digest(),
   );
-export function createAPI(store, config) {
+export function createAPI(store, config, options = {}) {
   const sessionName = config.secure
     ? "__Host-kamelog-session"
     : "kamelog-session";
@@ -303,7 +327,128 @@ export function createAPI(store, config) {
           headers: { ...headers, "Content-Length": String(bytes.length) },
         });
       }
+      if (
+        path[0] === "federation" &&
+        path[1] === "reposts" &&
+        path.length === 2 &&
+        method === "GET"
+      )
+        return json(publicFederationReposts(store));
+      if (
+        path[0] === "federation" &&
+        path[1] === "media" &&
+        path[2] &&
+        path.length === 3 &&
+        method === "GET"
+      ) {
+        if (!owner && !store.federationRemoteMediaIsPublic(path[2]))
+          return json({ error: "Not found" }, 404);
+        try {
+          const image = await federationRemoteImage(store, path[2], {
+            fetchOptions: options.federation?.fetchOptions,
+          });
+          if (!image) return json({ error: "Not found" }, 404);
+          return new Response(image.bytes, {
+            headers: {
+              "Cache-Control": owner
+                ? "private, no-store"
+                : "public, max-age=300",
+              "Content-Length": String(image.bytes.length),
+              "Content-Type": image.type,
+              "X-Content-Type-Options": "nosniff",
+            },
+          });
+        } catch {
+          return json({ error: "リモート画像を取得できませんでした。" }, 502);
+        }
+      }
       if (!owner) return json({ error: "Unauthorized" }, 401);
+      if (path[0] === "federation" && path[1] === "status" && method === "GET")
+        return json(federationStatus(store, config));
+      if (
+        path[0] === "federation" &&
+        path[1] === "timeline" &&
+        method === "GET"
+      )
+        return json(
+          ownerFederationTimeline(
+            store,
+            config,
+            url.searchParams.get("cursor"),
+          ),
+        );
+      if (
+        path[0] === "federation" &&
+        path[1] === "setup" &&
+        method === "POST"
+      ) {
+        const input = await body();
+        if (!input || typeof input.username !== "string")
+          return json({ error: "Invalid input" }, 400);
+        createFederationIdentity(store, input.username);
+        return json(federationStatus(store, config), 201);
+      }
+      if (
+        path[0] === "federation" &&
+        path[1] === "following" &&
+        method === "GET"
+      )
+        return json(store.federationFollowingList());
+      if (
+        path[0] === "federation" &&
+        path[1] === "follow" &&
+        method === "POST"
+      ) {
+        const input = await body();
+        if (!input || typeof input.handle !== "string")
+          return json({ error: "Invalid input" }, 400);
+        return json(
+          await followRemoteActor(
+            store,
+            config,
+            input.handle,
+            options.federation,
+          ),
+          201,
+        );
+      }
+      if (
+        path[0] === "federation" &&
+        path[1] === "follow" &&
+        method === "DELETE"
+      ) {
+        const input = await body();
+        if (!input || typeof input.actorId !== "string")
+          return json({ error: "Invalid input" }, 400);
+        return json(unfollowRemoteActor(store, config, input.actorId));
+      }
+      if (
+        path[0] === "federation" &&
+        path[1] === "reposts" &&
+        path.length === 2 &&
+        method === "POST"
+      ) {
+        const input = await body();
+        if (
+          !input ||
+          typeof input.objectId !== "string" ||
+          input.objectId.length > 2_048
+        )
+          return json({ error: "Invalid input" }, 400);
+        return json(createFederationRepost(store, config, input.objectId), 201);
+      }
+      if (
+        path[0] === "federation" &&
+        path[1] === "reposts" &&
+        path[2] &&
+        path.length === 3 &&
+        method === "DELETE"
+      ) {
+        const objectId = decodeURIComponent(path[2]);
+        if (objectId.length > 2_048)
+          return json({ error: "Invalid input" }, 400);
+        return json(undoFederationRepost(store, config, objectId));
+      }
       if (path[0] === "media" && method === "POST")
         return url.searchParams.get("kind") === "image"
           ? json(
@@ -331,7 +476,14 @@ export function createAPI(store, config) {
       if (["posts", "drafts"].includes(path[0])) {
         const table = path[0];
         if (method === "DELETE") {
-          store.remove(table, path[1], Number(req.headers.get("if-match")));
+          store.remove(
+            table,
+            path[1],
+            Number(req.headers.get("if-match")),
+            table === "posts"
+              ? (post) => enqueuePostFederationDelete(store, config, post)
+              : undefined,
+          );
           return json({ ok: true });
         }
         if (method === "POST" || method === "PUT") {
@@ -367,6 +519,23 @@ export function createAPI(store, config) {
           )
             return json({ error: "Unknown image" }, 400);
           const now = new Date().toISOString();
+          const federationEnabled =
+            table === "posts" &&
+            Boolean(store.federationIdentity()) &&
+            input.kind !== "vlog" &&
+            (input.federationEnabled ?? old?.federationEnabled) === true;
+          const federationContentChanged =
+            !old ||
+            old.kind !== input.kind ||
+            old.title !== input.title ||
+            old.body !== input.body ||
+            JSON.stringify(old.images || []) !==
+              JSON.stringify(input.images || []);
+          const federationUpdatedAt = federationEnabled
+            ? !old?.federationEnabled || federationContentChanged
+              ? now
+              : old.federationUpdatedAt || old.updatedAt || old.date
+            : old?.federationUpdatedAt;
           return json(
             store.save(
               table,
@@ -378,10 +547,24 @@ export function createAPI(store, config) {
                   ? { tags: extractHashtags(input.title, input.body) }
                   : {}),
                 ...(table === "posts"
-                  ? { date: old?.date || now, likes: old?.likes || 0 }
+                  ? {
+                      date: old?.date || now,
+                      likes: old ? store.localPostLikes(id) : 0,
+                      federationEnabled,
+                      ...(federationUpdatedAt ? { federationUpdatedAt } : {}),
+                    }
                   : { savedAt: now }),
               },
               input.revision,
+              table === "posts"
+                ? (saved, previous) =>
+                    enqueuePostFederationTransition(
+                      store,
+                      config,
+                      saved,
+                      previous,
+                    )
+                : undefined,
             ),
             method === "POST" ? 201 : 200,
           );
@@ -398,6 +581,12 @@ export function createAPI(store, config) {
         return json({ error: "Payload too large" }, 413);
       if (error?.name === "ZodError" || error instanceof SyntaxError)
         return json({ error: "Invalid input" }, 400);
+      if (error instanceof InvalidFederationUsername)
+        return json({ error: "ユーザー名を確認してください。" }, 400);
+      if (error instanceof InvalidFederationHandle)
+        return json({ error: "Fediverseアドレスを確認してください。" }, 400);
+      if (error instanceof InvalidFederationCursor)
+        return json({ error: "Invalid cursor" }, 400);
       // No request bodies, tokens or raw exception messages in responses/logs.
       return json(
         { error: "操作に失敗しました。入力を保持して再試行してください。" },

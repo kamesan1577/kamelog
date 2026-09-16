@@ -2,6 +2,7 @@
 
 個人のブログ・つぶやき・短尺vlog・プロジェクトをまとめる公開サイト。
 投稿者は単一オーナー。表示名・アイコン・自己紹介はアカウント画面から変更できる。
+オーナーはアカウント画面から単一のActivityPub identityを有効化できる。現在の対応範囲は [activitypub.md](activitypub.md) を正本とする。
 
 ## 公開UI
 
@@ -11,6 +12,7 @@
 トップにはBackend Engineerの紹介、開発上の関心、代表作品、実務経験・取り組み、用途別のスキル、学歴・資格、連絡先を表示し、下部の人気投稿・コンテンツ入口を維持する。実績・作品の固定情報は型付き公開データで管理し、アカウントで変更できる表示名・アイコン・自己紹介とは分離する。
 Projectsはkamelog、Home Lab、へいたんの3件を内部詳細ページへ案内し、外部のソースとサイトは詳細から開く。Qiitaはプロフィールの執筆・連絡先リンクとして扱う。Home Labの構成は公開可能な論理図だけに留める。
 プレビューのPC/スマホ疑似切替は開発用であり本番ホームを囲まない。
+`/federation` は `ActivityPubに対応しています` を中心に、実際のFediverseアドレス、標準的な接続手順、inbound/outbound対応表、公開endpointを簡潔に示す。kamelog固有の登録や独自protocolを要求しない。
 
 ## 編集
 
@@ -40,12 +42,16 @@ PCホームの画像添付は現在のつぶやきへ媒体を追加する操作
 10秒以下のvlogは無音で自動再生し、ループする。10秒を超えるvlogは自動再生しない。自動ループは動画上のボタン1回で停止できる。
 投稿の共有はリンクコピーとX共有を別の操作として提供する。
 新規投稿画面の「Xにも投稿」はつぶやき・ブログが初期ON、vlogが初期OFF。種別ごとの選択を端末に保存する。ONのときは保存成功後にXのWeb Intentへ公開URLと本文（ブログはタイトル）を事前入力し、Xでの最終投稿は利用者が行う。長文はXの重み付き280文字内で省略しURLを残す。ポップアップを開けない場合は投稿完了後に手動の「Xで開く」リンクを表示する。編集、下書き保存、投稿失敗時には共有しない。
+ActivityPub有効化後は、つぶやき・ブログの新規投稿画面に独立した「Fediverseにも配信」を初期ONで表示する。選択は投稿データへ保存し、編集時は現在値を表示する。vlogと未設定時には表示しない。X Web Intentの選択・成否とは相互に影響させない。
+ActivityPub有効化済みのオーナーにはTimelineの `kamelog | Fediverse` 切替を表示する。Fediverse側はfollowingから受信した投稿・RPと自分の配信対象投稿だけを表示し、公開visitorや未設定時には切替を出さない。refreshは受信済みserver stateだけを再取得する。
+オーナーがFediverse側のremote投稿をRPすると、公開Timelineの「すべて」に `かめさんがRP` として表示し、Announceをfollowersへ非同期配送する。RP解除とremote Deleteでは公開表示を止め、Undo(Announce)を配送する。
+local postへ届いたActivityPub Likeと対応済みのpositive reactionは、remote Actorごとに最大1件の「いいね」へ正規化し、既存のlocal likesと合算して表示する。UndoまたはreactionのDeleteでremote分だけを解除する。
 投稿URLは種別に応じた要約を含む1200x630のOGP画像を返す。ブログはタイトル、つぶやきは先頭の一文を優先し、長文は省略する。
 
 ## 技術構成と境界
 
 Next.js / React / TypeScript、Node.js 24、SQLite、ローカル媒体、FFmpeg。
-API契約: [api.md](api.md)。検証: [development.md](development.md)。SEO / 検索公開仕様: [seo.md](seo.md)。
+API契約: [api.md](api.md)。ActivityPub契約: [activitypub.md](activitypub.md)。検証: [development.md](development.md)。SEO / 検索公開仕様: [seo.md](seo.md)。
 パスキーの暗号検証は保守されたWebAuthnライブラリへ任せ、自作しない。
 配布はDocker Compose。開発はホットリロード。本番はHTTPS reverse proxyの背後で動かす。
 本番デプロイ可否は [deployment.md](../../runbooks/deployment.md) とHANDOFFの検証証跡で判断する。

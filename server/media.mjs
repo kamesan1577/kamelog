@@ -75,12 +75,16 @@ function imageDimensions(bytes, type) {
   return null;
 }
 
-export async function saveImage(store, bytes, declaredType) {
+export function validateImage(
+  bytes,
+  declaredType,
+  maxBytes = 12 * 1024 * 1024,
+) {
   const type = imageTypes[declaredType];
   if (
     !type ||
     bytes.length === 0 ||
-    bytes.length > 12 * 1024 * 1024 ||
+    bytes.length > maxBytes ||
     !type.signature(bytes)
   )
     throw new Error("Invalid image");
@@ -93,19 +97,24 @@ export async function saveImage(store, bytes, declaredType) {
     dimensions.width * dimensions.height > 40_000_000
   )
     throw new Error("Invalid image");
+  return { extension: type.extension, ...dimensions };
+}
+
+export async function saveImage(store, bytes, declaredType) {
+  const validated = validateImage(bytes, declaredType);
   const root = join(store.directory, "media");
   await mkdir(root, { recursive: true, mode: 0o700 });
   const id = randomUUID();
   const metadata = {
     kind: "image",
     type: declaredType,
-    extension: type.extension,
+    extension: validated.extension,
     size: bytes.length,
-    width: dimensions.width,
-    height: dimensions.height,
+    width: validated.width,
+    height: validated.height,
     createdAt: new Date().toISOString(),
   };
-  await writeFile(join(root, `${id}.${type.extension}`), bytes, {
+  await writeFile(join(root, `${id}.${validated.extension}`), bytes, {
     mode: 0o600,
   });
   store.save("media", id, metadata);
