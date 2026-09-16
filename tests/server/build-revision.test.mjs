@@ -46,7 +46,8 @@ test("the CI-approved SHA is stored in the image for both build and runtime", as
     readFile(new URL("../../compose.yaml", import.meta.url), "utf8"),
     readFile(new URL("../../ops/kamelog-update", import.meta.url), "utf8"),
   ]);
-  assert.equal((dockerfile.match(/^ARG KAMELOG_BUILD_SHA$/gm) ?? []).length, 2);
+  const buildArgs = dockerfile.match(/^ARG KAMELOG_BUILD_SHA$/gm);
+  assert.equal(buildArgs?.length, 2);
   assert.equal(
     (dockerfile.match(/KAMELOG_BUILD_SHA=\$\{KAMELOG_BUILD_SHA\}/g) ?? []).length,
     2,
