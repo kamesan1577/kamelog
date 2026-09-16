@@ -17,7 +17,7 @@ test("public main views keep their URL across navigation and reload", async ({
   await expect(page.locator('[data-ds="projects-page"]')).toBeVisible();
   await expect(
     page.locator('[data-ds="projects-page"] [data-ds="project-tile"]'),
-  ).toHaveCount(0);
+  ).toHaveCount(3);
 
   await page.reload();
   await expect(page).toHaveURL(/\/projects$/);
