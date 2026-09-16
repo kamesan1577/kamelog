@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import "@/components/design-system/patterns/LinkPreview.module.css";
 import { firstHttpUrl, splitTweetText } from "@/lib/tweet-links.mjs";
 
 type LinkPreview = {
