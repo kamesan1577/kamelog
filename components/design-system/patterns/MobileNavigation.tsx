@@ -37,7 +37,7 @@ export function MobileNavigation({
             type="button"
             variant="ghost"
             size="sm"
-            className="min-h-10 flex-col gap-1 rounded-none px-2 py-1 text-ds-xs"
+            className="min-h-10 w-full flex-col gap-1 rounded-none px-2 py-1 text-ds-xs"
             aria-current={item.active ? "page" : undefined}
             disabled={item.disabled}
             onClick={() => onSelect?.(item.id)}
