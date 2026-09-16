@@ -1,5 +1,8 @@
 # kamelog handoff
 
+2026-09-16 Issue #98: Storybook 10、addon-vitest、Design System token、primitive/layout、colocated Storyを追加。/lintをESLint 9へ統合し、Design System領域で6 ruleをerror化。check:uiは依存方向・Story必須・legacy CSS allowlistを検査し、Playwright visual regressionは390/768/1440pxを対象とする。Node 24/FFmpeg/Playwright containerでcomponent 13件、visual 3件、unit 75件、make check全体が成功。既存UI全面移行は#99。
+# kamelog handoff
+
 ## 入口
 
 `AGENTS.md` → `spec/invariants/` → `spec/current/` → 関連ADR → テスト/実装の順に読む。

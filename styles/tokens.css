@@ -1,0 +1,88 @@
+@import "tailwindcss";
+:root {
+  --ds-color-bg-page: #f7f7f5;
+  --ds-color-bg-surface: #ffffff;
+  --ds-color-bg-hover: #efefec;
+  --ds-color-text-primary: #37352f;
+  --ds-color-text-secondary: #78766f;
+  --ds-color-text-tertiary: #9b9992;
+  --ds-color-border-subtle: #e5e3df;
+  --ds-color-border-strong: #c9c6bd;
+  --ds-color-accent: #37352f;
+  --ds-color-accent-hover: #292824;
+  --ds-color-danger: #c93f46;
+  --ds-space-1: 0.25rem;
+  --ds-space-2: 0.5rem;
+  --ds-space-3: 0.75rem;
+  --ds-space-4: 1rem;
+  --ds-space-5: 1.5rem;
+  --ds-space-6: 2rem;
+  --ds-radius-sm: 0.375rem;
+  --ds-radius-md: 0.625rem;
+  --ds-radius-pill: 999px;
+  --ds-font-size-xs: 0.75rem;
+  --ds-font-size-sm: 0.875rem;
+  --ds-font-size-md: 1rem;
+  --ds-font-size-lg: 1.25rem;
+  --ds-line-height-tight: 1.25;
+  --ds-line-height-normal: 1.6;
+  --ds-content-width: 42rem;
+  --ds-page-width: 72rem;
+  --ds-sidebar-width: 13.875rem;
+}
+
+inline {
+  --color-ds-page: var(--ds-color-bg-page);
+  --color-ds-surface: var(--ds-color-bg-surface);
+  --color-ds-hover: var(--ds-color-bg-hover);
+  --color-ds-primary: var(--ds-color-text-primary);
+  --color-ds-secondary: var(--ds-color-text-secondary);
+  --color-ds-tertiary: var(--ds-color-text-tertiary);
+  --color-ds-border: var(--ds-color-border-subtle);
+  --color-ds-border-strong: var(--ds-color-border-strong);
+  --color-ds-accent: var(--ds-color-accent);
+  --color-ds-accent-hover: var(--ds-color-accent-hover);
+  --color-ds-danger: var(--ds-color-danger);
+  --spacing-ds-1: var(--ds-space-1);
+  --spacing-ds-2: var(--ds-space-2);
+  --spacing-ds-3: var(--ds-space-3);
+  --spacing-ds-4: var(--ds-space-4);
+  --spacing-ds-5: var(--ds-space-5);
+  --spacing-ds-6: var(--ds-space-6);
+  --radius-ds-sm: var(--ds-radius-sm);
+  --radius-ds-md: var(--ds-radius-md);
+  --radius-ds-pill: var(--ds-radius-pill);
+  --font-size-ds-xs: var(--ds-font-size-xs);
+  --font-size-ds-sm: var(--ds-font-size-sm);
+  --max-width-ds-page: var(--ds-page-width);
+}
+
+@utility max-w-ds-page {
+  max-width: var(--ds-page-width);
+}
+@utility px-ds-4 {
+  padding-inline: var(--ds-space-4);
+}
+@utility px-ds-6 {
+  padding-inline: var(--ds-space-6);
+}
+@utility py-ds-6 {
+  padding-block: var(--ds-space-6);
+}
+@utility gap-ds-4 {
+  gap: var(--ds-space-4);
+}
+@utility rounded-ds-sm {
+  border-radius: var(--ds-radius-sm);
+}
+@utility rounded-ds-pill {
+  border-radius: var(--ds-radius-pill);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
