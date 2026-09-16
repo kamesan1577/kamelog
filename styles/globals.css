@@ -484,47 +484,6 @@ textarea:focus {
   color: #918e86;
   margin: 0;
 }
-.composer {
-  border: 1px solid #e8e7e3;
-  border-radius: 6px;
-  margin-bottom: 27px;
-  box-shadow: 0 1px 2px #00000003;
-}
-.composer-start {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  padding: 16px;
-}
-.composer-start > button:not(.compose-plus) {
-  flex: 1;
-  text-align: left;
-  color: #aaa79f;
-  font-size: 14px;
-}
-.compose-plus {
-  width: 26px;
-  height: 26px;
-  color: #7b7970;
-  border: 1px solid #eee;
-}
-.composer-kinds {
-  display: flex;
-  gap: 23px;
-  margin: 0 16px;
-  padding: 11px 0;
-  border-top: 1px solid #f0efec;
-}
-.composer-kinds button {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #87837a;
-  font-size: 12px;
-}
-.composer-kinds button:hover {
-  color: #37352f;
-}
 [data-ds="timeline-tabs"] {
   height: 42px !important;
   padding: 0 !important;
@@ -1503,7 +1462,6 @@ textarea:focus {
 }
 
 /* Reading content stays comfortable on both layouts. */
-.composer-kinds button,
 [data-ds="timeline-tabs"] [data-slot="tabs-trigger"],
 .topic-list button,
 .side-search input,
