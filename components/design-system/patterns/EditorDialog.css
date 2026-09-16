@@ -114,3 +114,9 @@
     padding: 21px !important;
   }
 }
+[data-ds="editor-dialog"] [data-slot="tabs-list"] {
+  width: 100%;
+}
+[data-ds="editor-dialog"] [data-slot="tabs-trigger"] {
+  flex: 1;
+}

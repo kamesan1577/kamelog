@@ -1597,15 +1597,6 @@ textarea:focus {
   justify-content: flex-end;
   gap: 8px;
 }
-.editor-dialog {
-  max-width: 700px !important;
-}
-.editor-dialog [data-slot="tabs-list"] {
-  width: 100%;
-}
-.editor-dialog [data-slot="tabs-trigger"] {
-  flex: 1;
-}
 .draft-list {
   display: flex;
   flex-direction: column;
