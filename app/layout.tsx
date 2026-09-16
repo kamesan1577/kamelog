@@ -13,6 +13,7 @@ import "../components/design-system/patterns/EditorDialog.css";
 import "../components/design-system/patterns/EmptyState.css";
 import "../components/design-system/patterns/Sidebar.css";
 import "../components/design-system/patterns/TimelineFilter.css";
+import "../components/design-system/patterns/MarkdownContent.css";
 import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";
 import "../components/design-system/patterns/ComposerLayout.css";

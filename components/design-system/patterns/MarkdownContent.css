@@ -1,0 +1,161 @@
+[data-ds="detail-markdown"] {
+  font-size: 16px;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+
+[data-ds="detail-markdown"] h1 {
+  margin: 0 0 22px;
+  font-size: 29px;
+  font-weight: 750;
+  line-height: 1.55;
+  letter-spacing: -0.7px;
+}
+
+[data-ds="detail-markdown"] h2 {
+  margin: 32px 0 12px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+[data-ds="detail-markdown"] h3 {
+  margin: 24px 0 10px;
+  font-size: 19px;
+  font-weight: 650;
+}
+
+[data-ds="detail-markdown"] p {
+  margin: 14px 0;
+  color: #655f54;
+}
+
+[data-ds="detail-markdown"] blockquote {
+  margin: 22px 0;
+  padding: 6px 17px;
+  border-left: 3px solid #37352f;
+  background: #f8f8f5;
+  color: #827969;
+}
+
+[data-ds="detail-markdown"] pre {
+  overflow: auto;
+  margin: 0;
+  padding: 20px;
+  border: 1px solid #eeeae2;
+  border-radius: 5px;
+  background: #f6f5f2;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+[data-ds="detail-markdown"] code {
+  font-family: ui-monospace, monospace;
+}
+
+[data-ds="detail-markdown"] p code {
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: #f1eeea;
+  color: #c25850;
+}
+
+[data-ds="detail-markdown"] a {
+  color: #2383e2;
+  text-decoration: underline;
+}
+
+[data-ds="detail-markdown"] .md-list {
+  margin: 8px 0;
+  color: #655f54;
+}
+
+[data-ds="detail-markdown"] ul,
+[data-ds="detail-markdown"] ol {
+  margin: 12px 0;
+  padding-left: 1.65em;
+  color: #655f54;
+}
+
+[data-ds="detail-markdown"] ul {
+  list-style: disc;
+}
+
+[data-ds="detail-markdown"] ol {
+  list-style: decimal;
+}
+
+[data-ds="detail-markdown"] li {
+  margin: 4px 0;
+}
+
+[data-ds="detail-markdown"] li > ul {
+  list-style: circle;
+}
+
+[data-ds="detail-markdown"] li > ol {
+  list-style: lower-alpha;
+}
+
+[data-ds="detail-markdown"] .contains-task-list {
+  list-style: disc;
+  padding-left: 1.65em;
+}
+
+[data-ds="detail-markdown"] .task-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  list-style: none;
+}
+
+[data-ds="detail-markdown"] .task-list-item input {
+  margin-top: 0.55em;
+  accent-color: #2383e2;
+}
+
+[data-ds="detail-markdown"] table {
+  display: block;
+  width: 100%;
+  margin: 20px 0;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+
+[data-ds="detail-markdown"] th,
+[data-ds="detail-markdown"] td {
+  min-width: 110px;
+  padding: 7px 10px;
+  border: 1px solid #dedbd4;
+  text-align: left;
+}
+
+[data-ds="detail-markdown"] th {
+  background: #f6f5f2;
+  font-weight: 650;
+}
+
+[data-ds="detail-markdown"] hr {
+  margin: 30px 0;
+  border: 0;
+  border-top: 1px solid #dedbd4;
+}
+
+[data-ds="detail-markdown"] img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 20px auto;
+  border-radius: 5px;
+}
+
+[data-ds="detail-markdown"] pre code.hljs {
+  padding: 0;
+  background: transparent;
+}
+
+[data-ds="detail-markdown"] pre:has(.mermaid-diagram) {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
