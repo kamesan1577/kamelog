@@ -84,20 +84,19 @@ function renderToc(markdown: HTMLElement) {
 
   const nav = document.createElement("nav");
   nav.dataset.ds = "blog-table-of-contents";
-  nav.className = "blog-table-of-contents";
   nav.setAttribute(TOC_ATTRIBUTE, "");
   nav.setAttribute("aria-label", "目次");
   nav.dataset.signature = signature;
 
   const title = document.createElement("p");
-  title.className = "blog-table-of-contents-title";
+  title.dataset.ds = "blog-table-of-contents-title";
   title.textContent = "目次";
   nav.append(title);
 
   const list = document.createElement("ol");
   for (const entry of entries) {
     const item = document.createElement("li");
-    item.className = `blog-table-of-contents-level-${Math.min(
+    item.dataset.ds = `blog-table-of-contents-level-${Math.min(
       6,
       Math.max(2, entry.level),
     )}`;
