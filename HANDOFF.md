@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with ProfileCard. The owner sidebar profile is now rendered through a shared Design System pattern and Storybook state, with the existing profile handle and link presentation preserved through the semantic boundary. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
+
 2026-09-17 Issue #99 migration continued with reader/editor semantic regions. Preview shell, Markdown output, Mermaid output, help dialog, active filters, and admin access now expose data-ds contracts; blog and owner journey assertions use semantic boundaries. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
 
 2026-09-17 Issue #99 migration continued with post/video semantic contracts. Tweet previews, vlog frames/captions, detail tweet bodies, and site navigation assertions now use data-ds boundaries instead of implementation-only class selectors. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.

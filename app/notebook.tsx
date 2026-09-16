@@ -55,6 +55,7 @@ import { MediaUploadField } from "@/components/design-system/patterns/MediaUploa
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { OwnerSection } from "@/components/design-system/patterns/OwnerSection";
+import { ProfileCard } from "@/components/design-system/patterns/ProfileCard";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -2695,16 +2696,19 @@ export default function Notebook({
                 "right-sidebar " + (view === "home" ? "landing-hidden" : "")
               }
             >
-              <div data-ds="profile-card" className="profile-card">
-                <Avatar value={profile.icon} large />
-                <h2>{profile.name}</h2>
-                <span className="profile-handle">@kamesan1577</span>
-                <p>{profile.bio}</p>
-                <a href={contact.github} target="_blank" rel="noreferrer">
-                  GitHub
-                  <ArrowUpRight size={14} />
-                </a>
-              </div>
+              <ProfileCard
+                className="profile-card"
+                avatar={<Avatar value={profile.icon} large />}
+                name={profile.name}
+                handle="@kamesan1577"
+                bio={profile.bio}
+                link={
+                  <a href={contact.github} target="_blank" rel="noreferrer">
+                    GitHub
+                    <ArrowUpRight size={14} />
+                  </a>
+                }
+              />
               {(view !== "timeline" || timelineMode === "kamelog") && (
                 <>
                   <label data-ds="side-search" className="side-search">
