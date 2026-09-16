@@ -30,7 +30,7 @@ export function MobileNavigation({
       className={className}
       {...props}
     >
-      <div className="grid grid-cols-3">
+      <div className="grid w-full grid-cols-3">
         {items.map((item) => (
           <Button
             key={item.id}
