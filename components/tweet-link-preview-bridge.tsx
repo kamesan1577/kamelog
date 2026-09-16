@@ -33,7 +33,7 @@ function loadPreview(url: string) {
 }
 
 function previewHost(body: HTMLElement) {
-  return body.closest<HTMLElement>(".post-focus") ?? body;
+  return body.closest<HTMLElement>('[data-ds="post-preview"]') ?? body;
 }
 
 function isPreviewCard(element: Element | null): element is HTMLElement {
@@ -56,9 +56,9 @@ function removeExistingCards(body: HTMLElement) {
 function owningTweetBody(card: HTMLElement) {
   const host = card.previousElementSibling;
   if (!(host instanceof HTMLElement)) return null;
-  if (host.classList.contains("tweet-body")) return host;
-  if (!host.classList.contains("post-focus")) return null;
-  return host.querySelector<HTMLElement>(".tweet-body");
+  if (host.dataset.ds === "tweet-body") return host;
+  if (host.dataset.ds !== "post-preview") return null;
+  return host.querySelector<HTMLElement>('[data-ds="tweet-body"]');
 }
 
 function removeOrphanedCards() {
@@ -93,7 +93,6 @@ function removeDuplicateCards(body: HTMLElement) {
 
 function inlineLink(url: string) {
   const link = document.createElement("a");
-  link.dataset.ds = "tweet-inline-link";
   link.dataset.ds = "tweet-inline-link";
   link.href = url;
   link.target = "_blank";
@@ -208,7 +207,9 @@ function enhanceTweet(body: HTMLElement) {
 
 function scanTweets() {
   removeOrphanedCards();
-  document.querySelectorAll<HTMLElement>(".tweet-body").forEach(enhanceTweet);
+  document
+    .querySelectorAll<HTMLElement>('[data-ds="tweet-body"]')
+    .forEach(enhanceTweet);
 }
 
 export function TweetLinkPreviewBridge() {
