@@ -17,7 +17,7 @@ test("X sharing uses the X brand mark instead of the close glyph", async () => {
 
   assert.match(
     notebook,
-    /<div className="post-actions">[\s\S]*?<X size=\{16\} \/>[\s\S]*?Xで共有/,
+    /data-ds="post-actions"[\s\S]*?<X size=\{16\} \/>[\s\S]*?Xで共有/,
   );
   assert.match(layout, /import "\.\/x-share-logo\.css";/);
   assert.match(styles, /button:has\(> \.lucide-x\)/);
