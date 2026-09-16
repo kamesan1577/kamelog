@@ -1796,6 +1796,7 @@ export default function Notebook({
                     保存
                   </Button>
                   <section
+                    data-ds="federation-settings"
                     className="federation-settings"
                     aria-labelledby="federation-heading"
                   >
