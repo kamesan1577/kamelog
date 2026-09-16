@@ -1,0 +1,27 @@
+[data-ds="post-actions"] {
+  display: flex;
+  align-items: center;
+  gap: 23px;
+  margin-top: 16px;
+  color: #aaa69d;
+}
+
+[data-ds="post-actions"] button {
+  display: flex;
+  min-height: 25px;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+[data-ds="post-actions"] button:hover {
+  color: #686157;
+}
+
+[data-ds="post-actions"] .liked {
+  color: #db6974;
+}
+
+[data-ds="post-actions"] .more {
+  margin-left: auto;
+}
