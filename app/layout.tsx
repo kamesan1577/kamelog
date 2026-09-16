@@ -4,7 +4,7 @@ import "./globals.css";
 import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";
 import "./composer-layout.css";
-import "./mobile-composer.css";
+import "../components/design-system/patterns/MobileComposer.css";
 import "../components/design-system/patterns/FullPageBlogEditor.css";
 import "../components/design-system/patterns/LinkPreview.css";
 import "./detail-actions.css";
