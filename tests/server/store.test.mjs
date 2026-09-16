@@ -90,6 +90,12 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
       publishedAt: "2026-09-16T00:00:02.000Z",
       receivedAt: "2026-09-16T00:00:03.000Z",
     });
+    store.saveFederationRepost({
+      objectId: "https://remote.example/notes/1",
+      announceActivityId:
+        "https://example.test/activitypub/activities/announce/fixture",
+      createdAt: "2026-09-16T00:00:04.000Z",
+    });
     store.db.prepare("DELETE FROM federation_remote_media").run();
     store.enqueueFederationActivity(
       {
@@ -125,6 +131,10 @@ test("persistence, revision conflicts, rollback and backup restore", async () =>
     assert.equal(
       restored.federationTimeline()[0].contentHtml,
       "<p>backup fixture</p>",
+    );
+    assert.equal(
+      restored.federationPublicReposts()[0].objectId,
+      "https://remote.example/notes/1",
     );
     assert.equal(restored.federationDiagnostics().pendingDeliveries, 1);
     assert.equal(
@@ -176,7 +186,7 @@ test("adds view counts to an existing schema without rewriting posts", async () 
     database.close();
 
     const migrated = new Store(root);
-    assert.equal(migrated.schemaVersion(), 7);
+    assert.equal(migrated.schemaVersion(), 8);
     assert.equal(migrated.get("posts", "legacy-post").views, 0);
     assert.equal(migrated.recordView("legacy-post").views, 1);
     assert.equal(migrated.get("posts", "legacy-post").body, "legacy fixture");

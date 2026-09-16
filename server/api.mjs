@@ -35,6 +35,11 @@ import {
   InvalidFederationCursor,
   ownerFederationTimeline,
 } from "./federation-timeline.mjs";
+import {
+  createFederationRepost,
+  publicFederationReposts,
+  undoFederationRepost,
+} from "./federation-reposts.mjs";
 
 export function configuration(env = process.env) {
   const origin = env.KAMELOG_ORIGIN || "http://localhost:3000";
@@ -322,6 +327,41 @@ export function createAPI(store, config, options = {}) {
           headers: { ...headers, "Content-Length": String(bytes.length) },
         });
       }
+      if (
+        path[0] === "federation" &&
+        path[1] === "reposts" &&
+        path.length === 2 &&
+        method === "GET"
+      )
+        return json(publicFederationReposts(store));
+      if (
+        path[0] === "federation" &&
+        path[1] === "media" &&
+        path[2] &&
+        path.length === 3 &&
+        method === "GET"
+      ) {
+        if (!owner && !store.federationRemoteMediaIsPublic(path[2]))
+          return json({ error: "Not found" }, 404);
+        try {
+          const image = await federationRemoteImage(store, path[2], {
+            fetchOptions: options.federation?.fetchOptions,
+          });
+          if (!image) return json({ error: "Not found" }, 404);
+          return new Response(image.bytes, {
+            headers: {
+              "Cache-Control": owner
+                ? "private, no-store"
+                : "public, max-age=300",
+              "Content-Length": String(image.bytes.length),
+              "Content-Type": image.type,
+              "X-Content-Type-Options": "nosniff",
+            },
+          });
+        } catch {
+          return json({ error: "リモート画像を取得できませんでした。" }, 502);
+        }
+      }
       if (!owner) return json({ error: "Unauthorized" }, 401);
       if (path[0] === "federation" && path[1] === "status" && method === "GET")
         return json(federationStatus(store, config));
@@ -337,30 +377,6 @@ export function createAPI(store, config, options = {}) {
             url.searchParams.get("cursor"),
           ),
         );
-      if (
-        path[0] === "federation" &&
-        path[1] === "media" &&
-        path[2] &&
-        path.length === 3 &&
-        method === "GET"
-      ) {
-        try {
-          const image = await federationRemoteImage(store, path[2], {
-            fetchOptions: options.federation?.fetchOptions,
-          });
-          if (!image) return json({ error: "Not found" }, 404);
-          return new Response(image.bytes, {
-            headers: {
-              "Cache-Control": "private, no-store",
-              "Content-Length": String(image.bytes.length),
-              "Content-Type": image.type,
-              "X-Content-Type-Options": "nosniff",
-            },
-          });
-        } catch {
-          return json({ error: "リモート画像を取得できませんでした。" }, 502);
-        }
-      }
       if (
         path[0] === "federation" &&
         path[1] === "setup" &&
@@ -405,6 +421,33 @@ export function createAPI(store, config, options = {}) {
         if (!input || typeof input.actorId !== "string")
           return json({ error: "Invalid input" }, 400);
         return json(unfollowRemoteActor(store, config, input.actorId));
+      }
+      if (
+        path[0] === "federation" &&
+        path[1] === "reposts" &&
+        path.length === 2 &&
+        method === "POST"
+      ) {
+        const input = await body();
+        if (
+          !input ||
+          typeof input.objectId !== "string" ||
+          input.objectId.length > 2_048
+        )
+          return json({ error: "Invalid input" }, 400);
+        return json(createFederationRepost(store, config, input.objectId), 201);
+      }
+      if (
+        path[0] === "federation" &&
+        path[1] === "reposts" &&
+        path[2] &&
+        path.length === 3 &&
+        method === "DELETE"
+      ) {
+        const objectId = decodeURIComponent(path[2]);
+        if (objectId.length > 2_048)
+          return json({ error: "Invalid input" }, 400);
+        return json(undoFederationRepost(store, config, objectId));
       }
       if (path[0] === "media" && method === "POST")
         return url.searchParams.get("kind") === "image"

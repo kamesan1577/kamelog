@@ -6,6 +6,7 @@ import {
 } from "./federation-fetch.mjs";
 import { ACTIVITY_STREAMS, PUBLIC_AUDIENCE } from "./federation-outbound.mjs";
 import { sanitizeRemoteHtml } from "./federation-content.mjs";
+import { enqueueFederationRepostUndo } from "./federation-reposts.mjs";
 
 const ACTOR_TYPES = new Set([
   "Person",
@@ -332,7 +333,8 @@ export async function processIncomingRemoteActivity(
         store.undoFederationTimelineEntry(undoneId, actor.actorId, receivedAt);
       return true;
     }
-    if (!followed(store, actor.actorId)) return true;
+    if (!followed(store, actor.actorId) && activity.type !== "Delete")
+      return true;
     if (activity.type === "Create" && note) {
       if (note.actorId !== actor.actorId) return true;
       if (!store.saveFederationRemoteObject(note)) return true;
@@ -354,12 +356,32 @@ export async function processIncomingRemoteActivity(
     }
     if (activity.type === "Delete") {
       const objectId = activityObjectId(activity.object);
-      if (objectId)
-        store.deleteFederationRemoteObject(
-          normalizedUrl(objectId, options.fetchOptions),
-          actor.actorId,
-          receivedAt,
+      if (objectId) {
+        const normalizedObjectId = normalizedUrl(
+          objectId,
+          options.fetchOptions,
         );
+        const existing = store.federationRemoteObject(normalizedObjectId);
+        if (
+          existing?.actorId === actor.actorId &&
+          store.federationRepost(normalizedObjectId)
+        ) {
+          if (options.config)
+            enqueueFederationRepostUndo(
+              store,
+              options.config,
+              normalizedObjectId,
+              now,
+            );
+          else store.undoFederationRepost(normalizedObjectId, receivedAt);
+        }
+        if (existing?.actorId === actor.actorId)
+          store.deleteFederationRemoteObject(
+            normalizedObjectId,
+            actor.actorId,
+            receivedAt,
+          );
+      }
       return true;
     }
     if (activity.type === "Announce" && note) {

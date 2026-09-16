@@ -55,6 +55,7 @@ function remoteItem(item) {
     publishedAt: item.publishedAt,
     updatedAt: item.updatedAt,
     activityPublishedAt: item.activityPublishedAt,
+    reposted: Boolean(item.reposted),
     attachments: item.attachments.map((attachment) => ({
       type: attachment.mediaType,
       url: `/api/federation/media/${hash(`${item.objectId}\0${attachment.url}`)}`,

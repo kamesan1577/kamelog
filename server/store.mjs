@@ -140,13 +140,20 @@ export class Store {
         size INTEGER,
         cached_at TEXT
       );
+      CREATE TABLE IF NOT EXISTS federation_reposts(
+        object_id TEXT PRIMARY KEY REFERENCES federation_remote_objects(object_id),
+        announce_activity_id TEXT NOT NULL UNIQUE,
+        created_at TEXT NOT NULL,
+        undone_at TEXT
+      );
       INSERT OR IGNORE INTO migrations VALUES(1);
       INSERT OR IGNORE INTO migrations VALUES(2);
       INSERT OR IGNORE INTO migrations VALUES(3);
       INSERT OR IGNORE INTO migrations VALUES(4);
       INSERT OR IGNORE INTO migrations VALUES(5);
       INSERT OR IGNORE INTO migrations VALUES(6);
-      INSERT OR IGNORE INTO migrations VALUES(7);`);
+      INSERT OR IGNORE INTO migrations VALUES(7);
+      INSERT OR IGNORE INTO migrations VALUES(8);`);
     this.db
       .prepare(
         `SELECT object_id AS objectId, attachments
@@ -760,7 +767,8 @@ export class Store {
                 objects.object_id AS objectId, objects.type,
                 objects.content_html AS contentHtml, objects.url,
                 objects.published_at AS publishedAt,
-                objects.updated_at AS updatedAt, objects.attachments
+                objects.updated_at AS updatedAt, objects.attachments,
+                CASE WHEN reposts.object_id IS NULL THEN 0 ELSE 1 END AS reposted
          FROM federation_timeline_entries entries
          JOIN federation_remote_objects objects
            ON objects.object_id=entries.object_id
@@ -768,6 +776,8 @@ export class Store {
            ON actors.actor_id=entries.actor_id
          JOIN federation_following following
            ON following.actor_id=entries.actor_id
+         LEFT JOIN federation_reposts reposts
+           ON reposts.object_id=objects.object_id AND reposts.undone_at IS NULL
          WHERE entries.deleted_at IS NULL AND objects.deleted_at IS NULL
            AND following.state='accepted'
          ORDER BY entries.published_at DESC, entries.activity_id DESC
@@ -834,6 +844,22 @@ export class Store {
         .get(id) || null
     );
   }
+  federationRemoteMediaIsPublic(id) {
+    return Boolean(
+      this.db
+        .prepare(
+          `SELECT 1 AS found
+           FROM federation_remote_media media
+           JOIN federation_reposts reposts
+             ON reposts.object_id=media.object_id
+           JOIN federation_remote_objects objects
+             ON objects.object_id=media.object_id
+           WHERE media.id=? AND reposts.undone_at IS NULL
+             AND objects.deleted_at IS NULL`,
+        )
+        .get(id),
+    );
+  }
   cacheFederationRemoteMedia(id, metadata) {
     this.db
       .prepare(
@@ -859,6 +885,84 @@ export class Store {
         )
         .run(now, activityId, actorId).changes > 0
     );
+  }
+  canRepostFederationObject(objectId) {
+    return Boolean(
+      this.db
+        .prepare(
+          `SELECT 1 AS found
+           FROM federation_remote_objects objects
+           JOIN federation_timeline_entries entries
+             ON entries.object_id=objects.object_id
+           JOIN federation_following following
+             ON following.actor_id=entries.actor_id
+           WHERE objects.object_id=? AND objects.deleted_at IS NULL
+             AND entries.deleted_at IS NULL AND following.state='accepted'
+           LIMIT 1`,
+        )
+        .get(objectId),
+    );
+  }
+  saveFederationRepost(repost) {
+    this.db
+      .prepare(
+        `INSERT INTO federation_reposts
+         (object_id, announce_activity_id, created_at, undone_at)
+         VALUES (?, ?, ?, NULL)
+         ON CONFLICT(object_id) DO UPDATE SET
+           announce_activity_id=excluded.announce_activity_id,
+           created_at=excluded.created_at,
+           undone_at=NULL`,
+      )
+      .run(repost.objectId, repost.announceActivityId, repost.createdAt);
+    return this.federationRepost(repost.objectId);
+  }
+  federationRepost(objectId) {
+    return (
+      this.db
+        .prepare(
+          `SELECT object_id AS objectId,
+                  announce_activity_id AS announceActivityId,
+                  created_at AS createdAt, undone_at AS undoneAt
+           FROM federation_reposts WHERE object_id=?`,
+        )
+        .get(objectId) || null
+    );
+  }
+  undoFederationRepost(objectId, now) {
+    return (
+      this.db
+        .prepare(
+          `UPDATE federation_reposts SET undone_at=?
+           WHERE object_id=? AND undone_at IS NULL`,
+        )
+        .run(now, objectId).changes > 0
+    );
+  }
+  federationPublicReposts() {
+    return this.db
+      .prepare(
+        `SELECT reposts.object_id AS objectId,
+                reposts.announce_activity_id AS announceActivityId,
+                reposts.created_at AS createdAt,
+                objects.actor_id AS actorId, objects.content_html AS contentHtml,
+                objects.url, objects.published_at AS publishedAt,
+                objects.attachments, actors.handle,
+                actors.preferred_username AS preferredUsername,
+                actors.display_name AS displayName
+         FROM federation_reposts reposts
+         JOIN federation_remote_objects objects
+           ON objects.object_id=reposts.object_id
+         LEFT JOIN federation_remote_actors actors
+           ON actors.actor_id=objects.actor_id
+         WHERE reposts.undone_at IS NULL AND objects.deleted_at IS NULL
+         ORDER BY reposts.created_at DESC`,
+      )
+      .all()
+      .map((row) => ({
+        ...row,
+        attachments: JSON.parse(row.attachments),
+      }));
   }
   claimFederationDelivery(now = Date.now(), staleAfterMs = 5 * 60_000) {
     return this.transaction(() => {

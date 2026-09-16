@@ -3,6 +3,7 @@ import Notebook from "./notebook";
 import TweetThreadBridge from "./tweet-thread-bridge";
 import { getStore } from "@/server/runtime.mjs";
 import { blogStructuredData, websiteStructuredData } from "@/server/seo.mjs";
+import { publicFederationReposts } from "@/server/federation-reposts.mjs";
 
 function StructuredData({ value }: { value: Record<string, unknown> }) {
   return (
@@ -73,6 +74,7 @@ export default async function SitePage({
 }) {
   const store = getStore();
   const posts = store.list("posts");
+  const reposts = publicFederationReposts(store);
   const selectedPost = selectedPostId
     ? posts.find(({ id }: { id: string }) => id === selectedPostId)
     : undefined;
@@ -96,6 +98,7 @@ export default async function SitePage({
       ))}
       <Notebook
         initialPosts={posts}
+        initialReposts={reposts}
         initialProfile={profile}
         initialSelected={selectedPostId}
       />

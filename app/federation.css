@@ -457,20 +457,42 @@
 
 .fediverse-post-actions {
   display: flex;
+  align-items: center;
+  gap: 18px;
   margin: 14px 0 0 39px;
 }
 
-.fediverse-post-actions a {
+.fediverse-post-actions a,
+.fediverse-post-actions button {
   display: inline-flex;
   min-height: 32px;
   align-items: center;
   gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: #77736b;
   font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
-.fediverse-post-actions a:hover {
+.fediverse-post-actions a:hover,
+.fediverse-post-actions button:hover,
+.fediverse-post-actions button.is-reposted {
   color: #37352f;
+}
+
+.fediverse-post-actions button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.public-repost-label {
+  margin: 0 0 10px 39px;
+  color: #77736b;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .fediverse-load-more {
@@ -518,8 +540,13 @@
 
   .fediverse-content,
   .fediverse-attachments,
-  .fediverse-post-actions {
+  .fediverse-post-actions,
+  .public-repost-label {
     margin-left: 0;
+  }
+
+  .fediverse-post-actions button {
+    min-height: 44px;
   }
 
   .fediverse-timeline-heading p {

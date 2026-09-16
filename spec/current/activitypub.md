@@ -58,6 +58,14 @@ remote cardはsanitized content、display name、handle、受信できた画像�
 
 remote画像はowner-onlyのlocal URLへ置換し、初回表示時にserverが取得する。既存SSRF境界に加え、画像Content-Type、magic bytes、寸法、1件8MiBを検証する。cache directoryは256MiBを上限に古いfileから削除し、再取得可能なためbackupへ含めない。remote objectのUpdate/Delete後は旧mappingから画像を配信しない。videoや未対応媒体はproxyせずoriginal postへ誘導する。
 
+## Public RP
+
+オーナーはowner-only Fediverse timelineで受信済みremote objectをRP・解除できる。RPはlocal DBへ先に保存し、`Announce` と各followerへのdeliveryを同じtransactionでqueueへ登録する。配送失敗はRP操作のlocal成功を取り消さない。解除は `Undo` のobjectへ元のAnnounce全体を埋め込み、同じdurable queueで配送する。
+
+有効なRPは公開Timelineの「すべて」だけに `かめさんがRP` として混在させ、ブログ・つぶやき・vlog filterには出さない。remote本文は保存済みsanitized HTML、画像は登録済みlocal proxy URL、遷移先はoriginal URLだけを使う。公開media endpointは有効なRPと結び付く画像だけを返す。
+
+元Actorから同じobject IDのDeleteを受信した場合は、objectをtombstone化するtransaction内でRPを無効化し、Undo(Announce)をqueueへ登録する。別ActorによるDeleteではRPもobjectも変更しない。
+
 ## HTTP signature
 
 inboxは `(request-target)`、`host`、`date`、`digest` を含むRSA-SHA256署名を必須にする。Digestはraw request bodyに対して検証し、Dateは10分以内に制限する。署名keyはremote Actor documentから取得し、`publicKey.id` とownerを照合する。失敗、改ざん、stale requestは拒否する。

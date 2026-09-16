@@ -144,10 +144,24 @@ type FederationTimelineItem = {
   updatedAt?: string;
   activityPublishedAt: string;
   attachments: { type: string; url: string }[];
+  reposted?: boolean;
 };
 type FederationTimelineResponse = {
   items: FederationTimelineItem[];
   nextCursor: string | null;
+};
+type PublicRepost = {
+  id: string;
+  kind: "repost";
+  objectId: string;
+  displayName: string;
+  handle: string;
+  contentHtml: string;
+  url: string;
+  date: string;
+  publishedAt: string;
+  likes: number;
+  attachments: { type: string; url: string }[];
 };
 type NavigationState = {
   view: View;
@@ -479,10 +493,12 @@ export function PreviewShell() {
 
 export default function Notebook({
   initialPosts = [],
+  initialReposts = [],
   initialProfile,
   initialSelected = null,
 }: {
   initialPosts?: Post[];
+  initialReposts?: PublicRepost[];
   initialProfile?: { name: string; icon: string; bio: string };
   initialSelected?: string | null;
 }) {
@@ -503,7 +519,12 @@ export default function Notebook({
     }
   };
   const refresh = async () => {
-    setPosts(await api<Post[]>("posts"));
+    const [nextPosts, nextReposts] = await Promise.all([
+      api<Post[]>("posts"),
+      api<PublicRepost[]>("federation/reposts"),
+    ]);
+    setPosts(nextPosts);
+    setPublicReposts(nextReposts);
   };
   const logIn = async () => {
     const authenticated = await guard(async () => {
@@ -524,6 +545,8 @@ export default function Notebook({
       nav("home");
     });
   const [posts, setPosts] = useState<Post[]>(initialPosts),
+    [publicReposts, setPublicReposts] =
+      useState<PublicRepost[]>(initialReposts),
     [profile, setProfile] = useState(
       initialProfile ?? {
         name: "かめさん",
@@ -593,7 +616,10 @@ export default function Notebook({
       string | null
     >(null),
     [federationTimelineBusy, setFederationTimelineBusy] = useState(false),
-    [federationTimelineError, setFederationTimelineError] = useState("");
+    [federationTimelineError, setFederationTimelineError] = useState(""),
+    [federationRepostBusy, setFederationRepostBusy] = useState<string | null>(
+      null,
+    );
   const loadFederationFollowing = useCallback(async () => {
     const following = await api<FederationFollowing[]>("federation/following");
     setFederationFollowing(following);
@@ -678,6 +704,51 @@ export default function Notebook({
       );
     } finally {
       setFederationTimelineBusy(false);
+    }
+  };
+  const federationRepost = async (timelineItem: FederationTimelineItem) => {
+    setFederationRepostBusy(timelineItem.objectId);
+    try {
+      if (timelineItem.reposted) {
+        await api(
+          `federation/reposts/${encodeURIComponent(timelineItem.objectId)}`,
+          "DELETE",
+          {},
+        );
+        setPublicReposts((current) =>
+          current.filter((repost) => repost.objectId !== timelineItem.objectId),
+        );
+        setFederationTimeline((current) =>
+          current.map((item) =>
+            item.objectId === timelineItem.objectId
+              ? { ...item, reposted: false }
+              : item,
+          ),
+        );
+        toast.success("RPを取り消しました");
+      } else {
+        const repost = await api<PublicRepost>("federation/reposts", "POST", {
+          objectId: timelineItem.objectId,
+        });
+        setPublicReposts((current) => [
+          repost,
+          ...current.filter((item) => item.objectId !== repost.objectId),
+        ]);
+        setFederationTimeline((current) =>
+          current.map((item) =>
+            item.objectId === timelineItem.objectId
+              ? { ...item, reposted: true }
+              : item,
+          ),
+        );
+        toast.success("RPしました");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "RPを更新できませんでした。",
+      );
+    } finally {
+      setFederationRepostBusy(null);
     }
   };
   const [vMode, setVMode] = useState<"camera" | "upload">("camera"),
@@ -1378,21 +1449,37 @@ export default function Notebook({
       }
     });
   };
-  const shown = posts
-    .filter(
-      (p) =>
-        (filter === "all" || p.kind === filter) &&
-        (!tag || p.tags.includes(tag)) &&
-        (!query ||
-          (p.title + " " + p.body + " " + p.tags)
-            .toLowerCase()
-            .includes(query.toLowerCase())),
-    )
-    .sort((a, b) =>
-      sort === "popular"
-        ? b.likes - a.likes
-        : +!!b.pinned - +!!a.pinned || b.date.localeCompare(a.date),
-    );
+  const shownPosts = posts.filter(
+    (p) =>
+      (filter === "all" || p.kind === filter) &&
+      (!tag || p.tags.includes(tag)) &&
+      (!query ||
+        (p.title + " " + p.body + " " + p.tags)
+          .toLowerCase()
+          .includes(query.toLowerCase())),
+  );
+  const shownReposts =
+    filter === "all" && !tag
+      ? publicReposts.filter(
+          (repost) =>
+            !query ||
+            (
+              repost.displayName +
+              " " +
+              repost.handle +
+              " " +
+              repost.contentHtml.replace(/<[^>]+>/g, " ")
+            )
+              .toLowerCase()
+              .includes(query.toLowerCase()),
+        )
+      : [];
+  const shown = [...shownPosts, ...shownReposts].sort((a, b) =>
+    sort === "popular"
+      ? b.likes - a.likes
+      : +(b.kind !== "repost" && !!b.pinned) -
+          +(a.kind !== "repost" && !!a.pinned) || b.date.localeCompare(a.date),
+  );
   const tags = Object.entries(
     posts.reduce<Record<string, number>>((counts, post) => {
       for (const postTag of post.tags) {
@@ -2373,78 +2460,131 @@ export default function Notebook({
                         </div>
                       )}
                       <div className="feed">
-                        {shown.map((p) => (
-                          <article className={"post " + p.kind} key={p.id}>
-                            {p.pinned && (
-                              <div className="pinned">
-                                <Pin size={12} />
-                                固定
+                        {shown.map((p) =>
+                          p.kind === "repost" ? (
+                            <article className="post public-repost" key={p.id}>
+                              <p className="public-repost-label">
+                                {profile.name}がRP
+                              </p>
+                              <div className="fediverse-post-meta">
+                                <Avatar
+                                  value={
+                                    p.displayName.trim().slice(0, 1) || "•"
+                                  }
+                                />
+                                <div>
+                                  <strong>{p.displayName}</strong>
+                                  <span>{p.handle}</span>
+                                </div>
+                                <time dateTime={p.publishedAt}>
+                                  {new Date(p.publishedAt).toLocaleDateString(
+                                    "ja-JP",
+                                    { month: "numeric", day: "numeric" },
+                                  )}
+                                </time>
                               </div>
-                            )}
-                            {meta(p)}
-                            {p.kind === "vlog" ? (
-                              <div className="post-focus vlog-button">
-                                <VlogFrame post={p} />
+                              <div
+                                className="fediverse-content"
+                                dangerouslySetInnerHTML={{
+                                  __html: p.contentHtml,
+                                }}
+                              />
+                              {p.attachments.length > 0 && (
+                                <div className="fediverse-attachments">
+                                  {p.attachments.map((attachment) => (
+                                    <img
+                                      key={attachment.url}
+                                      src={attachment.url}
+                                      alt=""
+                                      loading="lazy"
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                              <div className="fediverse-post-actions">
+                                <a
+                                  href={p.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  元の投稿を開く
+                                  <ArrowUpRight size={14} />
+                                </a>
+                              </div>
+                            </article>
+                          ) : (
+                            <article className={"post " + p.kind} key={p.id}>
+                              {p.pinned && (
+                                <div className="pinned">
+                                  <Pin size={12} />
+                                  固定
+                                </div>
+                              )}
+                              {meta(p)}
+                              {p.kind === "vlog" ? (
+                                <div className="post-focus vlog-button">
+                                  <VlogFrame post={p} />
+                                  <button
+                                    className="open-vlog-detail"
+                                    onClick={() => openPost(p.id)}
+                                  >
+                                    詳細
+                                  </button>
+                                </div>
+                              ) : (
                                 <button
-                                  className="open-vlog-detail"
+                                  className="post-focus"
                                   onClick={() => openPost(p.id)}
                                 >
-                                  詳細
+                                  {p.kind === "blog" ? (
+                                    <>
+                                      <h2>{p.title}</h2>
+                                      <p>
+                                        {p.body
+                                          .split("\n")
+                                          .find((s) => s && !s.startsWith("#"))}
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <p className="tweet-body">{p.body}</p>
+                                  )}
                                 </button>
-                              </div>
-                            ) : (
-                              <button
-                                className="post-focus"
-                                onClick={() => openPost(p.id)}
-                              >
-                                {p.kind === "blog" ? (
-                                  <>
-                                    <h2>{p.title}</h2>
-                                    <p>
-                                      {p.body
-                                        .split("\n")
-                                        .find((s) => s && !s.startsWith("#"))}
-                                    </p>
-                                  </>
-                                ) : (
-                                  <p className="tweet-body">{p.body}</p>
-                                )}
-                              </button>
-                            )}
-                            {p.kind === "tweet" && (
-                              <ImageGallery images={p.images} />
-                            )}
-                            {p.tags.length > 0 && (
-                              <div className="tags">
-                                {p.tags.map((t) => {
-                                  const automatic = p.autoTags?.some(
-                                    (autoTag) => autoTag.tag === t,
-                                  );
-                                  return (
-                                    <button key={t} onClick={() => setTag(t)}>
-                                      <Badge
-                                        variant={t === "Go" ? "blue" : "gray"}
-                                        title={
-                                          automatic
-                                            ? "自動で付与されたタグ"
-                                            : undefined
-                                        }
-                                        aria-label={
-                                          automatic
-                                            ? `自動タグ ${t}`
-                                            : undefined
-                                        }
-                                      >
-                                        {automatic ? `AI · ${t}` : t}
-                                      </Badge>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            )}
-                            {actions(p)}
-                          </article>
-                        ))}
+                              )}
+                              {p.kind === "tweet" && (
+                                <ImageGallery images={p.images} />
+                              )}
+                              {p.tags.length > 0 && (
+                                <div className="tags">
+                                  {p.tags.map((t) => {
+                                    const automatic = p.autoTags?.some(
+                                      (autoTag) => autoTag.tag === t,
+                                    );
+                                    return (
+                                      <button key={t} onClick={() => setTag(t)}>
+                                        <Badge
+                                          variant={t === "Go" ? "blue" : "gray"}
+                                          title={
+                                            automatic
+                                              ? "自動で付与されたタグ"
+                                              : undefined
+                                          }
+                                          aria-label={
+                                            automatic
+                                              ? `自動タグ ${t}`
+                                              : undefined
+                                          }
+                                        >
+                                          {automatic ? `AI · ${t}` : t}
+                                        </Badge>
+                                      </button>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                              {actions(p)}
+                            </article>
+                          ),
+                        )}
                         {!shown.length && (
                           <div className="empty-state">
                             <p>該当する投稿はありません。</p>
@@ -2565,6 +2705,25 @@ export default function Notebook({
                                 元の投稿を開く
                                 <ArrowUpRight size={14} />
                               </a>
+                              {timelineItem.source === "remote" && (
+                                <button
+                                  type="button"
+                                  className={
+                                    timelineItem.reposted ? "is-reposted" : ""
+                                  }
+                                  disabled={
+                                    federationRepostBusy ===
+                                    timelineItem.objectId
+                                  }
+                                  onClick={() =>
+                                    void federationRepost(timelineItem)
+                                  }
+                                >
+                                  {timelineItem.reposted
+                                    ? "RPを取り消す"
+                                    : "RP"}
+                                </button>
+                              )}
                             </div>
                           </article>
                         ))}

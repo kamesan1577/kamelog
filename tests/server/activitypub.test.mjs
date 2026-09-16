@@ -31,6 +31,10 @@ import {
   unfollowRemoteActor,
 } from "../../server/federation-remote.mjs";
 import { ownerFederationTimeline } from "../../server/federation-timeline.mjs";
+import {
+  createFederationRepost,
+  publicFederationReposts,
+} from "../../server/federation-reposts.mjs";
 import { Store } from "../../server/store.mjs";
 
 const origin = "https://example.test";
@@ -881,6 +885,188 @@ test("owner timeline combines remote and self posts with stable cursors", async 
   });
 });
 
+test("RP publishes Announce, supports Undo and follows remote Delete", async () => {
+  await withStore("kamelog-federation-repost-", async (store) => {
+    createFederationIdentity(store, "kamesan");
+    const actorId = "https://remote.example/users/alice";
+    const objectId = "https://remote.example/notes/1";
+    store.saveFederationFollower({
+      actorId: "https://follower.example/users/bob",
+      inboxUrl: "https://follower.example/inbox",
+      followActivityId: "https://follower.example/follows/1",
+      followedAt: "2026-09-16T11:00:00.000Z",
+    });
+    store.saveFederationRemoteActor({
+      actorId,
+      handle: "@alice@remote.example",
+      inboxUrl: `${actorId}/inbox`,
+      preferredUsername: "alice",
+      displayName: "Alice",
+      fetchedAt: "2026-09-16T12:00:00.000Z",
+    });
+    store.saveFederationFollowing({
+      actorId,
+      state: "accepted",
+      followActivityId: `${origin}/activitypub/activities/follow/1`,
+      createdAt: "2026-09-16T11:00:00.000Z",
+      updatedAt: "2026-09-16T11:01:00.000Z",
+    });
+    store.saveFederationRemoteObject({
+      objectId,
+      actorId,
+      type: "Note",
+      contentHtml: "<p>Remote post</p>",
+      url: objectId,
+      publishedAt: "2026-09-16T12:00:00.000Z",
+      updatedAt: "2026-09-16T12:00:00.000Z",
+      attachments: [],
+      receivedAt: "2026-09-16T12:00:01.000Z",
+    });
+    store.saveFederationTimelineEntry({
+      activityId: `${actorId}/activities/create/1`,
+      actorId,
+      type: "Create",
+      objectId,
+      publishedAt: "2026-09-16T12:00:00.000Z",
+      receivedAt: "2026-09-16T12:00:01.000Z",
+    });
+
+    const session = store.createSession();
+    const api = createAPI(store, config);
+    const call = (path, method = "GET", body) =>
+      api(
+        new Request(`${origin}/api/${path}`, {
+          method,
+          headers: {
+            origin,
+            cookie: `__Host-kamelog-session=${session}`,
+            "content-type": "application/json",
+          },
+          body: body === undefined ? undefined : JSON.stringify(body),
+        }),
+      );
+    assert.deepEqual(
+      await (await api(new Request(`${origin}/api/federation/reposts`))).json(),
+      [],
+    );
+    assert.equal(
+      (
+        await api(
+          new Request(`${origin}/api/federation/reposts`, {
+            method: "POST",
+            headers: { origin, "content-type": "application/json" },
+            body: JSON.stringify({ objectId }),
+          }),
+        )
+      ).status,
+      401,
+    );
+    const createResponse = await call("federation/reposts", "POST", {
+      objectId,
+    });
+    assert.equal(createResponse.status, 201);
+    const created = await createResponse.json();
+    assert.equal(created.kind, "repost");
+    assert.equal(created.displayName, "Alice");
+    assert.equal(publicFederationReposts(store).length, 1);
+    assert.equal(
+      ownerFederationTimeline(store, config).items[0].reposted,
+      true,
+    );
+    assert.equal(store.federationOutboxActivities()[0].type, "Announce");
+    assert.equal(store.federationOutboxActivities()[0].object, objectId);
+    assert.equal(store.federationDiagnostics().pendingDeliveries, 1);
+    assert.throws(
+      () => createFederationRepost(store, config, objectId),
+      /Already reposted/,
+    );
+
+    assert.equal(
+      (
+        await call(
+          `federation/reposts/${encodeURIComponent(objectId)}`,
+          "DELETE",
+          {},
+        )
+      ).status,
+      200,
+    );
+    assert.equal(publicFederationReposts(store).length, 0);
+    assert.equal(
+      ownerFederationTimeline(store, config).items[0].reposted,
+      false,
+    );
+    assert.equal(store.federationOutboxActivities()[0].type, "Undo");
+    assert.equal(store.federationOutboxActivities()[0].object.type, "Announce");
+
+    createFederationRepost(
+      store,
+      config,
+      objectId,
+      new Date("2026-09-16T12:04:00Z"),
+    );
+    const otherActorId = "https://remote.example/users/mallory";
+    store.saveFederationRemoteActor({
+      actorId: otherActorId,
+      handle: "@mallory@remote.example",
+      inboxUrl: `${otherActorId}/inbox`,
+      preferredUsername: "mallory",
+      displayName: "Mallory",
+      fetchedAt: "2026-09-16T12:04:01.000Z",
+    });
+    store.saveFederationFollowing({
+      actorId: otherActorId,
+      state: "accepted",
+      followActivityId: `${origin}/activitypub/activities/follow/2`,
+      createdAt: "2026-09-16T12:04:01.000Z",
+      updatedAt: "2026-09-16T12:04:01.000Z",
+    });
+    await processIncomingRemoteActivity(
+      store,
+      {
+        id: `${otherActorId}/activities/delete/1`,
+        type: "Delete",
+        actor: otherActorId,
+        object: objectId,
+      },
+      {
+        id: otherActorId,
+        type: "Person",
+        preferredUsername: "mallory",
+        name: "Mallory",
+        inbox: `${otherActorId}/inbox`,
+      },
+      { config, now: new Date("2026-09-16T12:04:30Z") },
+    );
+    assert.equal(publicFederationReposts(store).length, 1);
+    assert.equal(store.federationRemoteObject(objectId).deletedAt, null);
+    store.removeFederationFollowing(actorId);
+    await processIncomingRemoteActivity(
+      store,
+      {
+        id: `${actorId}/activities/delete/1`,
+        type: "Delete",
+        actor: actorId,
+        object: objectId,
+      },
+      {
+        id: actorId,
+        type: "Person",
+        preferredUsername: "alice",
+        name: "Alice",
+        inbox: `${actorId}/inbox`,
+      },
+      { config, now: new Date("2026-09-16T12:05:00Z") },
+    );
+    assert.equal(publicFederationReposts(store).length, 0);
+    assert.equal(
+      store.federationRemoteObject(objectId).deletedAt !== null,
+      true,
+    );
+    assert.equal(store.federationOutboxActivities()[0].type, "Undo");
+  });
+});
+
 test("remote images are validated, cached locally and hidden after Delete", async () => {
   await withStore("kamelog-federation-media-", async (store) => {
     const actorId = "https://remote.example/users/alice";
@@ -930,7 +1116,7 @@ test("remote images are validated, cached locally and hidden after Delete", asyn
     assert.equal(
       (await api(new Request(`${origin}/api/federation/media/${mediaId}`)))
         .status,
-      401,
+      404,
     );
     const session = store.createSession();
     const imageResponse = await api(
@@ -941,6 +1127,25 @@ test("remote images are validated, cached locally and hidden after Delete", asyn
     assert.equal(imageResponse.status, 200);
     assert.equal(imageResponse.headers.get("content-type"), "image/png");
     assert.deepEqual(Buffer.from(await imageResponse.arrayBuffer()), png);
+    store.saveFederationRepost({
+      objectId,
+      announceActivityId: `${origin}/activitypub/activities/announce/1`,
+      createdAt: "2026-09-16T12:00:30.000Z",
+    });
+    const publicImageResponse = await api(
+      new Request(`${origin}/api/federation/media/${mediaId}`),
+    );
+    assert.equal(publicImageResponse.status, 200);
+    assert.equal(
+      publicImageResponse.headers.get("cache-control"),
+      "public, max-age=300",
+    );
+    store.undoFederationRepost(objectId, "2026-09-16T12:00:45.000Z");
+    assert.equal(
+      (await api(new Request(`${origin}/api/federation/media/${mediaId}`)))
+        .status,
+      404,
+    );
     store.deleteFederationRemoteObject(
       objectId,
       actorId,
