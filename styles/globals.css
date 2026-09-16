@@ -525,12 +525,6 @@ textarea:focus {
 .composer-kinds button:hover {
   color: #37352f;
 }
-.timeline-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #e5e3df;
-}
 [data-ds="timeline-tabs"] {
   height: 42px !important;
   padding: 0 !important;
