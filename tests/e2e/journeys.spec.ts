@@ -325,7 +325,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     "ホームから直接投稿する架空のつぶやき",
   );
   await page.locator("article.post .image-grid button").first().click();
-  await expect(page.locator(".image-lightbox img")).toBeVisible();
+  await expect(
+    page.locator('[data-ds="media-gallery-lightbox"] img'),
+  ).toBeVisible();
   await page.keyboard.press("Escape");
   const directPost = page
     .locator("article.post")
