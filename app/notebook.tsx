@@ -38,6 +38,8 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/notion/button";
+import { SideNavigation } from "@/components/design-system/patterns/SideNavigation";
+import { MobileNavigation } from "@/components/design-system/patterns/MobileNavigation";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -1618,29 +1620,29 @@ export default function Notebook({
             <strong>kamelog</strong>
             <ChevronDown size={15} />
           </button>
-          <nav>
-            <button
-              className={view === "home" ? "active" : ""}
-              onClick={() => nav("home")}
-            >
-              <Home />
-              <span>ホーム</span>
-            </button>
-            <button
-              className={view === "timeline" ? "active" : ""}
-              onClick={() => nav("timeline")}
-            >
-              <MessageCircle />
-              <span>タイムライン</span>
-            </button>
-            <button
-              className={view === "projects" ? "active" : ""}
-              onClick={() => nav("projects")}
-            >
-              <Globe />
-              <span>プロジェクト</span>
-            </button>
-          </nav>
+          <SideNavigation
+            items={[
+              {
+                id: "home",
+                label: "ホーム",
+                icon: <Home />,
+                active: view === "home",
+              },
+              {
+                id: "timeline",
+                label: "タイムライン",
+                icon: <MessageCircle />,
+                active: view === "timeline",
+              },
+              {
+                id: "projects",
+                label: "プロジェクト",
+                icon: <Globe />,
+                active: view === "projects",
+              },
+            ]}
+            onSelect={(id) => nav(id as View)}
+          />
           <div className="sidebar-section">
             <span>コンテンツ</span>
             {(
@@ -2809,29 +2811,30 @@ export default function Notebook({
               )}
             </aside>
           </div>
-          <nav className="mobile-nav">
-            <button
-              className={view === "home" ? "active" : ""}
-              onClick={() => nav("home")}
-            >
-              <Home />
-              <span>ホーム</span>
-            </button>
-            <button
-              className={view === "timeline" ? "active" : ""}
-              onClick={() => nav("timeline")}
-            >
-              <MessageCircle />
-              <span>タイムライン</span>
-            </button>
-            <button
-              className={view === "projects" ? "active" : ""}
-              onClick={() => nav("projects")}
-            >
-              <Globe />
-              <span>プロジェクト</span>
-            </button>
-          </nav>
+          <MobileNavigation
+            className="mobile-nav"
+            items={[
+              {
+                id: "home",
+                label: "ホーム",
+                icon: <Home />,
+                active: view === "home",
+              },
+              {
+                id: "timeline",
+                label: "タイムライン",
+                icon: <MessageCircle />,
+                active: view === "timeline",
+              },
+              {
+                id: "projects",
+                label: "プロジェクト",
+                icon: <Globe />,
+                active: view === "projects",
+              },
+            ]}
+            onSelect={(id) => nav(id as View)}
+          />
           {login && (
             <button
               className="mobile-create"
