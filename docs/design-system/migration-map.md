@@ -22,6 +22,7 @@ behavior coverage, and visual approval.
 ## CSS responsibility inventory
 
 The legacy allowlist is now empty; the shared styles have moved into the Design System style layer, while selector-level extraction from `styles/globals.css` remains in progress. Their primary
+The current implementation has completed the MediaGallery, Markdown help, ProjectList, detail, reader, sidebar, editor, composer, timeline, and post-pattern extractions. Remaining global responsibilities are the app/public shell, preview shell, mobile/account controls, project/vlog/editor auxiliary rules, and final duplicate/orphan cleanup; these remain tracked as migration work rather than being treated as complete.
 responsibilities are:
 
 | File                                                       | Responsibility                                                  | Target pattern/primitive                                       | Decision          |
