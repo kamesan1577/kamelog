@@ -27,26 +27,24 @@ export function MobileNavigation({
     <nav
       data-ds="mobile-navigation"
       aria-label={props["aria-label"] ?? "モバイルナビゲーション"}
-      className={className}
+      className={`grid w-full ds-mobile-navigation-grid ${className ?? ""}`}
       {...props}
     >
-      <div className="grid w-full grid-cols-3">
-        {items.map((item) => (
-          <Button
-            key={item.id}
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="min-h-10 !w-full flex-col gap-1 rounded-none px-2 py-1 text-ds-xs"
-            aria-current={item.active ? "page" : undefined}
-            disabled={item.disabled}
-            onClick={() => onSelect?.(item.id)}
-          >
-            {item.icon}
-            <span>{item.label}</span>
-          </Button>
-        ))}
-      </div>
+      {items.map((item) => (
+        <Button
+          key={item.id}
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="min-h-10 !w-full flex-col gap-1 rounded-none px-2 py-1 text-ds-xs"
+          aria-current={item.active ? "page" : undefined}
+          disabled={item.disabled}
+          onClick={() => onSelect?.(item.id)}
+        >
+          {item.icon}
+          <span>{item.label}</span>
+        </Button>
+      ))}
     </nav>
   );
 }

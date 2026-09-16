@@ -63,6 +63,9 @@ inline {
 @utility ds-shell-grid {
   grid-template-columns: var(--ds-sidebar-width) minmax(0, 1fr);
 }
+@utility ds-mobile-navigation-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
 @utility px-ds-4 {
   padding-inline: var(--ds-space-4);
 }
