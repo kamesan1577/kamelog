@@ -27,6 +27,7 @@ import {
   Pencil,
   Pin,
   Plus,
+  RefreshCw,
   Search,
   Settings,
   Share2,
@@ -128,6 +129,25 @@ type FederationFollowing = {
   state: "pending" | "accepted" | "rejected" | "failed";
   updatedAt: string;
   lastError: string | null;
+};
+type FederationTimelineItem = {
+  id: string;
+  source: "remote" | "self";
+  activityType: "Create" | "Announce";
+  actorId: string;
+  displayName: string;
+  handle: string;
+  objectId: string;
+  contentHtml: string;
+  url: string;
+  publishedAt: string;
+  updatedAt?: string;
+  activityPublishedAt: string;
+  attachments: { type: string; url: string }[];
+};
+type FederationTimelineResponse = {
+  items: FederationTimelineItem[];
+  nextCursor: string | null;
 };
 type NavigationState = {
   view: View;
@@ -499,6 +519,8 @@ export default function Notebook({
       await api("auth/logout", "POST", {});
       setLogin(false);
       setDrafts([]);
+      setTimelineMode("kamelog");
+      setFederationTimeline([]);
       nav("home");
     });
   const [posts, setPosts] = useState<Post[]>(initialPosts),
@@ -560,7 +582,18 @@ export default function Notebook({
     >([]),
     [federationFollowHandle, setFederationFollowHandle] = useState(""),
     [federationFollowError, setFederationFollowError] = useState(""),
-    [federationFollowBusy, setFederationFollowBusy] = useState(false);
+    [federationFollowBusy, setFederationFollowBusy] = useState(false),
+    [timelineMode, setTimelineMode] = useState<"kamelog" | "fediverse">(
+      "kamelog",
+    ),
+    [federationTimeline, setFederationTimeline] = useState<
+      FederationTimelineItem[]
+    >([]),
+    [federationTimelineCursor, setFederationTimelineCursor] = useState<
+      string | null
+    >(null),
+    [federationTimelineBusy, setFederationTimelineBusy] = useState(false),
+    [federationTimelineError, setFederationTimelineError] = useState("");
   const loadFederationFollowing = useCallback(async () => {
     const following = await api<FederationFollowing[]>("federation/following");
     setFederationFollowing(following);
@@ -621,6 +654,30 @@ export default function Notebook({
       );
     } finally {
       setFederationFollowBusy(false);
+    }
+  };
+  const loadFederationTimeline = async (
+    cursor: string | null = null,
+    append = false,
+  ) => {
+    setFederationTimelineBusy(true);
+    setFederationTimelineError("");
+    try {
+      const result = await api<FederationTimelineResponse>(
+        `federation/timeline${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
+      );
+      setFederationTimeline((current) =>
+        append ? [...current, ...result.items] : result.items,
+      );
+      setFederationTimelineCursor(result.nextCursor);
+    } catch (error) {
+      setFederationTimelineError(
+        error instanceof Error
+          ? error.message
+          : "Fediverseを読み込めませんでした。",
+      );
+    } finally {
+      setFederationTimelineBusy(false);
     }
   };
   const [vMode, setVMode] = useState<"camera" | "upload">("camera"),
@@ -2144,20 +2201,37 @@ export default function Notebook({
                   <section className="page-heading">
                     <h1>タイムライン</h1>
                   </section>
-                  <label className="home-search mobile-search">
-                    <Search size={17} />
-                    <input
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="投稿を検索"
-                    />
-                    {query && (
-                      <button onClick={() => setQuery("")}>
-                        <X size={15} />
-                      </button>
-                    )}
-                  </label>
-                  {login && (
+                  {timelineMode === "kamelog" && (
+                    <label className="home-search mobile-search">
+                      <Search size={17} />
+                      <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="投稿を検索"
+                      />
+                      {query && (
+                        <button onClick={() => setQuery("")}>
+                          <X size={15} />
+                        </button>
+                      )}
+                    </label>
+                  )}
+                  {login && federationStatus?.enabled && (
+                    <Tabs
+                      value={timelineMode}
+                      onValueChange={(value) => {
+                        const next = value as "kamelog" | "fediverse";
+                        setTimelineMode(next);
+                        if (next === "fediverse") void loadFederationTimeline();
+                      }}
+                    >
+                      <TabsList className="fediverse-mode-switch">
+                        <TabsTrigger value="kamelog">kamelog</TabsTrigger>
+                        <TabsTrigger value="fediverse">Fediverse</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                  )}
+                  {login && timelineMode === "kamelog" && (
                     <div className="composer desktop-composer">
                       <div className="composer-start">
                         <Avatar value={profile.icon} />
@@ -2258,129 +2332,260 @@ export default function Notebook({
                       </div>
                     </div>
                   )}
-                  <div className="timeline-toolbar">
-                    <Tabs
-                      value={filter}
-                      onValueChange={(v) => setFilter(v as "all" | Kind)}
-                    >
-                      <TabsList variant="line" className="feed-tabs">
-                        <TabsTrigger value="all">すべて</TabsTrigger>
-                        <TabsTrigger value="blog">ブログ</TabsTrigger>
-                        <TabsTrigger value="tweet">つぶやき</TabsTrigger>
-                        <TabsTrigger value="vlog">vlog</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <button className="sort-button">
-                          <SlidersHorizontal size={17} />
-                        </button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setSort("new")}>
-                          新しい順 {sort === "new" && <Check />}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setSort("popular")}>
-                          いいね順 {sort === "popular" && <Check />}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  {tag && (
-                    <div className="filter-active">
-                      #{tag}
-                      <button onClick={() => setTag("")}>
-                        <X size={14} />
-                      </button>
-                    </div>
-                  )}
-                  <div className="feed">
-                    {shown.map((p) => (
-                      <article className={"post " + p.kind} key={p.id}>
-                        {p.pinned && (
-                          <div className="pinned">
-                            <Pin size={12} />
-                            固定
-                          </div>
-                        )}
-                        {meta(p)}
-                        {p.kind === "vlog" ? (
-                          <div className="post-focus vlog-button">
-                            <VlogFrame post={p} />
-                            <button
-                              className="open-vlog-detail"
-                              onClick={() => openPost(p.id)}
-                            >
-                              詳細
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            className="post-focus"
-                            onClick={() => openPost(p.id)}
-                          >
-                            {p.kind === "blog" ? (
-                              <>
-                                <h2>{p.title}</h2>
-                                <p>
-                                  {p.body
-                                    .split("\n")
-                                    .find((s) => s && !s.startsWith("#"))}
-                                </p>
-                              </>
-                            ) : (
-                              <p className="tweet-body">{p.body}</p>
-                            )}
-                          </button>
-                        )}
-                        {p.kind === "tweet" && (
-                          <ImageGallery images={p.images} />
-                        )}
-                        {p.tags.length > 0 && (
-                          <div className="tags">
-                            {p.tags.map((t) => {
-                              const automatic = p.autoTags?.some(
-                                (autoTag) => autoTag.tag === t,
-                              );
-                              return (
-                                <button key={t} onClick={() => setTag(t)}>
-                                  <Badge
-                                    variant={t === "Go" ? "blue" : "gray"}
-                                    title={
-                                      automatic
-                                        ? "自動で付与されたタグ"
-                                        : undefined
-                                    }
-                                    aria-label={
-                                      automatic ? `自動タグ ${t}` : undefined
-                                    }
-                                  >
-                                    {automatic ? `AI · ${t}` : t}
-                                  </Badge>
-                                </button>
-                              );
-                            })}
-                          </div>
-                        )}
-                        {actions(p)}
-                      </article>
-                    ))}
-                    {!shown.length && (
-                      <div className="empty-state">
-                        <p>該当する投稿はありません。</p>
-                        <Button
-                          onClick={() => {
-                            setQuery("");
-                            setFilter("all");
-                            setTag("");
-                          }}
+                  {timelineMode === "kamelog" ? (
+                    <>
+                      <div className="timeline-toolbar">
+                        <Tabs
+                          value={filter}
+                          onValueChange={(v) => setFilter(v as "all" | Kind)}
                         >
-                          解除
-                        </Button>
+                          <TabsList variant="line" className="feed-tabs">
+                            <TabsTrigger value="all">すべて</TabsTrigger>
+                            <TabsTrigger value="blog">ブログ</TabsTrigger>
+                            <TabsTrigger value="tweet">つぶやき</TabsTrigger>
+                            <TabsTrigger value="vlog">vlog</TabsTrigger>
+                          </TabsList>
+                        </Tabs>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button className="sort-button">
+                              <SlidersHorizontal size={17} />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setSort("new")}>
+                              新しい順 {sort === "new" && <Check />}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setSort("popular")}
+                            >
+                              いいね順 {sort === "popular" && <Check />}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                    )}
-                    <div className="feed-count">{shown.length}件</div>
-                  </div>
+                      {tag && (
+                        <div className="filter-active">
+                          #{tag}
+                          <button onClick={() => setTag("")}>
+                            <X size={14} />
+                          </button>
+                        </div>
+                      )}
+                      <div className="feed">
+                        {shown.map((p) => (
+                          <article className={"post " + p.kind} key={p.id}>
+                            {p.pinned && (
+                              <div className="pinned">
+                                <Pin size={12} />
+                                固定
+                              </div>
+                            )}
+                            {meta(p)}
+                            {p.kind === "vlog" ? (
+                              <div className="post-focus vlog-button">
+                                <VlogFrame post={p} />
+                                <button
+                                  className="open-vlog-detail"
+                                  onClick={() => openPost(p.id)}
+                                >
+                                  詳細
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                className="post-focus"
+                                onClick={() => openPost(p.id)}
+                              >
+                                {p.kind === "blog" ? (
+                                  <>
+                                    <h2>{p.title}</h2>
+                                    <p>
+                                      {p.body
+                                        .split("\n")
+                                        .find((s) => s && !s.startsWith("#"))}
+                                    </p>
+                                  </>
+                                ) : (
+                                  <p className="tweet-body">{p.body}</p>
+                                )}
+                              </button>
+                            )}
+                            {p.kind === "tweet" && (
+                              <ImageGallery images={p.images} />
+                            )}
+                            {p.tags.length > 0 && (
+                              <div className="tags">
+                                {p.tags.map((t) => {
+                                  const automatic = p.autoTags?.some(
+                                    (autoTag) => autoTag.tag === t,
+                                  );
+                                  return (
+                                    <button key={t} onClick={() => setTag(t)}>
+                                      <Badge
+                                        variant={t === "Go" ? "blue" : "gray"}
+                                        title={
+                                          automatic
+                                            ? "自動で付与されたタグ"
+                                            : undefined
+                                        }
+                                        aria-label={
+                                          automatic
+                                            ? `自動タグ ${t}`
+                                            : undefined
+                                        }
+                                      >
+                                        {automatic ? `AI · ${t}` : t}
+                                      </Badge>
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                            {actions(p)}
+                          </article>
+                        ))}
+                        {!shown.length && (
+                          <div className="empty-state">
+                            <p>該当する投稿はありません。</p>
+                            <Button
+                              onClick={() => {
+                                setQuery("");
+                                setFilter("all");
+                                setTag("");
+                              }}
+                            >
+                              解除
+                            </Button>
+                          </div>
+                        )}
+                        <div className="feed-count">{shown.length}件</div>
+                      </div>
+                    </>
+                  ) : (
+                    <section
+                      className="fediverse-timeline"
+                      aria-labelledby="fediverse-timeline-heading"
+                    >
+                      <div className="fediverse-timeline-heading">
+                        <div>
+                          <h2 id="fediverse-timeline-heading">Fediverse</h2>
+                          <p>フォロー中の投稿と自分の配信済み投稿</p>
+                        </div>
+                        <button
+                          type="button"
+                          aria-label="Fediverseを更新"
+                          disabled={federationTimelineBusy}
+                          onClick={() => void loadFederationTimeline()}
+                        >
+                          <RefreshCw
+                            size={17}
+                            className={
+                              federationTimelineBusy ? "is-spinning" : ""
+                            }
+                          />
+                        </button>
+                      </div>
+                      {federationTimelineError && (
+                        <div className="fediverse-timeline-error" role="alert">
+                          <p>{federationTimelineError}</p>
+                          <Button
+                            type="button"
+                            onClick={() => void loadFederationTimeline()}
+                          >
+                            再試行
+                          </Button>
+                        </div>
+                      )}
+                      {!federationTimelineError &&
+                        !federationTimelineBusy &&
+                        !federationTimeline.length && (
+                          <div className="empty-state">
+                            <p>受信した投稿はまだありません。</p>
+                          </div>
+                        )}
+                      <div className="fediverse-feed">
+                        {federationTimeline.map((timelineItem) => (
+                          <article
+                            className="fediverse-post"
+                            key={timelineItem.id}
+                          >
+                            {timelineItem.activityType === "Announce" && (
+                              <p className="fediverse-announced">
+                                {timelineItem.displayName}がRP
+                              </p>
+                            )}
+                            <div className="fediverse-post-meta">
+                              <Avatar
+                                value={
+                                  timelineItem.source === "self"
+                                    ? profile.icon
+                                    : timelineItem.displayName
+                                        .trim()
+                                        .slice(0, 1) || "•"
+                                }
+                              />
+                              <div>
+                                <strong>{timelineItem.displayName}</strong>
+                                <span>{timelineItem.handle}</span>
+                              </div>
+                              <time dateTime={timelineItem.publishedAt}>
+                                {new Date(
+                                  timelineItem.publishedAt,
+                                ).toLocaleDateString("ja-JP", {
+                                  month: "numeric",
+                                  day: "numeric",
+                                })}
+                              </time>
+                            </div>
+                            <div
+                              className="fediverse-content"
+                              dangerouslySetInnerHTML={{
+                                __html: timelineItem.contentHtml,
+                              }}
+                            />
+                            {timelineItem.attachments.length > 0 && (
+                              <div className="fediverse-attachments">
+                                {timelineItem.attachments.map((attachment) => (
+                                  <img
+                                    key={attachment.url}
+                                    src={attachment.url}
+                                    alt=""
+                                    loading="lazy"
+                                  />
+                                ))}
+                              </div>
+                            )}
+                            <div className="fediverse-post-actions">
+                              <a
+                                href={timelineItem.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                元の投稿を開く
+                                <ArrowUpRight size={14} />
+                              </a>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                      {federationTimelineCursor && (
+                        <Button
+                          type="button"
+                          className="fediverse-load-more"
+                          disabled={federationTimelineBusy}
+                          onClick={() =>
+                            void loadFederationTimeline(
+                              federationTimelineCursor,
+                              true,
+                            )
+                          }
+                        >
+                          さらに読み込む
+                        </Button>
+                      )}
+                    </section>
+                  )}
                 </>
               )}
             </main>
@@ -2399,43 +2604,49 @@ export default function Notebook({
                   <ArrowUpRight size={14} />
                 </a>
               </div>
-              <label className="side-search">
-                <Search size={16} />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="投稿を検索"
-                />
-                <kbd>/</kbd>
-              </label>
-              {tags.length > 0 && (
-                <div className="aside-section">
-                  <h3>タグ</h3>
-                  <div className="topic-list">
-                    {visibleTags.map(({ name, count }) => (
-                      <button
-                        key={name}
-                        className={tag === name ? "active" : ""}
-                        onClick={() => {
-                          nav("timeline");
-                          setTag(name);
-                          setFilter("all");
-                        }}
-                      >
-                        #{name}
-                        <small>{count}</small>
-                      </button>
-                    ))}
-                  </div>
-                  {visibleTagCount < tags.length && (
-                    <button
-                      className="tag-load-more"
-                      onClick={() => setVisibleTagCount((count) => count + 5)}
-                    >
-                      もっと見る
-                    </button>
+              {(view !== "timeline" || timelineMode === "kamelog") && (
+                <>
+                  <label className="side-search">
+                    <Search size={16} />
+                    <input
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="投稿を検索"
+                    />
+                    <kbd>/</kbd>
+                  </label>
+                  {tags.length > 0 && (
+                    <div className="aside-section">
+                      <h3>タグ</h3>
+                      <div className="topic-list">
+                        {visibleTags.map(({ name, count }) => (
+                          <button
+                            key={name}
+                            className={tag === name ? "active" : ""}
+                            onClick={() => {
+                              nav("timeline");
+                              setTag(name);
+                              setFilter("all");
+                            }}
+                          >
+                            #{name}
+                            <small>{count}</small>
+                          </button>
+                        ))}
+                      </div>
+                      {visibleTagCount < tags.length && (
+                        <button
+                          className="tag-load-more"
+                          onClick={() =>
+                            setVisibleTagCount((count) => count + 5)
+                          }
+                        >
+                          もっと見る
+                        </button>
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </aside>
           </div>

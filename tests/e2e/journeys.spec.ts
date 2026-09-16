@@ -535,6 +535,33 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
       (activity: { type: string }) => activity.type === "Create",
     ),
   ).toBe(true);
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
+    .click();
+  const fediverseResponse = page.waitForResponse((response) =>
+    response.url().includes("/api/federation/timeline"),
+  );
+  await page.getByRole("tab", { name: "Fediverse", exact: true }).click();
+  expect((await fediverseResponse).status()).toBe(200);
+  await expect(page.locator(".timeline-toolbar")).toHaveCount(0);
+  await expect(
+    page.getByText("ホームから直接投稿する架空のつぶやき", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "元の投稿を開く" }).first(),
+  ).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator(".fediverse-mode-switch")).toBeVisible();
+  await page.locator(".fediverse-timeline").screenshot({
+    path: testInfo.outputPath("fediverse-timeline-mobile.png"),
+  });
+  const refreshed = page.waitForResponse((response) =>
+    response.url().includes("/api/federation/timeline"),
+  );
+  await page.getByRole("button", { name: "Fediverseを更新" }).click();
+  expect((await refreshed).status()).toBe(200);
+  await page.setViewportSize({ width: 1280, height: 900 });
   const shared = await page.request.get("/?post=" + blog.id);
   expect(await shared.text()).toContain('property="og:image"');
   const og = await page.request.get("/og?post=" + blog.id);
@@ -542,6 +569,11 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   expect(og.headers()["content-type"]).toContain("image/png");
   await page.getByRole("button", { name: "ログアウト", exact: true }).click();
   await expect(page.locator(".desktop-composer")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "タイムライン", exact: true })
+    .first()
+    .click();
+  await expect(page.getByRole("tab", { name: "Fediverse" })).toHaveCount(0);
   await page.locator(".admin-access summary").click();
   await page
     .locator(".admin-access")

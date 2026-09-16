@@ -16,7 +16,7 @@ export function sanitizeRemoteHtml(value) {
       "ol",
       "li",
     ],
-    allowedAttributes: { a: ["href", "rel"] },
+    allowedAttributes: { a: ["href", "rel", "target"] },
     allowedSchemes: ["http", "https"],
     allowProtocolRelative: false,
     transformTags: {
@@ -25,6 +25,7 @@ export function sanitizeRemoteHtml(value) {
         attribs: {
           href: attributes.href || "",
           rel: "nofollow noopener noreferrer",
+          target: "_blank",
         },
       }),
     },

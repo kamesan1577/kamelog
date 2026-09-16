@@ -1,5 +1,5 @@
 import { DatabaseSync, backup } from "node:sqlite";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, rmSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { randomUUID, createHash } from "node:crypto";
 
@@ -130,12 +130,37 @@ export class Store {
       );
       CREATE INDEX IF NOT EXISTS federation_timeline_order
         ON federation_timeline_entries(deleted_at, published_at DESC, activity_id);
+      CREATE TABLE IF NOT EXISTS federation_remote_media(
+        id TEXT PRIMARY KEY,
+        object_id TEXT NOT NULL REFERENCES federation_remote_objects(object_id) ON DELETE CASCADE,
+        remote_url TEXT NOT NULL,
+        declared_type TEXT NOT NULL,
+        cached_type TEXT,
+        extension TEXT,
+        size INTEGER,
+        cached_at TEXT
+      );
       INSERT OR IGNORE INTO migrations VALUES(1);
       INSERT OR IGNORE INTO migrations VALUES(2);
       INSERT OR IGNORE INTO migrations VALUES(3);
       INSERT OR IGNORE INTO migrations VALUES(4);
       INSERT OR IGNORE INTO migrations VALUES(5);
-      INSERT OR IGNORE INTO migrations VALUES(6);`);
+      INSERT OR IGNORE INTO migrations VALUES(6);
+      INSERT OR IGNORE INTO migrations VALUES(7);`);
+    this.db
+      .prepare(
+        `SELECT object_id AS objectId, attachments
+         FROM federation_remote_objects WHERE deleted_at IS NULL`,
+      )
+      .all()
+      .forEach(({ objectId, attachments }) => {
+        for (const attachment of JSON.parse(attachments))
+          this.registerFederationRemoteMedia(
+            objectId,
+            attachment.url,
+            attachment.mediaType,
+          );
+      });
     this.db
       .prepare("SELECT id, data FROM posts")
       .all()
@@ -641,6 +666,7 @@ export class Store {
   saveFederationRemoteObject(object) {
     const existing = this.federationRemoteObject(object.objectId);
     if (existing && existing.actorId !== object.actorId) return false;
+    if (existing) this.invalidateFederationRemoteMedia(object.objectId);
     this.db
       .prepare(
         `INSERT INTO federation_remote_objects
@@ -668,6 +694,12 @@ export class Store {
         JSON.stringify(object.attachments || []),
         object.receivedAt,
       );
+    for (const attachment of object.attachments || [])
+      this.registerFederationRemoteMedia(
+        object.objectId,
+        attachment.url,
+        attachment.mediaType,
+      );
     return true;
   }
   federationRemoteObject(objectId) {
@@ -689,13 +721,15 @@ export class Store {
          WHERE object_id=? AND actor_id=? AND deleted_at IS NULL`,
       )
       .run(now, now, objectId, actorId);
-    if (result.changes)
+    if (result.changes) {
       this.db
         .prepare(
           `UPDATE federation_timeline_entries SET deleted_at=?
            WHERE object_id=? AND deleted_at IS NULL`,
         )
         .run(now, objectId);
+      this.invalidateFederationRemoteMedia(objectId);
+    }
     return result.changes > 0;
   }
   saveFederationTimelineEntry(entry) {
@@ -732,15 +766,89 @@ export class Store {
            ON objects.object_id=entries.object_id
          JOIN federation_remote_actors actors
            ON actors.actor_id=entries.actor_id
+         JOIN federation_following following
+           ON following.actor_id=entries.actor_id
          WHERE entries.deleted_at IS NULL AND objects.deleted_at IS NULL
+           AND following.state='accepted'
          ORDER BY entries.published_at DESC, entries.activity_id DESC
          LIMIT ?`,
       )
-      .all(Math.max(1, Math.min(100, Number(limit) || 50)))
+      .all(Math.max(1, Math.min(5_000, Number(limit) || 50)))
       .map((row) => ({
         ...row,
         attachments: JSON.parse(row.attachments),
       }));
+  }
+  registerFederationRemoteMedia(objectId, remoteUrl, declaredType) {
+    const id = hash(`${objectId}\0${remoteUrl}`);
+    this.db
+      .prepare(
+        `INSERT OR IGNORE INTO federation_remote_media
+         (id, object_id, remote_url, declared_type)
+         VALUES (?, ?, ?, ?)`,
+      )
+      .run(id, objectId, remoteUrl, declaredType);
+    return id;
+  }
+  invalidateFederationRemoteMedia(objectId) {
+    const files = this.db
+      .prepare(
+        "SELECT id, extension FROM federation_remote_media WHERE object_id=?",
+      )
+      .all(objectId);
+    this.db
+      .prepare("DELETE FROM federation_remote_media WHERE object_id=?")
+      .run(objectId);
+    for (const file of files)
+      if (
+        /^[a-f0-9]{64}$/.test(file.id) &&
+        /^(png|jpg|webp|gif)$/.test(file.extension || "")
+      )
+        try {
+          rmSync(
+            join(
+              this.directory,
+              "federation-media",
+              `${file.id}.${file.extension}`,
+            ),
+            { force: true },
+          );
+        } catch {
+          // A stale cache file is inaccessible and can be evicted later.
+        }
+  }
+  federationRemoteMedia(id) {
+    return (
+      this.db
+        .prepare(
+          `SELECT media.id, media.object_id AS objectId,
+                  media.remote_url AS remoteUrl,
+                  media.declared_type AS declaredType,
+                  media.cached_type AS cachedType, media.extension,
+                  media.size, media.cached_at AS cachedAt
+           FROM federation_remote_media media
+           JOIN federation_remote_objects objects
+             ON objects.object_id=media.object_id
+           WHERE media.id=? AND objects.deleted_at IS NULL`,
+        )
+        .get(id) || null
+    );
+  }
+  cacheFederationRemoteMedia(id, metadata) {
+    this.db
+      .prepare(
+        `UPDATE federation_remote_media
+         SET cached_type=?, extension=?, size=?, cached_at=?
+         WHERE id=?`,
+      )
+      .run(
+        metadata.type,
+        metadata.extension,
+        metadata.size,
+        metadata.cachedAt,
+        id,
+      );
+    return this.federationRemoteMedia(id);
   }
   undoFederationTimelineEntry(activityId, actorId, now) {
     return (

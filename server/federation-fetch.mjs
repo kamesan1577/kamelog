@@ -114,7 +114,9 @@ function requestDocument(url, resolved, options) {
           }
           chunks.push(chunk);
         });
-        response.on("end", () => resolve({ body: Buffer.concat(chunks) }));
+        response.on("end", () =>
+          resolve({ body: Buffer.concat(chunks), contentType }),
+        );
       },
     );
     const timeout = setTimeout(
@@ -197,7 +199,7 @@ export async function fetchFederationDocument(value, options = {}) {
       url = normalizeFederationUrl(result.redirect, settings);
       continue;
     }
-    return { body: result.body, url };
+    return { body: result.body, contentType: result.contentType, url };
   }
   throw new Error("federation request failed");
 }

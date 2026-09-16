@@ -30,6 +30,11 @@ import {
   InvalidFederationHandle,
   unfollowRemoteActor,
 } from "./federation-remote.mjs";
+import { federationRemoteImage } from "./federation-media.mjs";
+import {
+  InvalidFederationCursor,
+  ownerFederationTimeline,
+} from "./federation-timeline.mjs";
 
 export function configuration(env = process.env) {
   const origin = env.KAMELOG_ORIGIN || "http://localhost:3000";
@@ -322,6 +327,42 @@ export function createAPI(store, config, options = {}) {
         return json(federationStatus(store, config));
       if (
         path[0] === "federation" &&
+        path[1] === "timeline" &&
+        method === "GET"
+      )
+        return json(
+          ownerFederationTimeline(
+            store,
+            config,
+            url.searchParams.get("cursor"),
+          ),
+        );
+      if (
+        path[0] === "federation" &&
+        path[1] === "media" &&
+        path[2] &&
+        path.length === 3 &&
+        method === "GET"
+      ) {
+        try {
+          const image = await federationRemoteImage(store, path[2], {
+            fetchOptions: options.federation?.fetchOptions,
+          });
+          if (!image) return json({ error: "Not found" }, 404);
+          return new Response(image.bytes, {
+            headers: {
+              "Cache-Control": "private, no-store",
+              "Content-Length": String(image.bytes.length),
+              "Content-Type": image.type,
+              "X-Content-Type-Options": "nosniff",
+            },
+          });
+        } catch {
+          return json({ error: "リモート画像を取得できませんでした。" }, 502);
+        }
+      }
+      if (
+        path[0] === "federation" &&
         path[1] === "setup" &&
         method === "POST"
       ) {
@@ -501,6 +542,8 @@ export function createAPI(store, config, options = {}) {
         return json({ error: "ユーザー名を確認してください。" }, 400);
       if (error instanceof InvalidFederationHandle)
         return json({ error: "Fediverseアドレスを確認してください。" }, 400);
+      if (error instanceof InvalidFederationCursor)
+        return json({ error: "Invalid cursor" }, 400);
       // No request bodies, tokens or raw exception messages in responses/logs.
       return json(
         { error: "操作に失敗しました。入力を保持して再試行してください。" },

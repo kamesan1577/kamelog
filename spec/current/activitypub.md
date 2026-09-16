@@ -48,7 +48,15 @@ ownerはAccountの `フォロー管理` へ完全な `@user@domain` を入力す
 
 Accept済みのfollowingから届いたpublic `Note` だけを専用のremote object cacheへ保存する。`Create` はtimeline entryを作成し、`Update` は同じobject ID・actorのcacheだけを更新し、`Delete` はtombstone化してtimelineから隠す。`Announce` は埋め込みNoteまたは安全にdereferenceしたNoteを保存し、`Undo(Announce)` は対応entryを隠す。followしていないActorの投稿activityはidempotency記録だけを行い、timeline cacheへ入れない。
 
-remote objectはlocal `posts` に混在させない。本文は保存前にallowlist sanitizeし、画像attachmentはHTTPS URLと対応MIMEを最大4件まで正規化する。このPhaseではbrowserへremote URLを直接表示せず、media proxy/cacheとowner timeline表示は後続Phaseで追加する。
+remote objectはlocal `posts` に混在させない。本文は保存前にallowlist sanitizeし、画像attachmentはHTTPS URLと対応MIMEを最大4件まで正規化する。
+
+## Owner-only Fediverse timeline
+
+ActivityPub有効化済みかつログイン中だけ、既存Timelineに `kamelog | Fediverse` 切替を表示する。Fediverse modeはAccept済みfollowingから受信したCreate/Announceと、`federationEnabled=true` の自分のtweet/blogを新しい順に返す。local種別filter、sort、composerはこのmodeでは隠す。refreshはserver-side cacheを再取得するだけで、follow先outboxをpollしない。cursorは最終itemの時刻とIDを署名不要のopaque base64url値として扱い、不正値を拒否する。
+
+remote cardはsanitized content、display name、handle、受信できた画像、original URLを表示する。Announceはannouncerを `○○がRP` として示す。remote iconはbrowserから直接取得せず、現段階では文字fallback avatarを使う。
+
+remote画像はowner-onlyのlocal URLへ置換し、初回表示時にserverが取得する。既存SSRF境界に加え、画像Content-Type、magic bytes、寸法、1件8MiBを検証する。cache directoryは256MiBを上限に古いfileから削除し、再取得可能なためbackupへ含めない。remote objectのUpdate/Delete後は旧mappingから画像を配信しない。videoや未対応媒体はproxyせずoriginal postへ誘導する。
 
 ## HTTP signature
 

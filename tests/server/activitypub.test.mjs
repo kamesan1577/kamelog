@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { generateKeyPairSync } from "node:crypto";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -24,11 +24,13 @@ import {
   localPostObject,
 } from "../../server/federation-outbound.mjs";
 import { processNextFederationDelivery } from "../../server/federation-worker.mjs";
+import { federationRemoteImage } from "../../server/federation-media.mjs";
 import {
   followRemoteActor,
   processIncomingRemoteActivity,
   unfollowRemoteActor,
 } from "../../server/federation-remote.mjs";
+import { ownerFederationTimeline } from "../../server/federation-timeline.mjs";
 import { Store } from "../../server/store.mjs";
 
 const origin = "https://example.test";
@@ -308,6 +310,7 @@ test("remote HTML is allowlisted and strips executable content", () => {
   assert.equal(sanitized.includes("onclick"), false);
   assert.equal(sanitized.includes("javascript:"), false);
   assert.match(sanitized, /rel="nofollow noopener noreferrer"/);
+  assert.match(sanitized, /target="_blank"/);
 });
 
 test("federation fetch blocks private targets and revalidates redirects", async () => {
@@ -775,6 +778,178 @@ test("accepted remote activities maintain a sanitized, idempotent timeline", asy
       { now: new Date("2026-09-16T12:07:00Z") },
     );
     assert.equal(store.federationFollowing(actorUrl).state, "rejected");
+  });
+});
+
+test("owner timeline combines remote and self posts with stable cursors", async () => {
+  await withStore("kamelog-federation-owner-timeline-", async (store) => {
+    createFederationIdentity(store, "kamesan");
+    const actorId = "https://remote.example/users/alice";
+    const objectId = "https://remote.example/notes/1";
+    store.saveFederationRemoteActor({
+      actorId,
+      handle: "@alice@remote.example",
+      inboxUrl: `${actorId}/inbox`,
+      preferredUsername: "alice",
+      displayName: "Alice",
+      fetchedAt: "2026-09-16T12:00:00.000Z",
+    });
+    store.saveFederationFollowing({
+      actorId,
+      state: "accepted",
+      followActivityId: `${origin}/activitypub/activities/follow/1`,
+      createdAt: "2026-09-16T11:00:00.000Z",
+      updatedAt: "2026-09-16T11:01:00.000Z",
+    });
+    store.saveFederationRemoteObject({
+      objectId,
+      actorId,
+      type: "Note",
+      contentHtml: "<p>Remote</p>",
+      url: objectId,
+      publishedAt: "2026-09-16T12:00:00.000Z",
+      updatedAt: "2026-09-16T12:00:00.000Z",
+      attachments: [
+        {
+          type: "Image",
+          mediaType: "image/png",
+          url: "https://remote.example/media/1.png",
+        },
+      ],
+      receivedAt: "2026-09-16T12:00:01.000Z",
+    });
+    store.saveFederationTimelineEntry({
+      activityId: "https://remote.example/activities/create/1",
+      actorId,
+      type: "Create",
+      objectId,
+      publishedAt: "2026-09-16T12:00:00.000Z",
+      receivedAt: "2026-09-16T12:00:01.000Z",
+    });
+    store.save("posts", "self-note", {
+      kind: "tweet",
+      title: "",
+      body: "Self",
+      tags: [],
+      likes: 0,
+      images: [],
+      date: "2026-09-16T11:00:00.000Z",
+      federationEnabled: true,
+      federationUpdatedAt: "2026-09-16T11:00:00.000Z",
+    });
+
+    const first = ownerFederationTimeline(store, config, null, 1);
+    assert.equal(first.items[0].source, "remote");
+    assert.match(
+      first.items[0].attachments[0].url,
+      /^\/api\/federation\/media\/[a-f0-9]{64}$/,
+    );
+    assert.ok(first.nextCursor);
+    const second = ownerFederationTimeline(store, config, first.nextCursor, 1);
+    assert.equal(second.items[0].source, "self");
+    assert.equal(second.nextCursor, null);
+
+    const api = createAPI(store, config);
+    assert.equal(
+      (await api(new Request(`${origin}/api/federation/timeline`))).status,
+      401,
+    );
+    const session = store.createSession();
+    const response = await api(
+      new Request(`${origin}/api/federation/timeline`, {
+        headers: { cookie: `__Host-kamelog-session=${session}` },
+      }),
+    );
+    assert.equal(response.status, 200);
+    assert.equal((await response.json()).items.length, 2);
+    assert.equal(
+      (
+        await api(
+          new Request(`${origin}/api/federation/timeline?cursor=bad`, {
+            headers: { cookie: `__Host-kamelog-session=${session}` },
+          }),
+        )
+      ).status,
+      400,
+    );
+    store.removeFederationFollowing(actorId);
+    const afterUnfollow = ownerFederationTimeline(store, config, null, 30);
+    assert.deepEqual(
+      afterUnfollow.items.map(({ source }) => source),
+      ["self"],
+    );
+  });
+});
+
+test("remote images are validated, cached locally and hidden after Delete", async () => {
+  await withStore("kamelog-federation-media-", async (store) => {
+    const actorId = "https://remote.example/users/alice";
+    const objectId = "https://remote.example/notes/1";
+    const remoteUrl = "https://remote.example/media/1.png";
+    store.saveFederationRemoteObject({
+      objectId,
+      actorId,
+      type: "Note",
+      contentHtml: "<p>Image</p>",
+      url: objectId,
+      publishedAt: "2026-09-16T12:00:00.000Z",
+      updatedAt: "2026-09-16T12:00:00.000Z",
+      attachments: [{ type: "Image", mediaType: "image/png", url: remoteUrl }],
+      receivedAt: "2026-09-16T12:00:01.000Z",
+    });
+    const mediaId = store.db
+      .prepare("SELECT id FROM federation_remote_media WHERE object_id=?")
+      .get(objectId).id;
+    const png = Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "base64",
+    );
+    let requests = 0;
+    let payload = Buffer.from("not an image");
+    const options = {
+      fetchOptions: {
+        lookup: async () => [{ address: "8.8.8.8", family: 4 }],
+        request: async () => {
+          requests += 1;
+          return { body: payload, contentType: "image/png" };
+        },
+      },
+    };
+    await assert.rejects(federationRemoteImage(store, mediaId, options));
+    payload = png;
+    assert.deepEqual(await federationRemoteImage(store, mediaId, options), {
+      bytes: png,
+      type: "image/png",
+    });
+    assert.deepEqual(await federationRemoteImage(store, mediaId, options), {
+      bytes: png,
+      type: "image/png",
+    });
+    assert.equal(requests, 2);
+    const api = createAPI(store, config, { federation: options });
+    assert.equal(
+      (await api(new Request(`${origin}/api/federation/media/${mediaId}`)))
+        .status,
+      401,
+    );
+    const session = store.createSession();
+    const imageResponse = await api(
+      new Request(`${origin}/api/federation/media/${mediaId}`, {
+        headers: { cookie: `__Host-kamelog-session=${session}` },
+      }),
+    );
+    assert.equal(imageResponse.status, 200);
+    assert.equal(imageResponse.headers.get("content-type"), "image/png");
+    assert.deepEqual(Buffer.from(await imageResponse.arrayBuffer()), png);
+    store.deleteFederationRemoteObject(
+      objectId,
+      actorId,
+      "2026-09-16T12:01:00.000Z",
+    );
+    assert.equal(await federationRemoteImage(store, mediaId, options), null);
+    await assert.rejects(
+      readFile(join(store.directory, "federation-media", `${mediaId}.png`)),
+    );
   });
 });
 

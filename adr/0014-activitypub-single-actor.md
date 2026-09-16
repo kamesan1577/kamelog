@@ -14,7 +14,7 @@ remote objectは既存のlocal `posts` へ混ぜず、専用の正規化cacheへ
 
 outbound activityはSQLiteのdurable delivery queueへ保存し、同じimageを使うworkerが非同期配送する。remote障害をlocal投稿の失敗へ昇格させない。external positive reactionはlocal postごとにremote Actor単位で1いいねへ正規化し、既存anonymous likeと表示時に合算する。
 
-remote mediaは受信時に無制限に保存せず、SSRF・MIME・size・timeoutを検証するserver-side proxy/cacheを採用する。大容量videoのproxyは対象外とし、表示できない媒体はoriginal URLへ案内する。
+remote mediaは受信時に無制限に保存せず、ownerがtimelineを表示したときだけ取得するserver-side proxy/cacheを採用する。HTTPS、公開IP、redirect先、timeout、MIME、magic bytes、画像寸法を検証し、1画像8MiB、cache全体256MiBに制限する。browserへremote URLを渡さず、cacheは再取得可能としてbackup対象外にする。remote Delete後は対応mappingを無効化して配信しない。大容量videoのproxyは対象外とし、表示できない媒体はoriginal URLへ案内する。
 
 ## セキュリティ境界
 
