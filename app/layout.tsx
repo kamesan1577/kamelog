@@ -14,6 +14,7 @@ import "./tweet-link-preview.css";
 import "./project-social-links.css";
 import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
+import { NavigationUrlBridge } from "@/components/navigation-url-bridge";
 import { ProfileSocialLinksBridge } from "@/components/profile-social-links-bridge";
 import { TweetLinkPreviewBridge } from "@/components/tweet-link-preview-bridge";
 import { homeUrl, ogImageUrl, siteOrigin } from "@/server/seo.mjs";
@@ -55,6 +56,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className="antialiased">
+        <NavigationUrlBridge />
         <ImageUploadBridge />
         <BlogTableOfContentsBridge />
         <TweetLinkPreviewBridge />
