@@ -18,7 +18,10 @@ test("keeps the inline image attachment separate from post-type actions", async 
     readFile(layoutUrl, "utf8"),
   ]);
 
-  assert.match(layout, /import "\.\/composer-layout\.css";/);
+  assert.match(
+    layout,
+    /import "\.\.\/components\/design-system\/patterns\/ComposerLayout.css";/,
+  );
   assert.match(
     css,
     /\.desktop-composer \.composer-kinds\s*\{[^}]*display:\s*grid;/s,
@@ -35,7 +38,10 @@ test("keeps publish actions visible above the mobile keyboard only", async () =>
     readFile(layoutUrl, "utf8"),
   ]);
 
-  assert.match(layout, /import "\.\/mobile-composer\.css";/);
+  assert.match(
+    layout,
+    /import "\.\.\/components\/design-system\/patterns\/MobileComposer.css";/,
+  );
   assert.match(css, /\.mobile-editor-header\s*\{[^}]*display:\s*none;/s);
   assert.match(
     css,
