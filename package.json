@@ -61,7 +61,7 @@
     "@storybook/addon-vitest": "^10.6.0",
     "@storybook/nextjs-vite": "^10.6.0",
     "@tailwindcss/postcss": "4.3.3",
-    "@types/node": "22.19.19",
+    "@types/node": "26.5.1",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.7",
     "@types/twitter-text": "^3.1.10",
