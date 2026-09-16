@@ -263,7 +263,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.getByRole("button", { name: "戻る", exact: true }).click();
   const inlineTweet = page.getByPlaceholder("いまどうしてる？");
   await page
-    .locator(".composer-kinds .image-upload-button input")
+    .locator('[data-ds="composer-toolbar"] .image-upload-button input')
     .setInputFiles({
       name: "fictional.png",
       mimeType: "image/png",
@@ -355,7 +355,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   ).toBeVisible();
   await deleteDialog.getByRole("button", { name: "キャンセル" }).click();
   await page
-    .locator(".composer-kinds")
+    .locator('[data-ds="composer-toolbar"]')
     .getByRole("button", { name: "ブログ", exact: true })
     .click();
   await page.getByPlaceholder("タイトル", { exact: true }).fill("架空のブログ");
@@ -422,10 +422,16 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.getByText("- [ ] 未完了")).toBeVisible();
   await expect(page.getByText("```javascript")).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.locator(".blog-dialog")).not.toHaveClass(/is-full-page/);
+  await expect(page.locator('[data-ds="editor-dialog"]')).toHaveAttribute(
+    "data-ds-state",
+    "modal",
+  );
   await blogBody.fill("リアルタイムプレビュー");
   await page.getByRole("button", { name: "フルページで編集" }).click();
-  await expect(page.locator(".blog-dialog")).toHaveClass(/is-full-page/);
+  await expect(page.locator('[data-ds="editor-dialog"]')).toHaveAttribute(
+    "data-ds-state",
+    "full-page",
+  );
   const viewModes = page.getByRole("group", { name: "エディタ表示" });
   await viewModes.getByRole("button", { name: "両方" }).click();
   const livePreview = page.getByLabel("プレビュー");
@@ -565,7 +571,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   );
   await page.getByRole("tab", { name: "Fediverse", exact: true }).click();
   expect((await fediverseResponse).status()).toBe(200);
-  await expect(page.locator(".timeline-toolbar")).toHaveCount(0);
+  await expect(page.locator('[data-ds="timeline-toolbar"]')).toHaveCount(0);
   await expect(
     page.getByText("ホームから直接投稿する架空のつぶやき", { exact: true }),
   ).toBeVisible();
