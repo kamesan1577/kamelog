@@ -1,0 +1,18 @@
+[data-ds="page-header"] h1 {
+  font-weight: 750;
+  font-size: 32px;
+  letter-spacing: -1.3px;
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+[data-ds="page-header"].page-heading {
+  margin-bottom: 26px;
+}
+
+@media (max-width: 640px) {
+  [data-ds="page-header"] h1 {
+    font-size: 29px;
+    letter-spacing: -0.8px;
+  }
+}

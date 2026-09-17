@@ -196,16 +196,7 @@ textarea:focus {
   font-size: 46px;
   border-radius: 12px;
 }
-.page-heading {
-  margin-bottom: 26px;
-}
-.page-heading h1 {
-  font-weight: 750;
-  font-size: 32px;
-  letter-spacing: -1.3px;
-  margin: 0 0 8px;
-  line-height: 1.4;
-}
+
 @media (min-width: 1450px) {
   .content-grid {
     padding-top: 60px;
