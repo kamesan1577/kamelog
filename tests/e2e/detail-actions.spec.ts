@@ -6,15 +6,15 @@ async function renderBlogDetail(page: Page) {
     document.body.innerHTML = `
       <div class="content-grid">
         <main class="main-content">
-          <section class="detail-page">
+          <section data-ds="detail-page" class="detail-page">
             <button class="back-button">戻る</button>
             <div class="post-meta">投稿者 · 9/7 <span class="type-label blog">ブログ</span></div>
-            <div class="markdown" style="min-height:1800px">
+            <div data-ds="detail-markdown" class="markdown" style="min-height:1800px">
               <h1>架空の記事タイトル</h1>
               <p>架空の記事本文</p>
             </div>
             <div class="tags">tag</div>
-            <div class="post-actions">
+            <div data-ds="post-actions" class="post-actions">
               <button>♡ 0</button>
               <button>リンクをコピー</button>
               <button>Xで共有</button>
@@ -32,8 +32,8 @@ test("desktop blog actions stay beside content while scrolling", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await renderBlogDetail(page);
 
-  const actions = page.locator(".post-actions");
-  const article = page.locator(".markdown");
+  const actions = page.locator('[data-ds="post-actions"]');
+  const article = page.locator('[data-ds="detail-markdown"]');
   const before = await actions.boundingBox();
   const articleBox = await article.boundingBox();
 
@@ -58,7 +58,7 @@ test("mobile blog actions float above bottom navigation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await renderBlogDetail(page);
 
-  const actions = page.locator(".post-actions");
+  const actions = page.locator('[data-ds="post-actions"]');
   const before = await actions.boundingBox();
   expect(before).not.toBeNull();
   if (!before) throw new Error("mobile floating actions unavailable");
