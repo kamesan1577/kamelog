@@ -78,7 +78,7 @@ function syncProfileSocialLinks() {
 
 function syncQiitaProjectThumbnail() {
   const image = document.querySelector<HTMLImageElement>(
-    `a.project-tile[href="${QIITA_URL}"] img`,
+    `a[data-ds="project-tile"][href="${QIITA_URL}"] img`,
   );
   if (!image) return;
   image.src = "/qiita-project.svg";

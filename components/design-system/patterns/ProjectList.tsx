@@ -43,6 +43,7 @@ export function ProjectList({
 
         return project.source ? (
           <a
+            data-ds="project-tile"
             className={tileClassName}
             key={project.slug}
             href={project.source}
@@ -52,7 +53,12 @@ export function ProjectList({
             {content}
           </a>
         ) : (
-          <div className={staticTileClassName} key={project.slug}>
+          <div
+            data-ds="project-tile"
+            data-ds-variant="static"
+            className={staticTileClassName}
+            key={project.slug}
+          >
             {content}
           </div>
         );

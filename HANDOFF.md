@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with ProjectList semantic items. Project tiles now expose stable data-ds variants used by the social-link bridge and project E2E assertions, while approved CSS hooks remain for presentation. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
+
 2026-09-17 Issue #99 migration continued with link preview contracts. Inline links and generated OGP cards now expose data-ds markers; ownership and cleanup selectors use the semantic card boundary, and journey/link-preview tests no longer select those cards by CSS class. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
 
 2026-09-17 Issue #99 migration continued with detail and page-header contracts. Detail Markdown, post actions fixtures, federation timeline heading lookup, and navigation route assertions now use semantic data-ds boundaries while preserving existing visual classes and behavior. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
