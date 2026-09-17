@@ -205,3 +205,9 @@
     height: 480px;
   }
 }
+
+@media (max-width: 640px) {
+  [data-ds="detail-markdown"] { font-size: 15px; }
+  [data-ds="detail-markdown"] h1 { font-size: 25px; }
+  [data-ds="detail-markdown"] h2 { font-size: 20px; }
+}

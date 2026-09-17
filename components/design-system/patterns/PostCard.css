@@ -10,3 +10,9 @@
   font-size: 12px;
   margin-bottom: 12px;
 }
+
+@media (max-width: 640px) {
+  [data-ds="post-card"] {
+    padding-top: 20px;
+  }
+}
