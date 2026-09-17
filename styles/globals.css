@@ -207,10 +207,6 @@ textarea:focus {
   margin: 0 0 8px;
   line-height: 1.4;
 }
-.mobile-nav,
-.mobile-create {
-  display: none;
-}
 .settings-page {
   padding-bottom: 60px;
 }
@@ -407,50 +403,6 @@ textarea:focus {
   .post-actions button {
     min-height: 32px;
   }
-  .mobile-nav {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 65px;
-    padding-bottom: env(safe-area-inset-bottom, 0);
-    background: #ffffffed;
-    backdrop-filter: blur(12px);
-    border-top: 1px solid #eae8e2;
-    align-items: center;
-    justify-content: space-around;
-    z-index: 20;
-  }
-  .mobile-nav button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 7px 17px;
-    color: #aaa498;
-  }
-  .mobile-nav button span {
-    font-size: 12px;
-  }
-  .mobile-nav .active {
-    color: #37352f;
-  }
-  .mobile-create {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    bottom: 83px;
-    right: 20px;
-    height: 48px;
-    width: 48px;
-    color: white;
-    background: #37352f;
-    border-radius: 50%;
-    box-shadow: 0 3px 12px #0003;
-    z-index: 20;
-  }
   .markdown {
     font-size: 15px;
   }
@@ -488,11 +440,6 @@ textarea:focus {
   font-size: 12px;
 }
 @media (max-width: 640px) {
-}
-
-/* Reading content stays comfortable on both layouts. */
-.mobile-nav button span {
-  font-size: 12px;
 }
 
 /* Public-first shell */
@@ -723,9 +670,6 @@ textarea:focus {
   .mobile-nav button {
     font-size: 12px;
   }
-  .mobile-create {
-    bottom: 76px;
-  }
 }
 
 .desktop-composer .composer-start {
@@ -794,16 +738,6 @@ textarea:focus {
   flex-wrap: wrap;
 }
 @media (max-width: 640px) {
-  .mobile-create {
-    right: 18px;
-    bottom: 78px;
-    width: 56px;
-    height: 56px;
-  }
-  .mobile-create svg {
-    width: 27px;
-    height: 27px;
-  }
   .caption-field input,
   .inline-tweet {
     font-size: 16px;
