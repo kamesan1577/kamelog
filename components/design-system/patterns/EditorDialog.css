@@ -1,0 +1,116 @@
+[data-ds="editor-dialog"] {
+  width: calc(100% - 32px) !important;
+  max-width: 700px !important;
+  max-height: 92dvh;
+  overflow: auto;
+  gap: 14px !important;
+  padding: 26px !important;
+  border-radius: 8px !important;
+}
+
+[data-ds="editor-dialog"] .editor-caption {
+  color: #aaa !important;
+  font-size: 12px !important;
+}
+
+[data-ds="editor-dialog"] .editor-kinds {
+  width: 100% !important;
+  justify-content: stretch !important;
+}
+
+[data-ds="editor-dialog"] .editor-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 7px 0;
+  font-size: 13px;
+}
+
+[data-ds="editor-dialog"] .editor-author span:not(.avatar) {
+  margin-left: auto;
+  color: #999;
+  font-size: 12px;
+}
+
+[data-ds="editor-dialog"] .editor-author > svg {
+  color: #999;
+}
+
+[data-ds="editor-dialog"] .title-input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  padding: 8px 0;
+  font-size: 27px;
+  font-weight: 700;
+}
+
+[data-ds="editor-dialog"] .editor-tools {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  color: #999;
+  font-size: 13px;
+}
+
+[data-ds="editor-dialog"] .editor-tools button {
+  min-width: 20px;
+}
+
+[data-ds="editor-dialog"] .editor-tools .preview-toggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+}
+
+[data-ds="editor-dialog"] .editor-tools .active {
+  color: #2383e2;
+}
+
+[data-ds="editor-dialog"] .body-input {
+  width: 100%;
+  min-height: 210px;
+  resize: vertical;
+  border: 0;
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+[data-ds="editor-dialog"] .body-input.blog {
+  font-family: ui-monospace, "Noto Sans JP", monospace;
+}
+
+[data-ds="editor-dialog"] .body-input.vlog {
+  min-height: 70px;
+}
+
+[data-ds="editor-dialog"] .editor-preview {
+  min-height: 210px;
+  max-height: 40dvh;
+  overflow: auto;
+}
+
+[data-ds="editor-footer"] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+[data-ds="editor-footer"] > span {
+  margin-right: auto;
+  color: #aaa;
+  font-size: 12px;
+}
+
+@media (max-width: 640px) {
+  [data-ds="editor-dialog"] {
+    gap: 12px !important;
+    padding: 21px !important;
+  }
+}
