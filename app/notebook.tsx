@@ -45,6 +45,7 @@ import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToo
 import { PostMeta } from "@/components/design-system/patterns/PostMeta";
 import { PostPreview } from "@/components/design-system/patterns/PostPreview";
 import { PostCard } from "@/components/design-system/patterns/PostCard";
+import { InlineComposer } from "@/components/design-system/patterns/InlineComposer";
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
@@ -2272,30 +2273,18 @@ export default function Notebook({
                     </Tabs>
                   )}
                   {login && timelineMode === "kamelog" && (
-                    <div className="composer desktop-composer">
-                      <div className="composer-start">
-                        <Avatar value={profile.icon} />
-                        <textarea
-                          className="inline-tweet"
-                          value={inlineBody}
-                          onChange={(event) =>
-                            setInlineBody(event.target.value)
-                          }
-                          onKeyDown={(event) => {
-                            if (
-                              (event.ctrlKey || event.metaKey) &&
-                              event.key === "Enter"
-                            ) {
-                              event.preventDefault();
-                              publishInlineTweet();
-                            }
-                          }}
-                          placeholder="いまどうしてる？"
-                          maxLength={5000}
-                          rows={1}
-                          onDragOver={(event) => event.preventDefault()}
-                          onDrop={(event) => droppedImages(event, "inline")}
-                        />
+                    <InlineComposer
+                      className="composer desktop-composer"
+                      startClassName="composer-start"
+                      bodyClassName="inline-tweet"
+                      avatar={<Avatar value={profile.icon} />}
+                      value={inlineBody}
+                      onValueChange={setInlineBody}
+                      onSubmit={publishInlineTweet}
+                      onDrop={(event) => droppedImages(event, "inline")}
+                      placeholder="いまどうしてる？"
+                      maxLength={5000}
+                      submit={
                         <Button
                           variant="solid"
                           size="sm"
@@ -2304,73 +2293,77 @@ export default function Notebook({
                         >
                           投稿
                         </Button>
-                      </div>
-                      {inlineImages.length > 0 && (
-                        <div className="composer-images">
-                          <ImageGallery images={inlineImages} />
-                          <button
-                            type="button"
-                            onClick={() => setInlineImages([])}
-                          >
-                            画像を取り消す
+                      }
+                      media={
+                        inlineImages.length > 0 ? (
+                          <div className="composer-images">
+                            <ImageGallery images={inlineImages} />
+                            <button
+                              type="button"
+                              onClick={() => setInlineImages([])}
+                            >
+                              画像を取り消す
+                            </button>
+                          </div>
+                        ) : undefined
+                      }
+                      toolbar={
+                        <div className="composer-kinds">
+                          {xToggle("tweet")}
+                          {federationToggle(
+                            "tweet",
+                            inlineFederationEnabled,
+                            setInlineFederationEnabled,
+                          )}
+                          <label className="image-upload-button">
+                            <ImageIcon />
+                            画像
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp,image/gif"
+                              multiple
+                              disabled={
+                                uploadingImages || inlineImages.length >= 4
+                              }
+                              onChange={(event) =>
+                                void uploadImages(
+                                  Array.from(event.target.files || []),
+                                  "inline",
+                                )
+                              }
+                            />
+                          </label>
+                          <button onClick={() => openEditor("blog")}>
+                            <FileText />
+                            ブログ
                           </button>
+                          <button
+                            onClick={() =>
+                              document
+                                .querySelector<HTMLTextAreaElement>(
+                                  ".inline-tweet",
+                                )
+                                ?.focus()
+                            }
+                          >
+                            <MessageCircle />
+                            つぶやき
+                          </button>
+                          <button onClick={() => openEditor("vlog")}>
+                            <Video />
+                            vlog
+                          </button>
+                          {drafts.length > 0 && (
+                            <button
+                              className="draft-button"
+                              onClick={() => setDraftList(true)}
+                            >
+                              下書き {drafts.length}
+                            </button>
+                          )}
                         </div>
-                      )}
-                      <div className="composer-kinds">
-                        {xToggle("tweet")}
-                        {federationToggle(
-                          "tweet",
-                          inlineFederationEnabled,
-                          setInlineFederationEnabled,
-                        )}
-                        <label className="image-upload-button">
-                          <ImageIcon />
-                          画像
-                          <input
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp,image/gif"
-                            multiple
-                            disabled={
-                              uploadingImages || inlineImages.length >= 4
-                            }
-                            onChange={(event) =>
-                              void uploadImages(
-                                Array.from(event.target.files || []),
-                                "inline",
-                              )
-                            }
-                          />
-                        </label>
-                        <button onClick={() => openEditor("blog")}>
-                          <FileText />
-                          ブログ
-                        </button>
-                        <button
-                          onClick={() =>
-                            document
-                              .querySelector<HTMLTextAreaElement>(
-                                ".inline-tweet",
-                              )
-                              ?.focus()
-                          }
-                        >
-                          <MessageCircle />
-                          つぶやき
-                        </button>
-                        <button onClick={() => openEditor("vlog")}>
-                          <Video />
-                          vlog
-                        </button>
-                        {drafts.length > 0 && (
-                          <button
-                            className="draft-button"
-                            onClick={() => setDraftList(true)}
-                          >
-                            下書き {drafts.length}
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                      }
+                    />
                   )}
                   {timelineMode === "kamelog" ? (
                     <>
