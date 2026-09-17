@@ -5,7 +5,7 @@ import "../styles/tokens.css";
 import "./mobile-blog-editor.css";
 import "./composer-layout.css";
 import "./mobile-composer.css";
-import "./full-page-blog-editor.css";
+import "../components/design-system/patterns/FullPageBlogEditor.css";
 import "../components/design-system/patterns/LinkPreview.css";
 import "./detail-actions.css";
 import "./brand-theme.css";
