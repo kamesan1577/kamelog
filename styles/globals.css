@@ -473,111 +473,6 @@ textarea:focus {
   padding-bottom: 50px;
 }
 
-.missing-video,
-.select-video {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: #bfbfbf;
-}
-.select-video {
-  cursor: pointer;
-}
-.select-video input {
-  display: none;
-}
-.vlog-dialog {
-  max-width: 720px !important;
-  width: calc(100% - 28px) !important;
-}
-.vlog-tabs {
-  width: 100% !important;
-}
-.vlog-tabs [data-slot="tabs-trigger"] {
-  flex: 1;
-}
-.vlog-stage {
-  border-radius: 9px;
-  margin-top: 4px;
-}
-.recording-mark {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  background: #0009;
-  border-radius: 20px;
-  padding: 6px 10px;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.recording-mark span {
-  width: 7px;
-  height: 7px;
-  background: #f34b4b;
-  border-radius: 50%;
-}
-.duration-picker {
-  display: flex;
-  justify-content: center;
-  gap: 7px;
-}
-.duration-picker button {
-  border: 1px solid #dfdcd5;
-  border-radius: 20px;
-  padding: 6px 12px;
-  color: #7f7b72;
-  font-size: 13px;
-}
-.duration-picker button.active {
-  background: #37352f;
-  border-color: #37352f;
-  color: #fff;
-}
-.record-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto;
-  border: 3px solid #37352f;
-  border-radius: 50%;
-  padding: 5px;
-}
-.record-button span {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: #e34d55;
-}
-.record-button:disabled {
-  opacity: 0.35;
-}
-.camera-error,
-.crop-note {
-  margin: 0;
-  text-align: center;
-  font-size: 12px;
-  color: #a35f5f;
-}
-.caption-field {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
-}
-.caption-field input {
-  flex: 1;
-  border: 1px solid #dedbd4;
-  border-radius: 5px;
-  padding: 9px 10px;
-}
-.vlog-actions,
 .confirm-actions {
   display: flex;
   justify-content: flex-end;
@@ -646,17 +541,6 @@ textarea:focus {
   .page-heading h1,
   .projects-page h1 {
     font-size: 27px;
-  }
-  .vlog-dialog {
-    padding: 18px !important;
-  }
-  .caption-field {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .caption-field input {
-    width: 100%;
   }
   .confirm-actions {
     flex-wrap: wrap;
@@ -732,12 +616,10 @@ textarea:focus {
   flex-wrap: wrap;
 }
 @media (max-width: 640px) {
-  .caption-field input,
   .inline-tweet {
     font-size: 16px;
   }
   .editor-footer [data-slot="button"],
-  .vlog-actions [data-slot="button"],
   .confirm-actions [data-slot="button"] {
     min-height: 44px;
     border-radius: 10px;
