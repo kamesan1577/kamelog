@@ -83,7 +83,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(`[data-ds="owner-profile"]`)).toBeVisible();
   await expect(page.locator(`[data-ds="owner-federation"]`)).toBeVisible();
   await page.screenshot({
-    path: testInfo.outputPath("screen-evidence-account-mobile.png"),
+    path: "ui-evidence/screen-evidence-account-mobile.png",
     fullPage: true,
   });
   const federationUsername = page.getByLabel("ユーザー名", { exact: true });
