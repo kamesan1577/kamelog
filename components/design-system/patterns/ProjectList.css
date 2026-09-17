@@ -20,6 +20,7 @@
   display: block;
   width: 100%;
   aspect-ratio: 16/9;
+  object-fit: contain;
   background: #f0efeb;
 }
 [data-ds="project-tile"][data-ds-variant="external"] img {
@@ -62,5 +63,15 @@
   }
   [data-ds="project-tile"] > div {
     padding: 13px;
+  }
+}
+
+@media (max-width: 320px) {
+  [data-ds="project-tile"] {
+    display: block;
+  }
+  [data-ds="project-tile"] img {
+    height: auto;
+    aspect-ratio: 16/9;
   }
 }
