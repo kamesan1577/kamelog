@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 E2E selector audit completed for the current suite: the remaining project-article implementation selector was replaced with a semantic article query scoped to the projects region. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
+
 2026-09-17 Issue #99 migration continued with EmptyState. Local and Fediverse timeline empty results now share the Design System EmptyState pattern and Storybook state while preserving the existing action and styling hooks. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
 
 2026-09-17 Issue #99 navigation selectors continued. Federation guide, mobile navigation, public sidebar navigation, and page headers now use semantic data-ds contracts in route and social-link journeys; only the negative project-article assertion remains to be replaced with a meaningful project detail contract.
@@ -110,6 +112,8 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 - コンテンツ種別アイコンは薄いグレー面と細い全周罫線、経歴の年は背景なしの文字で表示する。カードの片側だけを太い罫線で強調する意匠は使わない。
 
 ## 検証済み
+
+- 2026-09-17 Issue #99の404画面を`NotFoundState`パターンへ移行し、colocated Storybook storyを追加した。`app/not-found.module.css`を削除してlegacy allowlistを17ファイルへ削減。typecheck、check:ui、check:public、diff checkを実行済み。CIの`check` / `e2e` / `container`はPRで確認する。
 
 - 2026-09-16 ActivityPub Phase 6でlocal federated postへのLike/EmojiReact受信、Actor単位dedupe、Undo/Delete、local likesとのquery時合算を追加した。`make check`（unit 73件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。同一Actorのreaction置換、古いUndoの無効化、現在reactionのUndo/Delete、非following Actor、投稿編集後のlocal likes非汚染、backup/restoreをunit testで確認した。
 - 2026-09-16 ActivityPub Phase 5でownerのremote投稿RP/解除、公開Timelineの「すべて」へのRP混在、Announce/Undoのdurable配送、remote Delete連動、公開RP画像の限定配信を追加した。`make check`（unit 72件、typecheck、lint、format、production build、public-repo/UI check、UI components 8件）が成功。RP APIの認証、二重RP拒否、別Actor Delete拒否、unfollow後の正規Actor Delete、backup/restore、公開画像のRP解除後404をunit testで確認した。

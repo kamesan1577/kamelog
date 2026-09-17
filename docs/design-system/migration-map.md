@@ -43,7 +43,7 @@ responsibilities are:
 | `app/federation/federation-guide.module.css` | public federation guide                                         | `Guide`, `Matrix`                                              | adapt             |
 | `app/project-social-links.css`               | project external links                                          | `ExternalLinkList`                                             | replace           |
 | `app/x-share-logo.css`                       | X share mark                                                    | shared icon primitive                                          | replace           |
-| `app/not-found.module.css`                   | 404 page                                                        | `EmptyState`                                                   | adapt             |
+| `app/not-found.module.css`                   | 404 page                                                        | `NotFoundState`                                                | complete          |
 
 ## `globals.css` visual responsibilities to extract
 
