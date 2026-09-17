@@ -82,8 +82,8 @@ test("automatic tag labels", async ({ page }) => {
   await expect(autoTag).toBeVisible();
   await expect(autoTag).toHaveText("AI · 自動タグ候補");
 
-  await page.locator(".filter-active button").click();
+  await page.locator('[data-ds="filter-active"] button').click();
   await post.locator('[data-ds="post-preview"]').click();
-  const detail = page.locator(".detail-page");
+  const detail = page.locator('[data-ds="detail-page"]');
   await expect(detail.getByLabel(autoTagName)).toBeVisible();
 });

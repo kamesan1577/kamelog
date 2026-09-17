@@ -274,6 +274,7 @@ function MermaidDiagram({ chart }: { chart: string }) {
     );
   return (
     <div
+      data-ds="mermaid-diagram"
       className="mermaid-diagram"
       aria-label="Mermaid図"
       dangerouslySetInnerHTML={{ __html: svg }}
@@ -441,7 +442,7 @@ export function PreviewShell() {
     mode === "mobile" ? Math.min(390, w) : mode === "desktop" ? 1280 : w;
   const scale = mode === "desktop" ? Math.min(1, w / 1280) : 1;
   return (
-    <div className="preview-shell">
+    <div data-ds="preview-shell" className="preview-shell">
       <header className="preview-toolbar">
         <span className="preview-brand">
           <b>kamelog</b>
@@ -3314,7 +3315,10 @@ export default function Notebook({
         </DialogContent>
       </Dialog>
       <Dialog open={markdownHelpOpen} onOpenChange={setMarkdownHelpOpen}>
-        <DialogContent className="markdown-help-dialog">
+        <DialogContent
+          data-ds="markdown-help-dialog"
+          className="markdown-help-dialog"
+        >
           <DialogTitle>Markdown記法ヘルプ</DialogTitle>
           <DialogDescription>
             ブログで使えるCommonMarkとGFMの記法です。生HTMLは表示されません。
