@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with EmptyState. Local and Fediverse timeline empty results now share the Design System EmptyState pattern and Storybook state while preserving the existing action and styling hooks. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
+
 2026-09-17 Issue #99 navigation selectors continued. Federation guide, mobile navigation, public sidebar navigation, and page headers now use semantic data-ds contracts in route and social-link journeys; only the negative project-article assertion remains to be replaced with a meaningful project detail contract.
 
 2026-09-17 Issue #99 migration continued with ProfileCard. The owner sidebar profile is now rendered through a shared Design System pattern and Storybook state, with the existing profile handle and link presentation preserved through the semantic boundary. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.
