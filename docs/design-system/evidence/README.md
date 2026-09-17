@@ -11,21 +11,21 @@
 
 ## 公開ページ
 
-| Page | Mobile | Tablet | Desktop |
-| --- | --- | --- | --- |
-| Home | [PNG](./visual-evidence-home-mobile.png) | [PNG](./visual-evidence-home-tablet.png) | [PNG](./visual-evidence-home-desktop.png) |
-| Timeline | [PNG](./visual-evidence-timeline-mobile.png) | [PNG](./visual-evidence-timeline-tablet.png) | [PNG](./visual-evidence-timeline-desktop.png) |
-| Projects | [PNG](./visual-evidence-projects-mobile.png) | [PNG](./visual-evidence-projects-tablet.png) | [PNG](./visual-evidence-projects-desktop.png) |
+| Page       | Mobile                                         | Tablet                                         | Desktop                                         |
+| ---------- | ---------------------------------------------- | ---------------------------------------------- | ----------------------------------------------- |
+| Home       | [PNG](./visual-evidence-home-mobile.png)       | [PNG](./visual-evidence-home-tablet.png)       | [PNG](./visual-evidence-home-desktop.png)       |
+| Timeline   | [PNG](./visual-evidence-timeline-mobile.png)   | [PNG](./visual-evidence-timeline-tablet.png)   | [PNG](./visual-evidence-timeline-desktop.png)   |
+| Projects   | [PNG](./visual-evidence-projects-mobile.png)   | [PNG](./visual-evidence-projects-tablet.png)   | [PNG](./visual-evidence-projects-desktop.png)   |
 | Federation | [PNG](./visual-evidence-federation-mobile.png) | [PNG](./visual-evidence-federation-tablet.png) | [PNG](./visual-evidence-federation-desktop.png) |
-| Not found | [PNG](./visual-evidence-not-found-mobile.png) | [PNG](./visual-evidence-not-found-tablet.png) | [PNG](./visual-evidence-not-found-desktop.png) |
+| Not found  | [PNG](./visual-evidence-not-found-mobile.png)  | [PNG](./visual-evidence-not-found-tablet.png)  | [PNG](./visual-evidence-not-found-desktop.png)  |
 
 ## 認証後の主要状態
 
-| State | Screenshot |
-| --- | --- |
-| Account mobile | [PNG](./screen-evidence-account-mobile.png) |
-| Account desktop | [PNG](./screen-evidence-account-desktop.png) |
-| Editor mobile | [PNG](./screen-evidence-editor-mobile.png) |
+| State                     | Screenshot                                    |
+| ------------------------- | --------------------------------------------- |
+| Account mobile            | [PNG](./screen-evidence-account-mobile.png)   |
+| Account desktop           | [PNG](./screen-evidence-account-desktop.png)  |
+| Editor mobile             | [PNG](./screen-evidence-editor-mobile.png)    |
 | Fediverse timeline mobile | [PNG](./screen-evidence-fediverse-mobile.png) |
 
 主要コンポーネント（Button、PageHeader、PostCard、ProjectList、MobileNavigation）は、既存の
