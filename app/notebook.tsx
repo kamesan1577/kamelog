@@ -777,6 +777,7 @@ export default function Notebook({
     [recording, setRecording] = useState(false),
     [count, setCount] = useState(0),
     [cameraError, setCameraError] = useState("");
+  const cameraRequest = useRef(0);
   const live = useRef<HTMLVideoElement>(null),
     bodyInput = useRef<HTMLTextAreaElement>(null),
     titleInput = useRef<HTMLInputElement>(null),
@@ -1366,10 +1367,12 @@ export default function Notebook({
     void uploadImages(files, target === "blog" ? "blog-drop" : target);
   };
   const stopCamera = () => {
+    cameraRequest.current += 1;
     stream?.getTracks().forEach((t) => t.stop());
     setStream(null);
   };
   const prepareVlog = async () => {
+    const requestId = ++cameraRequest.current;
     setVMode("camera");
     setClip("");
     clipData.current = null;
@@ -1382,12 +1385,15 @@ export default function Notebook({
       }),
     );
     try {
-      setStream(
-        await navigator.mediaDevices.getUserMedia({
-          video: { aspectRatio: 16 / 9, facingMode: { ideal: "environment" } },
-          audio: true,
-        }),
-      );
+      const nextStream = await navigator.mediaDevices.getUserMedia({
+        video: { aspectRatio: 16 / 9, facingMode: { ideal: "environment" } },
+        audio: true,
+      });
+      if (requestId !== cameraRequest.current) {
+        nextStream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      setStream(nextStream);
     } catch {
       setCameraError("カメラを使えません。動画ファイルは選択できます。");
     }

@@ -1,3 +1,5 @@
+2026-09-18 Issue #240で、Issue #99後に崩れたUIを修正。インライン画像inputの不要なファイル名表示を隠し、空状態の投稿ボタン文字と投稿種別/vlogタブの選択状態を視認できるようにした。スレッドの親子カード間隔を拡大し、vlogの非同期カメラ取得がモーダル終了後に解決してもtrackを停止する回帰を追加した。Issue専用unit 3件、typecheck、lint、format、public/UI guardは成功。ホストmake checkは実FFmpeg欠如のためmedia変換1件のみ未成功で、FFmpeg入りCI相当環境とリモートCIで確認する。
+
 2026-09-17 Issue #99 completed the remaining raw feature selectors in brand-theme for public header, mobile navigation, and create controls; all now use existing data-ds boundaries.
 
 # kamelog handoff
