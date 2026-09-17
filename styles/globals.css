@@ -561,10 +561,6 @@ textarea:focus {
   color: #8e8b84;
   padding: 8px;
 }
-.post {
-  padding: 23px 0 16px;
-  border-bottom: 1px solid #eeede9;
-}
 .pinned {
   display: flex;
   align-items: center;
