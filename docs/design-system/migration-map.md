@@ -21,9 +21,7 @@ behavior coverage, and visual approval.
 
 ## CSS responsibility inventory
 
-The legacy allowlist is now empty; the shared styles have moved into the Design System style layer, while selector-level extraction from `styles/globals.css` remains in progress. Their primary
-The current implementation has completed the MediaGallery, Markdown help, ProjectList, detail, reader, sidebar, editor, composer, timeline, and post-pattern extractions. Remaining global responsibilities are the app/public shell, preview shell, mobile/account controls, project/vlog/editor auxiliary rules, and final duplicate/orphan cleanup; these remain tracked as migration work rather than being treated as complete.
-responsibilities are:
+The legacy allowlist is now empty; the shared styles have moved into the Design System style layer, while selector-level extraction from `styles/globals.css` remains in progress. The current implementation has completed the MediaGallery, Markdown help, ProjectList, detail, reader, sidebar, editor, composer, timeline, and post-pattern extractions. Remaining global responsibilities are the app/public shell, preview shell, mobile/account controls, project/vlog/editor auxiliary rules, and final duplicate/orphan cleanup; these remain tracked as migration work rather than being treated as complete.
 
 | File                                                       | Responsibility                                                  | Target pattern/primitive                                       | Decision          |
 | ---------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------- | ----------------- |
@@ -95,7 +93,7 @@ test-id justification:
 | `.mobile-nav`                                                               | `mobile-nav-layout.spec.ts`                 | navigation role/name                            |
 | `.public-sidebar`, `.side-search`                                           | `journeys.spec.ts`                          | navigation/label semantics                      |
 | `[data-ds="landing-page"]`, `[data-ds="landing-profile"]`, `.content-cards` | `notion-polish.spec.ts`, `journeys.spec.ts` | semantic sections and visual regression fixture |
-| `.post-focus`, `.tweet-body`                                                | journey/detail/thread tests                 | article/body semantics                          |
+| `[data-ds="post-card"]`, `[data-ds="post-preview"]`                         | journey/detail/thread tests                 | article/body semantics                          |
 | `.editor-dialog`, `.mobile-editor-header`, `.editor-footer`                 | `journeys.spec.ts`                          | dialog/action regions                           |
 | `[data-ds="owner-federation"]`                                              | `journeys.spec.ts`                          | owner federation settings semantic region       |
 
