@@ -667,29 +667,6 @@ textarea:focus {
   font-size: 12px;
   color: #aaa69c;
 }
-.post-actions {
-  display: flex;
-  align-items: center;
-  gap: 23px;
-  margin-top: 16px;
-  color: #aaa69d;
-}
-.post-actions button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  min-height: 25px;
-}
-.post-actions button:hover {
-  color: #686157;
-}
-.post-actions .liked {
-  color: #db6974;
-}
-.post-actions .more {
-  margin-left: auto;
-}
 .right-sidebar {
   padding-top: 4px;
 }
