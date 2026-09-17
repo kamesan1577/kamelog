@@ -649,26 +649,6 @@ textarea:focus {
   letter-spacing: -1px;
   margin: 0;
 }
-.home-search {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid #e2e0da;
-  border-radius: 5px;
-  padding: 9px 11px;
-  margin: 21px 0 22px;
-  color: #9b978e;
-}
-.home-search:focus-within {
-  border-color: #9bbfe0;
-  box-shadow: 0 0 0 2px #edf5fc;
-}
-.home-search input {
-  flex: 1;
-  min-width: 0;
-  font-size: 14px;
-  background: transparent;
-}
 .draft-button {
   margin-left: auto;
   color: #2383e2;
@@ -865,9 +845,6 @@ textarea:focus {
   .projects-page h1 {
     font-size: 27px;
   }
-  .home-search {
-    margin: 18px 0;
-  }
   .vlog-dialog {
     padding: 18px !important;
   }
@@ -941,9 +918,6 @@ textarea:focus {
   height: 24px;
   font-size: 17px;
 }
-.home-search {
-  display: none;
-}
 .desktop-composer .composer-start {
   display: flex;
 }
@@ -956,10 +930,6 @@ textarea:focus {
 }
 
 @media (max-width: 640px) {
-  .mobile-search {
-    display: flex;
-    margin: 18px 0;
-  }
   .desktop-composer {
     display: none;
   }
