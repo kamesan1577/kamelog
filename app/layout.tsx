@@ -9,7 +9,7 @@ import "../components/design-system/patterns/FullPageBlogEditor.css";
 import "../components/design-system/patterns/LinkPreview.css";
 import "../components/design-system/patterns/DetailActions.css";
 import "../styles/brand-theme.css";
-import "./mobile-nav-layout.css";
+import "../components/design-system/patterns/MobileNavigationLayout.css";
 import "../components/design-system/patterns/ProfileSocialLinks.css";
 import "./federation.css";
 import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";

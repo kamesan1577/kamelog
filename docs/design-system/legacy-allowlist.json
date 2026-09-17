@@ -4,7 +4,6 @@
     "app/federation.css",
     "app/globals.css",
     "app/landing.css",
-    "app/mobile-nav-layout.css",
     "app/tweet-thread-bridge.module.css"
   ]
 }
