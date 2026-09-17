@@ -44,6 +44,7 @@ import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
 import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToolbar";
 import { PostMeta } from "@/components/design-system/patterns/PostMeta";
 import { PostPreview } from "@/components/design-system/patterns/PostPreview";
+import { PostCard } from "@/components/design-system/patterns/PostCard";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -2448,13 +2449,19 @@ export default function Notebook({
                               </div>
                             </article>
                           ) : (
-                            <article className={"post " + p.kind} key={p.id}>
-                              {p.pinned && (
-                                <div className="pinned">
+                            <PostCard
+                              className={"post " + p.kind}
+                              kind={p.kind}
+                              key={p.id}
+                              pinned={p.pinned}
+                              pinnedClassName="pinned"
+                              pinnedLabel={
+                                <>
                                   <Pin size={12} />
                                   固定
-                                </div>
-                              )}
+                                </>
+                              }
+                            >
                               {meta(p)}
                               {p.kind === "vlog" ? (
                                 <div className="post-focus vlog-button">
@@ -2521,7 +2528,7 @@ export default function Notebook({
                                 </div>
                               )}
                               {actions(p)}
-                            </article>
+                            </PostCard>
                           ),
                         )}
                         {!shown.length && (
