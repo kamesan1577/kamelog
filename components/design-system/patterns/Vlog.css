@@ -1,0 +1,208 @@
+.vlog-button {
+  margin-top: 12px;
+}
+.post.vlog .post-actions {
+  margin-top: 10px;
+}
+.vlog-frame,
+.vlog-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  border-radius: 7px;
+  background: #1b1b1b;
+  color: white;
+}
+.vlog-frame video,
+.vlog-stage video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.vlog-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 34px 18px 14px;
+  background: linear-gradient(transparent, #0009);
+  color: white;
+  text-align: left;
+  pointer-events: none;
+  text-shadow: 0 1px 8px #000;
+}
+.vlog-overlay time {
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-size: 27px;
+  letter-spacing: -0.5px;
+}
+.vlog-overlay p {
+  font-size: 14px;
+  margin: 3px 0 0;
+}
+.post-focus.vlog-button {
+  position: relative;
+}
+.open-vlog-detail {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 2;
+  background: #0009;
+  color: #fff;
+  border: 1px solid #ffffff55;
+  border-radius: 4px;
+  padding: 5px 9px;
+  font-size: 12px;
+}
+.vlog-loop-toggle {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 3;
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 1px solid #ffffff55;
+  border-radius: 6px;
+  background: #000b;
+  color: #fff;
+  font-size: 12px;
+}
+.missing-video,
+.select-video {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #bfbfbf;
+}
+.select-video {
+  cursor: pointer;
+}
+.select-video input {
+  display: none;
+}
+.vlog-dialog {
+  max-width: 720px !important;
+  width: calc(100% - 28px) !important;
+}
+.vlog-tabs {
+  width: 100% !important;
+}
+.vlog-tabs [data-slot="tabs-trigger"] {
+  flex: 1;
+}
+.vlog-stage {
+  border-radius: 9px;
+  margin-top: 4px;
+}
+.recording-mark {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #0009;
+  border-radius: 20px;
+  padding: 6px 10px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.recording-mark span {
+  width: 7px;
+  height: 7px;
+  background: #f34b4b;
+  border-radius: 50%;
+}
+.duration-picker {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+}
+.duration-picker button {
+  border: 1px solid #dfdcd5;
+  border-radius: 20px;
+  padding: 6px 12px;
+  color: #7f7b72;
+  font-size: 13px;
+}
+.duration-picker button.active {
+  background: #37352f;
+  border-color: #37352f;
+  color: #fff;
+}
+.record-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  border: 3px solid #37352f;
+  border-radius: 50%;
+  padding: 5px;
+}
+.record-button span {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #e34d55;
+}
+.record-button:disabled {
+  opacity: 0.35;
+}
+.camera-error,
+.crop-note {
+  margin: 0;
+  text-align: center;
+  font-size: 12px;
+  color: #a35f5f;
+}
+.caption-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+.caption-field input {
+  flex: 1;
+  border: 1px solid #dedbd4;
+  border-radius: 5px;
+  padding: 9px 10px;
+}
+.vlog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.vlog-dialog {
+  padding: 18px !important;
+}
+.caption-field {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
+}
+.caption-field input {
+  width: 100%;
+  font-size: 16px;
+}
+.vlog-actions [data-slot="button"] {
+  min-height: 44px;
+  border-radius: 10px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+@media (max-width: 640px) {
+  .vlog-overlay {
+    padding: 28px 13px 11px;
+  }
+  .vlog-overlay time {
+    font-size: 23px;
+  }
+}

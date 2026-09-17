@@ -1,0 +1,9 @@
+.icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  background: currentColor;
+  -webkit-mask: url("/x-logo.svg") center / contain no-repeat;
+  mask: url("/x-logo.svg") center / contain no-repeat;
+}

@@ -1,0 +1,78 @@
+/* Keep the blog Markdown controls inside the mobile post dialog. */
+.editor-tools {
+  min-width: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.editor-tool-list {
+  flex: 1 1 0;
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+}
+
+@media (max-width: 640px) {
+  .editor-tools {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 6px;
+  }
+
+  .editor-tool-list {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    padding-bottom: 3px;
+  }
+
+  .editor-tools .markdown-help-link {
+    grid-column: 1;
+    justify-self: start;
+    margin-left: 0;
+  }
+
+  .editor-tools .preview-toggle {
+    grid-column: 2;
+    justify-self: end;
+    margin-left: 0;
+  }
+
+  /*
+   * Scroll the whole help dialog on mobile instead of nesting the scroll
+   * inside the help list. This keeps touch scrolling reliable even when the
+   * dialog primitive applies its own sizing/layout constraints.
+   */
+  .markdown-help-dialog {
+    display: flex;
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 16px);
+    flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .markdown-help-list {
+    min-height: 0;
+    flex: 0 0 auto;
+    overflow-y: visible;
+  }
+}
+
+[data-ds="editor-dialog"] .editor-tool-list {
+  padding-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  [data-ds="editor-dialog"] .editor-tool-list {
+    padding-bottom: 3px;
+  }
+  [data-ds="editor-dialog"] .editor-tool-list button {
+    padding: 5px 7px;
+  }
+}

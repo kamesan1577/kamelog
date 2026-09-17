@@ -33,13 +33,13 @@ function loadPreview(url: string) {
 }
 
 function previewHost(body: HTMLElement) {
-  return body.closest<HTMLElement>(".post-focus") ?? body;
+  return body.closest<HTMLElement>('[data-ds="post-preview"]') ?? body;
 }
 
 function isPreviewCard(element: Element | null): element is HTMLElement {
   return (
     element instanceof HTMLElement &&
-    element.classList.contains("tweet-link-card") &&
+    element.dataset.ds === "tweet-link-card" &&
     element.dataset.previewOwner === "tweet-link-preview"
   );
 }
@@ -56,15 +56,15 @@ function removeExistingCards(body: HTMLElement) {
 function owningTweetBody(card: HTMLElement) {
   const host = card.previousElementSibling;
   if (!(host instanceof HTMLElement)) return null;
-  if (host.classList.contains("tweet-body")) return host;
-  if (!host.classList.contains("post-focus")) return null;
-  return host.querySelector<HTMLElement>(".tweet-body");
+  if (host.dataset.ds === "tweet-body") return host;
+  if (host.dataset.ds !== "post-preview") return null;
+  return host.querySelector<HTMLElement>('[data-ds="tweet-body"]');
 }
 
 function removeOrphanedCards() {
   document
     .querySelectorAll<HTMLElement>(
-      '.tweet-link-card[data-preview-owner="tweet-link-preview"]',
+      '[data-ds="tweet-link-card"][data-preview-owner="tweet-link-preview"]',
     )
     .forEach((card) => {
       const body = owningTweetBody(card);
@@ -93,7 +93,7 @@ function removeDuplicateCards(body: HTMLElement) {
 
 function inlineLink(url: string) {
   const link = document.createElement("a");
-  link.className = "tweet-inline-link";
+  link.dataset.ds = "tweet-inline-link";
   link.href = url;
   link.target = "_blank";
   link.rel = "noopener noreferrer";
@@ -106,7 +106,7 @@ function inlineLink(url: string) {
 
 function previewCard(url: string, preview: LinkPreview) {
   const card = document.createElement("a");
-  card.className = `tweet-link-card${preview.image ? " has-image" : ""}`;
+  card.dataset.ds = "tweet-link-card";
   card.href = url;
   card.target = "_blank";
   card.rel = "noopener noreferrer";
@@ -124,7 +124,7 @@ function previewCard(url: string, preview: LinkPreview) {
   }
 
   const copy = document.createElement("span");
-  copy.className = "tweet-link-card-copy";
+  copy.dataset.ds = "tweet-link-card-copy";
   const site = document.createElement("small");
   site.textContent = preview.siteName || new URL(url).hostname;
   const title = document.createElement("strong");
@@ -132,7 +132,7 @@ function previewCard(url: string, preview: LinkPreview) {
   copy.append(site, title);
   if (preview.description) {
     const description = document.createElement("span");
-    description.className = "tweet-link-card-description";
+    description.dataset.ds = "tweet-link-card-description";
     description.textContent = preview.description;
     copy.append(description);
   }
@@ -207,7 +207,9 @@ function enhanceTweet(body: HTMLElement) {
 
 function scanTweets() {
   removeOrphanedCards();
-  document.querySelectorAll<HTMLElement>(".tweet-body").forEach(enhanceTweet);
+  document
+    .querySelectorAll<HTMLElement>('[data-ds="tweet-body"]')
+    .forEach(enhanceTweet);
 }
 
 export function TweetLinkPreviewBridge() {

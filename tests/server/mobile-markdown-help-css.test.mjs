@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const css = readFileSync("app/mobile-blog-editor.css", "utf8");
+const css = readFileSync(
+  "components/design-system/patterns/MobileBlogEditor.css",
+  "utf8",
+);
 
 test("mobile Markdown help scrolls the dialog itself", () => {
   assert.match(

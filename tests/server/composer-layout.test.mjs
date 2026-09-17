@@ -2,8 +2,14 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const cssUrl = new URL("../../app/composer-layout.css", import.meta.url);
-const mobileCssUrl = new URL("../../app/mobile-composer.css", import.meta.url);
+const cssUrl = new URL(
+  "../../components/design-system/patterns/ComposerLayout.css",
+  import.meta.url,
+);
+const mobileCssUrl = new URL(
+  "../../components/design-system/patterns/MobileComposer.css",
+  import.meta.url,
+);
 const layoutUrl = new URL("../../app/layout.tsx", import.meta.url);
 
 test("keeps the inline image attachment separate from post-type actions", async () => {
@@ -12,7 +18,10 @@ test("keeps the inline image attachment separate from post-type actions", async 
     readFile(layoutUrl, "utf8"),
   ]);
 
-  assert.match(layout, /import "\.\/composer-layout\.css";/);
+  assert.match(
+    layout,
+    /import "\.\.\/components\/design-system\/patterns\/ComposerLayout.css";/,
+  );
   assert.match(
     css,
     /\.desktop-composer \.composer-kinds\s*\{[^}]*display:\s*grid;/s,
@@ -29,7 +38,10 @@ test("keeps publish actions visible above the mobile keyboard only", async () =>
     readFile(layoutUrl, "utf8"),
   ]);
 
-  assert.match(layout, /import "\.\/mobile-composer\.css";/);
+  assert.match(
+    layout,
+    /import "\.\.\/components\/design-system\/patterns\/MobileComposer.css";/,
+  );
   assert.match(css, /\.mobile-editor-header\s*\{[^}]*display:\s*none;/s);
   assert.match(
     css,

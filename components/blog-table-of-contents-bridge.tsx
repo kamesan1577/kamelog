@@ -4,7 +4,8 @@ import { useEffect } from "react";
 
 import { buildTocEntries } from "@/lib/blog-toc.mjs";
 
-const DETAIL_MARKDOWN_SELECTOR = ".detail-page .markdown";
+const DETAIL_MARKDOWN_SELECTOR =
+  '[data-ds="detail-page"] [data-ds="detail-markdown"]';
 const HEADING_SELECTOR = "h2,h3,h4,h5,h6";
 const TOC_ATTRIBUTE = "data-kamelog-blog-toc";
 const GENERATED_HEADING_ATTRIBUTE = "data-kamelog-toc-generated";
@@ -29,7 +30,8 @@ function clearGeneratedHeadingIds() {
 }
 
 function removeGeneratedToc() {
-  for (const toc of document.querySelectorAll(`[${TOC_ATTRIBUTE}]`)) toc.remove();
+  for (const toc of document.querySelectorAll(`[${TOC_ATTRIBUTE}]`))
+    toc.remove();
 }
 
 function renderToc(markdown: HTMLElement) {
@@ -81,20 +83,20 @@ function renderToc(markdown: HTMLElement) {
   removeGeneratedToc();
 
   const nav = document.createElement("nav");
-  nav.className = "blog-table-of-contents";
+  nav.dataset.ds = "blog-table-of-contents";
   nav.setAttribute(TOC_ATTRIBUTE, "");
   nav.setAttribute("aria-label", "目次");
   nav.dataset.signature = signature;
 
   const title = document.createElement("p");
-  title.className = "blog-table-of-contents-title";
+  title.dataset.ds = "blog-table-of-contents-title";
   title.textContent = "目次";
   nav.append(title);
 
   const list = document.createElement("ol");
   for (const entry of entries) {
     const item = document.createElement("li");
-    item.className = `blog-table-of-contents-level-${Math.min(
+    item.dataset.ds = `blog-table-of-contents-level-${Math.min(
       6,
       Math.max(2, entry.level),
     )}`;

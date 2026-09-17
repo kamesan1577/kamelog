@@ -31,13 +31,14 @@ test("tweet URLs become working links and render a compact OGP card without over
     "https://example.test/articles/%E3%81%A8%E3%81%A6%E3%82%82%E9%95%B7%E3%81%84%E3%83%91%E3%82%B9%E3%81%A7%E3%82%82%E6%8A%98%E3%82%8A%E8%BF%94%E3%81%99";
   await page.evaluate((href) => {
     const article = document.createElement("article");
-    article.className = "post";
+    article.dataset.ds = "post-card";
+    article.dataset.dsKind = "tweet";
     article.style.width = "320px";
     const focus = document.createElement("button");
-    focus.className = "post-focus";
+    focus.dataset.ds = "post-preview";
     focus.type = "button";
     const body = document.createElement("p");
-    body.className = "tweet-body";
+    body.dataset.ds = "tweet-body";
     body.textContent = `参考 ${href}`;
     focus.append(body);
     article.append(focus);
@@ -45,21 +46,21 @@ test("tweet URLs become working links and render a compact OGP card without over
   }, url);
 
   const link = page
-    .locator(".tweet-inline-link")
+    .locator('[data-ds="tweet-inline-link"]')
     .filter({ hasText: "example.test" });
   await expect(link).toHaveAttribute("href", url);
   await expect(link).toHaveAttribute("target", "_blank");
   await expect
     .poll(() =>
       link.evaluate((element) => {
-        const parent = element.closest(".tweet-body");
+        const parent = element.closest('[data-ds="tweet-body"]');
         return parent ? parent.scrollWidth <= parent.clientWidth : false;
       }),
     )
     .toBe(true);
 
   const card = page
-    .locator(".tweet-link-card")
+    .locator('[data-ds="tweet-link-card"]')
     .filter({ hasText: "架空のOGPタイトル" });
   await expect(card).toBeVisible();
   await expect(card).toContainText("Example Test");
@@ -68,8 +69,8 @@ test("tweet URLs become working links and render a compact OGP card without over
   // A navigation/remount can leave stale cards beside the same tweet. The
   // bridge must collapse them back to one card when it re-enhances the body.
   await page.evaluate(() => {
-    const body = document.querySelector<HTMLElement>(".tweet-body");
-    const host = body?.closest<HTMLElement>(".post-focus") ?? body;
+    const body = document.querySelector<HTMLElement>('[data-ds="tweet-body"]');
+    const host = body?.closest<HTMLElement>('[data-ds="post-preview"]') ?? body;
     const existing = host?.nextElementSibling;
     if (!body || !host || !(existing instanceof HTMLElement)) return;
     for (let index = 0; index < 2; index += 1) {
@@ -80,7 +81,7 @@ test("tweet URLs become working links and render a compact OGP card without over
     }
     body.textContent = `${body.textContent ?? ""} `;
   });
-  await expect(page.locator(".tweet-link-card")).toHaveCount(1);
+  await expect(page.locator('[data-ds="tweet-link-card"]')).toHaveCount(1);
 
   const popupPromise = context.waitForEvent("page");
   await link.click();

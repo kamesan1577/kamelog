@@ -1,0 +1,9 @@
+[data-ds="composer-images"] {
+  margin: 8px 12px 2px;
+}
+
+[data-ds="composer-images"] > button {
+  margin-top: 7px;
+  color: #9a615d;
+  font-size: 12px;
+}

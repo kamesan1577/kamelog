@@ -7,7 +7,7 @@ import styles from "./federation-timeline-link.module.css";
 
 function timelineHeading(): HTMLElement | null {
   const heading = document.querySelector<HTMLElement>(
-    ".notebook .page-heading",
+    '.notebook [data-ds="page-header"]',
   );
   return heading?.querySelector("h1")?.textContent?.trim() === "タイムライン"
     ? heading

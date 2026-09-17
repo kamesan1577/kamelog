@@ -26,7 +26,7 @@ test("unknown URLs return the custom 404 with working recovery links", async ({
 
   await homeLink.click();
   await expect(page).toHaveURL(/\/$/);
-  await expect(page.locator(".landing-page")).toBeVisible();
+  await expect(page.locator('[data-ds="landing-page"]')).toBeVisible();
 });
 
 test("missing post IDs share the 404 page and can reach the timeline", async ({

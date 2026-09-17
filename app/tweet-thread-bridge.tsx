@@ -6,7 +6,7 @@ import { createPortal } from "react-dom";
 import { ChevronRight, MessageCircle, Plus, X } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import styles from "./tweet-thread-bridge.module.css";
+import styles from "@/components/design-system/patterns/TweetThreadBridge.module.css";
 
 export type ThreadPost = {
   id: string;

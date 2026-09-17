@@ -7,13 +7,13 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/");
     await page
-      .locator(".mobile-nav")
+      .locator('[data-ds="mobile-navigation"]')
       .getByRole("button", { name: "プロジェクト" })
       .click();
 
-    const projects = page.locator(".projects-page");
+    const projects = page.locator('[data-ds="projects-page"]');
     await expect(projects).toBeVisible();
-    const cards = projects.locator(".project-tile");
+    const cards = projects.locator('[data-ds="project-tile"]');
     await expect(cards).toHaveCount(3);
 
     for (let index = 0; index < 3; index += 1) {
@@ -40,7 +40,9 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
       ),
     ).toBeVisible();
     await expect(projects.locator('a[href="/projects/heitan"]')).toHaveCount(0);
-    await expect(projects.locator(".project-tile-static")).toHaveCount(1);
+    await expect(
+      projects.locator('[data-ds="project-tile"][data-ds-variant="static"]'),
+    ).toHaveCount(1);
     await expect(projects.getByRole("link", { name: /Qiita/ })).toHaveCount(0);
 
     if (width === 320) {
@@ -61,11 +63,11 @@ test("profile exposes GitHub, X and Qiita as brand-icon links", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
   await page
-    .locator(".public-sidebar nav")
+    .locator('[data-ds="public-sidebar"] nav')
     .getByRole("button", { name: "タイムライン" })
     .click();
 
-  const profile = page.locator(".profile-card");
+  const profile = page.locator('[data-ds="profile-card"]');
   await expect(profile).toBeVisible();
   const row = profile.locator("[data-kamelog-profile-social-links]");
   await expect(row).toBeVisible();
@@ -99,7 +101,7 @@ test("landing profile exposes social links on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  const profile = page.locator(".landing-profile");
+  const profile = page.locator('[data-ds="landing-profile"]');
   await expect(profile).toBeVisible();
   const row = profile.locator("[data-kamelog-profile-social-links]");
   await expect(row).toBeVisible();

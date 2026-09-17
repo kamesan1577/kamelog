@@ -6,8 +6,9 @@ async function addBlogDetailFixture(page: Page) {
     const fixture = document.createElement("section");
     fixture.id = "toc-fixture";
     fixture.className = "detail-page";
+    fixture.dataset.ds = "detail-page";
     fixture.innerHTML = `
-      <div class="markdown">
+      <div data-ds="detail-markdown" class="markdown">
         <h1>記事タイトル</h1>
         <p>本文</p>
         <h2>導入</h2>
@@ -79,7 +80,7 @@ test("blog table of contents renders above the article on desktop", async ({
     .getByRole("navigation", { name: "目次" })
     .boundingBox();
   const markdownBox = await page
-    .locator("#toc-fixture .markdown")
+    .locator('#toc-fixture [data-ds="detail-markdown"]')
     .boundingBox();
   expect(tocBox).not.toBeNull();
   expect(markdownBox).not.toBeNull();

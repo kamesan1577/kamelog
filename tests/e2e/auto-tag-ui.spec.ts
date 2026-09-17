@@ -58,13 +58,13 @@ test("automatic tag labels", async ({ page }) => {
     .first()
     .click();
 
-  const composer = page.locator(".desktop-composer");
+  const composer = page.locator('[data-ds="inline-composer"]');
   await expect(composer).toBeVisible();
   await composer.getByPlaceholder("いまどうしてる？").fill(taggedPost.body);
   await composer.getByRole("button", { name: "投稿", exact: true }).click();
 
   const post = page
-    .locator("article.post")
+    .locator('article[data-ds="post-card"]')
     .filter({ hasText: taggedPost.body });
   const autoTagName = "自動タグ 自動タグ候補";
   const autoTag = page.getByLabel(autoTagName);
@@ -74,14 +74,16 @@ test("automatic tag labels", async ({ page }) => {
   await expect(post.getByText("手動タグ", { exact: true })).toBeVisible();
 
   await post.getByRole("button", { name: autoTagName }).click();
-  await expect(page.locator(".filter-active")).toContainText("#自動タグ候補");
+  await expect(page.locator('[data-ds="filter-active"]')).toContainText(
+    "#自動タグ候補",
+  );
 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(autoTag).toBeVisible();
   await expect(autoTag).toHaveText("AI · 自動タグ候補");
 
-  await page.locator(".filter-active button").click();
-  await post.locator(".post-focus").click();
-  const detail = page.locator(".detail-page");
+  await page.locator('[data-ds="filter-active"] button').click();
+  await post.locator('[data-ds="post-preview"]').click();
+  const detail = page.locator('[data-ds="detail-page"]');
   await expect(detail.getByLabel(autoTagName)).toBeVisible();
 });

@@ -52,15 +52,15 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
   const inline = page.getByPlaceholder("いまどうしてる？");
   await inline.fill("スレッドの架空ルート投稿");
   await page
-    .locator(".desktop-composer")
+    .locator('[data-ds="inline-composer"]')
     .getByRole("button", { name: "投稿", exact: true })
     .click();
 
   const rootPost = page
-    .locator("article.post")
+    .locator('article[data-ds="post-card"]')
     .filter({ hasText: "スレッドの架空ルート投稿" });
   await expect(rootPost).toBeVisible();
-  await rootPost.locator(".post-focus").click();
+  await rootPost.locator('[data-ds="post-preview"]').click();
   await expect(page.getByRole("heading", { name: "スレッド" })).toBeVisible();
   await expect(page.getByText("1件", { exact: true })).toBeVisible();
   await expect(page.getByText("表示中の投稿", { exact: true })).toBeVisible();
@@ -75,9 +75,9 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
   await page.getByRole("button", { name: "つなげる" }).click();
 
   await expect(page).toHaveURL(/\?post=/);
-  await expect(page.locator(".detail-page .tweet-body")).toHaveText(
-    "スレッドの架空の続き",
-  );
+  await expect(
+    page.locator('[data-ds="detail-page"] [data-ds="tweet-body"]'),
+  ).toHaveText("スレッドの架空の続き");
   await expect(
     page.getByText("スレッドの架空ルート投稿", { exact: true }),
   ).toBeVisible();

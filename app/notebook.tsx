@@ -31,13 +31,33 @@ import {
   Search,
   Settings,
   Share2,
-  SlidersHorizontal,
   Trash2,
   Upload,
   Video,
   X,
 } from "lucide-react";
 import { Button } from "@/components/notion/button";
+import { SideNavigation } from "@/components/design-system/patterns/SideNavigation";
+import { MobileNavigation } from "@/components/design-system/patterns/MobileNavigation";
+import { PageHeader } from "@/components/design-system/patterns/PageHeader";
+import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
+import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToolbar";
+import { PostMeta } from "@/components/design-system/patterns/PostMeta";
+import { PostPreview } from "@/components/design-system/patterns/PostPreview";
+import { TimelineItem } from "@/components/design-system/patterns/TimelineItem";
+import { InlineComposer } from "@/components/design-system/patterns/InlineComposer";
+import { BlogEditorToolbar } from "@/components/design-system/patterns/BlogEditorToolbar";
+import { BlogEditorWorkspace } from "@/components/design-system/patterns/BlogEditorWorkspace";
+import { EditorFooter } from "@/components/design-system/patterns/EditorFooter";
+import { MediaGallery } from "@/components/design-system/patterns/MediaGallery";
+import { PostActions } from "@/components/design-system/patterns/PostActions";
+import { XShareIcon } from "@/components/design-system/primitives/XShareIcon";
+import { MediaUploadField } from "@/components/design-system/patterns/MediaUploadField";
+import { TagList } from "@/components/design-system/patterns/TagList";
+import { ProjectList } from "@/components/design-system/patterns/ProjectList";
+import { OwnerSection } from "@/components/design-system/patterns/OwnerSection";
+import { ProfileCard } from "@/components/design-system/patterns/ProfileCard";
+import { EmptyState } from "@/components/design-system/patterns/EmptyState";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -67,14 +87,14 @@ import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
 import { buildXIntentUrl } from "@/lib/x-intent.mjs";
-import threadStyles from "./tweet-thread-bridge.module.css";
+import threadStyles from "@/components/design-system/patterns/TweetThreadBridge.module.css";
 import {
   EngineeringProfile,
   ContactLinks,
 } from "@/components/engineering-profile";
 import { contact, projects } from "@/lib/public-profile";
-import "./landing.css";
-import "./engineering.css";
+import "../components/design-system/patterns/Landing.css";
+import "../components/design-system/patterns/Engineering.css";
 
 type Kind = "blog" | "tweet" | "vlog";
 type BlogEditorMode = "edit" | "preview" | "split";
@@ -257,6 +277,7 @@ function MermaidDiagram({ chart }: { chart: string }) {
     );
   return (
     <div
+      data-ds="mermaid-diagram"
       className="mermaid-diagram"
       aria-label="Mermaid図"
       dangerouslySetInnerHTML={{ __html: svg }}
@@ -307,7 +328,7 @@ function EmbeddedLink({ href }: { href: string }) {
 
 export function Markdown({ text }: { text: string }) {
   return (
-    <div className="markdown">
+    <div data-ds="detail-markdown" className="markdown">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[[rehypeHighlight, { detect: false }]]}
@@ -357,29 +378,11 @@ export function Markdown({ text }: { text: string }) {
 }
 
 function ImageGallery({ images = [] }: { images?: string[] }) {
-  const [large, setLarge] = useState<string | null>(null);
-  if (!images.length) return null;
   return (
-    <>
-      <div className={`image-grid count-${images.length}`}>
-        {images.map((src, index) => (
-          <button
-            type="button"
-            key={src}
-            onClick={() => setLarge(src)}
-            aria-label={`画像${index + 1}を拡大`}
-          >
-            <img src={src} alt={`添付画像 ${index + 1}`} />
-          </button>
-        ))}
-      </div>
-      <Dialog open={!!large} onOpenChange={(open) => !open && setLarge(null)}>
-        <DialogContent className="image-lightbox">
-          <DialogTitle>添付画像</DialogTitle>
-          {large && <img src={large} alt="拡大した添付画像" />}
-        </DialogContent>
-      </Dialog>
-    </>
+    <MediaGallery
+      images={images}
+      gridClassName={"image-grid count-" + images.length}
+    />
   );
 }
 
@@ -442,7 +445,7 @@ export function PreviewShell() {
     mode === "mobile" ? Math.min(390, w) : mode === "desktop" ? 1280 : w;
   const scale = mode === "desktop" ? Math.min(1, w / 1280) : 1;
   return (
-    <div className="preview-shell">
+    <div data-ds="preview-shell" className="preview-shell">
       <header className="preview-toolbar">
         <span className="preview-brand">
           <b>kamelog</b>
@@ -1501,33 +1504,19 @@ export default function Notebook({
     return url.toString();
   };
   const meta = (p: Post) => (
-    <div className="post-meta">
-      <Avatar value={profile.icon} />
-      <b>{profile.name}</b>
-      <span>·</span>
-      <time dateTime={p.date}>
-        {new Date(p.date).toLocaleDateString("ja-JP", {
-          month: "numeric",
-          day: "numeric",
-        })}
-      </time>
-      {p.kind === "blog" && p.updatedAt && (
-        <>
-          <span>·</span>
-          <time dateTime={p.updatedAt} title="最終更新日">
-            更新{" "}
-            {new Date(p.updatedAt).toLocaleDateString("ja-JP", {
-              month: "numeric",
-              day: "numeric",
-            })}
-          </time>
-        </>
-      )}
-      <span className={"type-label " + p.kind}>{label[p.kind]}</span>
-    </div>
+    <PostMeta
+      className="post-meta"
+      avatar={<Avatar value={profile.icon} />}
+      author={profile.name}
+      kind={p.kind}
+      date={p.date}
+      updatedAt={p.updatedAt}
+      kindLabel={label[p.kind]}
+      kindLabelClassName={"type-label " + p.kind}
+    />
   );
   const actions = (p: Post) => (
-    <div className="post-actions">
+    <PostActions className="post-actions">
       <button
         className={liked.includes(p.id) ? "liked" : ""}
         onClick={() =>
@@ -1559,13 +1548,13 @@ export default function Notebook({
           window.open(intent, "_blank", "noopener,noreferrer");
         }}
       >
-        <X size={16} />
+        <XShareIcon />
         Xで共有
       </button>
       {login && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="more">
+            <button className="more" aria-label="その他">
               <MoreHorizontal size={19} />
             </button>
           </DropdownMenuTrigger>
@@ -1606,42 +1595,46 @@ export default function Notebook({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-    </div>
+    </PostActions>
   );
   return (
     <div className="notebook">
       <Toaster position="bottom-center" theme="light" />
       {xFallbackAction}
-      <div className="site-layout">
-        <aside className="public-sidebar">
-          <button className="site-name" onClick={() => nav("home")}>
+      <div data-ds="site-layout" className="site-layout">
+        <aside data-ds="public-sidebar" className="public-sidebar">
+          <button
+            data-ds="site-name"
+            className="site-name"
+            onClick={() => nav("home")}
+          >
             <strong>kamelog</strong>
             <ChevronDown size={15} />
           </button>
-          <nav>
-            <button
-              className={view === "home" ? "active" : ""}
-              onClick={() => nav("home")}
-            >
-              <Home />
-              <span>ホーム</span>
-            </button>
-            <button
-              className={view === "timeline" ? "active" : ""}
-              onClick={() => nav("timeline")}
-            >
-              <MessageCircle />
-              <span>タイムライン</span>
-            </button>
-            <button
-              className={view === "projects" ? "active" : ""}
-              onClick={() => nav("projects")}
-            >
-              <Globe />
-              <span>プロジェクト</span>
-            </button>
-          </nav>
-          <div className="sidebar-section">
+          <SideNavigation
+            items={[
+              {
+                id: "home",
+                label: "ホーム",
+                icon: <Home />,
+                active: view === "home",
+              },
+              {
+                id: "timeline",
+                label: "タイムライン",
+                icon: <MessageCircle />,
+                active: view === "timeline",
+              },
+              {
+                id: "projects",
+                label: "プロジェクト",
+                icon: <Globe />,
+                active: view === "projects",
+              },
+            ]}
+            onSelect={(id) => nav(id as View)}
+          />
+          <div data-ds="sidebar-section" className="sidebar-section">
             <span>コンテンツ</span>
             {(
               [
@@ -1675,7 +1668,7 @@ export default function Notebook({
             <ArrowUpRight />
           </a>
           {login && (
-            <div className="admin-nav">
+            <div data-ds="admin-nav" className="admin-nav">
               <Button
                 variant="solid"
                 size="sm"
@@ -1699,9 +1692,9 @@ export default function Notebook({
               <button onClick={logOut}>ログアウト</button>
             </div>
           )}
-          <div className="sidebar-foot">
+          <div data-ds="sidebar-foot" className="sidebar-foot">
             {!login ? (
-              <details className="admin-access">
+              <details data-ds="admin-access" className="admin-access">
                 <summary>•••</summary>
                 <button onClick={logIn}>ログイン</button>
               </details>
@@ -1711,9 +1704,13 @@ export default function Notebook({
             <small>© 2026 {profile.name}</small>
           </div>
         </aside>
-        <div className="workspace">
-          <header className="public-header">
-            <button className="mobile-name" onClick={() => nav("home")}>
+        <div data-ds="workspace" className="workspace">
+          <header data-ds="public-header" className="public-header">
+            <button
+              data-ds="mobile-name"
+              className="mobile-name"
+              onClick={() => nav("home")}
+            >
               <b>kamelog</b>
             </button>
             <span>
@@ -1728,12 +1725,13 @@ export default function Notebook({
                       : "ホーム"}
             </span>
             {!login ? (
-              <details className="mobile-login">
+              <details data-ds="mobile-login" className="mobile-login">
                 <summary>•••</summary>
                 <button onClick={logIn}>ログイン</button>
               </details>
             ) : (
               <button
+                data-ds="mobile-account"
                 className="mobile-account"
                 onClick={() => {
                   nav("account");
@@ -1750,14 +1748,18 @@ export default function Notebook({
             className={
               "content-grid " + (view === "home" ? "landing-layout" : "")
             }
+            data-ds="content-grid"
           >
-            <main className="main-content">
+            <main data-ds="main-content" className="main-content">
               {view === "account" && login ? (
-                <section className="settings-page">
-                  <h1>アカウント</h1>
-                  <div className="setting-avatar">
+                <section data-ds="owner-settings" className="settings-page">
+                  <PageHeader title="アカウント" />
+                  <div data-ds="owner-profile" className="setting-avatar">
                     <Avatar value={icon || profile.icon} large />
-                    <label className="upload-label">
+                    <label
+                      data-ds="owner-profile-upload"
+                      className="upload-label"
+                    >
                       <Upload size={15} />
                       画像を変更
                       <input
@@ -1773,21 +1775,21 @@ export default function Notebook({
                       />
                     </label>
                   </div>
-                  <div className="emoji-options">
+                  <div data-ds="owner-avatar-picker" className="emoji-options">
                     {["🐢", "🦦", "🐈", "🌱", "☕", "👾"].map((x) => (
                       <button key={x} onClick={() => setIcon(x)}>
                         {x}
                       </button>
                     ))}
                   </div>
-                  <label className="field">
+                  <label data-ds="owner-settings-field" className="field">
                     名前
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
                   </label>
-                  <label className="field">
+                  <label data-ds="owner-settings-field" className="field">
                     自己紹介
                     <textarea
                       value={bio}
@@ -1811,19 +1813,13 @@ export default function Notebook({
                   >
                     保存
                   </Button>
-                  <section
+                  <OwnerSection
+                    data-ds="owner-federation"
                     className="federation-settings"
-                    aria-labelledby="federation-heading"
+                    title="Fediverse"
+                    description="ActivityPubに対応すると、Fediverseからこのサイトをフォローできます。"
+                    icon={<Globe size={18} aria-hidden="true" />}
                   >
-                    <div className="federation-settings-heading">
-                      <Globe size={18} aria-hidden="true" />
-                      <div>
-                        <h2 id="federation-heading">Fediverse</h2>
-                        <p>
-                          ActivityPubに対応すると、Fediverseからこのサイトをフォローできます。
-                        </p>
-                      </div>
-                    </div>
                     {federationLoadError ? (
                       <div className="federation-load-error" role="alert">
                         <p>Fediverse設定を読み込めませんでした。</p>
@@ -1863,6 +1859,7 @@ export default function Notebook({
                           </Button>
                         </div>
                         <section
+                          data-ds="owner-following"
                           className="federation-following"
                           aria-labelledby="federation-following-heading"
                         >
@@ -1960,6 +1957,7 @@ export default function Notebook({
                       </div>
                     ) : (
                       <form
+                        data-ds="owner-federation-setup"
                         className="federation-setup"
                         aria-busy={federationBusy}
                         onSubmit={(event) => {
@@ -2049,51 +2047,28 @@ export default function Notebook({
                         </Button>
                       </form>
                     )}
-                  </section>
+                  </OwnerSection>
                 </section>
               ) : view === "projects" ? (
-                <section className="projects-page">
-                  <h1>プロジェクト</h1>
-                  <div className="project-grid">
-                    {projects.map((project) => {
-                      const card = (
-                        <>
-                          <img src={project.thumbnail} alt="" />
-                          <div>
-                            <h2>
-                              {project.title}{" "}
-                              {project.links.source && (
-                                <ArrowUpRight size={16} />
-                              )}
-                            </h2>
-                            <p>{project.summary}</p>
-                            <span>{project.stack.join(" · ")}</span>
-                          </div>
-                        </>
-                      );
-                      return project.links.source ? (
-                        <a
-                          className="project-tile"
-                          key={project.slug}
-                          href={project.links.source}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {card}
-                        </a>
-                      ) : (
-                        <div
-                          className="project-tile project-tile-static"
-                          key={project.slug}
-                        >
-                          {card}
-                        </div>
-                      );
-                    })}
-                  </div>
+                <section data-ds="projects-page" className="projects-page">
+                  <PageHeader title="プロジェクト" />
+                  <ProjectList
+                    className="project-grid"
+                    tileClassName="project-tile"
+                    staticTileClassName="project-tile project-tile-static"
+                    items={projects.map((project) => ({
+                      slug: project.slug,
+                      title: project.title,
+                      summary: project.summary,
+                      stack: project.stack,
+                      thumbnail: project.thumbnail,
+                      source: project.links.source,
+                    }))}
+                  />
                 </section>
               ) : item ? (
                 <section
+                  data-ds="detail-page"
                   className={`detail-page${
                     item.kind === "tweet" ? " tweet-thread-detail" : ""
                   }`}
@@ -2127,30 +2102,27 @@ export default function Notebook({
                     ) : item.kind === "vlog" ? (
                       <VlogFrame post={item} />
                     ) : (
-                      <p className="tweet-body">{item.body}</p>
+                      <p data-ds="tweet-body" className="tweet-body">
+                        {item.body}
+                      </p>
                     )}
                     {item.kind === "tweet" && (
                       <ImageGallery images={item.images} />
                     )}
-                    <div className="tags">
-                      {item.tags.map((t) => {
-                        const automatic = item.autoTags?.some(
-                          (autoTag) => autoTag.tag === t,
-                        );
-                        return (
-                          <Badge
-                            key={t}
-                            variant="gray"
-                            title={
-                              automatic ? "自動で付与されたタグ" : undefined
-                            }
-                            aria-label={automatic ? `自動タグ ${t}` : undefined}
-                          >
-                            {automatic ? `AI · ${t}` : t}
-                          </Badge>
-                        );
-                      })}
-                    </div>
+                    <TagList
+                      className="tags"
+                      tags={item.tags}
+                      automaticTags={item.autoTags?.map((tag) => tag.tag)}
+                      renderTag={(tag, automatic) => (
+                        <Badge
+                          variant="gray"
+                          title={automatic ? "自動で付与されたタグ" : undefined}
+                          aria-label={automatic ? "自動タグ " + tag : undefined}
+                        >
+                          {automatic ? "AI · " + tag : tag}
+                        </Badge>
+                      )}
+                    />
                     {actions(item)}
                   </div>
                   {item.kind === "tweet" && (
@@ -2158,7 +2130,7 @@ export default function Notebook({
                   )}
                 </section>
               ) : view === "home" ? (
-                <section className="landing-page">
+                <section data-ds="landing-page" className="landing-page">
                   <div className="landing-intro">
                     <div className="landing-copy">
                       <h1>
@@ -2184,7 +2156,10 @@ export default function Notebook({
                         </button>
                       </div>
                     </div>
-                    <aside className="landing-profile">
+                    <aside
+                      data-ds="landing-profile"
+                      className="landing-profile"
+                    >
                       <Avatar value={profile.icon} large />
                       <div>
                         <span>プロフィール</span>
@@ -2200,52 +2175,41 @@ export default function Notebook({
 
                   <EngineeringProfile />
                   <div className="landing-lower">
-                    <div className="content-index">
-                      <div className="landing-section-title">
-                        <h2>コンテンツ</h2>
-                      </div>
-                      <div className="content-cards">
-                        {(
-                          [
-                            {
-                              id: "blog",
-                              icon: FileText,
-                              title: "ブログ",
-                              text: "技術、開発、個人制作についての記事",
-                            },
-                            {
-                              id: "tweet",
-                              icon: MessageCircle,
-                              title: "つぶやき",
-                              text: "日々の短いメモ",
-                            },
-                            {
-                              id: "vlog",
-                              icon: Video,
-                              title: "vlog",
-                              text: "数秒から30秒までの動画",
-                            },
-                          ] as const
-                        ).map(({ id, icon: Icon, title: cardTitle, text }) => (
-                          <button
-                            key={id}
-                            onClick={() => {
-                              nav("timeline");
-                              setFilter(id);
-                            }}
-                          >
-                            <span className={`content-icon ${id}`}>
-                              <Icon size={18} />
-                            </span>
-                            <span className="content-card-copy">
-                              <strong>{cardTitle}</strong>
-                              <small>{text}</small>
-                            </span>
-                            <b>{posts.filter((p) => p.kind === id).length}</b>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    <ContentIndex
+                      className="content-index"
+                      items={
+                        [
+                          {
+                            id: "blog",
+                            icon: <FileText size={18} />,
+                            title: "ブログ",
+                            description: "技術、開発、個人制作についての記事",
+                            count: posts.filter((p) => p.kind === "blog")
+                              .length,
+                          },
+                          {
+                            id: "tweet",
+                            icon: <MessageCircle size={18} />,
+                            title: "つぶやき",
+                            description: "日々の短いメモ",
+                            count: posts.filter((p) => p.kind === "tweet")
+                              .length,
+                          },
+                          {
+                            id: "vlog",
+                            icon: <Video size={18} />,
+                            title: "vlog",
+                            description: "数秒から30秒までの動画",
+                            count: posts.filter((p) => p.kind === "vlog")
+                              .length,
+                          },
+                        ] as const
+                      }
+                      onSelect={(id) => {
+                        nav("timeline");
+                        setFilter(id as Kind);
+                      }}
+                    />
 
                     <div className="featured-area">
                       <div className="landing-section-title">
@@ -2253,6 +2217,7 @@ export default function Notebook({
                       </div>
                       {featuredPost ? (
                         <button
+                          data-ds="featured-post"
                           className="featured-post"
                           onClick={() => openPost(featuredPost.id)}
                         >
@@ -2285,11 +2250,12 @@ export default function Notebook({
                 </section>
               ) : (
                 <>
-                  <section className="page-heading">
-                    <h1>タイムライン</h1>
-                  </section>
+                  <PageHeader className="page-heading" title="タイムライン" />
                   {timelineMode === "kamelog" && (
-                    <label className="home-search mobile-search">
+                    <label
+                      data-ds="mobile-search"
+                      className="home-search mobile-search"
+                    >
                       <Search size={17} />
                       <input
                         value={query}
@@ -2312,37 +2278,28 @@ export default function Notebook({
                         if (next === "fediverse") void loadFederationTimeline();
                       }}
                     >
-                      <TabsList className="fediverse-mode-switch">
+                      <TabsList
+                        data-ds="fediverse-mode-switch"
+                        className="fediverse-mode-switch"
+                      >
                         <TabsTrigger value="kamelog">kamelog</TabsTrigger>
                         <TabsTrigger value="fediverse">Fediverse</TabsTrigger>
                       </TabsList>
                     </Tabs>
                   )}
                   {login && timelineMode === "kamelog" && (
-                    <div className="composer desktop-composer">
-                      <div className="composer-start">
-                        <Avatar value={profile.icon} />
-                        <textarea
-                          className="inline-tweet"
-                          value={inlineBody}
-                          onChange={(event) =>
-                            setInlineBody(event.target.value)
-                          }
-                          onKeyDown={(event) => {
-                            if (
-                              (event.ctrlKey || event.metaKey) &&
-                              event.key === "Enter"
-                            ) {
-                              event.preventDefault();
-                              publishInlineTweet();
-                            }
-                          }}
-                          placeholder="いまどうしてる？"
-                          maxLength={5000}
-                          rows={1}
-                          onDragOver={(event) => event.preventDefault()}
-                          onDrop={(event) => droppedImages(event, "inline")}
-                        />
+                    <InlineComposer
+                      className="composer desktop-composer"
+                      startClassName="composer-start"
+                      bodyClassName="inline-tweet"
+                      avatar={<Avatar value={profile.icon} />}
+                      value={inlineBody}
+                      onValueChange={setInlineBody}
+                      onSubmit={publishInlineTweet}
+                      onDrop={(event) => droppedImages(event, "inline")}
+                      placeholder="いまどうしてる？"
+                      maxLength={5000}
+                      submit={
                         <Button
                           variant="solid"
                           size="sm"
@@ -2351,108 +2308,97 @@ export default function Notebook({
                         >
                           投稿
                         </Button>
-                      </div>
-                      {inlineImages.length > 0 && (
-                        <div className="composer-images">
-                          <ImageGallery images={inlineImages} />
-                          <button
-                            type="button"
-                            onClick={() => setInlineImages([])}
+                      }
+                      media={
+                        inlineImages.length > 0 ? (
+                          <div
+                            data-ds="composer-images"
+                            className="composer-images"
                           >
-                            画像を取り消す
-                          </button>
-                        </div>
-                      )}
-                      <div className="composer-kinds">
-                        {xToggle("tweet")}
-                        {federationToggle(
-                          "tweet",
-                          inlineFederationEnabled,
-                          setInlineFederationEnabled,
-                        )}
-                        <label className="image-upload-button">
-                          <ImageIcon />
-                          画像
-                          <input
-                            type="file"
-                            accept="image/png,image/jpeg,image/webp,image/gif"
-                            multiple
-                            disabled={
-                              uploadingImages || inlineImages.length >= 4
-                            }
-                            onChange={(event) =>
-                              void uploadImages(
-                                Array.from(event.target.files || []),
-                                "inline",
-                              )
-                            }
-                          />
-                        </label>
-                        <button onClick={() => openEditor("blog")}>
-                          <FileText />
-                          ブログ
-                        </button>
-                        <button
-                          onClick={() =>
-                            document
-                              .querySelector<HTMLTextAreaElement>(
-                                ".inline-tweet",
-                              )
-                              ?.focus()
-                          }
+                            <ImageGallery images={inlineImages} />
+                            <button
+                              type="button"
+                              onClick={() => setInlineImages([])}
+                            >
+                              画像を取り消す
+                            </button>
+                          </div>
+                        ) : undefined
+                      }
+                      toolbar={
+                        <div
+                          data-ds="composer-toolbar"
+                          className="composer-kinds"
                         >
-                          <MessageCircle />
-                          つぶやき
-                        </button>
-                        <button onClick={() => openEditor("vlog")}>
-                          <Video />
-                          vlog
-                        </button>
-                        {drafts.length > 0 && (
-                          <button
-                            className="draft-button"
-                            onClick={() => setDraftList(true)}
-                          >
-                            下書き {drafts.length}
+                          {xToggle("tweet")}
+                          {federationToggle(
+                            "tweet",
+                            inlineFederationEnabled,
+                            setInlineFederationEnabled,
+                          )}
+                          <label className="image-upload-button">
+                            <ImageIcon />
+                            画像
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/webp,image/gif"
+                              multiple
+                              disabled={
+                                uploadingImages || inlineImages.length >= 4
+                              }
+                              onChange={(event) =>
+                                void uploadImages(
+                                  Array.from(event.target.files || []),
+                                  "inline",
+                                )
+                              }
+                            />
+                          </label>
+                          <button onClick={() => openEditor("blog")}>
+                            <FileText />
+                            ブログ
                           </button>
-                        )}
-                      </div>
-                    </div>
+                          <button
+                            onClick={() =>
+                              document
+                                .querySelector<HTMLTextAreaElement>(
+                                  ".inline-tweet",
+                                )
+                                ?.focus()
+                            }
+                          >
+                            <MessageCircle />
+                            つぶやき
+                          </button>
+                          <button onClick={() => openEditor("vlog")}>
+                            <Video />
+                            vlog
+                          </button>
+                          {drafts.length > 0 && (
+                            <button
+                              className="draft-button"
+                              onClick={() => setDraftList(true)}
+                            >
+                              下書き {drafts.length}
+                            </button>
+                          )}
+                        </div>
+                      }
+                    />
                   )}
                   {timelineMode === "kamelog" ? (
                     <>
-                      <div className="timeline-toolbar">
-                        <Tabs
-                          value={filter}
-                          onValueChange={(v) => setFilter(v as "all" | Kind)}
-                        >
-                          <TabsList variant="line" className="feed-tabs">
-                            <TabsTrigger value="all">すべて</TabsTrigger>
-                            <TabsTrigger value="blog">ブログ</TabsTrigger>
-                            <TabsTrigger value="tweet">つぶやき</TabsTrigger>
-                            <TabsTrigger value="vlog">vlog</TabsTrigger>
-                          </TabsList>
-                        </Tabs>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button className="sort-button">
-                              <SlidersHorizontal size={17} />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setSort("new")}>
-                              新しい順 {sort === "new" && <Check />}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setSort("popular")}
-                            >
-                              いいね順 {sort === "popular" && <Check />}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                      <TimelineToolbar
+                        className="timeline-toolbar"
+                        filter={filter}
+                        onFilterChange={(value) =>
+                          setFilter(value as "all" | Kind)
+                        }
+                        sort={sort}
+                        onSortChange={setSort}
+                      />
                       {tag && (
-                        <div className="filter-active">
+                        <div data-ds="filter-active" className="filter-active">
                           #{tag}
                           <button onClick={() => setTag("")}>
                             <X size={14} />
@@ -2513,13 +2459,19 @@ export default function Notebook({
                               </div>
                             </article>
                           ) : (
-                            <article className={"post " + p.kind} key={p.id}>
-                              {p.pinned && (
-                                <div className="pinned">
+                            <TimelineItem
+                              className={"post " + p.kind}
+                              kind={p.kind}
+                              key={p.id}
+                              pinned={p.pinned}
+                              pinnedClassName="pinned"
+                              pinnedLabel={
+                                <>
                                   <Pin size={12} />
                                   固定
-                                </div>
-                              )}
+                                </>
+                              }
+                            >
                               {meta(p)}
                               {p.kind === "vlog" ? (
                                 <div className="post-focus vlog-button">
@@ -2532,61 +2484,64 @@ export default function Notebook({
                                   </button>
                                 </div>
                               ) : (
-                                <button
+                                <PostPreview
+                                  title={
+                                    p.kind === "blog" ? p.title : undefined
+                                  }
+                                  excerpt={
+                                    p.kind === "blog"
+                                      ? p.body
+                                          .split("\n")
+                                          .find(
+                                            (s) => s && !s.startsWith("#"),
+                                          ) || ""
+                                      : p.body
+                                  }
+                                  excerptClassName={
+                                    p.kind === "tweet"
+                                      ? "tweet-body"
+                                      : undefined
+                                  }
                                   className="post-focus"
                                   onClick={() => openPost(p.id)}
-                                >
-                                  {p.kind === "blog" ? (
-                                    <>
-                                      <h2>{p.title}</h2>
-                                      <p>
-                                        {p.body
-                                          .split("\n")
-                                          .find((s) => s && !s.startsWith("#"))}
-                                      </p>
-                                    </>
-                                  ) : (
-                                    <p className="tweet-body">{p.body}</p>
-                                  )}
-                                </button>
+                                />
                               )}
                               {p.kind === "tweet" && (
                                 <ImageGallery images={p.images} />
                               )}
                               {p.tags.length > 0 && (
-                                <div className="tags">
-                                  {p.tags.map((t) => {
-                                    const automatic = p.autoTags?.some(
-                                      (autoTag) => autoTag.tag === t,
-                                    );
-                                    return (
-                                      <button key={t} onClick={() => setTag(t)}>
-                                        <Badge
-                                          variant={t === "Go" ? "blue" : "gray"}
-                                          title={
-                                            automatic
-                                              ? "自動で付与されたタグ"
-                                              : undefined
-                                          }
-                                          aria-label={
-                                            automatic
-                                              ? `自動タグ ${t}`
-                                              : undefined
-                                          }
-                                        >
-                                          {automatic ? `AI · ${t}` : t}
-                                        </Badge>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
+                                <TagList
+                                  className="tags"
+                                  tags={p.tags}
+                                  automaticTags={p.autoTags?.map(
+                                    (tag) => tag.tag,
+                                  )}
+                                  onTagSelect={setTag}
+                                  renderTag={(tag, automatic) => (
+                                    <Badge
+                                      variant={tag === "Go" ? "blue" : "gray"}
+                                      title={
+                                        automatic
+                                          ? "自動で付与されたタグ"
+                                          : undefined
+                                      }
+                                      aria-label={
+                                        automatic
+                                          ? "自動タグ " + tag
+                                          : undefined
+                                      }
+                                    >
+                                      {automatic ? "AI · " + tag : tag}
+                                    </Badge>
+                                  )}
+                                />
                               )}
                               {actions(p)}
-                            </article>
+                            </TimelineItem>
                           ),
                         )}
                         {!shown.length && (
-                          <div className="empty-state">
+                          <EmptyState className="empty-state">
                             <p>該当する投稿はありません。</p>
                             <Button
                               onClick={() => {
@@ -2597,13 +2552,16 @@ export default function Notebook({
                             >
                               解除
                             </Button>
-                          </div>
+                          </EmptyState>
                         )}
-                        <div className="feed-count">{shown.length}件</div>
+                        <div data-ds="feed-count" className="feed-count">
+                          {shown.length}件
+                        </div>
                       </div>
                     </>
                   ) : (
                     <section
+                      data-ds="fediverse-timeline"
                       className="fediverse-timeline"
                       aria-labelledby="fediverse-timeline-heading"
                     >
@@ -2640,9 +2598,9 @@ export default function Notebook({
                       {!federationTimelineError &&
                         !federationTimelineBusy &&
                         !federationTimeline.length && (
-                          <div className="empty-state">
+                          <EmptyState className="empty-state">
                             <p>受信した投稿はまだありません。</p>
-                          </div>
+                          </EmptyState>
                         )}
                       <div className="fediverse-feed">
                         {federationTimeline.map((timelineItem) => (
@@ -2749,23 +2707,27 @@ export default function Notebook({
               )}
             </main>
             <aside
+              data-ds="right-sidebar"
               className={
                 "right-sidebar " + (view === "home" ? "landing-hidden" : "")
               }
             >
-              <div className="profile-card">
-                <Avatar value={profile.icon} large />
-                <h2>{profile.name}</h2>
-                <span className="profile-handle">@kamesan1577</span>
-                <p>{profile.bio}</p>
-                <a href={contact.github} target="_blank" rel="noreferrer">
-                  GitHub
-                  <ArrowUpRight size={14} />
-                </a>
-              </div>
+              <ProfileCard
+                className="profile-card"
+                avatar={<Avatar value={profile.icon} large />}
+                name={profile.name}
+                handle="@kamesan1577"
+                bio={profile.bio}
+                link={
+                  <a href={contact.github} target="_blank" rel="noreferrer">
+                    GitHub
+                    <ArrowUpRight size={14} />
+                  </a>
+                }
+              />
               {(view !== "timeline" || timelineMode === "kamelog") && (
                 <>
-                  <label className="side-search">
+                  <label data-ds="side-search" className="side-search">
                     <Search size={16} />
                     <input
                       value={query}
@@ -2775,9 +2737,9 @@ export default function Notebook({
                     <kbd>/</kbd>
                   </label>
                   {tags.length > 0 && (
-                    <div className="aside-section">
+                    <div data-ds="aside-section" className="aside-section">
                       <h3>タグ</h3>
-                      <div className="topic-list">
+                      <div data-ds="topic-list" className="topic-list">
                         {visibleTags.map(({ name, count }) => (
                           <button
                             key={name}
@@ -2795,6 +2757,7 @@ export default function Notebook({
                       </div>
                       {visibleTagCount < tags.length && (
                         <button
+                          data-ds="tag-load-more"
                           className="tag-load-more"
                           onClick={() =>
                             setVisibleTagCount((count) => count + 5)
@@ -2809,31 +2772,33 @@ export default function Notebook({
               )}
             </aside>
           </div>
-          <nav className="mobile-nav">
-            <button
-              className={view === "home" ? "active" : ""}
-              onClick={() => nav("home")}
-            >
-              <Home />
-              <span>ホーム</span>
-            </button>
-            <button
-              className={view === "timeline" ? "active" : ""}
-              onClick={() => nav("timeline")}
-            >
-              <MessageCircle />
-              <span>タイムライン</span>
-            </button>
-            <button
-              className={view === "projects" ? "active" : ""}
-              onClick={() => nav("projects")}
-            >
-              <Globe />
-              <span>プロジェクト</span>
-            </button>
-          </nav>
+          <MobileNavigation
+            className="mobile-nav"
+            items={[
+              {
+                id: "home",
+                label: "ホーム",
+                icon: <Home />,
+                active: view === "home",
+              },
+              {
+                id: "timeline",
+                label: "タイムライン",
+                icon: <MessageCircle />,
+                active: view === "timeline",
+              },
+              {
+                id: "projects",
+                label: "プロジェクト",
+                icon: <Globe />,
+                active: view === "projects",
+              },
+            ]}
+            onSelect={(id) => nav(id as View)}
+          />
           {login && (
             <button
+              data-ds="mobile-create"
               className="mobile-create"
               onClick={() => openEditor("tweet")}
               aria-label="投稿を作成"
@@ -2845,6 +2810,10 @@ export default function Notebook({
       </div>
       <Dialog open={editor} onOpenChange={(o) => !o && askClose()}>
         <DialogContent
+          data-ds="editor-dialog"
+          data-ds-state={
+            kind === "blog" && fullPageEditor ? "full-page" : "modal"
+          }
           className={
             "editor-dialog " +
             (kind === "vlog" ? "vlog-dialog " : "") +
@@ -2870,7 +2839,10 @@ export default function Notebook({
             askClose();
           }}
         >
-          <header className="mobile-editor-header">
+          <header
+            data-ds="mobile-editor-header"
+            className="mobile-editor-header"
+          >
             <button
               type="button"
               className="mobile-editor-close"
@@ -2919,7 +2891,7 @@ export default function Notebook({
                 <span>{drafts.length}</span>
               </button>
               {editorDrafts && (
-                <div className="draft-list">
+                <div data-ds="draft-list" className="draft-list">
                   {drafts.map((draft) => (
                     <button
                       type="button"
@@ -3004,7 +2976,7 @@ export default function Notebook({
                   <TabsTrigger value="upload">動画を選ぶ</TabsTrigger>
                 </TabsList>
               </Tabs>
-              <div className="vlog-stage">
+              <div data-ds="vlog-stage" className="vlog-stage">
                 {clip ? (
                   <video src={clip} controls playsInline />
                 ) : vMode === "camera" ? (
@@ -3020,7 +2992,7 @@ export default function Notebook({
                     />
                   </label>
                 )}
-                <div className="vlog-overlay">
+                <div data-ds="vlog-overlay" className="vlog-overlay">
                   <time>{vtime}</time>
                   {caption && <p>{caption}</p>}
                 </div>
@@ -3098,7 +3070,7 @@ export default function Notebook({
                 />
               )}
               {kind === "blog" && (
-                <div
+                <BlogEditorToolbar
                   className="editor-tools"
                   role="toolbar"
                   aria-label="Markdown記法"
@@ -3285,11 +3257,13 @@ export default function Notebook({
                       <Maximize2 size={15} />
                     )}
                   </button>
-                </div>
+                </BlogEditorToolbar>
               )}
               {kind === "blog" ? (
-                <div className={"blog-editor-workspace mode-" + blogEditorMode}>
-                  {blogEditorMode !== "preview" && (
+                <BlogEditorWorkspace
+                  className={"blog-editor-workspace mode-" + blogEditorMode}
+                  mode={blogEditorMode}
+                  editor={
                     <textarea
                       ref={bodyInput}
                       className="body-input blog"
@@ -3299,13 +3273,13 @@ export default function Notebook({
                       onDragOver={(event) => event.preventDefault()}
                       onDrop={(event) => droppedImages(event, "blog")}
                     />
-                  )}
-                  {blogEditorMode !== "edit" && (
+                  }
+                  preview={
                     <div className="editor-preview" aria-label="プレビュー">
                       <Markdown text={"# " + title + "\n\n" + body} />
                     </div>
-                  )}
-                </div>
+                  }
+                />
               ) : (
                 <textarea
                   ref={bodyInput}
@@ -3317,51 +3291,55 @@ export default function Notebook({
                   onDrop={(event) => droppedImages(event, "tweet")}
                 />
               )}
-              <div className="editor-media-row">
-                <label className="image-upload-button">
-                  <ImageIcon />
-                  {kind === "blog"
+              <MediaUploadField
+                className="editor-media-row"
+                labelClassName="image-upload-button"
+                icon={<ImageIcon />}
+                label={
+                  kind === "blog"
                     ? "画像を本文末尾へ追加"
-                    : `画像を追加（${editorImages.length}/4）`}
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp,image/gif"
-                    multiple={kind === "tweet"}
-                    disabled={
-                      uploadingImages ||
-                      (kind === "tweet" && editorImages.length >= 4)
-                    }
-                    onChange={(event) =>
-                      void uploadImages(
-                        Array.from(event.target.files || []),
-                        kind === "blog" ? "blog" : "tweet",
-                      )
-                    }
-                  />
-                </label>
-                {uploadingImages && <span>アップロード中…</span>}
-              </div>
+                    : `画像を追加（${editorImages.length}/4）`
+                }
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                multiple={kind === "tweet"}
+                disabled={
+                  uploadingImages ||
+                  (kind === "tweet" && editorImages.length >= 4)
+                }
+                onFilesSelected={(files) =>
+                  void uploadImages(files, kind === "blog" ? "blog" : "tweet")
+                }
+                status={
+                  uploadingImages ? <span>アップロード中…</span> : undefined
+                }
+              />
               {kind === "tweet" && editorImages.length > 0 && (
-                <div className="composer-images">
+                <div data-ds="composer-images" className="composer-images">
                   <ImageGallery images={editorImages} />
                   <button type="button" onClick={() => setEditorImages([])}>
                     画像を取り消す
                   </button>
                 </div>
               )}
-              <div className="editor-footer">
-                <span>{body.length}文字</span>
-                <Button onClick={askClose}>閉じる</Button>
-                <Button variant="solid" onClick={publish}>
-                  投稿
-                </Button>
-              </div>
+              <EditorFooter
+                className="editor-footer"
+                characterCount={body.length}
+                closeAction={<Button onClick={askClose}>閉じる</Button>}
+                submitAction={
+                  <Button variant="solid" onClick={publish}>
+                    投稿
+                  </Button>
+                }
+              />
             </>
           )}
         </DialogContent>
       </Dialog>
       <Dialog open={markdownHelpOpen} onOpenChange={setMarkdownHelpOpen}>
-        <DialogContent className="markdown-help-dialog">
+        <DialogContent
+          data-ds="markdown-help-dialog"
+          className="markdown-help-dialog"
+        >
           <DialogTitle>Markdown記法ヘルプ</DialogTitle>
           <DialogDescription>
             ブログで使えるCommonMarkとGFMの記法です。生HTMLは表示されません。
@@ -3385,7 +3363,7 @@ export default function Notebook({
           <DialogDescription>
             保存しない場合、入力内容は削除されます。
           </DialogDescription>
-          <div className="confirm-actions">
+          <div data-ds="confirm-actions" className="confirm-actions">
             <Button onClick={() => setCloseAsk(false)}>編集を続ける</Button>
             <Button onClick={discard}>削除して閉じる</Button>
             <Button variant="solid" onClick={saveDraft}>
@@ -3398,7 +3376,7 @@ export default function Notebook({
         <DialogContent>
           <DialogTitle>下書き</DialogTitle>
           <DialogDescription>サーバーに保存されています。</DialogDescription>
-          <div className="draft-list">
+          <div data-ds="draft-list" className="draft-list">
             {drafts.map((d) => (
               <button
                 key={d.id}
@@ -3426,12 +3404,15 @@ export default function Notebook({
         open={!!remove}
         onOpenChange={(open) => !open && setRemove(null)}
       >
-        <AlertDialogContent className="delete-dialog">
+        <AlertDialogContent data-ds="delete-dialog" className="delete-dialog">
           <AlertDialogTitle>投稿を削除しますか？</AlertDialogTitle>
           <AlertDialogDescription>
             公開サイトから削除されます。
           </AlertDialogDescription>
-          <AlertDialogFooter className="confirm-actions">
+          <AlertDialogFooter
+            data-ds="confirm-actions"
+            className="confirm-actions"
+          >
             <Button onClick={() => setRemove(null)}>キャンセル</Button>
             <Button
               variant="red-fill"
@@ -3467,7 +3448,7 @@ function VlogFrame({ post }: { post: Post }) {
     void element.play().catch(() => undefined);
   };
   return (
-    <div className="vlog-frame">
+    <div data-ds="vlog-frame" className="vlog-frame">
       {post.video ? (
         <video
           ref={video}
@@ -3492,7 +3473,7 @@ function VlogFrame({ post }: { post: Post }) {
               minute: "2-digit",
             })}
         </time>
-        {post.body && <p>{post.body}</p>}
+        {post.body && <p data-ds="vlog-caption">{post.body}</p>}
       </div>
       {post.video && looping && (
         <button

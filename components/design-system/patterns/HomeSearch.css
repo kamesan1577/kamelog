@@ -1,0 +1,29 @@
+[data-ds="mobile-search"] {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e2e0da;
+  border-radius: 5px;
+  padding: 9px 11px;
+  margin: 21px 0 22px;
+  color: #9b978e;
+}
+
+[data-ds="mobile-search"]:focus-within {
+  border-color: #9bbfe0;
+  box-shadow: 0 0 0 2px #edf5fc;
+}
+
+[data-ds="mobile-search"] input {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  background: transparent;
+}
+
+@media (max-width: 640px) {
+  [data-ds="mobile-search"] {
+    display: flex;
+    margin: 18px 0;
+  }
+}

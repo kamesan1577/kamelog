@@ -1,0 +1,65 @@
+[data-ds="timeline-toolbar"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e3df;
+}
+
+[data-ds="timeline-tabs"] {
+  height: 42px !important;
+  padding: 0 !important;
+  gap: 14px !important;
+}
+
+[data-ds="timeline-tabs"] [data-slot="tabs-trigger"] {
+  height: 42px !important;
+  padding: 0 2px;
+  border-radius: 0;
+  color: #8e8b84;
+  font-size: 13px;
+  font-weight: 400;
+  gap: 5px;
+}
+
+[data-ds="timeline-tabs"] [data-slot="tabs-trigger"]::after {
+  bottom: -1px !important;
+  height: 2px !important;
+}
+
+[data-ds="timeline-tabs"] [data-slot="tabs-trigger"][data-state="active"] {
+  color: #37352f;
+  font-weight: 600;
+}
+
+[data-ds="timeline-tabs"] [data-slot="tabs-trigger"] svg {
+  width: 14px !important;
+  height: 14px !important;
+}
+
+@media (max-width: 1150px) {
+  [data-ds="timeline-tabs"] {
+    gap: 10px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  [data-ds="timeline-tabs"] {
+    gap: 14px !important;
+  }
+
+  [data-ds="timeline-tabs"] [data-slot="tabs-trigger"] {
+    font-size: 12px;
+    gap: 4px;
+  }
+
+  [data-ds="timeline-tabs"] [data-slot="tabs-trigger"] svg {
+    width: 12px !important;
+  }
+}
+
+[data-ds="feed-count"] {
+  text-align: center;
+  color: #b4afa5;
+  font-size: 12px;
+  padding: 24px;
+}

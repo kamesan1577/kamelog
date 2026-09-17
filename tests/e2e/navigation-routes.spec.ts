@@ -14,12 +14,14 @@ test("public main views keep their URL across navigation and reload", async ({
     .first()
     .click();
   await expect(page).toHaveURL(/\/projects$/);
-  await expect(page.locator(".projects-page")).toBeVisible();
-  await expect(page.locator(".project-article")).toHaveCount(0);
+  await expect(page.locator('[data-ds="projects-page"]')).toBeVisible();
+  await expect(
+    page.locator('[data-ds="projects-page"] [data-ds="project-tile"]'),
+  ).toHaveCount(3);
 
   await page.reload();
   await expect(page).toHaveURL(/\/projects$/);
-  await expect(page.locator(".projects-page")).toBeVisible();
+  await expect(page.locator('[data-ds="projects-page"]')).toBeVisible();
 
   await page.goBack();
   await expect(page).toHaveURL(/\/timeline$/);
@@ -39,7 +41,7 @@ test("public main views keep their URL across navigation and reload", async ({
 
 test("federation guide keeps URL and history", async ({ page }) => {
   await page.goto("/timeline");
-  const heading = page.locator(".page-heading");
+  const heading = page.locator('[data-ds="page-header"]');
   const notice = heading.getByText("ActivityPubに対応しています。");
   await expect(notice).toBeVisible();
   const guideLink = heading.getByRole("link", { name: "対応範囲を見る" });
@@ -87,7 +89,7 @@ test("mobile timeline shows a single federation link", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/timeline");
   const guideLink = page
-    .locator(".page-heading")
+    .locator('[data-ds="page-header"]')
     .getByRole("link", { name: "対応範囲を見る" });
   await expect(guideLink).toBeVisible();
   await expect(guideLink).toHaveCount(1);

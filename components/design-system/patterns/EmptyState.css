@@ -1,0 +1,18 @@
+[data-ds="empty-state"] {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 13px;
+  padding: 45px;
+  color: #999;
+  text-align: center;
+}
+
+[data-ds="empty-state"] h2 {
+  color: #555;
+  font-size: 17px;
+}
+
+[data-ds="empty-state"] p {
+  font-size: 14px;
+}

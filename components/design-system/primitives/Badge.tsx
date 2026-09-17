@@ -9,7 +9,7 @@ export function Badge({
     <span
       data-ds="badge"
       className={cn(
-        "inline-flex items-center rounded-ds-pill bg-ds-hover px-2 py-1 text-ds-xs font-medium text-ds-secondary",
+        "inline-flex items-center rounded-ds-pill bg-ds-hover px-2 py-1 ds-text-xs font-medium text-ds-secondary",
         className,
       )}
       {...props}
