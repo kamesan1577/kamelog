@@ -1,6 +1,8 @@
 # kamelog handoff
 
-. "2026-09-17 Issue #99 moved preview-shell and detail Markdown mobile responsive rules out of globals and into their data-ds Design System patterns. The existing 390px preview sizing, mobile device treatment, Markdown typography, and detail back-link spacing are preserved. check:ui, typecheck, lint, and public-repo check passed locally.
+. "2026-09-17 Issue #99 moved the remaining editor mobile spacing rules into the semantic editor-dialog Design System boundary and removed the final editor-specific global rules. check:ui, typecheck, lint, public-repo check, and formatting passed locally.
+
+". "2026-09-17 Issue #99 moved preview-shell and detail Markdown mobile responsive rules out of globals and into their data-ds Design System patterns. The existing 390px preview sizing, mobile device treatment, Markdown typography, and detail back-link spacing are preserved. check:ui, typecheck, lint, and public-repo check passed locally.
 
 "2026-09-17 Issue #99 removed the duplicate generic content-grid responsive rules from globals after AppShell became the owner of that coordinate system. check:ui, typecheck, lint, and public-repo check passed locally.
 

@@ -63,3 +63,16 @@
     overflow-y: visible;
   }
 }
+
+[data-ds="editor-dialog"] .editor-tool-list {
+  padding-bottom: 0;
+}
+
+@media (max-width: 640px) {
+  [data-ds="editor-dialog"] .editor-tool-list {
+    padding-bottom: 3px;
+  }
+  [data-ds="editor-dialog"] .editor-tool-list button {
+    padding: 5px 7px;
+  }
+}

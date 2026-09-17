@@ -193,21 +193,3 @@ textarea:focus {
     animation: none !important;
   }
 }
-
-@media (max-width: 640px) {
-  .editor-kinds [data-slot="tabs-trigger"] {
-    gap: 6px;
-  }
-}
-
-@media (max-width: 640px) {
-  .editor-tools {
-    gap: 6px;
-  }
-  .editor-tool-list {
-    padding-bottom: 3px;
-  }
-  .editor-tool-list button {
-    padding: 5px 7px;
-  }
-}
