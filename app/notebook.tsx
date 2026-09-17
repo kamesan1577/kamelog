@@ -2308,7 +2308,10 @@ export default function Notebook({
                         ) : undefined
                       }
                       toolbar={
-                        <div className="composer-kinds">
+                        <div
+                          data-ds="composer-toolbar"
+                          className="composer-kinds"
+                        >
                           {xToggle("tweet")}
                           {federationToggle(
                             "tweet",
@@ -2784,6 +2787,9 @@ export default function Notebook({
       <Dialog open={editor} onOpenChange={(o) => !o && askClose()}>
         <DialogContent
           data-ds="editor-dialog"
+          data-ds-state={
+            kind === "blog" && fullPageEditor ? "full-page" : "modal"
+          }
           className={
             "editor-dialog " +
             (kind === "vlog" ? "vlog-dialog " : "") +
