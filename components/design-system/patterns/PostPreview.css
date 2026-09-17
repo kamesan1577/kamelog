@@ -13,7 +13,7 @@
   letter-spacing: -0.2px;
 }
 
-[data-ds="post-preview"] > p:not(.tweet-body) {
+[data-ds="post-preview"] > p:not([data-ds="tweet-body"]) {
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
@@ -24,7 +24,7 @@
   -webkit-line-clamp: 2;
 }
 
-[data-ds="post-preview"] > .tweet-body {
+[data-ds="post-preview"] > [data-ds="tweet-body"] {
   margin: 14px 0 8px;
   color: #625e54;
   font-size: 16px;
@@ -38,7 +38,7 @@
     line-height: 1.6;
   }
 
-  [data-ds="post-preview"] > p:not(.tweet-body) {
+  [data-ds="post-preview"] > p:not([data-ds="tweet-body"]) {
     font-size: 13px;
     line-height: 1.9;
   }
