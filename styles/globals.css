@@ -573,43 +573,6 @@ textarea:focus {
   font-size: 12px;
   margin-bottom: 12px;
 }
-.post-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #aaa69c;
-}
-.post-meta .avatar {
-  width: 25px;
-  height: 25px;
-  font-size: 18px;
-  border-radius: 4px;
-}
-.post-meta b {
-  color: #666157;
-  font-size: 12px;
-  font-weight: 600;
-}
-.post-meta time {
-  font-size: 12px;
-}
-.type-label {
-  margin-left: auto;
-  font-size: 12px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  color: #807d74;
-  background: #f2f1ee;
-}
-.type-label.blog {
-  color: #397392;
-  background: #edf4f7;
-}
-.type-label.vlog {
-  color: #886f9f;
-  background: #f3eef8;
-}
 .post-focus {
   display: block;
   text-align: left;

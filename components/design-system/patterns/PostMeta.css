@@ -1,0 +1,43 @@
+[data-ds="post-meta"] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #aaa69c;
+  font-size: 12px;
+}
+
+[data-ds="post-meta"] .avatar {
+  width: 25px;
+  height: 25px;
+  border-radius: 4px;
+  font-size: 18px;
+}
+
+[data-ds="post-meta"] b {
+  color: #666157;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+[data-ds="post-meta"] time {
+  font-size: 12px;
+}
+
+[data-ds="post-meta"] .type-label {
+  margin-left: auto;
+  border-radius: 3px;
+  padding: 1px 6px;
+  color: #807d74;
+  background: #f2f1ee;
+  font-size: 12px;
+}
+
+[data-ds="post-meta"] .type-label[data-ds-kind="blog"] {
+  color: #397392;
+  background: #edf4f7;
+}
+
+[data-ds="post-meta"] .type-label[data-ds-kind="vlog"] {
+  color: #886f9f;
+  background: #f3eef8;
+}

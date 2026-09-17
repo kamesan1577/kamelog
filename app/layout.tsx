@@ -3,6 +3,7 @@ import "highlight.js/styles/github.css";
 import "../styles/globals.css";
 import "../components/design-system/patterns/ProfileCard.css";
 import "../components/design-system/patterns/PostActions.css";
+import "../components/design-system/patterns/PostMeta.css";
 import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";
 import "../components/design-system/patterns/ComposerLayout.css";
