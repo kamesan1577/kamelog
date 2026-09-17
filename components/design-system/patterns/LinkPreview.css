@@ -1,9 +1,9 @@
-.tweet-body {
+[data-ds="tweet-body"] {
   overflow-wrap: anywhere;
   word-break: break-word;
 }
 
-.tweet-inline-link {
+[data-ds="tweet-inline-link"] {
   color: #37352f;
   text-decoration: underline;
   text-decoration-thickness: 1px;
@@ -12,11 +12,11 @@
   word-break: break-word;
 }
 
-.tweet-inline-link:hover {
+[data-ds="tweet-inline-link"]:hover {
   text-decoration-thickness: 2px;
 }
 
-.tweet-link-card {
+[data-ds="tweet-link-card"] {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   width: 100%;
@@ -28,12 +28,12 @@
   color: #37352f;
 }
 
-.tweet-link-card.has-image {
+[data-ds="tweet-link-card"][data-ds-variant="has-image"] {
   grid-template-columns: 132px minmax(0, 1fr);
   min-height: 92px;
 }
 
-.tweet-link-card > img {
+[data-ds="tweet-link-card"] > img {
   width: 132px;
   height: 100%;
   min-height: 92px;
@@ -41,7 +41,7 @@
   background: #f2f1ee;
 }
 
-.tweet-link-card-copy {
+[data-ds="tweet-link-card-copy"] {
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -50,7 +50,7 @@
   padding: 12px 13px;
 }
 
-.tweet-link-card-copy small {
+[data-ds="tweet-link-card-copy"] small {
   overflow: hidden;
   color: #98948b;
   font-size: 11px;
@@ -58,7 +58,7 @@
   white-space: nowrap;
 }
 
-.tweet-link-card-copy strong {
+[data-ds="tweet-link-card-copy"] strong {
   display: -webkit-box;
   overflow: hidden;
   font-size: 14px;
@@ -68,7 +68,7 @@
   -webkit-line-clamp: 2;
 }
 
-.tweet-link-card-description {
+[data-ds="tweet-link-card-description"] {
   display: -webkit-box;
   overflow: hidden;
   color: #817c72;
@@ -78,22 +78,22 @@
   -webkit-line-clamp: 2;
 }
 
-.tweet-link-card:hover {
+[data-ds="tweet-link-card"]:hover {
   background: #faf9f7;
 }
 
 @media (max-width: 640px) {
-  .tweet-link-card.has-image {
+  [data-ds="tweet-link-card"][data-ds-variant="has-image"] {
     grid-template-columns: 104px minmax(0, 1fr);
     min-height: 84px;
   }
 
-  .tweet-link-card > img {
+  [data-ds="tweet-link-card"] > img {
     width: 104px;
     min-height: 84px;
   }
 
-  .tweet-link-card-copy {
+  [data-ds="tweet-link-card-copy"] {
     padding: 10px 11px;
   }
 }
