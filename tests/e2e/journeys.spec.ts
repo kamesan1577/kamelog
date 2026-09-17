@@ -82,6 +82,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(`[data-ds="owner-settings"]`)).toBeVisible();
   await expect(page.locator(`[data-ds="owner-profile"]`)).toBeVisible();
   await expect(page.locator(`[data-ds="owner-federation"]`)).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("screen-evidence-account-mobile.png"),
+    fullPage: true,
+  });
   const federationUsername = page.getByLabel("ユーザー名", { exact: true });
   await expect(federationUsername).toBeVisible();
   await expect
@@ -135,6 +139,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.locator('[data-ds="owner-federation"]').screenshot({
     path: testInfo.outputPath("federation-enabled-desktop.png"),
   });
+  await page.screenshot({
+    path: testInfo.outputPath("screen-evidence-account-desktop.png"),
+    fullPage: true,
+  });
   await page
     .getByRole("button", { name: "タイムライン", exact: true })
     .first()
@@ -155,6 +163,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   });
   await expect(mobileEditorHeader).toBeVisible();
   await expect(mobilePublish).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("screen-evidence-editor-mobile.png"),
+    fullPage: true,
+  });
   await page.setViewportSize({ width: 390, height: 520 });
   await expect(mobileTweetBody).toBeFocused();
   await expect(mobilePublish).toBeInViewport();
@@ -585,6 +597,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   ).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator('[data-ds="fediverse-mode-switch"]')).toBeVisible();
+  await page.screenshot({
+    path: testInfo.outputPath("screen-evidence-fediverse-mobile.png"),
+    fullPage: true,
+  });
   await page.locator('[data-ds="fediverse-timeline"]').screenshot({
     path: testInfo.outputPath("fediverse-timeline-mobile.png"),
   });

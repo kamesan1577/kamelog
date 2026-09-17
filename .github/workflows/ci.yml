@@ -66,6 +66,8 @@ jobs:
           path: |
             test-results/**/landing-*.png
             test-results/**/federation-*.png
+            test-results/**/visual-evidence-*.png
+            test-results/**/screen-evidence-*.png
           if-no-files-found: ignore
           retention-days: 3
       - uses: actions/upload-artifact@v7
