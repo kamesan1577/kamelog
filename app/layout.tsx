@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "highlight.js/styles/github.css";
-import "./globals.css";
+import "../styles/globals.css";
 import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";
 import "../components/design-system/patterns/ComposerLayout.css";
@@ -11,7 +11,7 @@ import "../components/design-system/patterns/DetailActions.css";
 import "../styles/brand-theme.css";
 import "../components/design-system/patterns/MobileNavigationLayout.css";
 import "../components/design-system/patterns/ProfileSocialLinks.css";
-import "./federation.css";
+import "../components/design-system/patterns/Federation.css";
 import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
 import { NavigationUrlBridge } from "@/components/navigation-url-bridge";

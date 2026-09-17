@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const css = readFileSync("app/mobile-nav-layout.css", "utf8");
+const css = readFileSync(
+  "components/design-system/patterns/MobileNavigationLayout.css",
+  "utf8",
+);
 
 test("mobile bottom navigation uses three equal-width slots", () => {
   assert.match(

@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 
 const source = readFileSync("app/notebook.tsx", "utf8");
-const css = readFileSync("app/full-page-blog-editor.css", "utf8");
+const css = readFileSync(
+  "components/design-system/patterns/FullPageBlogEditor.css",
+  "utf8",
+);
 
 test("blog editor keeps modal mode and offers full-page live split preview", () => {
   assert.match(source, /"フルページで編集"/);

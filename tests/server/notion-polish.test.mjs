@@ -2,8 +2,11 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 
-const landing = readFileSync("app/landing.css", "utf8");
-const theme = readFileSync("app/brand-theme.css", "utf8");
+const landing = readFileSync(
+  "components/design-system/patterns/Landing.css",
+  "utf8",
+);
+const theme = readFileSync("styles/brand-theme.css", "utf8");
 const variants = readFileSync("components/notion/variants.ts", "utf8");
 
 test("keeps the landing polish restrained and stateful", () => {
