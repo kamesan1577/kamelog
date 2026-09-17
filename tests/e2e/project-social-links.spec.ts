@@ -65,7 +65,7 @@ test("profile exposes GitHub, X and Qiita as brand-icon links", async ({
     .getByRole("button", { name: "タイムライン" })
     .click();
 
-  const profile = page.locator(".profile-card");
+  const profile = page.locator('[data-ds="profile-card"]');
   await expect(profile).toBeVisible();
   const row = profile.locator("[data-kamelog-profile-social-links]");
   await expect(row).toBeVisible();

@@ -1597,9 +1597,13 @@ export default function Notebook({
     <div className="notebook">
       <Toaster position="bottom-center" theme="light" />
       {xFallbackAction}
-      <div className="site-layout">
-        <aside className="public-sidebar">
-          <button className="site-name" onClick={() => nav("home")}>
+      <div data-ds="site-layout" className="site-layout">
+        <aside data-ds="public-sidebar" className="public-sidebar">
+          <button
+            data-ds="site-name"
+            className="site-name"
+            onClick={() => nav("home")}
+          >
             <strong>kamelog</strong>
             <ChevronDown size={15} />
           </button>
@@ -1686,7 +1690,7 @@ export default function Notebook({
           )}
           <div className="sidebar-foot">
             {!login ? (
-              <details className="admin-access">
+              <details data-ds="admin-access" className="admin-access">
                 <summary>•••</summary>
                 <button onClick={logIn}>ログイン</button>
               </details>
@@ -2197,6 +2201,7 @@ export default function Notebook({
                       </div>
                       {featuredPost ? (
                         <button
+                          data-ds="featured-post"
                           className="featured-post"
                           onClick={() => openPost(featuredPost.id)}
                         >
@@ -2231,7 +2236,10 @@ export default function Notebook({
                 <>
                   <PageHeader className="page-heading" title="タイムライン" />
                   {timelineMode === "kamelog" && (
-                    <label className="home-search mobile-search">
+                    <label
+                      data-ds="mobile-search"
+                      className="home-search mobile-search"
+                    >
                       <Search size={17} />
                       <input
                         value={query}
@@ -2254,7 +2262,10 @@ export default function Notebook({
                         if (next === "fediverse") void loadFederationTimeline();
                       }}
                     >
-                      <TabsList className="fediverse-mode-switch">
+                      <TabsList
+                        data-ds="fediverse-mode-switch"
+                        className="fediverse-mode-switch"
+                      >
                         <TabsTrigger value="kamelog">kamelog</TabsTrigger>
                         <TabsTrigger value="fediverse">Fediverse</TabsTrigger>
                       </TabsList>
@@ -2365,7 +2376,7 @@ export default function Notebook({
                         onSortChange={setSort}
                       />
                       {tag && (
-                        <div className="filter-active">
+                        <div data-ds="filter-active" className="filter-active">
                           #{tag}
                           <button onClick={() => setTag("")}>
                             <X size={14} />
@@ -2526,6 +2537,7 @@ export default function Notebook({
                     </>
                   ) : (
                     <section
+                      data-ds="fediverse-timeline"
                       className="fediverse-timeline"
                       aria-labelledby="fediverse-timeline-heading"
                     >
@@ -2671,11 +2683,12 @@ export default function Notebook({
               )}
             </main>
             <aside
+              data-ds="right-sidebar"
               className={
                 "right-sidebar " + (view === "home" ? "landing-hidden" : "")
               }
             >
-              <div className="profile-card">
+              <div data-ds="profile-card" className="profile-card">
                 <Avatar value={profile.icon} large />
                 <h2>{profile.name}</h2>
                 <span className="profile-handle">@kamesan1577</span>
@@ -2795,7 +2808,10 @@ export default function Notebook({
             askClose();
           }}
         >
-          <header className="mobile-editor-header">
+          <header
+            data-ds="mobile-editor-header"
+            className="mobile-editor-header"
+          >
             <button
               type="button"
               className="mobile-editor-close"
@@ -2929,7 +2945,7 @@ export default function Notebook({
                   <TabsTrigger value="upload">動画を選ぶ</TabsTrigger>
                 </TabsList>
               </Tabs>
-              <div className="vlog-stage">
+              <div data-ds="vlog-stage" className="vlog-stage">
                 {clip ? (
                   <video src={clip} controls playsInline />
                 ) : vMode === "camera" ? (
@@ -3395,7 +3411,7 @@ function VlogFrame({ post }: { post: Post }) {
     void element.play().catch(() => undefined);
   };
   return (
-    <div className="vlog-frame">
+    <div data-ds="vlog-frame" className="vlog-frame">
       {post.video ? (
         <video
           ref={video}

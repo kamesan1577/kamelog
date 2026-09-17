@@ -74,7 +74,9 @@ test("automatic tag labels", async ({ page }) => {
   await expect(post.getByText("手動タグ", { exact: true })).toBeVisible();
 
   await post.getByRole("button", { name: autoTagName }).click();
-  await expect(page.locator(".filter-active")).toContainText("#自動タグ候補");
+  await expect(page.locator('[data-ds="filter-active"]')).toContainText(
+    "#自動タグ候補",
+  );
 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(autoTag).toBeVisible();
