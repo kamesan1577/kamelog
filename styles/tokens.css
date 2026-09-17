@@ -60,6 +60,45 @@ inline {
 @utility max-w-ds-page {
   max-width: var(--ds-page-width);
 }
+@utility ds-shell-grid {
+  grid-template-columns: var(--ds-sidebar-width) minmax(0, 1fr);
+}
+@utility bg-ds-page {
+  background-color: var(--ds-color-bg-page);
+}
+@utility ds-mobile-navigation-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@utility pb-ds-4 {
+  padding-bottom: var(--ds-space-4);
+}
+@utility mt-ds-1 {
+  margin-top: var(--ds-space-1);
+}
+@utility ds-text-xs {
+  font-size: var(--ds-font-size-xs);
+}
+@utility ds-text-sm {
+  font-size: var(--ds-font-size-sm);
+}
+@utility ds-text-md {
+  font-size: var(--ds-font-size-md);
+}
+@utility ds-text-lg {
+  font-size: var(--ds-font-size-lg);
+}
+@utility space-y-ds-3 {
+  :where(& > :not(:last-child)) {
+    margin-block-start: 0;
+    margin-block-end: var(--ds-space-3);
+  }
+}
+@utility gap-ds-2 {
+  gap: var(--ds-space-2);
+}
+@utility p-ds-3 {
+  padding: var(--ds-space-3);
+}
 @utility px-ds-4 {
   padding-inline: var(--ds-space-4);
 }

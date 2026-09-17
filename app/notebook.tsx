@@ -31,13 +31,18 @@ import {
   Search,
   Settings,
   Share2,
-  SlidersHorizontal,
   Trash2,
   Upload,
   Video,
   X,
 } from "lucide-react";
 import { Button } from "@/components/notion/button";
+import { SideNavigation } from "@/components/design-system/patterns/SideNavigation";
+import { MobileNavigation } from "@/components/design-system/patterns/MobileNavigation";
+import { PageHeader } from "@/components/design-system/patterns/PageHeader";
+import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
+import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToolbar";
+import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -1618,29 +1623,29 @@ export default function Notebook({
             <strong>kamelog</strong>
             <ChevronDown size={15} />
           </button>
-          <nav>
-            <button
-              className={view === "home" ? "active" : ""}
-              onClick={() => nav("home")}
-            >
-              <Home />
-              <span>ホーム</span>
-            </button>
-            <button
-              className={view === "timeline" ? "active" : ""}
-              onClick={() => nav("timeline")}
-            >
-              <MessageCircle />
-              <span>タイムライン</span>
-            </button>
-            <button
-              className={view === "projects" ? "active" : ""}
-              onClick={() => nav("projects")}
-            >
-              <Globe />
-              <span>プロジェクト</span>
-            </button>
-          </nav>
+          <SideNavigation
+            items={[
+              {
+                id: "home",
+                label: "ホーム",
+                icon: <Home />,
+                active: view === "home",
+              },
+              {
+                id: "timeline",
+                label: "タイムライン",
+                icon: <MessageCircle />,
+                active: view === "timeline",
+              },
+              {
+                id: "projects",
+                label: "プロジェクト",
+                icon: <Globe />,
+                active: view === "projects",
+              },
+            ]}
+            onSelect={(id) => nav(id as View)}
+          />
           <div className="sidebar-section">
             <span>コンテンツ</span>
             {(
@@ -1754,7 +1759,7 @@ export default function Notebook({
             <main className="main-content">
               {view === "account" && login ? (
                 <section className="settings-page">
-                  <h1>アカウント</h1>
+                  <PageHeader title="アカウント" />
                   <div className="setting-avatar">
                     <Avatar value={icon || profile.icon} large />
                     <label className="upload-label">
@@ -2053,44 +2058,20 @@ export default function Notebook({
                 </section>
               ) : view === "projects" ? (
                 <section className="projects-page">
-                  <h1>プロジェクト</h1>
-                  <div className="project-grid">
-                    {projects.map((project) => {
-                      const card = (
-                        <>
-                          <img src={project.thumbnail} alt="" />
-                          <div>
-                            <h2>
-                              {project.title}{" "}
-                              {project.links.source && (
-                                <ArrowUpRight size={16} />
-                              )}
-                            </h2>
-                            <p>{project.summary}</p>
-                            <span>{project.stack.join(" · ")}</span>
-                          </div>
-                        </>
-                      );
-                      return project.links.source ? (
-                        <a
-                          className="project-tile"
-                          key={project.slug}
-                          href={project.links.source}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {card}
-                        </a>
-                      ) : (
-                        <div
-                          className="project-tile project-tile-static"
-                          key={project.slug}
-                        >
-                          {card}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <PageHeader title="プロジェクト" />
+                  <ProjectList
+                    className="project-grid"
+                    tileClassName="project-tile"
+                    staticTileClassName="project-tile project-tile-static"
+                    items={projects.map((project) => ({
+                      slug: project.slug,
+                      title: project.title,
+                      summary: project.summary,
+                      stack: project.stack,
+                      thumbnail: project.thumbnail,
+                      source: project.links.source,
+                    }))}
+                  />
                 </section>
               ) : item ? (
                 <section
@@ -2200,52 +2181,41 @@ export default function Notebook({
 
                   <EngineeringProfile />
                   <div className="landing-lower">
-                    <div className="content-index">
-                      <div className="landing-section-title">
-                        <h2>コンテンツ</h2>
-                      </div>
-                      <div className="content-cards">
-                        {(
-                          [
-                            {
-                              id: "blog",
-                              icon: FileText,
-                              title: "ブログ",
-                              text: "技術、開発、個人制作についての記事",
-                            },
-                            {
-                              id: "tweet",
-                              icon: MessageCircle,
-                              title: "つぶやき",
-                              text: "日々の短いメモ",
-                            },
-                            {
-                              id: "vlog",
-                              icon: Video,
-                              title: "vlog",
-                              text: "数秒から30秒までの動画",
-                            },
-                          ] as const
-                        ).map(({ id, icon: Icon, title: cardTitle, text }) => (
-                          <button
-                            key={id}
-                            onClick={() => {
-                              nav("timeline");
-                              setFilter(id);
-                            }}
-                          >
-                            <span className={`content-icon ${id}`}>
-                              <Icon size={18} />
-                            </span>
-                            <span className="content-card-copy">
-                              <strong>{cardTitle}</strong>
-                              <small>{text}</small>
-                            </span>
-                            <b>{posts.filter((p) => p.kind === id).length}</b>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                    <ContentIndex
+                      className="content-index"
+                      items={
+                        [
+                          {
+                            id: "blog",
+                            icon: <FileText size={18} />,
+                            title: "ブログ",
+                            description: "技術、開発、個人制作についての記事",
+                            count: posts.filter((p) => p.kind === "blog")
+                              .length,
+                          },
+                          {
+                            id: "tweet",
+                            icon: <MessageCircle size={18} />,
+                            title: "つぶやき",
+                            description: "日々の短いメモ",
+                            count: posts.filter((p) => p.kind === "tweet")
+                              .length,
+                          },
+                          {
+                            id: "vlog",
+                            icon: <Video size={18} />,
+                            title: "vlog",
+                            description: "数秒から30秒までの動画",
+                            count: posts.filter((p) => p.kind === "vlog")
+                              .length,
+                          },
+                        ] as const
+                      }
+                      onSelect={(id) => {
+                        nav("timeline");
+                        setFilter(id as Kind);
+                      }}
+                    />
 
                     <div className="featured-area">
                       <div className="landing-section-title">
@@ -2285,9 +2255,7 @@ export default function Notebook({
                 </section>
               ) : (
                 <>
-                  <section className="page-heading">
-                    <h1>タイムライン</h1>
-                  </section>
+                  <PageHeader className="page-heading" title="タイムライン" />
                   {timelineMode === "kamelog" && (
                     <label className="home-search mobile-search">
                       <Search size={17} />
@@ -2421,36 +2389,15 @@ export default function Notebook({
                   )}
                   {timelineMode === "kamelog" ? (
                     <>
-                      <div className="timeline-toolbar">
-                        <Tabs
-                          value={filter}
-                          onValueChange={(v) => setFilter(v as "all" | Kind)}
-                        >
-                          <TabsList variant="line" className="feed-tabs">
-                            <TabsTrigger value="all">すべて</TabsTrigger>
-                            <TabsTrigger value="blog">ブログ</TabsTrigger>
-                            <TabsTrigger value="tweet">つぶやき</TabsTrigger>
-                            <TabsTrigger value="vlog">vlog</TabsTrigger>
-                          </TabsList>
-                        </Tabs>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button className="sort-button">
-                              <SlidersHorizontal size={17} />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setSort("new")}>
-                              新しい順 {sort === "new" && <Check />}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setSort("popular")}
-                            >
-                              いいね順 {sort === "popular" && <Check />}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                      <TimelineToolbar
+                        className="timeline-toolbar"
+                        filter={filter}
+                        onFilterChange={(value) =>
+                          setFilter(value as "all" | Kind)
+                        }
+                        sort={sort}
+                        onSortChange={setSort}
+                      />
                       {tag && (
                         <div className="filter-active">
                           #{tag}
@@ -2809,29 +2756,30 @@ export default function Notebook({
               )}
             </aside>
           </div>
-          <nav className="mobile-nav">
-            <button
-              className={view === "home" ? "active" : ""}
-              onClick={() => nav("home")}
-            >
-              <Home />
-              <span>ホーム</span>
-            </button>
-            <button
-              className={view === "timeline" ? "active" : ""}
-              onClick={() => nav("timeline")}
-            >
-              <MessageCircle />
-              <span>タイムライン</span>
-            </button>
-            <button
-              className={view === "projects" ? "active" : ""}
-              onClick={() => nav("projects")}
-            >
-              <Globe />
-              <span>プロジェクト</span>
-            </button>
-          </nav>
+          <MobileNavigation
+            className="mobile-nav"
+            items={[
+              {
+                id: "home",
+                label: "ホーム",
+                icon: <Home />,
+                active: view === "home",
+              },
+              {
+                id: "timeline",
+                label: "タイムライン",
+                icon: <MessageCircle />,
+                active: view === "timeline",
+              },
+              {
+                id: "projects",
+                label: "プロジェクト",
+                icon: <Globe />,
+                active: view === "projects",
+              },
+            ]}
+            onSelect={(id) => nav(id as View)}
+          />
           {login && (
             <button
               className="mobile-create"

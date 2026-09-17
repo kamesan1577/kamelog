@@ -6,7 +6,7 @@ test("mobile bottom navigation is split into three equal tap areas", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  const nav = page.locator(".mobile-nav");
+  const nav = page.getByRole("navigation", { name: "モバイルナビゲーション" });
   await expect(nav).toBeVisible();
   const buttons = nav.locator("button");
   await expect(buttons).toHaveCount(3);
