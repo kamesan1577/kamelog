@@ -31,7 +31,7 @@ test("gives shared buttons visible hover, active and focus states", () => {
 test("uses the original ink color across the site theme", () => {
   assert.match(theme, /--kamelog-ink:\s*#37352f/);
   assert.match(theme, /--kamelog-paper:\s*#f6f5f4/);
-  assert.match(theme, /\.public-sidebar button\.active/);
-  assert.match(theme, /\.content-grid:not\(\.landing-layout\)/);
+  assert.match(theme, /\[data-ds="public-sidebar"\] button\.active/);
+  assert.match(theme, /\[data-ds="content-grid"\]:not\(\.landing-layout\)/);
   assert.doesNotMatch(theme, /#2383e2|#277dae|#337ea9/);
 });
