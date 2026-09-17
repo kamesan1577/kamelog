@@ -14,7 +14,10 @@ test("keeps blog detail actions visible while reading", async () => {
     readFile(layoutUrl, "utf8"),
   ]);
 
-  assert.match(layout, /import "\.\/detail-actions\.css";/);
+  assert.match(
+    layout,
+    /import "\.\.\/components\/design-system\/patterns\/DetailActions.css";/,
+  );
   assert.match(
     css,
     /@media \(min-width: 1000px\)[\s\S]*\.detail-page:has\(> \.markdown\) > \.post-actions\s*\{[^}]*position:\s*sticky;[^}]*top:\s*76px;/,
