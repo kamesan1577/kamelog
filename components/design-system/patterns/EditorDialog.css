@@ -244,3 +244,9 @@
     gap: 6px;
   }
 }
+
+[data-ds="editor-dialog"] .editor-kinds [data-slot="tabs-trigger"][data-state="active"],
+[data-ds="editor-dialog"] .vlog-tabs [data-slot="tabs-trigger"][data-state="active"] {
+  background: #37352f;
+  color: #fff;
+}

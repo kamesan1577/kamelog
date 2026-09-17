@@ -19,12 +19,22 @@
   color: #777168;
 }
 
+.desktop-composer .image-upload-button input {
+  display: none;
+}
+
 /* The legacy composer rule in globals.css makes every direct button flex: 1.
    The inline submit button must stay at its intrinsic width, including disabled state. */
 .desktop-composer .composer-start > [data-slot="button"] {
   flex: 0 0 auto;
   text-align: center;
   color: #fff;
+}
+
+.desktop-composer .composer-start > [data-slot="button"]:disabled {
+  background: #37352f66;
+  color: #fff;
+  opacity: 1;
 }
 
 .desktop-composer .composer-kinds > .draft-button {

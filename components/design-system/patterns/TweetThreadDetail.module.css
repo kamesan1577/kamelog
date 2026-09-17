@@ -42,11 +42,11 @@
 .ancestors,
 .children {
   display: grid;
-  gap: 8px;
+  gap: 12px;
 }
 
 .ancestors {
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .current {
@@ -161,8 +161,8 @@
 }
 
 .children {
-  margin-top: 8px;
-  padding-top: 20px;
+  margin-top: 12px;
+  padding-top: 24px;
   border-top: 1px solid #ebe8e2;
 }
 
@@ -201,6 +201,10 @@
   border: 1px solid #dedbd4;
   border-radius: 10px;
   background: #faf9f7;
+}
+
+.composer .image-upload-button input {
+  display: none;
 }
 
 .replyTarget {
