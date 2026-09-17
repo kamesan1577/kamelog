@@ -1634,7 +1634,7 @@ export default function Notebook({
             ]}
             onSelect={(id) => nav(id as View)}
           />
-          <div className="sidebar-section">
+          <div data-ds="sidebar-section" className="sidebar-section">
             <span>コンテンツ</span>
             {(
               [
@@ -1668,7 +1668,7 @@ export default function Notebook({
             <ArrowUpRight />
           </a>
           {login && (
-            <div className="admin-nav">
+            <div data-ds="admin-nav" className="admin-nav">
               <Button
                 variant="solid"
                 size="sm"
@@ -1692,7 +1692,7 @@ export default function Notebook({
               <button onClick={logOut}>ログアウト</button>
             </div>
           )}
-          <div className="sidebar-foot">
+          <div data-ds="sidebar-foot" className="sidebar-foot">
             {!login ? (
               <details data-ds="admin-access" className="admin-access">
                 <summary>•••</summary>
@@ -1704,9 +1704,13 @@ export default function Notebook({
             <small>© 2026 {profile.name}</small>
           </div>
         </aside>
-        <div className="workspace">
-          <header className="public-header">
-            <button className="mobile-name" onClick={() => nav("home")}>
+        <div data-ds="workspace" className="workspace">
+          <header data-ds="public-header" className="public-header">
+            <button
+              data-ds="mobile-name"
+              className="mobile-name"
+              onClick={() => nav("home")}
+            >
               <b>kamelog</b>
             </button>
             <span>
@@ -1721,12 +1725,13 @@ export default function Notebook({
                       : "ホーム"}
             </span>
             {!login ? (
-              <details className="mobile-login">
+              <details data-ds="mobile-login" className="mobile-login">
                 <summary>•••</summary>
                 <button onClick={logIn}>ログイン</button>
               </details>
             ) : (
               <button
+                data-ds="mobile-account"
                 className="mobile-account"
                 onClick={() => {
                   nav("account");
@@ -1743,14 +1748,18 @@ export default function Notebook({
             className={
               "content-grid " + (view === "home" ? "landing-layout" : "")
             }
+            data-ds="content-grid"
           >
-            <main className="main-content">
+            <main data-ds="main-content" className="main-content">
               {view === "account" && login ? (
                 <section data-ds="owner-settings" className="settings-page">
                   <PageHeader title="アカウント" />
                   <div data-ds="owner-profile" className="setting-avatar">
                     <Avatar value={icon || profile.icon} large />
-                    <label className="upload-label">
+                    <label
+                      data-ds="owner-profile-upload"
+                      className="upload-label"
+                    >
                       <Upload size={15} />
                       画像を変更
                       <input
@@ -1773,14 +1782,14 @@ export default function Notebook({
                       </button>
                     ))}
                   </div>
-                  <label className="field">
+                  <label data-ds="owner-settings-field" className="field">
                     名前
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
                   </label>
-                  <label className="field">
+                  <label data-ds="owner-settings-field" className="field">
                     自己紹介
                     <textarea
                       value={bio}
@@ -2876,7 +2885,7 @@ export default function Notebook({
                 <span>{drafts.length}</span>
               </button>
               {editorDrafts && (
-                <div className="draft-list">
+                <div data-ds="draft-list" className="draft-list">
                   {drafts.map((draft) => (
                     <button
                       type="button"
@@ -3348,7 +3357,7 @@ export default function Notebook({
           <DialogDescription>
             保存しない場合、入力内容は削除されます。
           </DialogDescription>
-          <div className="confirm-actions">
+          <div data-ds="confirm-actions" className="confirm-actions">
             <Button onClick={() => setCloseAsk(false)}>編集を続ける</Button>
             <Button onClick={discard}>削除して閉じる</Button>
             <Button variant="solid" onClick={saveDraft}>
@@ -3361,7 +3370,7 @@ export default function Notebook({
         <DialogContent>
           <DialogTitle>下書き</DialogTitle>
           <DialogDescription>サーバーに保存されています。</DialogDescription>
-          <div className="draft-list">
+          <div data-ds="draft-list" className="draft-list">
             {drafts.map((d) => (
               <button
                 key={d.id}
@@ -3389,12 +3398,15 @@ export default function Notebook({
         open={!!remove}
         onOpenChange={(open) => !open && setRemove(null)}
       >
-        <AlertDialogContent className="delete-dialog">
+        <AlertDialogContent data-ds="delete-dialog" className="delete-dialog">
           <AlertDialogTitle>投稿を削除しますか？</AlertDialogTitle>
           <AlertDialogDescription>
             公開サイトから削除されます。
           </AlertDialogDescription>
-          <AlertDialogFooter className="confirm-actions">
+          <AlertDialogFooter
+            data-ds="confirm-actions"
+            className="confirm-actions"
+          >
             <Button onClick={() => setRemove(null)}>キャンセル</Button>
             <Button
               variant="red-fill"

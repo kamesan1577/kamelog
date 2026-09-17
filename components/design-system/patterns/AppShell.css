@@ -1,0 +1,17 @@
+[data-ds="workspace"] {
+  min-width: 0;
+  flex: 1;
+}
+
+[data-ds="content-grid"] {
+  display: grid;
+  grid-template-columns: minmax(0, 660px) 232px;
+  gap: 46px;
+  max-width: 1030px;
+  margin: 0 auto;
+  padding: 47px 40px 60px;
+}
+
+[data-ds="main-content"] {
+  min-width: 0;
+}
