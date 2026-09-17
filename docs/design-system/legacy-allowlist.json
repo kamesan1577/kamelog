@@ -7,7 +7,6 @@
     "app/federation.css",
     "app/globals.css",
     "app/landing.css",
-    "app/mobile-blog-editor.css",
     "app/mobile-composer.css",
     "app/mobile-nav-layout.css",
     "app/tweet-thread-bridge.module.css"
