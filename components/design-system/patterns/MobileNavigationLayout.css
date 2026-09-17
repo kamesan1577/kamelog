@@ -5,7 +5,9 @@
 
 @media (max-width: 640px) {
   [data-ds="mobile-navigation"] {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    justify-content: initial;
     position: fixed;
     bottom: 0;
     left: 0;
