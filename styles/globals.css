@@ -186,30 +186,6 @@ textarea:focus {
   border-radius: 12px;
 }
 
-@media (min-width: 1450px) {
-  .content-grid {
-    padding-top: 60px;
-    gap: 60px;
-    grid-template-columns: minmax(0, 680px) 240px;
-  }
-}
-@media (max-width: 1150px) {
-  .content-grid {
-    gap: 30px;
-    padding: 35px 28px;
-    grid-template-columns: minmax(0, 1fr) 200px;
-  }
-}
-@media (max-width: 950px) {
-  .right-sidebar {
-    display: none;
-  }
-  .content-grid {
-    display: block;
-    max-width: 730px;
-    padding: 32px;
-  }
-}
 @media (max-width: 640px) {
   .preview-toolbar {
     padding: 0 10px;
@@ -283,9 +259,6 @@ textarea:focus {
   }
   .sample-badge {
     font-size: 12px;
-  }
-  .content-grid {
-    padding: 28px 20px 105px;
   }
   .page-heading {
     margin-bottom: 23px;
