@@ -8,17 +8,70 @@
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
-  transition: transform 0.16s, box-shadow 0.16s;
+  transition:
+    transform 0.16s,
+    box-shadow 0.16s;
 }
-[data-ds="project-tile"]:hover { transform: translateY(-2px); box-shadow: 0 7px 22px #0000000d; }
-[data-ds="project-tile"] img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #f0efeb; }
-[data-ds="project-tile"] > div { padding: 15px; }
-[data-ds="project-tile"] h2 { display: flex; align-items: center; gap: 7px; font-size: 16px; font-weight: 650; margin: 0 0 8px; }
-[data-ds="project-tile"] p { color: #8b867c; font-size: 13px; margin: 0 0 11px; }
-[data-ds="project-tile"] span { font-size: 11px; background: #efefeb; padding: 3px 6px; border-radius: 3px; color: #837e74; }
+[data-ds="project-tile"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 22px #0000000d;
+}
+[data-ds="project-tile"] img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: contain;
+  background: #f0efeb;
+}
+[data-ds="project-tile"][data-ds-variant="external"] img {
+  object-fit: contain;
+}
+[data-ds="project-tile"] > div {
+  padding: 15px;
+}
+[data-ds="project-tile"] h2 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 16px;
+  font-weight: 650;
+  margin: 0 0 8px;
+}
+[data-ds="project-tile"] p {
+  color: #8b867c;
+  font-size: 13px;
+  margin: 0 0 11px;
+}
+[data-ds="project-tile"] span {
+  font-size: 11px;
+  background: #efefeb;
+  padding: 3px 6px;
+  border-radius: 3px;
+  color: #837e74;
+}
 @media (max-width: 640px) {
-  [data-ds="project-list"] { grid-template-columns: 1fr; }
-  [data-ds="project-tile"] { display: grid; grid-template-columns: 41% 1fr; }
-  [data-ds="project-tile"] img { height: 100%; aspect-ratio: auto; }
-  [data-ds="project-tile"] > div { padding: 13px; }
+  [data-ds="project-list"] {
+    grid-template-columns: 1fr;
+  }
+  [data-ds="project-tile"] {
+    display: grid;
+    grid-template-columns: 41% 1fr;
+  }
+  [data-ds="project-tile"] img {
+    height: 100%;
+    aspect-ratio: auto;
+  }
+  [data-ds="project-tile"] > div {
+    padding: 13px;
+  }
+}
+
+@media (max-width: 320px) {
+  [data-ds="project-tile"] {
+    display: block;
+  }
+  [data-ds="project-tile"] img {
+    height: auto;
+    aspect-ratio: 16/9;
+  }
 }

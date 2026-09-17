@@ -162,3 +162,43 @@
     font-size: 23px;
   }
 }
+
+[data-ds="editor-dialog"] .editor-drafts {
+  border: 1px solid #ebe9e3;
+  border-radius: 6px;
+  padding: 8px;
+}
+[data-ds="editor-dialog"] .editor-drafts > button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 4px 6px;
+  color: #716d65;
+  font-size: 13px;
+}
+[data-ds="editor-dialog"] .editor-drafts > button span {
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: #f0efeb;
+  color: #8b867c;
+  text-align: center;
+}
+[data-ds="editor-dialog"] .editor-drafts .draft-list {
+  max-height: 170px;
+  overflow: auto;
+  margin-top: 7px;
+}
+@media (max-width: 640px) {
+  [data-ds="editor-dialog"] [data-slot="dialog-close"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+}
