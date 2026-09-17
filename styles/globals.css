@@ -484,10 +484,6 @@ textarea:focus {
   color: #918e86;
   margin: 0;
 }
-[data-ds="timeline-sort"] {
-  color: #8e8b84;
-  padding: 8px;
-}
 .right-sidebar {
   padding-top: 4px;
 }
@@ -542,86 +538,6 @@ textarea:focus {
 .topic-list button:hover,
 .topic-list .active {
   color: #2383e2;
-}
-.project-aside {
-  border-top: 1px solid #eae7e0;
-  padding-top: 21px;
-}
-.project-aside > a {
-  display: flex;
-  gap: 9px;
-  align-items: center;
-  color: #9b9386;
-}
-.project-aside > a > span {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.project-aside b {
-  font-size: 13px;
-  color: #786e60;
-  font-weight: 500;
-}
-.project-aside small {
-  font-size: 12px;
-  color: #a29a8e;
-}
-.project-aside > a > svg:last-child {
-  margin-left: auto;
-}
-.site-footer {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 12px;
-  color: #b2a99b;
-  margin-top: 36px;
-}
-.feed-end {
-  padding: 25px;
-  text-align: center;
-  font-size: 12px;
-  color: #b9b3a9;
-}
-.feed-end span {
-  margin: 0 8px;
-}
-.vlog-preview {
-  position: relative;
-  margin-top: 12px;
-  border-radius: 5px;
-  overflow: hidden;
-  background: #f1f1ee;
-}
-.vlog-preview video {
-  display: block;
-  width: 100%;
-  max-height: 280px;
-  object-fit: cover;
-}
-.vlog-caption {
-  display: block;
-  background: #f7f6f3;
-  color: #979083;
-  font-size: 12px;
-  padding: 8px 11px;
-  letter-spacing: 1.4px;
-}
-.main-search {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border: 1px solid #d9d5cb;
-  padding: 12px;
-  border-radius: 5px;
-  margin-bottom: 24px;
-  color: #999;
-}
-.main-search input {
-  flex: 1;
-  min-width: 0;
-  font-size: 15px;
 }
 .filter-active {
   display: flex;
@@ -1102,9 +1018,6 @@ textarea:focus {
     gap: 21px;
     margin: 0 12px;
   }
-  [data-ds="timeline-sort"] {
-    padding: 8px 0 8px 8px;
-  }
   .post {
     padding-top: 20px;
   }
@@ -1197,9 +1110,6 @@ textarea:focus {
   }
   .preview-stage.desktop .preview-device {
     align-self: flex-start;
-  }
-  .vlog-preview video {
-    max-height: 230px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
