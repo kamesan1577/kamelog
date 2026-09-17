@@ -94,6 +94,36 @@
   overflow: auto;
 }
 
+[data-ds="editor-dialog"] .image-upload-button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #777168;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+[data-ds="editor-dialog"] .image-upload-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+[data-ds="editor-dialog"] .image-upload-button input {
+  display: none;
+}
+
+[data-ds="editor-dialog"] .editor-media-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+}
+
+[data-ds="editor-dialog"] .editor-media-row > span {
+  font-size: 12px;
+  color: #999;
+}
+
 [data-ds="editor-footer"] {
   display: flex;
   align-items: center;
@@ -160,6 +190,12 @@
   }
   [data-ds="editor-dialog"] .title-input {
     font-size: 23px;
+  }
+  [data-ds="editor-dialog"] .editor-media-row {
+    min-height: 34px;
+  }
+  [data-ds="editor-dialog"] .image-upload-button {
+    min-height: 38px;
   }
 }
 

@@ -159,3 +159,49 @@
   background: transparent;
   overflow: visible;
 }
+
+[data-ds="detail-markdown"] .mermaid-diagram {
+  margin: 20px 0;
+  overflow-x: auto;
+  text-align: center;
+}
+
+[data-ds="detail-markdown"] .mermaid-diagram svg {
+  max-width: 100%;
+  height: auto;
+}
+
+[data-ds="detail-markdown"] .mermaid-error {
+  color: #a35f5f;
+}
+
+[data-ds="detail-markdown"] .social-embed {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  margin: 22px 0;
+  overflow: hidden;
+  border: 1px solid #e4e1da;
+  border-radius: 8px;
+  background: #f6f5f2;
+}
+
+[data-ds="detail-markdown"] .social-embed iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+[data-ds="detail-markdown"] .social-embed.x-embed {
+  aspect-ratio: auto;
+  height: 520px;
+  max-width: 550px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 640px) {
+  [data-ds="detail-markdown"] .social-embed.x-embed {
+    height: 480px;
+  }
+}
