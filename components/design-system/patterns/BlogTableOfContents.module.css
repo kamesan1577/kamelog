@@ -6,7 +6,7 @@
   background: #fafaf8;
 }
 
-[data-ds="blog-table-of-contents"] .blog-table-of-contents-title {
+[data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-title"] {
   margin: 0;
   color: #625e54;
   font-size: 13px;
@@ -36,23 +36,33 @@
   color: #37352f;
 }
 
-[data-ds="blog-table-of-contents"] .blog-table-of-contents-level-3 a {
+[data-ds="blog-table-of-contents"]
+  [data-ds="blog-table-of-contents-level-3"]
+  a {
   padding-left: 17px;
 }
 
-[data-ds="blog-table-of-contents"] .blog-table-of-contents-level-4 a {
+[data-ds="blog-table-of-contents"]
+  [data-ds="blog-table-of-contents-level-4"]
+  a {
   padding-left: 29px;
 }
 
-[data-ds="blog-table-of-contents"] .blog-table-of-contents-level-5 a {
+[data-ds="blog-table-of-contents"]
+  [data-ds="blog-table-of-contents-level-5"]
+  a {
   padding-left: 41px;
 }
 
-[data-ds="blog-table-of-contents"] .blog-table-of-contents-level-6 a {
+[data-ds="blog-table-of-contents"]
+  [data-ds="blog-table-of-contents-level-6"]
+  a {
   padding-left: 53px;
 }
 
-.detail-page .markdown [data-kamelog-toc-generated="true"] {
+[data-ds="detail-page"]
+  [data-ds="detail-markdown"]
+  [data-kamelog-toc-generated="true"] {
   scroll-margin-top: 20px;
 }
 

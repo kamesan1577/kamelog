@@ -1,6 +1,5 @@
 {
   "css": [
-    "app/blog-toc.css",
     "app/brand-theme.css",
     "app/composer-layout.css",
     "app/detail-actions.css",
