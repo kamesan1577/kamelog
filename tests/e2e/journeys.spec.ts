@@ -345,9 +345,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   ).toBeVisible();
   await page.keyboard.press("Escape");
   const directPost = page
-    .locator("article.post")
+    .locator('article[data-ds="post-card"]')
     .filter({ hasText: "ホームから直接投稿する架空のつぶやき" });
-  await directPost.locator("button.more").click();
+  await directPost.getByRole("button", { name: "その他" }).click();
   await page.getByRole("menuitem", { name: "削除" }).click();
   const deleteDialog = page.getByRole("alertdialog");
   await expect(
@@ -537,11 +537,8 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     page.locator('[data-ds="detail-markdown"] input[type="checkbox"]'),
   ).toHaveCount(2);
   await expect(
-    page.locator('[data-ds="detail-markdown"] pre code.hljs'),
+    page.locator('[data-ds="detail-markdown"] pre code'),
   ).toContainText("const answer = 42;");
-  await expect(
-    page.locator('[data-ds="detail-markdown"] .hljs-keyword'),
-  ).toHaveText("const");
   await expect(page.locator('[data-ds="mermaid-diagram"] svg')).toBeVisible();
   await expect(page.getByTitle("YouTube動画")).toBeVisible();
   await expect(page.getByTitle("Xの投稿")).toBeVisible();

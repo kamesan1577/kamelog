@@ -1554,7 +1554,7 @@ export default function Notebook({
       {login && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="more">
+            <button className="more" aria-label="その他">
               <MoreHorizontal size={19} />
             </button>
           </DropdownMenuTrigger>
