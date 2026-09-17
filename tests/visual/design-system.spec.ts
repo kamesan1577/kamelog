@@ -27,10 +27,15 @@ for (const viewport of [
     ["project-list", "patterns-projectlist--default"],
     ["mobile-navigation", "patterns-mobilenavigation--three-equal-slots"],
   ] as const) {
-    test(` representative state at `, async ({ page }) => {
-      await page.setViewportSize(viewport);
-      await page.goto(`/iframe.html?id=&viewMode=story`);
-      await expect(page.locator("#storybook-root")).toHaveScreenshot(`-.png`);
-    });
+    test(
+      name + " representative state at " + viewport.name,
+      async ({ page }) => {
+        await page.setViewportSize(viewport);
+        await page.goto("/iframe.html?id=" + story + "&viewMode=story");
+        await expect(page.locator("#storybook-root")).toHaveScreenshot(
+          name + "-" + viewport.name + ".png",
+        );
+      },
+    );
   }
 }
