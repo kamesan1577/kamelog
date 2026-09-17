@@ -87,7 +87,10 @@ import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
 import { buildXIntentUrl } from "@/lib/x-intent.mjs";
-import threadStyles from "@/components/design-system/patterns/TweetThreadBridge.module.css";
+import { flattenTweetThreads as flattenTweetThreadsUntyped } from "@/lib/tweet-threads.mjs";
+import { hasTweetContent, tweetPostInput } from "@/lib/tweet-composer.mjs";
+import threadStyles from "@/components/design-system/patterns/TweetThreadDetail.module.css";
+import TweetThreadDetail from "./tweet-thread-detail";
 import {
   EngineeringProfile,
   ContactLinks,
@@ -122,7 +125,18 @@ type Post = {
   pinned?: boolean;
   images?: string[];
   federationEnabled?: boolean;
+  threadDepth?: number;
+  threadRootId?: string;
+  threadParentMissing?: boolean;
 };
+const flattenTweetThreads = flattenTweetThreadsUntyped as <T extends Post>(
+  posts: T[],
+  matches?: (post: T) => boolean,
+  compareGroups?: (
+    a: { root: T; latestDate: string },
+    b: { root: T; latestDate: string },
+  ) => number,
+) => Array<T & { threadDepth: number; threadRootId: string }>;
 type Draft = {
   revision?: number;
   id: string;
@@ -1204,16 +1218,27 @@ export default function Notebook({
         const saved = await api<Post>(
           "posts" + (editId ? "/" + editId : ""),
           editId ? "PUT" : "POST",
-          {
-            kind,
-            title: title.trim(),
-            body: body.trim(),
-            tags: old?.tags || [],
-            pinned: old?.pinned || false,
-            images: kind === "tweet" ? editorImages : [],
-            federationEnabled: editorFederationEnabled,
-            ...(old ? { revision: old.revision } : {}),
-          },
+          kind === "tweet"
+            ? {
+                ...tweetPostInput({
+                  body,
+                  images: editorImages,
+                  federationEnabled: editorFederationEnabled,
+                  tags: old?.tags || [],
+                  pinned: old?.pinned || false,
+                }),
+                ...(old ? { revision: old.revision } : {}),
+              }
+            : {
+                kind,
+                title: title.trim(),
+                body: body.trim(),
+                tags: old?.tags || [],
+                pinned: old?.pinned || false,
+                images: [],
+                federationEnabled: editorFederationEnabled,
+                ...(old ? { revision: old.revision } : {}),
+              },
         );
         setPosts((ps) => [saved, ...ps.filter((p) => p.id !== saved.id)]);
         setEditor(false);
@@ -1242,19 +1267,19 @@ export default function Notebook({
   const publishInlineTweet = () => {
     if (inFlight.current) return;
     const text = inlineBody.trim();
-    if (!text && !inlineImages.length) return;
+    if (!hasTweetContent(text, inlineImages)) return;
     const popup = prepareX("tweet");
     void guard(async () => {
       try {
-        const saved = await api<Post>("posts", "POST", {
-          kind: "tweet",
-          title: "",
-          body: text,
-          tags: [],
-          pinned: false,
-          images: inlineImages,
-          federationEnabled: inlineFederationEnabled,
-        });
+        const saved = await api<Post>(
+          "posts",
+          "POST",
+          tweetPostInput({
+            body: text,
+            images: inlineImages,
+            federationEnabled: inlineFederationEnabled,
+          }),
+        );
         setPosts((ps) => [saved, ...ps]);
         setInlineBody("");
         setInlineImages([]);
@@ -1452,14 +1477,21 @@ export default function Notebook({
       }
     });
   };
-  const shownPosts = posts.filter(
-    (p) =>
-      (filter === "all" || p.kind === filter) &&
-      (!tag || p.tags.includes(tag)) &&
-      (!query ||
-        (p.title + " " + p.body + " " + p.tags)
-          .toLowerCase()
-          .includes(query.toLowerCase())),
+  const postMatches = (p: Post) =>
+    (filter === "all" || p.kind === filter) &&
+    (!tag || p.tags.includes(tag)) &&
+    (!query ||
+      (p.title + " " + p.body + " " + p.tags)
+        .toLowerCase()
+        .includes(query.toLowerCase()));
+  const threadedPosts = flattenTweetThreads(posts, postMatches, (a, b) =>
+    sort === "popular"
+      ? b.root.likes - a.root.likes ||
+        b.latestDate.localeCompare(a.latestDate) ||
+        b.root.id.localeCompare(a.root.id)
+      : +(b.root.pinned === true) - +(a.root.pinned === true) ||
+        b.latestDate.localeCompare(a.latestDate) ||
+        b.root.id.localeCompare(a.root.id),
   );
   const shownReposts =
     filter === "all" && !tag
@@ -1477,12 +1509,7 @@ export default function Notebook({
               .includes(query.toLowerCase()),
         )
       : [];
-  const shown = [...shownPosts, ...shownReposts].sort((a, b) =>
-    sort === "popular"
-      ? b.likes - a.likes
-      : +(b.kind !== "repost" && !!b.pinned) -
-          +(a.kind !== "repost" && !!a.pinned) || b.date.localeCompare(a.date),
-  );
+  const shown = [...threadedPosts, ...shownReposts];
   const tags = Object.entries(
     posts.reduce<Record<string, number>>((counts, post) => {
       for (const postTag of post.tags) {
@@ -2077,57 +2104,67 @@ export default function Notebook({
                     <ArrowLeft size={17} />
                     戻る
                   </button>
-                  {item.kind === "tweet" && (
-                    <div data-kamelog-thread-before="true" />
-                  )}
-                  <div
-                    className={
-                      item.kind === "tweet" ? threadStyles.current : undefined
+                  <TweetThreadDetail
+                    posts={posts}
+                    selectedId={selected}
+                    authenticated={login}
+                    federationAvailable={Boolean(federationStatus?.enabled)}
+                    onOpenPost={openPost}
+                    onPostCreated={(saved) =>
+                      setPosts((current) => [saved as Post, ...current])
                     }
+                    enabled={item.kind === "tweet"}
                   >
-                    {item.kind === "tweet" && (
-                      <span className={threadStyles.currentLabel}>
-                        表示中の投稿
-                      </span>
-                    )}
-                    {meta(item)}
-                    {item.kind === "blog" ? (
-                      <Markdown
-                        text={
-                          item.body.startsWith("# ")
-                            ? item.body
-                            : "# " + item.title + "\n\n" + item.body
-                        }
-                      />
-                    ) : item.kind === "vlog" ? (
-                      <VlogFrame post={item} />
-                    ) : (
-                      <p data-ds="tweet-body" className="tweet-body">
-                        {item.body}
-                      </p>
-                    )}
-                    {item.kind === "tweet" && (
-                      <ImageGallery images={item.images} />
-                    )}
-                    <TagList
-                      className="tags"
-                      tags={item.tags}
-                      automaticTags={item.autoTags?.map((tag) => tag.tag)}
-                      renderTag={(tag, automatic) => (
-                        <Badge
-                          variant="gray"
-                          title={automatic ? "自動で付与されたタグ" : undefined}
-                          aria-label={automatic ? "自動タグ " + tag : undefined}
-                        >
-                          {automatic ? "AI · " + tag : tag}
-                        </Badge>
+                    <div
+                      className={
+                        item.kind === "tweet" ? threadStyles.current : undefined
+                      }
+                    >
+                      {item.kind === "tweet" && (
+                        <span className={threadStyles.currentLabel}>
+                          表示中の投稿
+                        </span>
                       )}
-                    />
-                    {actions(item)}
-                  </div>
-                  {item.kind === "tweet" && (
-                    <div data-kamelog-thread-after="true" />
-                  )}
+                      {meta(item)}
+                      {item.kind === "blog" ? (
+                        <Markdown
+                          text={
+                            item.body.startsWith("# ")
+                              ? item.body
+                              : "# " + item.title + "\n\n" + item.body
+                          }
+                        />
+                      ) : item.kind === "vlog" ? (
+                        <VlogFrame post={item} />
+                      ) : (
+                        <p data-ds="tweet-body" className="tweet-body">
+                          {item.body}
+                        </p>
+                      )}
+                      {item.kind === "tweet" && (
+                        <ImageGallery images={item.images} />
+                      )}
+                      <TagList
+                        className="tags"
+                        tags={item.tags}
+                        automaticTags={item.autoTags?.map((tag) => tag.tag)}
+                        renderTag={(tag, automatic) => (
+                          <Badge
+                            variant="gray"
+                            title={
+                              automatic ? "自動で付与されたタグ" : undefined
+                            }
+                            aria-label={
+                              automatic ? "自動タグ " + tag : undefined
+                            }
+                          >
+                            {automatic ? "AI · " + tag : tag}
+                          </Badge>
+                        )}
+                      />
+                      {actions(item)}
+                    </div>
+                  </TweetThreadDetail>
                 </section>
               ) : view === "home" ? (
                 <section data-ds="landing-page" className="landing-page">
@@ -2460,7 +2497,28 @@ export default function Notebook({
                             </article>
                           ) : (
                             <TimelineItem
-                              className={"post " + p.kind}
+                              className={
+                                "post " +
+                                p.kind +
+                                (p.kind === "tweet" && p.threadDepth
+                                  ? " " + threadStyles.timelineThread
+                                  : "")
+                              }
+                              data-ds={
+                                p.kind === "tweet" && p.threadDepth
+                                  ? "thread-post"
+                                  : "post-card"
+                              }
+                              data-thread-depth={
+                                p.kind === "tweet" ? p.threadDepth : undefined
+                              }
+                              style={
+                                p.kind === "tweet" && p.threadDepth
+                                  ? {
+                                      marginInlineStart: `${Math.min(p.threadDepth, 3) * 18}px`,
+                                    }
+                                  : undefined
+                              }
                               kind={p.kind}
                               key={p.id}
                               pinned={p.pinned}
@@ -2472,6 +2530,14 @@ export default function Notebook({
                                 </>
                               }
                             >
+                              {p.kind === "tweet" && p.threadParentMissing && (
+                                <span
+                                  data-ds="thread-parent-missing"
+                                  className={threadStyles.parentMissing}
+                                >
+                                  返信先は表示できません
+                                </span>
+                              )}
                               {meta(p)}
                               {p.kind === "vlog" ? (
                                 <div className="post-focus vlog-button">

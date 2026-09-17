@@ -495,8 +495,8 @@ export function createAPI(store, config, options = {}) {
           const old = store.get(table, id);
           if (method === "PUT" && !old)
             return json({ error: "Not found" }, 404);
-          let parentId = table === "posts" ? input.parentId : undefined;
-          if (table === "posts" && method === "PUT") {
+          let parentId = input.parentId;
+          if (method === "PUT") {
             if (
               input.parentId !== undefined &&
               input.parentId !== old?.parentId
@@ -508,6 +508,16 @@ export function createAPI(store, config, options = {}) {
             const parent = store.get("posts", parentId);
             if (!parent || parent.kind !== "tweet")
               return json({ error: "Invalid thread parent" }, 400);
+            if (
+              table === "posts" &&
+              !old?.federationEnabled &&
+              (input.federationEnabled ?? old?.federationEnabled) === true &&
+              parent.federationEnabled !== true
+            )
+              return json(
+                { error: "Thread parent is not available on Fediverse" },
+                400,
+              );
           }
           if (input.video && !store.get("media", input.video.split("/").pop()))
             return json({ error: "Unknown media" }, 400);
@@ -542,7 +552,7 @@ export function createAPI(store, config, options = {}) {
               id,
               {
                 ...input,
-                ...(table === "posts" && parentId ? { parentId } : {}),
+                ...(parentId ? { parentId } : {}),
                 ...(table === "posts"
                   ? { tags: extractHashtags(input.title, input.body) }
                   : {}),
