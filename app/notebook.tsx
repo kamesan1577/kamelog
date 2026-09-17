@@ -2723,9 +2723,9 @@ export default function Notebook({
                     <kbd>/</kbd>
                   </label>
                   {tags.length > 0 && (
-                    <div className="aside-section">
+                    <div data-ds="aside-section" className="aside-section">
                       <h3>タグ</h3>
-                      <div className="topic-list">
+                      <div data-ds="topic-list" className="topic-list">
                         {visibleTags.map(({ name, count }) => (
                           <button
                             key={name}

@@ -484,39 +484,6 @@ textarea:focus {
   color: #918e86;
   margin: 0;
 }
-.aside-section {
-  margin: 28px 0;
-}
-.aside-section h3 {
-  font-size: 12px;
-  color: #a19a8e;
-  margin: 0 0 12px;
-  font-weight: 500;
-}
-.topic-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.topic-list button {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 13px;
-  color: #827a6d;
-}
-.topic-list button span {
-  color: #b9b2a7;
-}
-.topic-list button small {
-  margin-left: auto;
-  color: #b4ada1;
-  font-size: 12px;
-}
-.topic-list button:hover,
-.topic-list .active {
-  color: #2383e2;
-}
 .filter-active {
   display: flex;
   gap: 10px;
@@ -1112,7 +1079,6 @@ textarea:focus {
 }
 
 /* Reading content stays comfortable on both layouts. */
-.topic-list button,
 .profile-card p,
 .page-subtitle {
   font-size: 14px;
