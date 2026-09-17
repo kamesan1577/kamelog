@@ -3,7 +3,6 @@ import "highlight.js/styles/github.css";
 import "./globals.css";
 import "../styles/tokens.css";
 import "./mobile-blog-editor.css";
-import "./x-share-logo.css";
 import "./composer-layout.css";
 import "./mobile-composer.css";
 import "./full-page-blog-editor.css";

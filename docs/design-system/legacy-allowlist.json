@@ -14,7 +14,6 @@
     "app/mobile-nav-layout.css",
     "app/project-social-links.css",
     "app/tweet-link-preview.css",
-    "app/tweet-thread-bridge.module.css",
-    "app/x-share-logo.css"
+    "app/tweet-thread-bridge.module.css"
   ]
 }
