@@ -1,0 +1,25 @@
+[data-ds="tag-list"] {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 13px 0 0;
+  flex-wrap: wrap;
+}
+
+[data-ds="tag-list"] [data-slot="badge"] {
+  padding: 1px 6px;
+  background: #f0efeb;
+  color: #888174;
+  border: none;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+[data-ds="tag-list"] [data-slot="badge"].bg-\[\#e7f3f8\] {
+  background: #edf4f7;
+  color: #397392;
+}
+
+[data-ds="tag-list"] button:hover {
+  opacity: 0.7;
+}

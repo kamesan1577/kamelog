@@ -6,6 +6,7 @@ import "../components/design-system/patterns/PostActions.css";
 import "../components/design-system/patterns/PostMeta.css";
 import "../components/design-system/patterns/PostPreview.css";
 import "../components/design-system/patterns/PostCard.css";
+import "../components/design-system/patterns/TagList.css";
 import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";
 import "../components/design-system/patterns/ComposerLayout.css";
