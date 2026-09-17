@@ -1,6 +1,9 @@
 # kamelog handoff
 
-2026-09-17 Issue #99 migration continued with PageHeader typography. Timeline and projects headings now use the existing PageHeader pattern boundary for shared responsive heading geometry; local check:ui, typecheck, and lint passed.
+2026-09-17 Issue #99 migration continued with PageHeader typography.
+
+2026-09-17 Issue #99 migration continued with composer auxiliary cleanup. Desktop composer visibility, draft action placement, responsive inline input, and stale heading rules now live in their semantic pattern boundaries; duplicate global rules were removed. check:ui, typecheck, and lint passed locally.
+Timeline and projects headings now use the existing PageHeader pattern boundary for shared responsive heading geometry; local check:ui, typecheck, and lint passed.
 
 2026-09-17 Issue #99 migration continued with owner settings. Profile upload, avatar picker, settings fields, and responsive settings heading now use the OwnerSettings Design System pattern; existing behavior and CSS hooks remain intact. check:ui, typecheck, lint, and public-repo check passed locally.
 

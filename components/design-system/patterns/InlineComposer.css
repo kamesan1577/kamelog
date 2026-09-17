@@ -60,7 +60,13 @@
 [data-ds="inline-composer"] .inline-tweet::placeholder {
   color: #aaa79f;
 }
-(max-width: 640px) {
+[data-ds="inline-composer"] .draft-button {
+  margin-left: auto;
+  color: #2383e2;
+  font-size: 13px;
+  padding: 6px;
+}
+@media (max-width: 640px) {
   [data-ds="inline-composer"] .inline-tweet {
     font-size: 16px;
   }
