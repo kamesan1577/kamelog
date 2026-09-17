@@ -3,7 +3,7 @@ import "highlight.js/styles/github.css";
 import "./globals.css";
 import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";
-import "./composer-layout.css";
+import "../components/design-system/patterns/ComposerLayout.css";
 import "../components/design-system/patterns/MobileComposer.css";
 import "../components/design-system/patterns/FullPageBlogEditor.css";
 import "../components/design-system/patterns/LinkPreview.css";
