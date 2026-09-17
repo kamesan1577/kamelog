@@ -1793,10 +1793,6 @@ textarea:focus {
   margin-left: auto;
   color: #2383e2;
 }
-.editor-kinds svg {
-  width: 15px;
-  height: 15px;
-}
 
 @media (max-width: 640px) {
   .mobile-search {
@@ -1891,26 +1887,6 @@ textarea:focus {
 .markdown pre code.hljs {
   padding: 0;
   background: transparent;
-}
-.editor-tool-list {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: thin;
-}
-.editor-tool-list button,
-.markdown-help-link {
-  flex-shrink: 0;
-  padding: 4px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-.editor-tool-list button:hover,
-.markdown-help-link:hover {
-  background: #f1f0ed;
-  color: #625e54;
 }
 .editor-tools .markdown-help-link {
   margin-left: auto;

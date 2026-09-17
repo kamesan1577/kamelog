@@ -120,3 +120,27 @@
 [data-ds="editor-dialog"] [data-slot="tabs-trigger"] {
   flex: 1;
 }
+[data-ds="editor-dialog"] .editor-kinds svg {
+  width: 15px;
+  height: 15px;
+}
+[data-ds="editor-dialog"] .editor-tool-list {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+[data-ds="editor-dialog"] .editor-tool-list button,
+[data-ds="editor-dialog"] .markdown-help-link {
+  flex-shrink: 0;
+  padding: 4px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+[data-ds="editor-dialog"] .editor-tool-list button:hover,
+[data-ds="editor-dialog"] .markdown-help-link:hover {
+  background: #f1f0ed;
+  color: #625e54;
+}
