@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued through PR #132: PageHeader、ContentIndex、ProjectListを追加し、account/projects/timeline/landingの表示を段階移行した。token theme生成と文字utilityの境界も修正。ProjectListのProjects E2E 7件、Storybook 19件、typecheck、lint、format、UI契約、公開検査、本番buildを確認済み。全体の残りはTimeline/Post/Detail、Composer、Blog editor、Owner UIとlegacy CSS撤去。
+
 2026-09-17 Issue #99 Phase 0〜3で移行マップ、AppShell、SideNavigation、MobileNavigationを追加し、既存のホームナビゲーションへ接続した。PR #124〜#128をstackedで作成。UI契約、公開検査、型、lint、本番build、モバイルナビE2Eは成功。全E2Eは24/25成功で、残るjourneyのvlog動画表示失敗はFFmpeg/fixture依存の既存課題として未解決。ホストのmake checkはFFmpeg未導入でmedia testが失敗するため、Storybook component testはPlaywright containerで成功確認した。
 
 2026-09-16 Issue #98: Storybook 10、addon-vitest、Design System token、primitive/layout、colocated Storyを追加。/lintをESLint 9へ統合し、Design System領域で6 ruleをerror化。check:uiは依存方向・Story必須・legacy CSS allowlistを検査し、Playwright visual regressionは390/768/1440pxを対象とする。Node 24/FFmpeg/Playwright containerでcomponent 13件、visual 3件、unit 75件、make check全体が成功。既存UI全面移行は#99。

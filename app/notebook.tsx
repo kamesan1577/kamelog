@@ -31,7 +31,6 @@ import {
   Search,
   Settings,
   Share2,
-  SlidersHorizontal,
   Trash2,
   Upload,
   Video,
@@ -42,6 +41,8 @@ import { SideNavigation } from "@/components/design-system/patterns/SideNavigati
 import { MobileNavigation } from "@/components/design-system/patterns/MobileNavigation";
 import { PageHeader } from "@/components/design-system/patterns/PageHeader";
 import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
+import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToolbar";
+import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -2058,43 +2059,19 @@ export default function Notebook({
               ) : view === "projects" ? (
                 <section className="projects-page">
                   <PageHeader title="プロジェクト" />
-                  <div className="project-grid">
-                    {projects.map((project) => {
-                      const card = (
-                        <>
-                          <img src={project.thumbnail} alt="" />
-                          <div>
-                            <h2>
-                              {project.title}{" "}
-                              {project.links.source && (
-                                <ArrowUpRight size={16} />
-                              )}
-                            </h2>
-                            <p>{project.summary}</p>
-                            <span>{project.stack.join(" · ")}</span>
-                          </div>
-                        </>
-                      );
-                      return project.links.source ? (
-                        <a
-                          className="project-tile"
-                          key={project.slug}
-                          href={project.links.source}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          {card}
-                        </a>
-                      ) : (
-                        <div
-                          className="project-tile project-tile-static"
-                          key={project.slug}
-                        >
-                          {card}
-                        </div>
-                      );
-                    })}
-                  </div>
+                  <ProjectList
+                    className="project-grid"
+                    tileClassName="project-tile"
+                    staticTileClassName="project-tile project-tile-static"
+                    items={projects.map((project) => ({
+                      slug: project.slug,
+                      title: project.title,
+                      summary: project.summary,
+                      stack: project.stack,
+                      thumbnail: project.thumbnail,
+                      source: project.links.source,
+                    }))}
+                  />
                 </section>
               ) : item ? (
                 <section
@@ -2412,36 +2389,15 @@ export default function Notebook({
                   )}
                   {timelineMode === "kamelog" ? (
                     <>
-                      <div className="timeline-toolbar">
-                        <Tabs
-                          value={filter}
-                          onValueChange={(v) => setFilter(v as "all" | Kind)}
-                        >
-                          <TabsList variant="line" className="feed-tabs">
-                            <TabsTrigger value="all">すべて</TabsTrigger>
-                            <TabsTrigger value="blog">ブログ</TabsTrigger>
-                            <TabsTrigger value="tweet">つぶやき</TabsTrigger>
-                            <TabsTrigger value="vlog">vlog</TabsTrigger>
-                          </TabsList>
-                        </Tabs>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <button className="sort-button">
-                              <SlidersHorizontal size={17} />
-                            </button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setSort("new")}>
-                              新しい順 {sort === "new" && <Check />}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setSort("popular")}
-                            >
-                              いいね順 {sort === "popular" && <Check />}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                      <TimelineToolbar
+                        className="timeline-toolbar"
+                        filter={filter}
+                        onFilterChange={(value) =>
+                          setFilter(value as "all" | Kind)
+                        }
+                        sort={sort}
+                        onSortChange={setSort}
+                      />
                       {tag && (
                         <div className="filter-active">
                           #{tag}
