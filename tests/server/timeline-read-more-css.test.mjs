@@ -8,8 +8,9 @@ const css = readFileSync(
 );
 
 test("timeline blog cards advertise that more content is available", () => {
-  assert.match(
-    css,
-    /\.post:has\(\.type-label\.blog\)\s+\.post-focus:not\(\.vlog-button\)::after\s*\{[^}]*content:\s*["']続きを読む →["'];/s,
+  assert.ok(
+    css.includes(
+      '[data-ds="post-card"][data-ds-kind="blog"] [data-ds="post-preview"]::after',
+    ) && css.includes('content: "続きを読む →";'),
   );
 });
