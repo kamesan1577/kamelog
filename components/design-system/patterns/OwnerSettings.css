@@ -1,0 +1,69 @@
+[data-ds="owner-settings"] {
+  padding-bottom: 60px;
+}
+[data-ds="owner-settings"] h1 {
+  font-weight: 750;
+  font-size: 32px;
+  letter-spacing: -1.3px;
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+[data-ds="owner-profile"] {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin: 32px 0 18px;
+}
+[data-ds="owner-profile-upload"] {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+[data-ds="owner-profile-upload"] input {
+  display: none;
+}
+[data-ds="owner-avatar-picker"] {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+[data-ds="owner-avatar-picker"] button {
+  font-size: 24px;
+  padding: 4px;
+  border-radius: 5px;
+  border: 1px solid transparent;
+}
+[data-ds="owner-avatar-picker"] .chosen {
+  border-color: #2383e2;
+  background: #edf6ff;
+}
+[data-ds="owner-settings-field"] {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  margin: 22px 0;
+}
+[data-ds="owner-settings-field"] input,
+[data-ds="owner-settings-field"] textarea {
+  padding: 10px 12px;
+  border: 1px solid #dedbd4;
+  border-radius: 4px;
+  font-size: 15px;
+  line-height: 1.7;
+  background: #fff;
+}
+[data-ds="owner-settings-field"] textarea {
+  height: 110px;
+  resize: vertical;
+}
+@media (max-width: 640px) {
+  [data-ds="owner-settings"] h1 {
+    font-size: 28px;
+  }
+}

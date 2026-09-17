@@ -1756,7 +1756,10 @@ export default function Notebook({
                   <PageHeader title="アカウント" />
                   <div data-ds="owner-profile" className="setting-avatar">
                     <Avatar value={icon || profile.icon} large />
-                    <label className="upload-label">
+                    <label
+                      data-ds="owner-profile-upload"
+                      className="upload-label"
+                    >
                       <Upload size={15} />
                       画像を変更
                       <input
@@ -1779,14 +1782,14 @@ export default function Notebook({
                       </button>
                     ))}
                   </div>
-                  <label className="field">
+                  <label data-ds="owner-settings-field" className="field">
                     名前
                     <input
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                     />
                   </label>
-                  <label className="field">
+                  <label data-ds="owner-settings-field" className="field">
                     自己紹介
                     <textarea
                       value={bio}

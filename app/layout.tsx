@@ -11,6 +11,7 @@ import "../components/design-system/patterns/TimelineToolbar.css";
 import "../components/design-system/patterns/InlineComposer.css";
 import "../components/design-system/patterns/Dialog.css";
 import "../components/design-system/patterns/EditorDialog.css";
+import "../components/design-system/patterns/OwnerSettings.css";
 import "../components/design-system/patterns/EmptyState.css";
 import "../components/design-system/patterns/Sidebar.css";
 import "../components/design-system/patterns/TimelineFilter.css";

@@ -199,70 +199,12 @@ textarea:focus {
 .page-heading {
   margin-bottom: 26px;
 }
-.page-heading h1,
-.settings-page h1 {
+.page-heading h1 {
   font-weight: 750;
   font-size: 32px;
   letter-spacing: -1.3px;
   margin: 0 0 8px;
   line-height: 1.4;
-}
-.settings-page {
-  padding-bottom: 60px;
-}
-.setting-avatar {
-  display: flex;
-  align-items: center;
-  gap: 22px;
-  margin: 32px 0 18px;
-}
-.upload-label {
-  display: flex;
-  gap: 7px;
-  align-items: center;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  padding: 7px 10px;
-  font-size: 13px;
-  cursor: pointer;
-}
-.upload-label input {
-  display: none;
-}
-.emoji-options {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 30px;
-}
-.emoji-options button {
-  font-size: 24px;
-  padding: 4px;
-  border-radius: 5px;
-  border: 1px solid transparent;
-}
-.emoji-options .chosen {
-  border-color: #2383e2;
-  background: #edf6ff;
-}
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  font-size: 14px;
-  margin: 22px 0;
-}
-.field input,
-.field textarea {
-  padding: 10px 12px;
-  border: 1px solid #dedbd4;
-  border-radius: 4px;
-  font-size: 15px;
-  line-height: 1.7;
-  background: #fff;
-}
-.field textarea {
-  height: 110px;
-  resize: vertical;
 }
 @media (min-width: 1450px) {
   .content-grid {
@@ -411,10 +353,6 @@ textarea:focus {
   }
   .markdown h2 {
     font-size: 20px;
-  }
-  .settings-page h1,
-  .portal-page h1 {
-    font-size: 28px;
   }
   .detail-page .back-button {
     margin-bottom: 24px;
