@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with BlogEditorWorkspace. Edit/preview/split rendering now uses a shared workspace pattern; Markdown rendering, image drop, and mode state stay in the feature layer. lint, typecheck, UI semantic guardrails, and format check passed.
+
 2026-09-17 Issue #99 migration continued with BlogEditorToolbar. The Markdown editing toolbar now has a shared Design System shell while editor commands, view mode state, help, and full-page behavior remain unchanged. lint, typecheck, UI semantic guardrails, and format check passed.
 
 2026-09-17 Issue #99 migration continued with InlineComposer. The desktop inline tweet composer now delegates its textarea keyboard/drop behavior and layout slots to a shared Design System pattern; media, toolbar actions, and persistence callbacks remain feature-owned. lint, typecheck, UI semantic guardrails, and format check passed.

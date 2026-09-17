@@ -47,6 +47,7 @@ import { PostPreview } from "@/components/design-system/patterns/PostPreview";
 import { PostCard } from "@/components/design-system/patterns/PostCard";
 import { InlineComposer } from "@/components/design-system/patterns/InlineComposer";
 import { BlogEditorToolbar } from "@/components/design-system/patterns/BlogEditorToolbar";
+import { BlogEditorWorkspace } from "@/components/design-system/patterns/BlogEditorWorkspace";
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
@@ -3224,8 +3225,10 @@ export default function Notebook({
                 </BlogEditorToolbar>
               )}
               {kind === "blog" ? (
-                <div className={"blog-editor-workspace mode-" + blogEditorMode}>
-                  {blogEditorMode !== "preview" && (
+                <BlogEditorWorkspace
+                  className={"blog-editor-workspace mode-" + blogEditorMode}
+                  mode={blogEditorMode}
+                  editor={
                     <textarea
                       ref={bodyInput}
                       className="body-input blog"
@@ -3235,13 +3238,13 @@ export default function Notebook({
                       onDragOver={(event) => event.preventDefault()}
                       onDrop={(event) => droppedImages(event, "blog")}
                     />
-                  )}
-                  {blogEditorMode !== "edit" && (
+                  }
+                  preview={
                     <div className="editor-preview" aria-label="プレビュー">
                       <Markdown text={"# " + title + "\n\n" + body} />
                     </div>
-                  )}
-                </div>
+                  }
+                />
               ) : (
                 <textarea
                   ref={bodyInput}
