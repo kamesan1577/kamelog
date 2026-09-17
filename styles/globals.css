@@ -488,22 +488,6 @@ textarea:focus {
 .mobile-create {
   display: none;
 }
-.back-button {
-  display: flex;
-  gap: 7px;
-  align-items: center;
-  font-size: 13px;
-  color: #999;
-  margin-bottom: 30px;
-}
-.page-icon {
-  margin-bottom: 15px;
-  color: #c2bfb8;
-}
-.page-icon svg {
-  width: 32px;
-  height: 32px;
-}
 .settings-page,
 .portal-page {
   padding-bottom: 60px;
