@@ -29,7 +29,8 @@ function clearGeneratedHeadingIds() {
 }
 
 function removeGeneratedToc() {
-  for (const toc of document.querySelectorAll(`[${TOC_ATTRIBUTE}]`)) toc.remove();
+  for (const toc of document.querySelectorAll(`[${TOC_ATTRIBUTE}]`))
+    toc.remove();
 }
 
 function renderToc(markdown: HTMLElement) {
@@ -81,6 +82,7 @@ function renderToc(markdown: HTMLElement) {
   removeGeneratedToc();
 
   const nav = document.createElement("nav");
+  nav.dataset.ds = "blog-table-of-contents";
   nav.className = "blog-table-of-contents";
   nav.setAttribute(TOC_ATTRIBUTE, "");
   nav.setAttribute("aria-label", "目次");
