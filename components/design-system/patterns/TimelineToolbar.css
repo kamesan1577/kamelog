@@ -1,0 +1,6 @@
+[data-ds="timeline-toolbar"] {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e5e3df;
+}
