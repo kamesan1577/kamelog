@@ -1,8 +1,3 @@
 {
-  "css": [
-    "app/engineering.css",
-    "app/federation.css",
-    "app/globals.css",
-    "app/landing.css"
-  ]
+  "css": ["app/engineering.css", "app/federation.css", "app/globals.css"]
 }
