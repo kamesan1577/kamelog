@@ -2,6 +2,7 @@ import * as React from "react";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import "./ProjectList.css";
 
 export interface ProjectListItem {
   slug: string;

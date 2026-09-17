@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import "./PostPreview.css";
 
 export interface PostPreviewProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   title?: string;

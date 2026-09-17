@@ -1,5 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import "./PostCard.css";
 
 export type PostCardKind = "blog" | "tweet" | "vlog";
 
