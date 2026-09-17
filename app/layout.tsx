@@ -27,6 +27,7 @@ import "../styles/brand-theme.css";
 import "../components/design-system/patterns/MobileNavigationLayout.css";
 import "../components/design-system/patterns/ProfileSocialLinks.css";
 import "../components/design-system/patterns/Federation.css";
+import "../components/design-system/patterns/Vlog.css";
 import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
 import { NavigationUrlBridge } from "@/components/navigation-url-bridge";

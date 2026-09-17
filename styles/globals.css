@@ -870,45 +870,6 @@ textarea:focus {
 .vlog-button {
   margin-top: 12px;
 }
-.vlog-frame,
-.vlog-stage {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 16/9;
-  overflow: hidden;
-  border-radius: 7px;
-  background: #1b1b1b;
-  color: white;
-}
-.vlog-frame video,
-.vlog-stage video {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-.vlog-overlay {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 34px 18px 14px;
-  background: linear-gradient(transparent, #0009);
-  color: white;
-  text-align: left;
-  pointer-events: none;
-  text-shadow: 0 1px 8px #000;
-}
-.vlog-overlay time {
-  font-family: Georgia, "Times New Roman", serif;
-  font-style: italic;
-  font-size: 27px;
-  letter-spacing: -0.5px;
-}
-.vlog-overlay p {
-  font-size: 14px;
-  margin: 3px 0 0;
-}
 .missing-video,
 .select-video {
   height: 100%;
@@ -1089,12 +1050,6 @@ textarea:focus {
   .home-search {
     margin: 18px 0;
   }
-  .vlog-overlay {
-    padding: 28px 13px 11px;
-  }
-  .vlog-overlay time {
-    font-size: 23px;
-  }
   .vlog-dialog {
     padding: 18px !important;
   }
@@ -1115,21 +1070,6 @@ textarea:focus {
   .mobile-create {
     bottom: 76px;
   }
-}
-.post-focus.vlog-button {
-  position: relative;
-}
-.open-vlog-detail {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  z-index: 2;
-  background: #0009;
-  color: #fff;
-  border: 1px solid #ffffff55;
-  border-radius: 4px;
-  padding: 5px 9px;
-  font-size: 12px;
 }
 
 /* Restore the original navigation and composer proportions. */
@@ -1221,7 +1161,6 @@ textarea:focus {
   }
 }
 
-
 @media (max-width: 640px) {
   .editor-tools {
     gap: 6px;
@@ -1252,19 +1191,6 @@ textarea:focus {
 .delete-dialog {
   max-height: calc(100dvh - 32px);
   overflow: auto;
-}
-.vlog-loop-toggle {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-  z-index: 3;
-  min-height: 32px;
-  padding: 5px 9px;
-  border: 1px solid #ffffff55;
-  border-radius: 6px;
-  background: #000b;
-  color: #fff;
-  font-size: 12px;
 }
 .post-actions {
   flex-wrap: wrap;
