@@ -232,13 +232,13 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.getByRole("button", { name: /保存される架空の下書き/ }).click();
   await expect(modalBody).toHaveValue(draftBody);
   await page.getByRole("button", { name: "投稿", exact: true }).click();
-  await expect(page.locator(".tweet-body")).toHaveText(draftBody);
+  await expect(page.locator('[data-ds="post-preview"]')).toHaveText(draftBody);
   await page.reload();
   await page
     .getByRole("button", { name: "タイムライン", exact: true })
     .first()
     .click();
-  await expect(page.locator(".tweet-body")).toHaveText(draftBody);
+  await expect(page.locator('[data-ds="post-preview"]')).toHaveText(draftBody);
   await expect(page.locator('[data-ds="tweet-link-card"]')).toHaveCount(1);
   await page
     .locator('[data-ds="post-preview"]')
@@ -255,7 +255,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     await expect(page.locator('[data-ds="projects-page"]')).toBeVisible();
     await expect(page.locator('[data-ds="tweet-link-card"]')).toHaveCount(0);
     await page.goBack();
-    await expect(page.locator(".detail-page")).toBeVisible();
+    await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
     await expect(
       page.locator('[data-ds="detail-page"] [data-ds="tweet-link-card"]'),
     ).toHaveCount(1);
@@ -333,7 +333,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     "ホームから直接投稿する架空のつぶやき\n",
   );
   await xTab.close();
-  await expect(page.locator(".tweet-body").first()).toHaveText(
+  await expect(page.locator('[data-ds="post-preview"]').first()).toHaveText(
     "ホームから直接投稿する架空のつぶやき",
   );
   await page
@@ -474,7 +474,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   ).toBeVisible();
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page.goForward();
-  await expect(page.locator(".detail-page")).toBeVisible();
+  await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
   expect(new URL(page.url()).searchParams.get("post")).toBe(openedPostId);
   await page.goBack();
   await expect(
@@ -491,10 +491,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   ).toBeVisible();
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page.goForward();
-  await expect(page.locator(".detail-page")).toBeVisible();
+  await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
   expect(new URL(page.url()).searchParams.get("post")).toBe(openedPostId);
 
-  await page.locator(".site-name").click();
+  await page.locator('[data-ds="site-name"]').click();
   await expect(
     page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
   ).toBeVisible();
@@ -503,11 +503,11 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   );
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page.goBack();
-  await expect(page.locator(".detail-page")).toBeVisible();
+  await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
   expect(new URL(page.url()).searchParams.get("post")).toBe(openedPostId);
 
   await page.goto("/?post=" + openedPostId);
-  await expect(page.locator(".detail-page")).toBeVisible();
+  await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
   await page.getByRole("button", { name: "戻る", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
@@ -661,22 +661,24 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   }
   await page.getByRole("tab", { name: "vlog", exact: true }).last().click();
   await page.getByRole("tab", { name: "動画を選ぶ", exact: true }).click();
-  await expect(page.locator(".vlog-stage")).toBeVisible();
+  await expect(page.locator('[data-ds="vlog-stage"]')).toBeVisible();
   await page
-    .locator('.vlog-stage input[type="file"]')
+    .locator('[data-ds="vlog-stage"] input[type="file"]')
     .setInputFiles("public/flower.mp4");
   await page
     .getByPlaceholder("一文だけ（任意）")
     .fill("架空のvlogキャプション");
   await page.getByRole("button", { name: "投稿する", exact: true }).click();
-  await expect(page.locator(".vlog-frame video").first()).toBeVisible();
-  await expect(page.locator(".vlog-overlay p").first()).toHaveText(
+  await expect(
+    page.locator('[data-ds="vlog-frame"] video').first(),
+  ).toBeVisible();
+  await expect(page.locator('[data-ds="vlog-caption"]').first()).toHaveText(
     "架空のvlogキャプション",
   );
   await expect
     .poll(() =>
       page
-        .locator(".vlog-frame video")
+        .locator('[data-ds="vlog-frame"] video')
         .first()
         .evaluate((video) => ({
           muted: (video as HTMLVideoElement).muted,
@@ -688,7 +690,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect
     .poll(() =>
       page
-        .locator(".vlog-frame video")
+        .locator('[data-ds="vlog-frame"] video')
         .first()
         .evaluate((video) => (video as HTMLVideoElement).loop),
     )
