@@ -10,6 +10,7 @@ import "../components/design-system/patterns/TagList.css";
 import "../components/design-system/patterns/TimelineToolbar.css";
 import "../components/design-system/patterns/InlineComposer.css";
 import "../components/design-system/patterns/EditorDialog.css";
+import "../components/design-system/patterns/EmptyState.css";
 import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";
 import "../components/design-system/patterns/ComposerLayout.css";
