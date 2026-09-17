@@ -4,12 +4,14 @@ import { join } from "node:path";
 import { spawn } from "node:child_process";
 const port = process.env.KAMELOG_E2E_PORT || "3000";
 const directory = await mkdtemp(join(tmpdir(), "kamelog-e2e-"));
-await cp(".next/static", ".next/standalone/.next/static", {
+const runtime = await mkdtemp(join(tmpdir(), "kamelog-e2e-runtime-"));
+await cp(".next/standalone", runtime, { recursive: true });
+await cp(".next/static", join(runtime, ".next/static"), {
   recursive: true,
 });
-await cp("public", ".next/standalone/public", { recursive: true });
+await cp("public", join(runtime, "public"), { recursive: true });
 const child = spawn(process.execPath, ["server.js"], {
-  cwd: ".next/standalone",
+  cwd: runtime,
   stdio: "inherit",
   env: {
     ...process.env,
@@ -24,5 +26,6 @@ for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => child.kill(signal));
 child.on("exit", async (code) => {
   await rm(directory, { recursive: true, force: true });
+  await rm(runtime, { recursive: true, force: true });
   process.exit(code || 0);
 });

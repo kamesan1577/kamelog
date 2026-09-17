@@ -47,7 +47,7 @@ federationEnabledはidentity設定済みのブログ/つぶやきだけtrueに�
 federation followのPOST bodyは `handle`、DELETE bodyはfollowing一覧で取得した `actorId` を受け取る。任意URLをfetchするAPIにはせず、handleはserver側でWebFingerから解決する。Accept/Rejectとremote cacheは公開APIへ返さない。
 timelineは `{ items, nextCursor }` を返し、`?cursor=` で続きへ進む。remote attachment URLは登録済みobjectから生成したlocal media URLだけを返し、入力URLをproxy targetとして受け取らない。RPのPOST bodyはowner timelineで取得した `objectId` だけを受け付け、Accept済みfollowing由来の有効なcacheとの一致を必須にする。media endpointはowner、または現在公開中のRPに結び付くmediaだけを返し、解除済みRP・deleted object・未登録mappingを404として扱う。
 公開posts APIの `likes` は保存済みlocal likesと、有効なremote reactionのActor数を合算した値を返す。remote内訳・Actor・reaction種別は公開APIへ出さず、投稿更新時には合算値をlocal likesへ書き戻さない。
-下書きはkind=blog/tweet、title、body、更新時revision。
+下書きはkind=blog/tweet、title、body、画像、任意のtweet用 `parentId`、更新時revisionを保存する。親は公開tweetに限り、親が削除済みでも通常投稿へ黙って変換しない。
 プロフィールはname（80）、bio（500）、icon（短い絵文字または制限された画像data URL）。
 
 ## 認証セッション
