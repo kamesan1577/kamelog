@@ -50,6 +50,7 @@ import { BlogEditorToolbar } from "@/components/design-system/patterns/BlogEdito
 import { BlogEditorWorkspace } from "@/components/design-system/patterns/BlogEditorWorkspace";
 import { EditorFooter } from "@/components/design-system/patterns/EditorFooter";
 import { MediaGallery } from "@/components/design-system/patterns/MediaGallery";
+import { PostActions } from "@/components/design-system/patterns/PostActions";
 import { MediaUploadField } from "@/components/design-system/patterns/MediaUploadField";
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
@@ -1510,7 +1511,7 @@ export default function Notebook({
     />
   );
   const actions = (p: Post) => (
-    <div className="post-actions">
+    <PostActions className="post-actions">
       <button
         className={liked.includes(p.id) ? "liked" : ""}
         onClick={() =>
@@ -1589,7 +1590,7 @@ export default function Notebook({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
-    </div>
+    </PostActions>
   );
   return (
     <div className="notebook">
@@ -1795,6 +1796,7 @@ export default function Notebook({
                     保存
                   </Button>
                   <section
+                    data-ds="federation-settings"
                     className="federation-settings"
                     aria-labelledby="federation-heading"
                   >
@@ -2035,7 +2037,7 @@ export default function Notebook({
                   </section>
                 </section>
               ) : view === "projects" ? (
-                <section className="projects-page">
+                <section data-ds="projects-page" className="projects-page">
                   <PageHeader title="プロジェクト" />
                   <ProjectList
                     className="project-grid"
@@ -2686,7 +2688,7 @@ export default function Notebook({
               </div>
               {(view !== "timeline" || timelineMode === "kamelog") && (
                 <>
-                  <label className="side-search">
+                  <label data-ds="side-search" className="side-search">
                     <Search size={16} />
                     <input
                       value={query}
@@ -2756,6 +2758,7 @@ export default function Notebook({
           />
           {login && (
             <button
+              data-ds="mobile-create"
               className="mobile-create"
               onClick={() => openEditor("tweet")}
               aria-label="投稿を作成"
@@ -2767,6 +2770,7 @@ export default function Notebook({
       </div>
       <Dialog open={editor} onOpenChange={(o) => !o && askClose()}>
         <DialogContent
+          data-ds="editor-dialog"
           className={
             "editor-dialog " +
             (kind === "vlog" ? "vlog-dialog " : "") +

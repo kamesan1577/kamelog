@@ -8,17 +8,17 @@ const root = fileURLToPath(new URL("../..", import.meta.url));
 const read = (path) => readFile(`${root}/${path}`, "utf8");
 
 test("X sharing uses the X brand mark instead of the close glyph", async () => {
-  const [notebook, layout, styles, logo] = await Promise.all([
+  const [notebook, postActions, layout, styles, logo] = await Promise.all([
     read("app/notebook.tsx"),
+    read("components/design-system/patterns/PostActions.tsx"),
     read("app/layout.tsx"),
     read("app/x-share-logo.css"),
     read("public/x-logo.svg"),
   ]);
 
-  assert.match(
-    notebook,
-    /<div className="post-actions">[\s\S]*?<X size=\{16\} \/>[\s\S]*?Xで共有/,
-  );
+  assert.match(notebook, /<PostActions className="post-actions">/);
+  assert.match(notebook, /<X size=\{16\} \/>[\s\S]*?Xで共有/);
+  assert.match(postActions, /data-ds="post-actions"/);
   assert.match(layout, /import "\.\/x-share-logo\.css";/);
   assert.match(styles, /button:has\(> \.lucide-x\)/);
   assert.match(styles, /mask: url\("\/x-logo\.svg"\)/);

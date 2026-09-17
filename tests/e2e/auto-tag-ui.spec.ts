@@ -58,7 +58,7 @@ test("automatic tag labels", async ({ page }) => {
     .first()
     .click();
 
-  const composer = page.locator(".desktop-composer");
+  const composer = page.locator('[data-ds="inline-composer"]');
   await expect(composer).toBeVisible();
   await composer.getByPlaceholder("いまどうしてる？").fill(taggedPost.body);
   await composer.getByRole("button", { name: "投稿", exact: true }).click();
@@ -81,7 +81,7 @@ test("automatic tag labels", async ({ page }) => {
   await expect(autoTag).toHaveText("AI · 自動タグ候補");
 
   await page.locator(".filter-active button").click();
-  await post.locator(".post-focus").click();
+  await post.locator('[data-ds="post-preview"]').click();
   const detail = page.locator(".detail-page");
   await expect(detail.getByLabel(autoTagName)).toBeVisible();
 });

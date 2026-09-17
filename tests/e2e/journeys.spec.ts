@@ -33,8 +33,8 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
       .getByRole("region", { name: "コンテンツ" })
       .getByRole("button", { name: /ブログ/ }),
   ).toBeVisible();
-  await expect(page.locator(".desktop-composer")).toHaveCount(0);
-  await expect(page.locator(".mobile-create")).toHaveCount(0);
+  await expect(page.locator('[data-ds="inline-composer"]')).toHaveCount(0);
+  await expect(page.locator('[data-ds="mobile-create"]')).toHaveCount(0);
   await page
     .getByRole("button", { name: "タイムライン", exact: true })
     .first()
@@ -42,8 +42,13 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByRole("heading", { name: "タイムライン", exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".side-search")).toBeVisible();
-  await expect(page.locator(".public-sidebar nav svg").first()).toBeVisible();
+  await expect(page.locator('[data-ds="side-search"]')).toBeVisible();
+  await expect(
+    page
+      .getByRole("navigation", { name: "サイドナビゲーション" })
+      .getByRole("button")
+      .first(),
+  ).toBeVisible();
   await expect(page.locator(".preview-shell")).toHaveCount(0);
   expect((await page.request.get("/api/drafts")).status()).toBe(401);
   await page.setViewportSize({ width: 390, height: 844 });
@@ -69,7 +74,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .getByRole("button", { name: "パスキーを登録", exact: true })
     .click();
   await expect(page).toHaveURL("/");
-  await expect(page.locator(".mobile-create")).toBeVisible();
+  await expect(page.locator('[data-ds="mobile-create"]')).toBeVisible();
   await page.getByRole("button", { name: "管理", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "アカウント", exact: true }),
@@ -87,7 +92,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByText("@kamesan@localhost:3000", { exact: true }),
   ).toBeVisible();
-  await page.locator(".federation-settings").screenshot({
+  await page.locator('[data-ds="federation-settings"]').screenshot({
     path: testInfo.outputPath("federation-setup-mobile.png"),
   });
   const federationSetup = page.waitForResponse(
@@ -124,7 +129,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .toBe("16px");
   expect(await page.locator("body").innerText()).not.toContain("PRIVATE KEY");
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.locator(".federation-settings").screenshot({
+  await page.locator('[data-ds="federation-settings"]').screenshot({
     path: testInfo.outputPath("federation-enabled-desktop.png"),
   });
   await page
@@ -132,7 +137,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .first()
     .click();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.locator(".mobile-create").click();
+  await page.locator('[data-ds="mobile-create"]').click();
   const mobileTweetBody = page.getByPlaceholder("本文", { exact: true });
   await expect(mobileTweetBody).toBeFocused();
   await expect
@@ -151,7 +156,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(mobileTweetBody).toBeFocused();
   await expect(mobilePublish).toBeInViewport();
   await expect(
-    page.locator(".editor-footer").getByRole("button", {
+    page.locator('[data-ds="editor-footer"]').getByRole("button", {
       name: "投稿",
       exact: true,
     }),
@@ -162,7 +167,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByRole("switch", { name: "Fediverseにも配信" }),
   ).toBeChecked();
-  await page.locator(".editor-dialog").screenshot({
+  await page.locator('[data-ds="editor-dialog"]').screenshot({
     path: testInfo.outputPath("landing-x-intent-mobile.png"),
   });
   await xSwitch.uncheck();
@@ -203,18 +208,18 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .getByRole("button", { name: "タイムライン", exact: true })
     .first()
     .click();
-  await expect(page.locator(".desktop-composer")).toBeVisible();
-  await page.locator(".desktop-composer").screenshot({
+  await expect(page.locator('[data-ds="inline-composer"]')).toBeVisible();
+  await page.locator('[data-ds="inline-composer"]').screenshot({
     path: testInfo.outputPath("landing-x-intent-desktop.png"),
   });
   await expect(
     page
-      .locator(".desktop-composer")
+      .locator('[data-ds="inline-composer"]')
       .getByRole("switch", { name: "Xにも投稿" }),
   ).not.toBeChecked();
   await expect(
     page
-      .locator(".desktop-composer")
+      .locator('[data-ds="inline-composer"]')
       .getByRole("switch", { name: "Fediverseにも配信" }),
   ).toBeChecked();
   await page.keyboard.press("n");
@@ -233,7 +238,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".tweet-body")).toHaveText(draftBody);
   await expect(page.locator(".tweet-link-card")).toHaveCount(1);
   await page
-    .locator(".post-focus")
+    .locator('[data-ds="post-preview"]')
     .filter({ hasText: draftBody })
     .evaluate((button: HTMLButtonElement) => button.click());
   await expect(page.locator(".detail-page .tweet-link-card")).toHaveCount(1);
@@ -242,7 +247,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
       .getByRole("button", { name: "プロジェクト", exact: true })
       .first()
       .click();
-    await expect(page.locator(".projects-page")).toBeVisible();
+    await expect(page.locator('[data-ds="projects-page"]')).toBeVisible();
     await expect(page.locator(".tweet-link-card")).toHaveCount(0);
     await page.goBack();
     await expect(page.locator(".detail-page")).toBeVisible();
@@ -260,16 +265,16 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
         "base64",
       ),
     });
-  await expect(page.locator(".desktop-composer .image-grid img")).toHaveCount(
-    1,
-  );
+  await expect(
+    page.locator('[data-ds="inline-composer"] [data-ds="media-gallery"] img'),
+  ).toHaveCount(1);
   await page
-    .locator(".desktop-composer")
+    .locator('[data-ds="inline-composer"]')
     .getByRole("button", { name: "画像を取り消す" })
     .click();
-  await expect(page.locator(".desktop-composer .image-grid img")).toHaveCount(
-    0,
-  );
+  await expect(
+    page.locator('[data-ds="inline-composer"] [data-ds="media-gallery"] img'),
+  ).toHaveCount(0);
   const pastedTweetImage = page.waitForResponse(
     (response) =>
       response.url().includes("/api/media?kind=image") &&
@@ -305,12 +310,12 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   const pastedTweetMeta = await (await pastedTweetImage).json();
   expect(pastedTweetMeta.type).toBe("image/webp");
   expect(Math.max(pastedTweetMeta.width, pastedTweetMeta.height)).toBe(2560);
-  await expect(page.locator(".desktop-composer .image-grid img")).toHaveCount(
-    1,
-  );
+  await expect(
+    page.locator('[data-ds="inline-composer"] [data-ds="media-gallery"] img'),
+  ).toHaveCount(1);
   await inlineTweet.fill("ホームから直接投稿する架空のつぶやき");
   await page
-    .locator(".desktop-composer")
+    .locator('[data-ds="inline-composer"]')
     .getByRole("switch", { name: "Xにも投稿" })
     .check();
   const xPopup = page.waitForEvent("popup");
@@ -324,7 +329,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(".tweet-body").first()).toHaveText(
     "ホームから直接投稿する架空のつぶやき",
   );
-  await page.locator("article.post .image-grid button").first().click();
+  await page
+    .locator('article[data-ds="post-card"] [data-ds="media-gallery"] button')
+    .first()
+    .click();
   await expect(
     page.locator('[data-ds="media-gallery-lightbox"] img'),
   ).toBeVisible();
@@ -572,7 +580,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   expect(og.ok()).toBe(true);
   expect(og.headers()["content-type"]).toContain("image/png");
   await page.getByRole("button", { name: "ログアウト", exact: true }).click();
-  await expect(page.locator(".desktop-composer")).toHaveCount(0);
+  await expect(page.locator('[data-ds="inline-composer"]')).toHaveCount(0);
   await page
     .getByRole("button", { name: "タイムライン", exact: true })
     .first()
@@ -587,9 +595,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .getByRole("button", { name: "タイムライン", exact: true })
     .first()
     .click();
-  await expect(page.locator(".desktop-composer")).toBeVisible();
+  await expect(page.locator('[data-ds="inline-composer"]')).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.locator(".mobile-create").click();
+  await page.locator('[data-ds="mobile-create"]').click();
   const mobileBlogTab = page
     .getByRole("tab", { name: "ブログ", exact: true })
     .last();
@@ -598,7 +606,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByPlaceholder("タイトル", { exact: true }),
   ).toBeVisible();
-  const mobileBlogDialog = page.locator(".editor-dialog");
+  const mobileBlogDialog = page.locator('[data-ds="editor-dialog"]');
   const mobileMarkdownToolbar = page.getByRole("toolbar", {
     name: "Markdown記法",
   });
