@@ -57,7 +57,7 @@ textarea:focus {
   color: #d8d6d0;
 }
 
-.public-header {
+[data-ds="public-header"] {
   border-bottom-color: var(--kamelog-line);
   background: var(--kamelog-panel);
   color: #6f6e69;
@@ -155,17 +155,17 @@ textarea:focus {
     border-radius: 0;
   }
 
-  .mobile-nav {
+  [data-ds="mobile-navigation"] {
     border-top-color: var(--kamelog-line);
     background: rgb(255 255 255 / 96%);
   }
 
-  .mobile-nav button.active {
+  [data-ds="mobile-navigation"] button.active {
     color: var(--kamelog-ink);
     font-weight: 650;
   }
 
-  .mobile-create {
+  [data-ds="mobile-create"] {
     border-color: var(--kamelog-ink);
     background: var(--kamelog-ink);
   }

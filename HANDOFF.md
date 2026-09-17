@@ -1,3 +1,5 @@
+2026-09-17 Issue #99 completed the remaining raw feature selectors in brand-theme for public header, mobile navigation, and create controls; all now use existing data-ds boundaries.
+
 # kamelog handoff
 
 2026-09-17 Issue #99 scoped brand-theme feature overrides to semantic data-ds boundaries for shell, navigation, content grid, search, timeline, owner controls, posts, tags, and source footer. The theme/base token layer remains global by design; check:ui, typecheck, lint, public-repo check, and formatting passed locally.
