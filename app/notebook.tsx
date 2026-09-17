@@ -2311,7 +2311,10 @@ export default function Notebook({
                       }
                       media={
                         inlineImages.length > 0 ? (
-                          <div className="composer-images">
+                          <div
+                            data-ds="composer-images"
+                            className="composer-images"
+                          >
                             <ImageGallery images={inlineImages} />
                             <button
                               type="button"
@@ -2551,7 +2554,9 @@ export default function Notebook({
                             </Button>
                           </EmptyState>
                         )}
-                        <div className="feed-count">{shown.length}件</div>
+                        <div data-ds="feed-count" className="feed-count">
+                          {shown.length}件
+                        </div>
                       </div>
                     </>
                   ) : (
@@ -2752,6 +2757,7 @@ export default function Notebook({
                       </div>
                       {visibleTagCount < tags.length && (
                         <button
+                          data-ds="tag-load-more"
                           className="tag-load-more"
                           onClick={() =>
                             setVisibleTagCount((count) => count + 5)
@@ -3308,7 +3314,7 @@ export default function Notebook({
                 }
               />
               {kind === "tweet" && editorImages.length > 0 && (
-                <div className="composer-images">
+                <div data-ds="composer-images" className="composer-images">
                   <ImageGallery images={editorImages} />
                   <button type="button" onClick={() => setEditorImages([])}>
                     画像を取り消す

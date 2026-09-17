@@ -56,3 +56,10 @@
     width: 12px !important;
   }
 }
+
+[data-ds="feed-count"] {
+  text-align: center;
+  color: #b4afa5;
+  font-size: 12px;
+  padding: 24px;
+}

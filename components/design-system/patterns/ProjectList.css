@@ -65,7 +65,9 @@
     padding: 13px;
   }
 }
-
+[data-ds="projects-page"] {
+  padding-bottom: 50px;
+}
 @media (max-width: 320px) {
   [data-ds="project-tile"] {
     display: block;

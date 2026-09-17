@@ -28,3 +28,12 @@
     gap: 5px;
   }
 }
+
+[data-ds="tag-load-more"] {
+  margin-top: 12px;
+  color: #8a857b;
+  font-size: 12px;
+}
+[data-ds="tag-load-more"]:hover {
+  color: #2383e2;
+}
