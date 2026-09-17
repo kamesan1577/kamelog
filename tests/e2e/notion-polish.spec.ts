@@ -14,7 +14,7 @@ test("landing polish keeps desktop and mobile controls readable", async ({
     "background-color",
     "rgb(246, 245, 244)",
   );
-  await expect(page.locator(".landing-profile")).toHaveCSS(
+  await expect(page.locator('[data-ds="landing-profile"]')).toHaveCSS(
     "background-color",
     "rgb(243, 242, 239)",
   );
@@ -32,7 +32,7 @@ test("landing polish keeps desktop and mobile controls readable", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(primary).toBeVisible();
   await expect(primary).toHaveCSS("min-height", "44px");
-  await expect(page.locator(".landing-page")).toHaveCSS(
+  await expect(page.locator('[data-ds="landing-page"]')).toHaveCSS(
     "overflow-x",
     "visible",
   );

@@ -99,7 +99,7 @@ test("landing profile exposes social links on mobile", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
 
-  const profile = page.locator(".landing-profile");
+  const profile = page.locator('[data-ds="landing-profile"]');
   await expect(profile).toBeVisible();
   const row = profile.locator("[data-kamelog-profile-social-links]");
   await expect(row).toBeVisible();

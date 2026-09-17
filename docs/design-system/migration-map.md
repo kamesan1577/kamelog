@@ -87,16 +87,16 @@ Behavior selectors already use roles and labels for most user-facing actions.
 The following implementation selectors remain and need migration or explicit
 test-id justification:
 
-| Selector family                                             | Current tests                               | Destination                                     |
-| ----------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------- |
-| `.desktop-composer`                                         | `journeys.spec.ts`                          | region/name or composer pattern test id         |
-| `.mobile-create`                                            | `journeys.spec.ts`                          | button role/name `投稿を作成`                   |
-| `.mobile-nav`                                               | `mobile-nav-layout.spec.ts`                 | navigation role/name                            |
-| `.public-sidebar`, `.side-search`                           | `journeys.spec.ts`                          | navigation/label semantics                      |
-| `.landing-page`, `.landing-profile`, `.content-cards`       | `notion-polish.spec.ts`, `journeys.spec.ts` | semantic sections and visual regression fixture |
-| `.post-focus`, `.tweet-body`                                | journey/detail/thread tests                 | article/body semantics                          |
-| `.editor-dialog`, `.mobile-editor-header`, `.editor-footer` | `journeys.spec.ts`                          | dialog/action regions                           |
-| `[data-ds="owner-federation"]`                              | `journeys.spec.ts`                          | owner federation settings semantic region       |
+| Selector family                                                             | Current tests                               | Destination                                     |
+| --------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------- |
+| `.desktop-composer`                                                         | `journeys.spec.ts`                          | region/name or composer pattern test id         |
+| `.mobile-create`                                                            | `journeys.spec.ts`                          | button role/name `投稿を作成`                   |
+| `.mobile-nav`                                                               | `mobile-nav-layout.spec.ts`                 | navigation role/name                            |
+| `.public-sidebar`, `.side-search`                                           | `journeys.spec.ts`                          | navigation/label semantics                      |
+| `[data-ds="landing-page"]`, `[data-ds="landing-profile"]`, `.content-cards` | `notion-polish.spec.ts`, `journeys.spec.ts` | semantic sections and visual regression fixture |
+| `.post-focus`, `.tweet-body`                                                | journey/detail/thread tests                 | article/body semantics                          |
+| `.editor-dialog`, `.mobile-editor-header`, `.editor-footer`                 | `journeys.spec.ts`                          | dialog/action regions                           |
+| `[data-ds="owner-federation"]`                                              | `journeys.spec.ts`                          | owner federation settings semantic region       |
 
 Geometry assertions in `notion-polish.spec.ts` and
 `mobile-nav-layout.spec.ts` are visual-regression candidates. User actions in
