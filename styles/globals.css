@@ -379,19 +379,7 @@ textarea:focus {
 .site-layout .content-grid {
   grid-template-columns: minmax(0, 660px) 232px;
 }
-.page-heading h1,
-.projects-page h1 {
-  font-size: 30px;
-  font-weight: 740;
-  letter-spacing: -1px;
-  margin: 0;
-}
-.draft-button {
-  margin-left: auto;
-  color: #2383e2;
-  font-size: 13px;
-  padding: 6px;
-}
+
 .feed-count {
   text-align: center;
   color: #b4afa5;
@@ -440,41 +428,12 @@ textarea:focus {
   .site-layout .content-grid {
     padding: 27px 18px 90px;
   }
-  .page-heading h1,
-  .projects-page h1 {
-    font-size: 27px;
-  }
   .mobile-nav button {
     font-size: 12px;
   }
 }
 
-.desktop-composer .composer-start {
-  display: flex;
-}
-.desktop-composer .composer-kinds {
-  display: flex;
-}
-.desktop-composer .draft-button {
-  margin-left: auto;
-  color: #2383e2;
-}
-
 @media (max-width: 640px) {
-  .desktop-composer {
-    display: none;
-  }
-  .mobile-name {
-    gap: 0;
-  }
-  .mobile-name b {
-    font-size: 14px;
-    color: #37352f;
-  }
-  .mobile-nav button svg {
-    width: 19px;
-    height: 19px;
-  }
   .editor-kinds [data-slot="tabs-trigger"] {
     gap: 6px;
   }
