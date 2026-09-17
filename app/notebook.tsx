@@ -45,6 +45,7 @@ import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToo
 import { PostMeta } from "@/components/design-system/patterns/PostMeta";
 import { PostPreview } from "@/components/design-system/patterns/PostPreview";
 import { PostCard } from "@/components/design-system/patterns/PostCard";
+import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -2102,25 +2103,20 @@ export default function Notebook({
                     {item.kind === "tweet" && (
                       <ImageGallery images={item.images} />
                     )}
-                    <div className="tags">
-                      {item.tags.map((t) => {
-                        const automatic = item.autoTags?.some(
-                          (autoTag) => autoTag.tag === t,
-                        );
-                        return (
-                          <Badge
-                            key={t}
-                            variant="gray"
-                            title={
-                              automatic ? "自動で付与されたタグ" : undefined
-                            }
-                            aria-label={automatic ? `自動タグ ${t}` : undefined}
-                          >
-                            {automatic ? `AI · ${t}` : t}
-                          </Badge>
-                        );
-                      })}
-                    </div>
+                    <TagList
+                      className="tags"
+                      tags={item.tags}
+                      automaticTags={item.autoTags?.map((tag) => tag.tag)}
+                      renderTag={(tag, automatic) => (
+                        <Badge
+                          variant="gray"
+                          title={automatic ? "自動で付与されたタグ" : undefined}
+                          aria-label={automatic ? "自動タグ " + tag : undefined}
+                        >
+                          {automatic ? "AI · " + tag : tag}
+                        </Badge>
+                      )}
+                    />
                     {actions(item)}
                   </div>
                   {item.kind === "tweet" && (
@@ -2500,32 +2496,31 @@ export default function Notebook({
                                 <ImageGallery images={p.images} />
                               )}
                               {p.tags.length > 0 && (
-                                <div className="tags">
-                                  {p.tags.map((t) => {
-                                    const automatic = p.autoTags?.some(
-                                      (autoTag) => autoTag.tag === t,
-                                    );
-                                    return (
-                                      <button key={t} onClick={() => setTag(t)}>
-                                        <Badge
-                                          variant={t === "Go" ? "blue" : "gray"}
-                                          title={
-                                            automatic
-                                              ? "自動で付与されたタグ"
-                                              : undefined
-                                          }
-                                          aria-label={
-                                            automatic
-                                              ? `自動タグ ${t}`
-                                              : undefined
-                                          }
-                                        >
-                                          {automatic ? `AI · ${t}` : t}
-                                        </Badge>
-                                      </button>
-                                    );
-                                  })}
-                                </div>
+                                <TagList
+                                  className="tags"
+                                  tags={p.tags}
+                                  automaticTags={p.autoTags?.map(
+                                    (tag) => tag.tag,
+                                  )}
+                                  onTagSelect={setTag}
+                                  renderTag={(tag, automatic) => (
+                                    <Badge
+                                      variant={tag === "Go" ? "blue" : "gray"}
+                                      title={
+                                        automatic
+                                          ? "自動で付与されたタグ"
+                                          : undefined
+                                      }
+                                      aria-label={
+                                        automatic
+                                          ? "自動タグ " + tag
+                                          : undefined
+                                      }
+                                    >
+                                      {automatic ? "AI · " + tag : tag}
+                                    </Badge>
+                                  )}
+                                />
                               )}
                               {actions(p)}
                             </PostCard>

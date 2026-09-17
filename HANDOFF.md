@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with a colocated TagList pattern. Detail and timeline tags now share automatic-tag labeling and optional selection behavior while Badge variants remain feature-configured. lint, typecheck, UI semantic guardrails, and format check passed; stacked CI verification is pending.
+
 2026-09-17 Issue #99 migration continued with a colocated PostCard pattern. Timeline local posts now share a semantic card shell with pinned state while feature-owned content and actions remain unchanged. lint, typecheck, UI semantic guardrails, and format check passed; stacked CI verification is pending.
 
 2026-09-17 Issue #99 migration continued with a colocated PostPreview pattern. Timeline blog/tweet excerpts now share the Design System rendering boundary while vlog-specific media remains feature-owned. lint, typecheck, UI semantic guardrails, format, and public-repo check passed. Storybook build passed; browser component tests remain blocked locally by missing Chromium, while stacked CI verification is pending.
