@@ -1,0 +1,9 @@
+[data-ds="editor-dialog"] .markdown-help-link { margin-left: auto; color: #2383e2; }
+[data-ds="editor-dialog"] .preview-toggle { margin-left: 0; flex-shrink: 0; }
+[data-ds="markdown-help-dialog"] { max-width: 760px !important; max-height: 88dvh; overflow: hidden; }
+.markdown-help-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; overflow-y: auto; padding: 2px 4px 4px 0; }
+.markdown-help-list section { min-width: 0; padding: 12px; border: 1px solid #ebe9e3; border-radius: 6px; }
+.markdown-help-list h3 { margin: 0 0 5px; font-size: 14px; font-weight: 650; }
+.markdown-help-list p { margin: 0 0 8px; color: #8d887e; font-size: 12px; line-height: 1.6; }
+.markdown-help-list pre { margin: 0; padding: 9px; border-radius: 4px; background: #f6f5f2; overflow-x: auto; font-size: 12px; line-height: 1.55; white-space: pre-wrap; }
+@media (max-width: 640px) { [data-ds="markdown-help-dialog"] { max-height: 92dvh; } .markdown-help-list { grid-template-columns: 1fr; } }
