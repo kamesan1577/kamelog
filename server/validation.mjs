@@ -68,12 +68,17 @@ export const draftSchema = z
     kind: z.enum(["blog", "tweet"]),
     title: z.string().max(300),
     body: z.string().max(100_000),
+    parentId: id.optional(),
     images: z
       .array(z.string().regex(/^\/api\/media\/[a-f0-9-]+$/))
       .max(4)
       .default([]),
   })
-  .strict();
+  .strict()
+  .superRefine((v, c) => {
+    if (v.parentId && v.kind !== "tweet")
+      c.addIssue({ code: "custom", message: "Only tweets can join threads" });
+  });
 export const profileSchema = z
   .object({
     name: z.string().trim().min(1).max(80),

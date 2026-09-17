@@ -64,6 +64,9 @@ export function localPostObject(store, config, post) {
         ? blogContent(post, canonical)
         : textContent(post.body),
     url: canonical,
+    ...(post.parentId
+      ? { inReplyTo: localObjectUrl(config, post.parentId) }
+      : {}),
     published: post.date,
     updated: post.federationUpdatedAt || post.updatedAt || post.date,
     ...(attachments.length ? { attachment: attachments } : {}),

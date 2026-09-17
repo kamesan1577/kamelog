@@ -6,7 +6,7 @@ const MAX_IMAGE_EDGE = 2560;
 const WEBP_QUALITY = 0.88;
 const IMAGE_INPUT_SELECTOR = '.image-upload-button input[type="file"]';
 const COMPOSER_TEXTAREA_SELECTOR =
-  ".desktop-composer textarea, textarea.body-input.blog, textarea.body-input.tweet";
+  ".desktop-composer textarea, textarea.body-input.blog, textarea.body-input.tweet, textarea[data-tweet-composer-textarea]";
 
 type Drawable = {
   source: CanvasImageSource;

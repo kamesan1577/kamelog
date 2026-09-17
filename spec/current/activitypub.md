@@ -31,6 +31,7 @@ ActivityPub有効化後の新規つぶやき・ブログはUIで `Fediverseに�
 - ONからOFF、またはONの投稿削除: `Delete(Tombstone)`
 
 つぶやきはescaped HTML本文、canonical URL、公開画像、published/updatedをNoteへ載せる。ブログはタイトル、240文字以内の概要、canonical URLをNoteへ載せ、記事全文をremote側の正本にしない。固定状態だけの変更ではUpdateを生成しない。既存投稿は `federationEnabled=false` として扱い、明示操作なしに過去分を一括配送しない。
+`parentId` を持つ配信対象のつぶやきNoteには、親のlocal object URLを `inReplyTo` として載せる。親がFediverse非公開のとき、新規作成・初回配信ONへの切替は拒否し、ローカル返信は保存できる。
 
 署名済み `Follow` はlocal Actor宛てだけを自動承認し、Actorのinbox/sharedInbox、元Follow IDを保存して `Accept` をqueueへ積む。同じsharedInboxは投稿activityごとに1配送へまとめる。`Undo(Follow)` は元Follow IDと署名Actorが一致したfollowerだけを削除する。
 

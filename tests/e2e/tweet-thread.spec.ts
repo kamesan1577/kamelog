@@ -51,16 +51,15 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
     .click();
   const inline = page.getByPlaceholder("いまどうしてる？");
   await inline.fill("スレッドの架空ルート投稿");
-  await page
-    .locator('[data-ds="inline-composer"]')
-    .getByRole("button", { name: "投稿", exact: true })
-    .click();
+  await page.getByRole("button", { name: "投稿", exact: true }).first().click();
 
   const rootPost = page
-    .locator('article[data-ds="post-card"]')
+    .locator("article")
     .filter({ hasText: "スレッドの架空ルート投稿" });
   await expect(rootPost).toBeVisible();
-  await rootPost.locator('[data-ds="post-preview"]').click();
+  await rootPost
+    .getByRole("button", { name: "スレッドの架空ルート投稿", exact: true })
+    .click();
   await expect(page.getByRole("heading", { name: "スレッド" })).toBeVisible();
   await expect(page.getByText("1件", { exact: true })).toBeVisible();
   await expect(page.getByText("表示中の投稿", { exact: true })).toBeVisible();
@@ -70,8 +69,35 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
   ).toBeVisible();
 
   await page.getByRole("button", { name: "続きをつなげる" }).click();
+  const replyComposer = page.locator('[data-ds="reply-composer"]');
+  await expect(replyComposer).toBeVisible();
+  await expect(
+    replyComposer.getByRole("switch", { name: "Xにも投稿" }),
+  ).toBeChecked();
+  const replyImage = replyComposer.locator(
+    '.image-upload-button input[type="file"]',
+  );
+  await expect(replyImage).toHaveCount(1);
+  await replyImage.setInputFiles({
+    name: "reply-fixture.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+      "base64",
+    ),
+  });
+  await expect(replyComposer.getByLabel("添付画像")).toBeVisible();
   const append = page.getByPlaceholder("続きのつぶやき");
   await append.fill("スレッドの架空の続き");
+  await append.press("Escape");
+  const closeDialog = page.getByRole("dialog", { name: "返信を閉じる" });
+  await expect(closeDialog).toBeVisible();
+  await closeDialog.getByRole("button", { name: "編集を続ける" }).click();
+  await expect(append).toHaveValue("スレッドの架空の続き");
+  await page.getByRole("heading", { name: "スレッド" }).click();
+  await expect(closeDialog).toBeVisible();
+  await closeDialog.getByRole("button", { name: "編集を続ける" }).click();
+  await expect(append).toHaveValue("スレッドの架空の続き");
   await page.getByRole("button", { name: "つなげる" }).click();
 
   await expect(page).toHaveURL(/\?post=/);

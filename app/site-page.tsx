@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import Notebook from "./notebook";
-import TweetThreadBridge from "./tweet-thread-bridge";
 import { FederationTimelineLink } from "@/components/federation-timeline-link";
 import { getStore } from "@/server/runtime.mjs";
 import { blogStructuredData, websiteStructuredData } from "@/server/seo.mjs";
@@ -127,7 +126,6 @@ export default async function SitePage({
         initialSelected={selectedPostId}
       />
       <FederationTimelineLink />
-      <TweetThreadBridge initialPosts={posts} />
       <SourceFooter />
     </>
   );

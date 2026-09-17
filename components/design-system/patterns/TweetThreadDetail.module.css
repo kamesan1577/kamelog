@@ -33,6 +33,12 @@
   font-size: 12px;
 }
 
+.parentMissing {
+  margin: 8px 0 12px;
+  color: #827d74;
+  font-size: 12px;
+}
+
 .ancestors,
 .children {
   display: grid;
@@ -84,6 +90,20 @@
 .card:hover {
   border-color: #ded9d0;
   background: #eeece7;
+}
+
+.timelineThread {
+  position: relative;
+  border-color: #e8e4dc;
+}
+
+.timelineThread::before {
+  position: absolute;
+  inset-block: 0;
+  left: -7px;
+  width: 1px;
+  background: #ded9d0;
+  content: "";
 }
 
 .cardMeta {
@@ -181,6 +201,102 @@
   border: 1px solid #dedbd4;
   border-radius: 10px;
   background: #faf9f7;
+}
+
+.replyTarget {
+  margin: 0 0 8px;
+  color: #777168;
+  font-size: 12px;
+}
+
+.replyTarget a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.imageGrid div {
+  position: relative;
+}
+
+.imageGrid img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.imageGrid button {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  border: 0;
+  border-radius: 4px;
+  background: rgba(55, 53, 47, 0.82);
+  color: #fff;
+  font-size: 11px;
+}
+
+.composerOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 8px;
+  color: #777168;
+  font-size: 12px;
+}
+
+.composerOptions label {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.closeDialog {
+  position: fixed;
+  z-index: 20;
+  inset: auto 16px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #d7d2c9;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(55, 53, 47, 0.16);
+}
+
+.closeDialog p {
+  flex-basis: 100%;
+  margin: 0;
+  color: #4f4b45;
+  font-size: 13px;
+}
+
+.closeDialog button,
+.xFallback {
+  padding: 6px 9px;
+  border: 1px solid #dedbd4;
+  border-radius: 6px;
+  background: #fff;
+  color: #4f4b45;
+  font-size: 12px;
+}
+
+.xFallback {
+  position: fixed;
+  z-index: 21;
+  right: 16px;
+  bottom: 16px;
 }
 
 .composerHeader,
