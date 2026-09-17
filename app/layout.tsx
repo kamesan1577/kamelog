@@ -31,6 +31,7 @@ import "../components/design-system/patterns/Vlog.css";
 import "../components/design-system/patterns/PreviewShell.css";
 import "../components/design-system/patterns/AppShell.css";
 import "../components/design-system/patterns/HomeSearch.css";
+import "../components/design-system/patterns/PublicHeader.css";
 import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
 import { NavigationUrlBridge } from "@/components/navigation-url-bridge";

@@ -1705,8 +1705,12 @@ export default function Notebook({
           </div>
         </aside>
         <div data-ds="workspace" className="workspace">
-          <header className="public-header">
-            <button className="mobile-name" onClick={() => nav("home")}>
+          <header data-ds="public-header" className="public-header">
+            <button
+              data-ds="mobile-name"
+              className="mobile-name"
+              onClick={() => nav("home")}
+            >
               <b>kamelog</b>
             </button>
             <span>
@@ -1721,12 +1725,13 @@ export default function Notebook({
                       : "ホーム"}
             </span>
             {!login ? (
-              <details className="mobile-login">
+              <details data-ds="mobile-login" className="mobile-login">
                 <summary>•••</summary>
                 <button onClick={logIn}>ログイン</button>
               </details>
             ) : (
               <button
+                data-ds="mobile-account"
                 className="mobile-account"
                 onClick={() => {
                   nav("account");

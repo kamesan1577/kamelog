@@ -600,41 +600,6 @@ textarea:focus {
   white-space: nowrap;
   font-size: 12px;
 }
-.public-header {
-  height: 53px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 28px;
-  border-bottom: 1px solid #f0efec;
-  color: #8d8a82;
-  font-size: 12px;
-}
-.public-header > span {
-  margin-right: auto;
-}
-.mobile-name {
-  display: none;
-}
-.mobile-login {
-  position: relative;
-}
-.mobile-login[open] > button {
-  position: absolute;
-  right: 0;
-  top: 27px;
-  background: #fff;
-  border: 1px solid #dedbd4;
-  border-radius: 5px;
-  padding: 7px 11px;
-  box-shadow: 0 4px 14px #0001;
-  white-space: nowrap;
-  z-index: 10;
-}
-.mobile-account {
-  font-size: 12px;
-  color: #706c65;
-}
 .site-layout > .workspace {
   flex: 1;
   min-width: 0;
