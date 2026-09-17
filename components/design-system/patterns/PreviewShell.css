@@ -85,3 +85,18 @@
   display: block;
   background: white;
 }
+
+@media (max-width: 640px) {
+  [data-ds="preview-shell"] .preview-toolbar { padding: 0 10px; gap: 8px; height: 53px; }
+  [data-ds="preview-shell"] .preview-brand b,
+  [data-ds="preview-shell"] .preview-size,
+  [data-ds="preview-shell"] .mock-label { display: none; }
+  [data-ds="preview-shell"] .preview-brand .mini-logo { width: 22px; height: 24px; font-size: 20px; }
+  [data-ds="preview-shell"] .preview-toolbar [data-slot="tabs-trigger"] { padding: 3px 13px; font-size: 12px; }
+  [data-ds="preview-shell"] .preview-stage { height: calc(100dvh - 53px); padding: 0; }
+  [data-ds="preview-shell"] .preview-stage.mobile { padding: 8px 0; }
+  [data-ds="preview-shell"] .preview-stage.mobile .preview-device { border-radius: 0; border: 0; }
+  [data-ds="preview-shell"] .preview-stage.auto .preview-device,
+  [data-ds="preview-shell"] .preview-stage.auto iframe { height: calc(100dvh - 53px) !important; }
+  [data-ds="preview-shell"] .preview-stage.desktop .preview-device { align-self: flex-start; }
+}
