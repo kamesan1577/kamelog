@@ -7,7 +7,7 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
     await page.setViewportSize({ width, height: 844 });
     await page.goto("/");
     await page
-      .locator(".mobile-nav")
+      .locator('[data-ds="mobile-navigation"]')
       .getByRole("button", { name: "プロジェクト" })
       .click();
 
@@ -63,7 +63,7 @@ test("profile exposes GitHub, X and Qiita as brand-icon links", async ({
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto("/");
   await page
-    .locator(".public-sidebar nav")
+    .locator('[data-ds="public-sidebar"] nav')
     .getByRole("button", { name: "タイムライン" })
     .click();
 
