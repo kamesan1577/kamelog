@@ -48,6 +48,7 @@ import { PostCard } from "@/components/design-system/patterns/PostCard";
 import { InlineComposer } from "@/components/design-system/patterns/InlineComposer";
 import { BlogEditorToolbar } from "@/components/design-system/patterns/BlogEditorToolbar";
 import { BlogEditorWorkspace } from "@/components/design-system/patterns/BlogEditorWorkspace";
+import { EditorFooter } from "@/components/design-system/patterns/EditorFooter";
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
@@ -3288,13 +3289,16 @@ export default function Notebook({
                   </button>
                 </div>
               )}
-              <div className="editor-footer">
-                <span>{body.length}文字</span>
-                <Button onClick={askClose}>閉じる</Button>
-                <Button variant="solid" onClick={publish}>
-                  投稿
-                </Button>
-              </div>
+              <EditorFooter
+                className="editor-footer"
+                characterCount={body.length}
+                closeAction={<Button onClick={askClose}>閉じる</Button>}
+                submitAction={
+                  <Button variant="solid" onClick={publish}>
+                    投稿
+                  </Button>
+                }
+              />
             </>
           )}
         </DialogContent>
