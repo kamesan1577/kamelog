@@ -12,7 +12,7 @@
 }
 
 @media (max-width: 640px) {
-  [data-ds="post-card"] {
+  [data-ds="post-card"].post {
     padding-top: 20px;
   }
 }

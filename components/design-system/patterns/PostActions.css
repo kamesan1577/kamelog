@@ -35,11 +35,11 @@
 }
 
 @media (max-width: 640px) {
-  [data-ds="post-actions"] {
+  [data-ds="post-actions"].post-actions {
     margin-top: 13px;
     gap: 26px;
   }
-  [data-ds="post-actions"] button {
+  [data-ds="post-actions"].post-actions button {
     min-height: 32px;
   }
 }

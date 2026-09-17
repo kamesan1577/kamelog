@@ -238,3 +238,9 @@
     border-radius: 10px;
   }
 }
+
+@media (max-width: 640px) {
+  [data-ds="editor-dialog"] .editor-kinds [data-slot="tabs-trigger"] {
+    gap: 6px;
+  }
+}
