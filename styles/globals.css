@@ -521,11 +521,6 @@ textarea:focus {
   margin: 14px 0 8px;
   color: #625e54;
 }
-.read-time {
-  margin-left: auto;
-  font-size: 12px;
-  color: #aaa69c;
-}
 .right-sidebar {
   padding-top: 4px;
 }
@@ -1177,15 +1172,6 @@ textarea:focus {
   }
   .post-actions button {
     min-height: 32px;
-  }
-  .tags {
-    gap: 5px;
-  }
-  .tags [data-slot="badge"] {
-    font-size: 12px;
-  }
-  .read-time {
-    font-size: 12px;
   }
   .mobile-nav {
     display: flex;
