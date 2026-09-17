@@ -43,6 +43,7 @@ import { PageHeader } from "@/components/design-system/patterns/PageHeader";
 import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
 import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToolbar";
 import { PostMeta } from "@/components/design-system/patterns/PostMeta";
+import { PostPreview } from "@/components/design-system/patterns/PostPreview";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
 import { Badge } from "@/components/notion/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -2466,23 +2467,27 @@ export default function Notebook({
                                   </button>
                                 </div>
                               ) : (
-                                <button
+                                <PostPreview
+                                  title={
+                                    p.kind === "blog" ? p.title : undefined
+                                  }
+                                  excerpt={
+                                    p.kind === "blog"
+                                      ? p.body
+                                          .split("\n")
+                                          .find(
+                                            (s) => s && !s.startsWith("#"),
+                                          ) || ""
+                                      : p.body
+                                  }
+                                  excerptClassName={
+                                    p.kind === "tweet"
+                                      ? "tweet-body"
+                                      : undefined
+                                  }
                                   className="post-focus"
                                   onClick={() => openPost(p.id)}
-                                >
-                                  {p.kind === "blog" ? (
-                                    <>
-                                      <h2>{p.title}</h2>
-                                      <p>
-                                        {p.body
-                                          .split("\n")
-                                          .find((s) => s && !s.startsWith("#"))}
-                                      </p>
-                                    </>
-                                  ) : (
-                                    <p className="tweet-body">{p.body}</p>
-                                  )}
-                                </button>
+                                />
                               )}
                               {p.kind === "tweet" && (
                                 <ImageGallery images={p.images} />
