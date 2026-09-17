@@ -473,9 +473,6 @@ textarea:focus {
   padding-bottom: 50px;
 }
 
-.vlog-button {
-  margin-top: 12px;
-}
 .missing-video,
 .select-video {
   height: 100%;
@@ -606,9 +603,6 @@ textarea:focus {
 .draft-list span {
   font-size: 12px;
   color: #9a968e;
-}
-.post.vlog .post-actions {
-  margin-top: 10px;
 }
 @media (max-width: 950px) {
   .site-layout .content-grid {

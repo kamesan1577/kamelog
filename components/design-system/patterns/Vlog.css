@@ -1,3 +1,9 @@
+.vlog-button {
+  margin-top: 12px;
+}
+.post.vlog .post-actions {
+  margin-top: 10px;
+}
 .vlog-frame,
 .vlog-stage {
   position: relative;
