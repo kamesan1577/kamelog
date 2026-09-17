@@ -25,9 +25,6 @@
 [data-ds="project-tile"][data-ds-variant="external"] img {
   object-fit: contain;
 }
-[data-ds="project-tile"][data-ds-variant="static"] img {
-  object-fit: cover;
-}
 [data-ds="project-tile"] > div {
   padding: 15px;
 }
