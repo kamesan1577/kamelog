@@ -140,7 +140,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     path: testInfo.outputPath("federation-enabled-desktop.png"),
   });
   await page.screenshot({
-    path: testInfo.outputPath("screen-evidence-account-desktop.png"),
+    path: "ui-evidence/screen-evidence-account-desktop.png",
     fullPage: true,
   });
   await page
@@ -164,7 +164,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(mobileEditorHeader).toBeVisible();
   await expect(mobilePublish).toBeVisible();
   await page.screenshot({
-    path: testInfo.outputPath("screen-evidence-editor-mobile.png"),
+    path: "ui-evidence/screen-evidence-editor-mobile.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 520 });
@@ -598,7 +598,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator('[data-ds="fediverse-mode-switch"]')).toBeVisible();
   await page.screenshot({
-    path: testInfo.outputPath("screen-evidence-fediverse-mobile.png"),
+    path: "ui-evidence/screen-evidence-fediverse-mobile.png",
     fullPage: true,
   });
   await page.locator('[data-ds="fediverse-timeline"]').screenshot({

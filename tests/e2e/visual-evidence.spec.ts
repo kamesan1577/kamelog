@@ -38,13 +38,12 @@ for (const viewport of viewports) {
         else expect(response?.ok()).toBe(true);
         await expect(page.locator(pageDefinition.marker)).toBeVisible();
         await page.screenshot({
-          path: testInfo.outputPath(
-            "visual-evidence-" +
-              pageDefinition.name +
-              "-" +
-              viewport.name +
-              ".png",
-          ),
+          path:
+            "ui-evidence/visual-evidence-" +
+            pageDefinition.name +
+            "-" +
+            viewport.name +
+            ".png",
           fullPage: true,
         });
       },
