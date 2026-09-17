@@ -8,7 +8,7 @@
 }
 
 body,
-.site-layout > .workspace {
+[data-ds="workspace"] {
   background: var(--kamelog-paper);
 }
 
@@ -22,38 +22,38 @@ textarea:focus {
   border-color: var(--kamelog-ink);
 }
 
-.public-sidebar {
+[data-ds="public-sidebar"] {
   border-right-color: #d8d6d0;
   background: #eeede9;
 }
 
-.site-name {
+[data-ds="site-name"] {
   color: var(--kamelog-ink);
   font-weight: 750;
   letter-spacing: -0.02em;
 }
 
-.public-sidebar nav button,
-.sidebar-section button,
-.admin-nav > button:not([data-slot="button"]) {
+[data-ds="public-sidebar"] nav button,
+[data-ds="aside-section"] button,
+[data-ds="admin-nav"] > button:not([data-slot="button"]) {
   transition:
     background-color 80ms ease,
     color 80ms ease;
 }
 
-.public-sidebar nav button:hover,
-.sidebar-section button:hover,
-.admin-nav > button:hover {
+[data-ds="public-sidebar"] nav button:hover,
+[data-ds="aside-section"] button:hover,
+[data-ds="admin-nav"] > button:hover {
   background: #e1dfda;
   color: var(--kamelog-ink);
 }
 
-.public-sidebar button.active {
+[data-ds="public-sidebar"] button.active {
   background: var(--kamelog-ink);
   color: #fff;
 }
 
-.public-sidebar button.active small {
+[data-ds="public-sidebar"] button.active small {
   color: #d8d6d0;
 }
 
@@ -63,30 +63,30 @@ textarea:focus {
   color: #6f6e69;
 }
 
-.content-grid:not(.landing-layout) > .main-content,
-.content-grid:not(.landing-layout) > .right-sidebar {
+[data-ds="content-grid"]:not(.landing-layout) > [data-ds="main-content"],
+[data-ds="content-grid"]:not(.landing-layout) > [data-ds="right-sidebar"] {
   border-radius: 12px;
   background: var(--kamelog-panel);
 }
 
-.content-grid:not(.landing-layout) > .main-content {
+[data-ds="content-grid"]:not(.landing-layout) > [data-ds="main-content"] {
   padding: 26px 30px 34px;
   border: 1px solid var(--kamelog-line);
 }
 
-.content-grid:not(.landing-layout) > .right-sidebar {
+[data-ds="content-grid"]:not(.landing-layout) > [data-ds="right-sidebar"] {
   height: fit-content;
   padding: 22px;
   border: 1px solid var(--kamelog-line);
 }
 
-.home-search:focus-within,
-.side-search:focus-within {
+[data-ds="mobile-search"]:focus-within,
+[data-ds="side-search"]:focus-within {
   border-color: var(--kamelog-ink);
   box-shadow: 0 0 0 2px rgb(55 53 47 / 10%);
 }
 
-.timeline-toolbar {
+[data-ds="timeline-toolbar"] {
   border-bottom-color: var(--kamelog-ink);
 }
 
@@ -95,63 +95,61 @@ textarea:focus {
   background: var(--kamelog-ink);
 }
 
-.profile-card a,
-.markdown a,
-.filter-active,
-.draft-button,
-.desktop-composer .draft-button,
-.editor-tools .active,
-.editor-tools .markdown-help-link,
-.video-upload > button,
-.site-source-footer a {
+[data-ds="profile-card"] a,
+[data-ds="detail-markdown"] a,
+[data-ds="filter-active"],
+[data-ds="inline-composer"] .draft-button,
+[data-ds="editor-dialog"] .editor-tools .active,
+[data-ds="editor-dialog"] .editor-tools .markdown-help-link,
+[data-ds="site-source-footer"] a {
   color: var(--kamelog-ink);
 }
 
-.site-source-footer {
+[data-ds="site-source-footer"] {
   border-top-color: var(--kamelog-line);
   background: var(--kamelog-paper);
 }
 
-.site-source-footer a:hover,
-.profile-card a:hover,
-.markdown a:hover {
+[data-ds="site-source-footer"] a:hover,
+[data-ds="profile-card"] a:hover,
+[data-ds="detail-markdown"] a:hover {
   color: var(--kamelog-ink-hover);
   text-decoration-thickness: 2px;
 }
 
-.tag-load-more:hover,
-.topic-list button:hover,
-.topic-list .active {
+[data-ds="tag-load-more"]:hover,
+[data-ds="topic-list"] button:hover,
+[data-ds="topic-list"] .active {
   color: var(--kamelog-ink);
 }
 
-.emoji-options .chosen {
+[data-ds="owner-avatar-picker"] .chosen {
   border-color: var(--kamelog-ink);
   background: var(--kamelog-soft);
 }
 
-.markdown .task-list-item input {
+[data-ds="detail-markdown"] .task-list-item input {
   accent-color: var(--kamelog-ink);
 }
 
-.project-tile {
+[data-ds="project-tile"] {
   border-color: var(--kamelog-line);
   border-radius: 12px;
   box-shadow: none;
 }
 
-.project-tile:hover {
+[data-ds="project-tile"]:hover {
   border-color: #b8b6b0;
   box-shadow: none;
   transform: none;
 }
 
 @media (max-width: 640px) {
-  .site-layout > .workspace {
+  [data-ds="workspace"] {
     background: var(--kamelog-paper);
   }
 
-  .content-grid:not(.landing-layout) > .main-content {
+  [data-ds="content-grid"]:not(.landing-layout) > [data-ds="main-content"] {
     padding: 20px 18px 96px;
     border: 0;
     border-radius: 0;
