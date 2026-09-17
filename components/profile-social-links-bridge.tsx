@@ -43,7 +43,7 @@ function createSocialLink({ href, label, icon, brand }: SocialLink) {
   anchor.href = href;
   anchor.target = "_blank";
   anchor.rel = "noreferrer";
-  anchor.className = `profile-social-link profile-social-link-${brand}`;
+  anchor.dataset.ds = `profile-social-link-${brand}`;
   anchor.setAttribute("aria-label", label);
   anchor.title = label;
 
@@ -57,7 +57,7 @@ function createSocialLink({ href, label, icon, brand }: SocialLink) {
 
 function syncProfileSocialLinks() {
   for (const card of document.querySelectorAll<HTMLElement>(
-    ".profile-card, .landing-profile",
+    '[data-ds="profile-card"], [data-ds="landing-profile"]',
   )) {
     const source = card.querySelector<HTMLAnchorElement>(
       `:scope > a[href="${GITHUB_URL}"]`,
@@ -68,7 +68,7 @@ function syncProfileSocialLinks() {
     if (card.querySelector(`[${SOCIAL_ROW_ATTRIBUTE}]`)) continue;
 
     const row = document.createElement("div");
-    row.className = "profile-social-links";
+    row.dataset.ds = "profile-social-links";
     row.setAttribute(SOCIAL_ROW_ATTRIBUTE, "");
     row.setAttribute("aria-label", "外部アカウント");
     for (const link of socialLinks) row.append(createSocialLink(link));
