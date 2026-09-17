@@ -1634,7 +1634,7 @@ export default function Notebook({
             ]}
             onSelect={(id) => nav(id as View)}
           />
-          <div className="sidebar-section">
+          <div data-ds="sidebar-section" className="sidebar-section">
             <span>コンテンツ</span>
             {(
               [
@@ -1668,7 +1668,7 @@ export default function Notebook({
             <ArrowUpRight />
           </a>
           {login && (
-            <div className="admin-nav">
+            <div data-ds="admin-nav" className="admin-nav">
               <Button
                 variant="solid"
                 size="sm"
@@ -1692,7 +1692,7 @@ export default function Notebook({
               <button onClick={logOut}>ログアウト</button>
             </div>
           )}
-          <div className="sidebar-foot">
+          <div data-ds="sidebar-foot" className="sidebar-foot">
             {!login ? (
               <details data-ds="admin-access" className="admin-access">
                 <summary>•••</summary>
