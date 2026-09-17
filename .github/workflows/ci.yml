@@ -59,17 +59,16 @@ jobs:
       - run: npm run build
       - run: make e2e
       - run: npm run test:visual
+      - name: List UI screenshot evidence
+        if: always()
+        run: find test-results -type f -name "*.png" -print | sort
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: ui-visual-${{ github.run_id }}
-          path: |
-            test-results/**/landing-*.png
-            test-results/**/federation-*.png
-            test-results/**/visual-evidence-*.png
-            test-results/**/screen-evidence-*.png
-          if-no-files-found: ignore
-          retention-days: 3
+          path: test-results/
+          if-no-files-found: error
+          retention-days: 7
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
