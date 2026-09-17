@@ -15,3 +15,22 @@ for (const viewport of [
     );
   });
 }
+
+for (const viewport of [
+  { name: "mobile", width: 390, height: 844 },
+  { name: "tablet", width: 768, height: 1024 },
+  { name: "desktop", width: 1440, height: 900 },
+]) {
+  for (const [name, story] of [
+    ["page-header", "patterns-pageheader--default"],
+    ["post-card", "patterns-postcard--default"],
+    ["project-list", "patterns-projectlist--default"],
+    ["mobile-navigation", "patterns-mobilenavigation--three-equal-slots"],
+  ] as const) {
+    test(` representative state at `, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto(`/iframe.html?id=&viewMode=story`);
+      await expect(page.locator("#storybook-root")).toHaveScreenshot(`-.png`);
+    });
+  }
+}
