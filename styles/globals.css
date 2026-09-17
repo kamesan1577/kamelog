@@ -693,41 +693,6 @@ textarea:focus {
 .right-sidebar {
   padding-top: 4px;
 }
-.profile-card {
-  padding: 0 0 23px;
-  border-bottom: 1px solid #ecebe7;
-}
-.profile-card .avatar {
-  width: 55px;
-  height: 55px;
-  font-size: 39px;
-  border-radius: 10px;
-}
-.profile-card h2 {
-  font-weight: 650;
-  font-size: 18px;
-  margin: 15px 0 3px;
-}
-[data-ds="profile-card"] > span {
-  font-size: 12px;
-  color: #a3a096;
-}
-.profile-card p {
-  font-size: 13px;
-  line-height: 1.95;
-  color: #8f897e;
-  margin: 13px 0 14px;
-}
-.profile-card a {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #857f74;
-}
-.profile-card a svg:last-child {
-  margin-left: 3px;
-}
 .side-search {
   display: flex;
   align-items: center;
