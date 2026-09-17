@@ -3,18 +3,6 @@
   flex: 1;
 }
 
-[data-ds="breadcrumb"] {
-  height: 53px;
-  border-bottom: 1px solid #f1f0ed;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 28px;
-  color: #78766f;
-  font-size: 12px;
-  white-space: nowrap;
-}
-
 [data-ds="content-grid"] {
   display: grid;
   grid-template-columns: minmax(0, 660px) 232px;
