@@ -2,7 +2,6 @@
   "css": [
     "app/brand-theme.css",
     "app/composer-layout.css",
-    "app/detail-actions.css",
     "app/engineering.css",
     "app/federation.css",
     "app/globals.css",
