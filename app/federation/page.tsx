@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { getStore } from "@/server/runtime.mjs";
 import { siteOrigin } from "@/server/seo.mjs";
-import styles from "./federation-guide.module.css";
+import styles from "@/components/design-system/patterns/FederationGuide.module.css";
 
 export const dynamic = "force-dynamic";
 
