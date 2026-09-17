@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with app-shell cleanup. Responsive content-grid geometry and workspace sizing now live in AppShell, while duplicate public navigation shell and side-link rules were removed from globals. check:ui, typecheck, lint, and public-repo check passed locally.
+
 2026-09-17 Issue #99 migration continued with residual shared states. Composer image controls, timeline feed count, project page spacing, and tag load-more now use pattern-owned data-ds styling; corresponding global selectors were removed. check:ui, typecheck, lint, and public-repo check passed locally.
 
 2026-09-17 Issue #99 migration continued with PageHeader typography.

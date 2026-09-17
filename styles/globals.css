@@ -162,17 +162,6 @@ input:focus,
 textarea:focus {
   border-color: #2383e2;
 }
-.side-link {
-  display: flex;
-  align-items: center;
-  gap: 11px;
-  margin: 0 20px;
-  font-size: 14px;
-  color: #78766f;
-}
-.side-link svg:last-child {
-  margin-left: auto;
-}
 .avatar {
   width: 31px;
   height: 31px;
@@ -357,59 +346,6 @@ textarea:focus {
     scroll-behavior: auto !important;
     transition: none !important;
     animation: none !important;
-  }
-}
-
-/* Public-first shell */
-.site-layout > .workspace {
-  flex: 1;
-  min-width: 0;
-}
-.site-layout .content-grid {
-  grid-template-columns: minmax(0, 660px) 232px;
-}
-
-@media (max-width: 950px) {
-  .site-layout .content-grid {
-    grid-template-columns: 1fr;
-  }
-  .site-layout .right-sidebar {
-    display: none;
-  }
-}
-@media (max-width: 640px) {
-  .site-layout {
-    display: block;
-  }
-  .public-sidebar {
-    display: none;
-  }
-  .public-header {
-    padding: 0 17px;
-  }
-  .public-header > span {
-    display: none;
-  }
-  .mobile-name {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    margin-right: auto;
-  }
-  .mobile-name .wordmark {
-    width: 21px;
-    height: 23px;
-    font-size: 19px;
-  }
-  .mobile-login,
-  .mobile-account {
-    margin-left: auto;
-  }
-  .site-layout .content-grid {
-    padding: 27px 18px 90px;
-  }
-  .mobile-nav button {
-    font-size: 12px;
   }
 }
 
