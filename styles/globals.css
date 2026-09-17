@@ -196,32 +196,6 @@ textarea:focus {
   font-size: 46px;
   border-radius: 12px;
 }
-.workspace {
-  min-width: 0;
-  flex: 1;
-}
-.breadcrumb {
-  height: 53px;
-  border-bottom: 1px solid #f1f0ed;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 28px;
-  color: #78766f;
-  font-size: 12px;
-  white-space: nowrap;
-}
-.content-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 660px) 232px;
-  gap: 46px;
-  max-width: 1030px;
-  margin: 0 auto;
-  padding: 47px 40px 60px;
-}
-.main-content {
-  min-width: 0;
-}
 .page-heading {
   margin-bottom: 26px;
 }

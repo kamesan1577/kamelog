@@ -1704,7 +1704,7 @@ export default function Notebook({
             <small>© 2026 {profile.name}</small>
           </div>
         </aside>
-        <div className="workspace">
+        <div data-ds="workspace" className="workspace">
           <header className="public-header">
             <button className="mobile-name" onClick={() => nav("home")}>
               <b>kamelog</b>
@@ -1743,8 +1743,9 @@ export default function Notebook({
             className={
               "content-grid " + (view === "home" ? "landing-layout" : "")
             }
+            data-ds="content-grid"
           >
-            <main className="main-content">
+            <main data-ds="main-content" className="main-content">
               {view === "account" && login ? (
                 <section data-ds="owner-settings" className="settings-page">
                   <PageHeader title="アカウント" />
