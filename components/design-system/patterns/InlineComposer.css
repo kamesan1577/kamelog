@@ -71,3 +71,20 @@
     font-size: 16px;
   }
 }
+
+@media (max-width: 640px) {
+  [data-ds="inline-composer"] {
+    margin-bottom: 22px;
+  }
+  [data-ds="inline-composer"] > .composer-start {
+    padding: 14px 12px;
+    gap: 10px;
+  }
+  [data-ds="inline-composer"] > .composer-start > button:not(.compose-plus) {
+    font-size: 13px;
+  }
+  [data-ds="inline-composer"] .composer-kinds {
+    gap: 21px;
+    margin: 0 12px;
+  }
+}

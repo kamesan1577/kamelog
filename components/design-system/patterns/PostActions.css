@@ -33,3 +33,13 @@
     gap: 12px 18px;
   }
 }
+
+@media (max-width: 640px) {
+  [data-ds="post-actions"] {
+    margin-top: 13px;
+    gap: 26px;
+  }
+  [data-ds="post-actions"] button {
+    min-height: 32px;
+  }
+}
