@@ -79,6 +79,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByRole("heading", { name: "アカウント", exact: true }),
   ).toBeVisible();
+  await expect(page.locator(`[data-ds="owner-settings"]`)).toBeVisible();
+  await expect(page.locator(`[data-ds="owner-profile"]`)).toBeVisible();
+  await expect(page.locator(`[data-ds="owner-federation"]`)).toBeVisible();
   const federationUsername = page.getByLabel("ユーザー名", { exact: true });
   await expect(federationUsername).toBeVisible();
   await expect

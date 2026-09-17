@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with owner account regions. Account settings, profile/avatar controls, federation settings, following management, and federation setup now expose semantic data-ds boundaries; the existing behavior and CSS hooks remain intact. CI for stacked PR #144 is green; #145 verification is pending.
+
 2026-09-17 Issue #99 selector migration continued. Journey tests now prefer data-ds contracts for composer, dialog, gallery, post preview/card, projects, federation, mobile create, and editor footer; a sidebar icon assertion now uses navigation/button roles. lint, typecheck, UI semantic guardrails, and format check passed.
 
 2026-09-17 Issue #99 migration continued with PostActions. Like, link-copy, X-share, and owner menu behavior now share a semantic action-group shell without moving their callbacks. lint, typecheck, UI semantic guardrails, and format check passed.

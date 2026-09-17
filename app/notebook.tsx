@@ -1737,9 +1737,9 @@ export default function Notebook({
           >
             <main className="main-content">
               {view === "account" && login ? (
-                <section className="settings-page">
+                <section data-ds="owner-settings" className="settings-page">
                   <PageHeader title="アカウント" />
-                  <div className="setting-avatar">
+                  <div data-ds="owner-profile" className="setting-avatar">
                     <Avatar value={icon || profile.icon} large />
                     <label className="upload-label">
                       <Upload size={15} />
@@ -1757,7 +1757,7 @@ export default function Notebook({
                       />
                     </label>
                   </div>
-                  <div className="emoji-options">
+                  <div data-ds="owner-avatar-picker" className="emoji-options">
                     {["🐢", "🦦", "🐈", "🌱", "☕", "👾"].map((x) => (
                       <button key={x} onClick={() => setIcon(x)}>
                         {x}
@@ -1796,7 +1796,7 @@ export default function Notebook({
                     保存
                   </Button>
                   <section
-                    data-ds="federation-settings"
+                    data-ds="owner-federation"
                     className="federation-settings"
                     aria-labelledby="federation-heading"
                   >
@@ -1848,6 +1848,7 @@ export default function Notebook({
                           </Button>
                         </div>
                         <section
+                          data-ds="owner-following"
                           className="federation-following"
                           aria-labelledby="federation-following-heading"
                         >
@@ -1945,6 +1946,7 @@ export default function Notebook({
                       </div>
                     ) : (
                       <form
+                        data-ds="owner-federation-setup"
                         className="federation-setup"
                         aria-busy={federationBusy}
                         onSubmit={(event) => {
