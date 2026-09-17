@@ -45,3 +45,23 @@
 [data-ds="inline-composer"] .composer-kinds button:hover {
   color: #37352f;
 }
+[data-ds="inline-composer"] .inline-tweet {
+  flex: 1;
+  min-width: 0;
+  min-height: 31px;
+  max-height: 140px;
+  resize: vertical;
+  border: 0;
+  line-height: 1.65;
+  font-size: 15px;
+  padding: 4px 0;
+  background: transparent;
+}
+[data-ds="inline-composer"] .inline-tweet::placeholder {
+  color: #aaa79f;
+}
+(max-width: 640px) {
+  [data-ds="inline-composer"] .inline-tweet {
+    font-size: 16px;
+  }
+}

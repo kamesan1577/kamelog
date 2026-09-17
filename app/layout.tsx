@@ -9,6 +9,7 @@ import "../components/design-system/patterns/PostCard.css";
 import "../components/design-system/patterns/TagList.css";
 import "../components/design-system/patterns/TimelineToolbar.css";
 import "../components/design-system/patterns/InlineComposer.css";
+import "../components/design-system/patterns/Dialog.css";
 import "../components/design-system/patterns/EditorDialog.css";
 import "../components/design-system/patterns/EmptyState.css";
 import "../components/design-system/patterns/Sidebar.css";

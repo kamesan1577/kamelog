@@ -1,5 +1,7 @@
 # kamelog handoff
 
+2026-09-17 Issue #99 migration continued with dialog and action auxiliary styles. Draft lists, save/delete confirmation actions, inline tweet input, and post-action wrapping now use Design System data-ds boundaries; the corresponding global rules were removed. check:ui, typecheck, and lint passed locally; PR #225 CI is pending.
+
 2026-09-17 Issue #99 E2E selector cleanup continued with semantic post and Markdown locators. The remaining post overflow control now has an accessible name, syntax-highlighting class assertions were removed from E2E in favor of content behavior coverage, and lint/typecheck passed; PR #207 CI is pending.
 
 2026-09-17 Issue #99 E2E selector audit completed for the current suite: the remaining project-article implementation selector was replaced with a semantic article query scoped to the projects region. lint, typecheck, format, UI semantic guardrails, and public-repo check passed; stacked CI is pending.

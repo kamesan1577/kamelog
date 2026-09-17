@@ -2882,7 +2882,7 @@ export default function Notebook({
                 <span>{drafts.length}</span>
               </button>
               {editorDrafts && (
-                <div className="draft-list">
+                <div data-ds="draft-list" className="draft-list">
                   {drafts.map((draft) => (
                     <button
                       type="button"
@@ -3354,7 +3354,7 @@ export default function Notebook({
           <DialogDescription>
             保存しない場合、入力内容は削除されます。
           </DialogDescription>
-          <div className="confirm-actions">
+          <div data-ds="confirm-actions" className="confirm-actions">
             <Button onClick={() => setCloseAsk(false)}>編集を続ける</Button>
             <Button onClick={discard}>削除して閉じる</Button>
             <Button variant="solid" onClick={saveDraft}>
@@ -3367,7 +3367,7 @@ export default function Notebook({
         <DialogContent>
           <DialogTitle>下書き</DialogTitle>
           <DialogDescription>サーバーに保存されています。</DialogDescription>
-          <div className="draft-list">
+          <div data-ds="draft-list" className="draft-list">
             {drafts.map((d) => (
               <button
                 key={d.id}
@@ -3395,12 +3395,15 @@ export default function Notebook({
         open={!!remove}
         onOpenChange={(open) => !open && setRemove(null)}
       >
-        <AlertDialogContent className="delete-dialog">
+        <AlertDialogContent data-ds="delete-dialog" className="delete-dialog">
           <AlertDialogTitle>投稿を削除しますか？</AlertDialogTitle>
           <AlertDialogDescription>
             公開サイトから削除されます。
           </AlertDialogDescription>
-          <AlertDialogFooter className="confirm-actions">
+          <AlertDialogFooter
+            data-ds="confirm-actions"
+            className="confirm-actions"
+          >
             <Button onClick={() => setRemove(null)}>キャンセル</Button>
             <Button
               variant="red-fill"

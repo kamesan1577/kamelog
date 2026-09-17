@@ -25,3 +25,11 @@
 [data-ds="post-actions"] .more {
   margin-left: auto;
 }
+[data-ds="post-actions"] {
+  flex-wrap: wrap;
+}
+(max-width: 640px) {
+  [data-ds="post-actions"] {
+    gap: 12px 18px;
+  }
+}
