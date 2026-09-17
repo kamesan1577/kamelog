@@ -49,6 +49,7 @@ import { InlineComposer } from "@/components/design-system/patterns/InlineCompos
 import { BlogEditorToolbar } from "@/components/design-system/patterns/BlogEditorToolbar";
 import { BlogEditorWorkspace } from "@/components/design-system/patterns/BlogEditorWorkspace";
 import { EditorFooter } from "@/components/design-system/patterns/EditorFooter";
+import { MediaGallery } from "@/components/design-system/patterns/MediaGallery";
 import { MediaUploadField } from "@/components/design-system/patterns/MediaUploadField";
 import { TagList } from "@/components/design-system/patterns/TagList";
 import { ProjectList } from "@/components/design-system/patterns/ProjectList";
@@ -371,29 +372,11 @@ export function Markdown({ text }: { text: string }) {
 }
 
 function ImageGallery({ images = [] }: { images?: string[] }) {
-  const [large, setLarge] = useState<string | null>(null);
-  if (!images.length) return null;
   return (
-    <>
-      <div className={`image-grid count-${images.length}`}>
-        {images.map((src, index) => (
-          <button
-            type="button"
-            key={src}
-            onClick={() => setLarge(src)}
-            aria-label={`画像${index + 1}を拡大`}
-          >
-            <img src={src} alt={`添付画像 ${index + 1}`} />
-          </button>
-        ))}
-      </div>
-      <Dialog open={!!large} onOpenChange={(open) => !open && setLarge(null)}>
-        <DialogContent className="image-lightbox">
-          <DialogTitle>添付画像</DialogTitle>
-          {large && <img src={large} alt="拡大した添付画像" />}
-        </DialogContent>
-      </Dialog>
-    </>
+    <MediaGallery
+      images={images}
+      gridClassName={"image-grid count-" + images.length}
+    />
   );
 }
 
