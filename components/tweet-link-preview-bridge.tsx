@@ -39,7 +39,7 @@ function previewHost(body: HTMLElement) {
 function isPreviewCard(element: Element | null): element is HTMLElement {
   return (
     element instanceof HTMLElement &&
-    element.classList.contains("tweet-link-card") &&
+    element.dataset.ds === "tweet-link-card" &&
     element.dataset.previewOwner === "tweet-link-preview"
   );
 }
@@ -64,7 +64,7 @@ function owningTweetBody(card: HTMLElement) {
 function removeOrphanedCards() {
   document
     .querySelectorAll<HTMLElement>(
-      '.tweet-link-card[data-preview-owner="tweet-link-preview"]',
+      '[data-ds="tweet-link-card"][data-preview-owner="tweet-link-preview"]',
     )
     .forEach((card) => {
       const body = owningTweetBody(card);
@@ -93,6 +93,7 @@ function removeDuplicateCards(body: HTMLElement) {
 
 function inlineLink(url: string) {
   const link = document.createElement("a");
+  link.dataset.ds = "tweet-inline-link";
   link.className = "tweet-inline-link";
   link.href = url;
   link.target = "_blank";
@@ -106,7 +107,8 @@ function inlineLink(url: string) {
 
 function previewCard(url: string, preview: LinkPreview) {
   const card = document.createElement("a");
-  card.className = `tweet-link-card${preview.image ? " has-image" : ""}`;
+  card.dataset.ds = "tweet-link-card";
+  card.className = `tweet-link-card`;
   card.href = url;
   card.target = "_blank";
   card.rel = "noopener noreferrer";

@@ -45,7 +45,7 @@ test("tweet URLs become working links and render a compact OGP card without over
   }, url);
 
   const link = page
-    .locator(".tweet-inline-link")
+    .locator('[data-ds="tweet-inline-link"]')
     .filter({ hasText: "example.test" });
   await expect(link).toHaveAttribute("href", url);
   await expect(link).toHaveAttribute("target", "_blank");
@@ -59,7 +59,7 @@ test("tweet URLs become working links and render a compact OGP card without over
     .toBe(true);
 
   const card = page
-    .locator(".tweet-link-card")
+    .locator('[data-ds="tweet-link-card"]')
     .filter({ hasText: "架空のOGPタイトル" });
   await expect(card).toBeVisible();
   await expect(card).toContainText("Example Test");
@@ -80,7 +80,7 @@ test("tweet URLs become working links and render a compact OGP card without over
     }
     body.textContent = `${body.textContent ?? ""} `;
   });
-  await expect(page.locator(".tweet-link-card")).toHaveCount(1);
+  await expect(page.locator('[data-ds="tweet-link-card"]')).toHaveCount(1);
 
   const popupPromise = context.waitForEvent("page");
   await link.click();
