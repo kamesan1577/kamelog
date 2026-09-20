@@ -1,0 +1,96 @@
+.state {
+  display: flex;
+  min-height: 65dvh;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: var(--kamelog-paper, #f6f5f4);
+  color: var(--kamelog-ink, #37352f);
+}
+
+.content {
+  width: min(100%, 480px);
+}
+
+.icon {
+  color: #80796e;
+}
+
+.title {
+  margin: 20px 0 0;
+  font-size: clamp(23px, 5vw, 29px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.4;
+}
+
+.description {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.9;
+  color: #726e66;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.primary,
+.secondary {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 16px;
+  border: 1px solid var(--kamelog-ink, #37352f);
+  border-radius: 6px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 150ms ease;
+}
+
+.primary {
+  background: var(--kamelog-ink, #37352f);
+  color: white;
+}
+
+.primary:hover {
+  background: #292824;
+}
+
+.secondary {
+  border-color: var(--kamelog-line, #dededb);
+  background: white;
+  color: var(--kamelog-ink, #37352f);
+}
+
+.secondary:hover {
+  background: var(--kamelog-soft, #efefed);
+}
+
+.primary:focus-visible,
+.secondary:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.compact {
+  min-height: 0;
+  padding: 32px 20px;
+  border: 1px solid var(--kamelog-line, #dededb);
+  border-radius: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primary,
+  .secondary {
+    transition: none;
+  }
+}

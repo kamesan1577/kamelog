@@ -19,6 +19,7 @@ import "../components/design-system/patterns/Sidebar.css";
 import "../components/design-system/patterns/TimelineFilter.css";
 import "../components/design-system/patterns/MarkdownContent.css";
 import "../components/design-system/patterns/DetailPage.css";
+import "../components/design-system/patterns/BlogTableOfContents.css";
 import "../components/design-system/patterns/MarkdownHelp.css";
 import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";
@@ -42,6 +43,7 @@ import { ImageUploadBridge } from "@/components/image-upload-bridge";
 import { NavigationUrlBridge } from "@/components/navigation-url-bridge";
 import { ProfileSocialLinksBridge } from "@/components/profile-social-links-bridge";
 import { TweetLinkPreviewBridge } from "@/components/tweet-link-preview-bridge";
+import { NotificationSettingsLink } from "@/components/notification-settings-link";
 import {
   homeUrl,
   ogImageUrl,
@@ -92,6 +94,7 @@ export default function RootLayout({
         <BlogTableOfContentsBridge />
         <TweetLinkPreviewBridge />
         <ProfileSocialLinksBridge />
+        <NotificationSettingsLink />
         {children}
       </body>
     </html>

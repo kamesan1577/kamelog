@@ -36,7 +36,7 @@ export function SideNavigation({
           <Button
             key={item.id}
             type="button"
-            variant={item.active ? "secondary" : "ghost"}
+            variant={item.active ? "primary" : "ghost"}
             size="sm"
             className="justify-start"
             aria-current={item.active ? "page" : undefined}

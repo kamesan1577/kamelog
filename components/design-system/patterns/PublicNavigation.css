@@ -165,6 +165,24 @@
   font-size: 12px;
 }
 
+/* Active navigation is driven by aria-current, not the legacy .active class.
+   Keep this more specific than the sidebar's generic button and hover styles. */
+[data-ds="public-sidebar"] [data-ds="side-navigation"] button[aria-current="page"] {
+  background: #37352f;
+  border-color: #37352f;
+  color: #fff;
+}
+
+[data-ds="public-sidebar"] [data-ds="side-navigation"] button[aria-current="page"]:hover {
+  background: #292824;
+  border-color: #292824;
+  color: #fff;
+}
+
+[data-ds="public-sidebar"] [data-ds="side-navigation"] button[aria-current="page"] span.ds-text-xs {
+  color: #d8d6d0;
+}
+
 @media (max-width: 640px) {
   [data-ds="site-layout"] {
     display: block;

@@ -1,7 +1,7 @@
 import { access, readdir, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator } from "@playwright/test";
 import { Store } from "../../server/store.mjs";
 
 async function findE2EDataDirectory() {
@@ -27,6 +27,24 @@ async function findE2EDataDirectory() {
   throw new Error("active kamelog E2E data directory not found");
 }
 
+async function expectDividerAligned(childPost: Locator) {
+  const divider = await childPost.evaluate((element) => {
+    const style = getComputedStyle(element, "::after");
+    const bounds = element.getBoundingClientRect();
+    const feed = element.closest(".feed")?.getBoundingClientRect();
+    return {
+      left: bounds.left + parseFloat(style.left),
+      feedLeft: feed?.left,
+      thickness: style.height,
+      color: style.backgroundColor,
+    };
+  });
+  expect(divider.feedLeft).toBeDefined();
+  expect(Math.abs(divider.left - divider.feedLeft!)).toBeLessThanOrEqual(1);
+  expect(divider.thickness).toBe("1px");
+  expect(divider.color).not.toBe("rgba(0, 0, 0, 0)");
+}
+
 test("owner can append a tweet thread and public detail renders the chain", async ({
   page,
   context,
@@ -49,6 +67,17 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
     .getByRole("button", { name: "タイムライン", exact: true })
     .first()
     .click();
+  const imagePicker = page.locator(".desktop-composer .image-upload-button");
+  await expect(imagePicker).toBeVisible();
+  await expect(imagePicker).toHaveText(/画像/);
+  await expect(imagePicker).toHaveCSS("font-size", "0px");
+  await expect(imagePicker.locator("svg")).toHaveCSS("width", "20px");
+  await expect(imagePicker.locator("svg")).toHaveCSS("height", "20px");
+  await expect(imagePicker.locator('input[type="file"]')).toHaveAttribute(
+    "accept",
+    "image/png,image/jpeg,image/webp,image/gif",
+  );
+
   const inline = page.getByPlaceholder("いまどうしてる？");
   await inline.fill("スレッドの架空ルート投稿");
   await page.getByRole("button", { name: "投稿", exact: true }).first().click();
@@ -131,4 +160,24 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
   await expect(
     page.getByText("スレッドの架空ルート投稿", { exact: true }),
   ).toBeVisible();
+
+  // The child card must not touch the divider or the preceding post's actions.
+  await page.goto("/timeline");
+  const childPost = page
+    .locator('[data-ds="thread-post"]')
+    .filter({ hasText: "スレッドの架空の続き" });
+  await expect(childPost).toBeVisible();
+  expect(
+    await childPost.evaluate((element) =>
+      parseFloat(getComputedStyle(element).paddingTop),
+    ),
+  ).toBeGreaterThanOrEqual(28);
+  await expectDividerAligned(childPost);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  expect(
+    await childPost.evaluate((element) =>
+      parseFloat(getComputedStyle(element).paddingTop),
+    ),
+  ).toBeGreaterThanOrEqual(32);
+  await expectDividerAligned(childPost);
 });
