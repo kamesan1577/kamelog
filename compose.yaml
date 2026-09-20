@@ -3,6 +3,7 @@ x-app: &app
   environment:
     KAMELOG_ORIGIN: ${KAMELOG_ORIGIN:?Set the public HTTPS origin}
     KAMELOG_BOOTSTRAP_TOKEN: ${KAMELOG_BOOTSTRAP_TOKEN:-}
+    KAMELOG_INFERENCE_ENCRYPTION_KEY: ${KAMELOG_INFERENCE_ENCRYPTION_KEY:-}
   volumes: ["kamelog-data:/data"]
   init: true
   restart: unless-stopped
