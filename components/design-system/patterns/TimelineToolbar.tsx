@@ -51,7 +51,7 @@ export function TimelineToolbar({
           <TabsTrigger value="vlog">vlog</TabsTrigger>
         </TabsList>
       </Tabs>
-      <div className="timeline-toolbar-actions">
+      <div data-ds="timeline-toolbar-actions">
         {onRefresh && (
           <button
             type="button"
@@ -59,7 +59,7 @@ export function TimelineToolbar({
             disabled={refreshing}
             onClick={onRefresh}
           >
-            <RefreshCw size={17} className={refreshing ? "is-spinning" : ""} />
+            <RefreshCw size={17} className={refreshing ? "animate-spin" : undefined} />
           </button>
         )}
         <DropdownMenu>
