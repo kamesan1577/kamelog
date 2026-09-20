@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { mkdtemp, writeFile, mkdir, rename, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
+import { optimizeImage } from "./image-optimizer.mjs";
 
 const imageTypes = {
   "image/png": {
@@ -58,7 +59,7 @@ function imageDimensions(bytes, type) {
       0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce,
       0xcf,
     ]);
-    for (let offset = 2; offset + 8 < bytes.length;) {
+    for (let offset = 2; offset + 8 < bytes.length; ) {
       if (bytes[offset] !== 0xff) return null;
       const marker = bytes[offset + 1];
       if (marker === 0xd9 || marker === 0xda) return null;
@@ -90,6 +91,7 @@ export function validateImage(
     throw new Error("Invalid image");
   const dimensions = imageDimensions(bytes, declaredType);
   if (
+    !dimensions ||
     !dimensions.width ||
     !dimensions.height ||
     dimensions.width > 12000 ||
@@ -104,21 +106,40 @@ export async function saveImage(store, bytes, declaredType) {
   const validated = validateImage(bytes, declaredType);
   const root = join(store.directory, "media");
   await mkdir(root, { recursive: true, mode: 0o700 });
-  const id = randomUUID();
-  const metadata = {
-    kind: "image",
-    type: declaredType,
-    extension: validated.extension,
-    size: bytes.length,
-    width: validated.width,
-    height: validated.height,
-    createdAt: new Date().toISOString(),
-  };
-  await writeFile(join(root, `${id}.${validated.extension}`), bytes, {
-    mode: 0o600,
-  });
-  store.save("media", id, metadata);
-  return { id, url: "/api/media/" + id, ...metadata };
+  const temporary = await mkdtemp(join(root, ".image-"));
+  let destination;
+  try {
+    const image = await optimizeImage(
+      bytes,
+      declaredType,
+      validated,
+      temporary,
+      command,
+      validateImage,
+    );
+    const id = randomUUID();
+    const metadata = {
+      kind: "image",
+      type: image.type,
+      extension: image.extension,
+      size: image.bytes.length,
+      width: image.width,
+      height: image.height,
+      createdAt: new Date().toISOString(),
+    };
+    const prepared = join(temporary, `prepared.${image.extension}`);
+    destination = join(root, `${id}.${image.extension}`);
+    await writeFile(prepared, image.bytes, { mode: 0o600 });
+    await rename(prepared, destination);
+    store.save("media", id, metadata);
+    destination = undefined;
+    return { id, url: "/api/media/" + id, ...metadata };
+  } catch (error) {
+    if (destination) await rm(destination, { force: true });
+    throw error;
+  } finally {
+    await rm(temporary, { recursive: true, force: true });
+  }
 }
 
 export function command(binary, args, timeout = 60_000) {
