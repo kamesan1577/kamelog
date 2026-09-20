@@ -83,3 +83,12 @@
   font-size: 12px;
   padding: 24px;
 }
+
+.timeline-pull-indicator,
+.timeline-refresh-status {
+  margin: 0;
+  padding: 8px 0;
+  text-align: center;
+  color: #7b7970;
+  font-size: 12px;
+}

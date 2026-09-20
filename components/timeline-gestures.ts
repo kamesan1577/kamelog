@@ -49,7 +49,11 @@ function unsafeSwipeTarget(target: Element) {
   ) {
     return true;
   }
-  for (let element: Element | null = target; element; element = element.parentElement) {
+  for (
+    let element: Element | null = target;
+    element;
+    element = element.parentElement
+  ) {
     if (!(element instanceof HTMLElement)) continue;
     if (
       element.scrollWidth > element.clientWidth + 4 &&
@@ -92,7 +96,8 @@ export function useTimelineGestures({
     }
     const target = event.target;
     if (!(target instanceof Element) || unsafeSwipeTarget(target)) return;
-    if (!window.getSelection()?.isCollapsed) return;
+    const selection = window.getSelection();
+    if (selection && !selection.isCollapsed) return;
     const touch = event.touches[0];
     const atTop = (scrollingSurface()?.scrollTop ?? window.scrollY) <= 1;
     start.current = {
@@ -135,7 +140,11 @@ export function useTimelineGestures({
       void onRefresh();
       return;
     }
-    if (origin.canSwipe && Math.abs(dx) >= 80 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    if (
+      origin.canSwipe &&
+      Math.abs(dx) >= 80 &&
+      Math.abs(dx) > Math.abs(dy) * 1.5
+    ) {
       const current = filters.indexOf(filter);
       const next = current + (dx < 0 ? 1 : -1);
       if (next >= 0 && next < filters.length) {
