@@ -1,10 +1,14 @@
 import { hash } from "./store.mjs";
+import { extractHashtags } from "./validation.mjs";
+import { TagRepository } from "./tag-repository.mjs";
 import { LocalTagInference } from "./inference/local-tag-inference.mjs";
 import { validateTagResult } from "./inference/ports.mjs";
 
+// Retained for the explicit local classifier and its historical tests.
 export const AUTO_TAG_MODEL_VERSION = "local-tfidf-v1";
 const AUTO_TAG_THRESHOLD = 0.42;
 const MAX_AUTO_TAGS = 5;
+const DEFAULT_CANDIDATES = 15;
 const hashtagPattern = /#[\p{L}\p{N}_-]+/gu;
 
 function textOf(post) {
@@ -17,8 +21,7 @@ function normalize(text) {
     .toLocaleLowerCase("ja-JP");
 }
 
-// Word tokens cover English/technical terms. Japanese bigrams keep the
-// classifier useful without a tokenizer or a downloaded model.
+// The old classifier remains an explicitly selectable, local implementation.
 function features(text) {
   const value = normalize(text);
   const tokens = new Map();
@@ -130,55 +133,184 @@ export function classifyPosts(posts) {
   return { result, trainingHash: trainingHash(posts) };
 }
 
+function createCandidates(posts, manual, aliasesByTag) {
+  const examples = new Map();
+  // Only publicly published owner posts are in `posts`; drafts and remote posts
+  // are separate collections and are never read by this use case.
+  for (const post of posts)
+    for (const tag of manual.get(post.id) || []) {
+      if (!examples.has(tag)) examples.set(tag, []);
+      if (examples.get(tag).length < 3)
+        examples.get(tag).push(textOf(post).slice(0, 500));
+    }
+  return [...examples].map(([tag, samples]) => ({
+    tag,
+    aliases: Array.isArray(aliasesByTag[tag])
+      ? aliasesByTag[tag]
+          .filter((alias) => typeof alias === "string" && alias.length <= 80)
+          .slice(0, 8)
+      : [],
+    examples: samples,
+  }));
+}
+
+/** Keep literal name/alias matches ahead of the bounded semantic shortlist. */
+export function selectTagCandidates(
+  post,
+  candidates,
+  limit = DEFAULT_CANDIDATES,
+) {
+  const text = normalize(textOf(post));
+  const ranked = candidates.map((candidate) => {
+    const names = [candidate.tag, ...candidate.aliases]
+      .map(normalize)
+      .filter(Boolean);
+    const exact = names.some((name) => text.includes(name));
+    const lexical = Math.max(
+      0,
+      ...names.map((name) => lexicalScore(name, text)),
+    );
+    const exemplar = Math.max(
+      0,
+      ...candidate.examples.map((sample) =>
+        lexicalScore(sample.slice(0, 60), text),
+      ),
+    );
+    return { candidate, exact, score: lexical + exemplar * 0.1 };
+  });
+  ranked.sort(
+    (a, b) =>
+      Number(b.exact) - Number(a.exact) ||
+      b.score - a.score ||
+      a.candidate.tag.localeCompare(b.candidate.tag, "ja"),
+  );
+  // Do not silently discard an explicitly matching name when >limit match.
+  const exactCount = ranked.filter((item) => item.exact).length;
+  return ranked
+    .slice(0, Math.max(limit, exactCount))
+    .map(({ candidate }) => candidate);
+}
+
 export async function autoTagPosts(
   store,
-  { tagInference = new LocalTagInference() } = {},
+  {
+    tagInference = new LocalTagInference(),
+    requireEnabled = false,
+    aliases = null,
+    candidateLimit = DEFAULT_CANDIDATES,
+  } = {},
 ) {
+  if (requireEnabled && !store.inferenceSettings()?.autoTagEnabled)
+    return { processed: 0, skipped: 0, failed: 0, posts: 0, disabled: true };
+  const repository = new TagRepository(store);
   const posts = store.list("posts");
-  const { trainingHash: currentTrainingHash } = classifyPosts(posts);
-  const candidates = [
-    ...new Set(posts.flatMap((post) => manualTags(post))),
-  ].map((tag) => ({
-    tag,
-    aliases: [],
-    examples: posts
-      .filter((post) => manualTags(post).includes(tag))
-      .map((post) => textOf(post))
-      .slice(0, 3),
-  }));
+  const manual = repository.manualTags();
+  const aliasesByTag = aliases ?? repository.aliases();
+  const allCandidates = createCandidates(posts, manual, aliasesByTag);
+  const currentTrainingHash = hash(
+    JSON.stringify({
+      training: posts
+        .filter((post) => (manual.get(post.id) || []).length)
+        .map((post) => [post.id, post.revision || 0, manual.get(post.id)])
+        .sort(([a], [b]) => a.localeCompare(b)),
+      aliases: allCandidates.map(({ tag, aliases: names }) => [tag, names]),
+    }),
+  );
+  const modelVersion = tagInference.modelVersion || AUTO_TAG_MODEL_VERSION;
+  const engineId = tagInference.engineId || "local-tfidf";
+  const providerId = tagInference.providerId || "local";
+  const adapterVersion = tagInference.adapterVersion || AUTO_TAG_MODEL_VERSION;
   let processed = 0;
   let skipped = 0;
+  let failed = 0;
   for (const post of posts) {
+    if (requireEnabled && !store.inferenceSettings()?.autoTagEnabled) break;
     const run = store.autoTagState(post.id);
     const currentContentHash = contentHash(post);
     if (
       run?.content_hash === currentContentHash &&
-      run.model_version === AUTO_TAG_MODEL_VERSION &&
+      run.model_version === modelVersion &&
       run.training_hash === currentTrainingHash
     ) {
       skipped++;
       continue;
     }
-    const inference = await tagInference.inferTags({
-      post: { id: post.id, title: post.title || "", body: post.body || "" },
-      candidates,
-      context: posts.map(({ id, body }) => ({ id, body: body || "" })),
-    });
-    const result = manualTags(post).length
-      ? { status: "abstained", tags: [] }
-      : validateTagResult(inference, candidates);
-    store.replaceAutoTags(post.id, result.tags, {
-      contentHash: currentContentHash,
-      modelVersion: AUTO_TAG_MODEL_VERSION,
-      trainingHash: currentTrainingHash,
-      engineId: tagInference.constructor.name,
-      adapterVersion: AUTO_TAG_MODEL_VERSION,
-    });
-    processed++;
+    const manualForPost = manual.get(post.id) || [];
+    const candidates = selectTagCandidates(
+      post,
+      allCandidates.filter(({ tag }) => !manualForPost.includes(tag)),
+      candidateLimit,
+    );
+    const canonical = new Set(allCandidates.map(({ tag }) => tag));
+    const explicit = extractHashtags(post.title, post.body).filter(
+      (tag) => canonical.has(tag) && !manualForPost.includes(tag),
+    );
+    const shortPost = textOf(post).trim().length < 35;
+    const context = shortPost
+      ? posts
+          .filter(
+            (previous) =>
+              previous.id !== post.id &&
+              String(previous.createdAt || "") <= String(post.createdAt || ""),
+          )
+          .slice(-3)
+          .map(({ id, title, body }) => ({
+            id,
+            title: (title || "").slice(0, 120),
+            body: (body || "").slice(0, 500),
+          }))
+      : [];
+    try {
+      const inference = candidates.length
+        ? await tagInference.inferTags({
+            post: {
+              id: post.id,
+              title: (post.title || "")
+                .replace(hashtagPattern, " ")
+                .slice(0, 300),
+              body: (post.body || "")
+                .replace(hashtagPattern, " ")
+                .slice(0, 12_000),
+            },
+            candidates,
+            context,
+          })
+        : { status: "classified", tags: [] };
+      const result = validateTagResult(inference, candidates);
+      // An explicit abstention is not a successful empty classification.
+      if (result.status !== "classified") {
+        failed++;
+        continue;
+      }
+      const tags = [
+        ...new Set([...explicit, ...result.tags.map(({ tag }) => tag)]),
+      ]
+        .slice(0, MAX_AUTO_TAGS)
+        .map((tag) => ({ tag }));
+      const saved = repository.replace(post.id, tags, {
+        contentHash: currentContentHash,
+        modelVersion,
+        trainingHash: currentTrainingHash,
+        manualTags: manualForPost,
+        engineId,
+        providerId,
+        adapterVersion,
+        candidateHash: hash(JSON.stringify(candidates)),
+        requireEnabled,
+      });
+      if (saved) processed++;
+      else skipped++;
+    } catch (error) {
+      // Never clear existing tags or advance post_tag_runs on provider failure.
+      // The unchanged run makes the existing oneshot timer retry on its next tick.
+      failed++;
+      if (error?.code === "not_configured") break;
+    }
   }
   return {
     processed,
     skipped,
+    failed,
     posts: posts.length,
     trainingHash: currentTrainingHash,
   };
