@@ -156,7 +156,9 @@ test("tiny original remains unchanged and persistence failures leave no files", 
     );
     assert.deepEqual(await readdir(join(root, "media")), []);
     await writeFile(join(root, "dummy"), "data");
-    await assert.rejects(saveImage(fakeStore(root), Buffer.from("bad"), "image/png"));
+    await assert.rejects(
+      saveImage(fakeStore(root), Buffer.from("bad"), "image/png"),
+    );
     assert.deepEqual(await readdir(join(root, "media")), []);
   } finally {
     await rm(root, { recursive: true, force: true });
