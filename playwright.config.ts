@@ -13,7 +13,7 @@ export default defineConfig({
     screenshot: "only-on-failure",
   },
   webServer: {
-    command: "node scripts/e2e-server.mjs",
+    command: "node scripts/e2e-server.ts",
     url: `${baseURL}/api/health`,
     reuseExistingServer: false,
     timeout: 120000,
