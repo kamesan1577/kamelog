@@ -70,6 +70,10 @@ test("compose keeps a gateway in front of two application replicas", async () =>
 });
 test("host installer preserves data and writes reproducible systemd overrides", () => {
   assert.match(installer, /test -r "\$ENV_FILE"/);
+  assert.match(installer, /ensure_inference_encryption_key/);
+  assert.match(installer, /openssl rand -base64 32/);
+  assert.match(installer, /KAMELOG_INFERENCE_ENCRYPTION_KEY/);
+  assert.match(installer, /chown --reference="\$ENV_FILE"/);
   assert.match(installer, /KAMELOG_APP_DIR=\$APP_DIR/);
   assert.match(installer, /KAMELOG_BACKUP_ROOT=\$BACKUP_ROOT/);
   assert.match(

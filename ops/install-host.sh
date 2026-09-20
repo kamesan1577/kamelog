@@ -25,6 +25,28 @@ test -r "$ENV_FILE" || fail "create $ENV_FILE before installing"
 test "$NODE_BIN" && test -x "$NODE_BIN" || fail 'pass the shell Node path: sudo env KAMELOG_NODE_BIN="$(command -v node)" ./ops/install-host.sh'
 id -nG "$SERVICE_USER" | tr ' ' '\n' | grep -qx docker || fail "$SERVICE_USER must belong to the docker group"
 
+ensure_inference_encryption_key() {
+  if grep -Eq '^[[:space:]]*(export[[:space:]]+)?KAMELOG_INFERENCE_ENCRYPTION_KEY=[^[:space:]#]+' "$ENV_FILE"; then
+    return
+  fi
+  command -v openssl >/dev/null 2>&1 || fail "openssl is required to initialize the inference encryption key"
+  local key
+  key="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '=\n')"
+  test "${#key}" = 43 || fail "could not generate a 32 byte inference encryption key"
+  local generated_env
+  generated_env="$(mktemp "$(dirname "$ENV_FILE")/.kamelog-env.XXXXXX")"
+  {
+    cat "$ENV_FILE"
+    printf '\nKAMELOG_INFERENCE_ENCRYPTION_KEY=%s\n' "$key"
+  } >"$generated_env"
+  chown --reference="$ENV_FILE" "$generated_env"
+  chmod --reference="$ENV_FILE" "$generated_env"
+  mv -f -- "$generated_env" "$ENV_FILE"
+  printf 'initialized KAMELOG_INFERENCE_ENCRYPTION_KEY in %s\n' "$ENV_FILE"
+}
+
+ensure_inference_encryption_key
+
 install -d -o "$SERVICE_USER" -g "$SERVICE_USER" -m 0700 "$BACKUP_ROOT" "$STATE_DIR"
 install -o root -g root -m 0755 "$APP_DIR/ops/kamelog-update" /usr/local/sbin/kamelog-update
 

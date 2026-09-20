@@ -42,6 +42,7 @@ sudo env KAMELOG_NODE_BIN="$(command -v node)" ./ops/install-host.sh
 既定では呼出元ユーザー、現在のcheckout、checkout内の `.env` を使用する。
 上書きが必要なら `KAMELOG_SERVICE_USER`、`KAMELOG_APP_DIR`、`KAMELOG_ENV_FILE`、`KAMELOG_BACKUP_ROOT`、`KAMELOG_DEPLOY_STATE_DIR` を同じコマンドへ渡す。
 installerは既存のenv、runtime volume、backupを削除しない。
+`KAMELOG_INFERENCE_ENCRYPTION_KEY` がenvになければ、installerが初回だけ生成して追記する。以後の再実行やdeployで値は変わらない。
 
 ```sh
 sudo adduser --system --group --home /srv/kamelog --shell /usr/sbin/nologin kamelog
