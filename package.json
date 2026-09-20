@@ -11,7 +11,7 @@
     "start": "next start",
     "test": "node --test tests/server/*.test.mjs",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint --max-warnings=0 app components/design-system .storybook server tests/server scripts/check*.mjs *.config.*",
+    "lint": "eslint --max-warnings=0 app components/design-system .storybook server tests/server scripts/check*.mjs scripts/*.ts *.config.*",
     "format:check": "prettier --check app lib server scripts tests *.mjs *.ts *.json *.md .github .codex adr docs ops runbooks spec",
     "test:e2e": "playwright test",
     "check:public": "node scripts/check-public-repo.mjs",
