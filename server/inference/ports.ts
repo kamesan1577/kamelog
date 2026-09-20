@@ -104,8 +104,7 @@ export function validateThreadResult(
   result: unknown,
   candidates: Iterable<ThreadCandidate>,
 ): ThreadInferenceResult {
-  if (isRecord(result) && result.status === "independent")
-    return independent();
+  if (isRecord(result) && result.status === "independent") return independent();
   if (isRecord(result) && result.status === "abstained")
     return abstainedParent();
   if (
