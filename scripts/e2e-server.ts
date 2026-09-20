@@ -2,6 +2,7 @@ import { cp, mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { spawn } from "node:child_process";
+
 const port = process.env.KAMELOG_E2E_PORT || "3000";
 const directory = await mkdtemp(join(tmpdir(), "kamelog-e2e-"));
 const runtime = await mkdtemp(join(tmpdir(), "kamelog-e2e-runtime-"));
@@ -22,7 +23,7 @@ const child = spawn(process.execPath, ["server.js"], {
     PORT: port,
   },
 });
-for (const signal of ["SIGINT", "SIGTERM"])
+for (const signal of ["SIGINT", "SIGTERM"] as const)
   process.on(signal, () => child.kill(signal));
 child.on("exit", async (code) => {
   await rm(directory, { recursive: true, force: true });

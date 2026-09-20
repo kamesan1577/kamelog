@@ -10,9 +10,19 @@ const allowlistPath = path.join(
   "design-system",
   "legacy-allowlist.json",
 );
-const allowlist = JSON.parse(readFileSync(allowlistPath, "utf8"));
+const parsed: unknown = JSON.parse(readFileSync(allowlistPath, "utf8"));
+if (
+  typeof parsed !== "object" ||
+  parsed === null ||
+  !("css" in parsed) ||
+  !Array.isArray(parsed.css) ||
+  !parsed.css.every((value: unknown) => typeof value === "string")
+) {
+  throw new TypeError("Invalid legacy CSS allowlist");
+}
+const allowlist: { css: string[] } = { css: parsed.css };
 
-function files(dir) {
+function files(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(dir, entry.name);
     return entry.isDirectory() ? files(file) : [file];

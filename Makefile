@@ -13,6 +13,7 @@ lint:
 public-repo-check:
 	npm run check:public
 check: public-repo-check
+	npm run check:typescript
 	npm run check:ui
 	npm run typecheck
 	npm run lint

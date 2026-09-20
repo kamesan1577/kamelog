@@ -4,7 +4,7 @@ import {
   forbiddenPath,
   containsSensitiveText,
   isAllowedEmail,
-} from "../../scripts/check-public-repo.mjs";
+} from "../../scripts/check-public-repo.ts";
 
 test("public repository gate catches negative fixtures", () => {
   assert.match(".runtime/kamelog.sqlite", forbiddenPath);

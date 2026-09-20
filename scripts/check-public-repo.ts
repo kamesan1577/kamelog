@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
+
 const tracked = execFileSync(
   "git",
   ["ls-files", "-z", "--cached", "--others", "--exclude-standard"],
@@ -20,10 +21,13 @@ const markers = (
   .split(/\r?\n/)
   .filter(Boolean);
 let failed = false;
-export const containsSensitiveText = (text, privateMarkers = markers) =>
+export const containsSensitiveText = (
+  text: string,
+  privateMarkers: readonly string[] = markers,
+) =>
   secretPattern.test(text) ||
   privateMarkers.some((marker) => text.includes(marker));
-export const isAllowedEmail = (email) =>
+export const isAllowedEmail = (email: string) =>
   email === "kamesan1577@gmail.com" ||
   email === "matsugaura_ken@andfactory.co.jp" ||
   email === "noreply@github.com" ||

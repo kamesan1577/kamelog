@@ -68,7 +68,7 @@ healthcheck_replica() {
 healthcheck_worker() {
   local healthy=0
   for _attempt in $(seq 1 30); do
-    if "${compose[@]}" exec -T federation-worker node scripts/federation-worker-health.mjs; then healthy=1; break; fi
+    if "${compose[@]}" exec -T federation-worker node scripts/federation-worker-health.ts; then healthy=1; break; fi
     sleep 1
   done
   test "$healthy" = 1
@@ -94,7 +94,7 @@ restore_previous_release() {
 }
 trap restore_previous_release ERR
 log "creating an online SQLite and immutable-media backup"
-"${compose[@]}" run --rm --no-deps -v "$BACKUP_ROOT:/backups" app-blue node scripts/admin.mjs backup /data "/backups/$backup_name"
+"${compose[@]}" run --rm --no-deps -v "$BACKUP_ROOT:/backups" app-blue node scripts/admin.ts backup /data "/backups/$backup_name"
 log "deploying CI-approved revision $remote_sha"
 git checkout --quiet --detach "$remote_sha"
 KAMELOG_BUILD_SHA="$remote_sha" "${compose[@]}" build app-blue

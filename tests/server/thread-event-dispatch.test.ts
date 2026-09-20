@@ -10,15 +10,19 @@ import { saveJevCredential } from "../../server/inference/settings.mjs";
 import { Store } from "../../server/store.mjs";
 import { recoverStaleThreadJobs } from "../../server/thread-recovery.ts";
 
-test("a successful publish starts inference without waiting for Jev", async () => {
+test("publishing responds before Jev completes and then links the post", async () => {
   const directory = await mkdtemp(join(tmpdir(), "kamelog-thread-dispatch-"));
   const origin = "http://localhost:3000";
   const key = randomBytes(32).toString("base64url");
+  const previous = {
+    data: process.env.KAMELOG_DATA_DIR,
+    origin: process.env.KAMELOG_ORIGIN,
+    key: process.env.KAMELOG_INFERENCE_ENCRYPTION_KEY,
+    fetch: globalThis.fetch,
+  };
   process.env.KAMELOG_DATA_DIR = directory;
   process.env.KAMELOG_ORIGIN = origin;
   process.env.KAMELOG_INFERENCE_ENCRYPTION_KEY = key;
-  // One isolated runtime instance for this test file, matching the production
-  // route rather than manually invoking the dispatcher.
   const { handle, getStore } = await import("../../server/runtime.mjs");
   const store = getStore();
   const box = inferenceSecretBox(key);
@@ -26,14 +30,13 @@ test("a successful publish starts inference without waiting for Jev", async () =
   saveJevCredential(store, box, "fictional-test-api-key");
   store.saveInferenceSettings({ autoThreadEnabled: true });
   const session = store.createSession();
-  const originalFetch = globalThis.fetch;
-  let completeRequest;
+  let completeRequest: (() => void) | undefined;
   let requests = 0;
   globalThis.fetch = async (_url, init) => {
     requests++;
-    const payload = JSON.parse(init.body);
+    const payload = JSON.parse(String(init?.body));
     assert.equal(payload.questions.parent.type, "choice");
-    return new Promise((resolve) => {
+    return new Promise<Response>((resolve) => {
       completeRequest = () =>
         resolve(
           Response.json({
@@ -44,7 +47,7 @@ test("a successful publish starts inference without waiting for Jev", async () =
         );
     });
   };
-  const publish = (body) =>
+  const publish = (body: string) =>
     handle(
       new Request(`${origin}/api/posts`, {
         method: "POST",
@@ -60,14 +63,15 @@ test("a successful publish starts inference without waiting for Jev", async () =
     const firstResponse = await publish("最初の投稿");
     assert.equal(firstResponse.status, 201);
     const first = await firstResponse.json();
+    // Candidate selection requires a strictly earlier post timestamp.
+    await sleep(15);
     const secondResponse = await publish("その続き");
     assert.equal(secondResponse.status, 201);
     const second = await secondResponse.json();
-
-    // Both requests have returned while Jev is unresolved.
     for (let i = 0; i < 100 && !completeRequest; i++) await sleep(10);
     assert.equal(requests, 1);
     assert.equal(store.get("posts", second.id).effectiveParentId, undefined);
+    assert.ok(completeRequest);
     completeRequest();
     for (let i = 0; i < 100; i++) {
       if (store.get("posts", second.id).effectiveParentId === first.id) break;
@@ -78,20 +82,25 @@ test("a successful publish starts inference without waiting for Jev", async () =
       store.db
         .prepare("SELECT state FROM inference_jobs ORDER BY created_at")
         .all()
-        .map((job) => job.state),
+        .map((job: { state: string }) => job.state),
       ["succeeded", "succeeded"],
     );
   } finally {
-    globalThis.fetch = originalFetch;
+    globalThis.fetch = previous.fetch;
+    for (const [name, value] of [
+      ["KAMELOG_DATA_DIR", previous.data],
+      ["KAMELOG_ORIGIN", previous.origin],
+      ["KAMELOG_INFERENCE_ENCRYPTION_KEY", previous.key],
+    ] as const) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
     store.close();
-    delete process.env.KAMELOG_DATA_DIR;
-    delete process.env.KAMELOG_ORIGIN;
-    delete process.env.KAMELOG_INFERENCE_ENCRYPTION_KEY;
     await rm(directory, { recursive: true, force: true });
   }
 });
 
-test("only stale processing claims are made eligible again", async () => {
+test("recover only stale processing thread claims", async () => {
   const directory = await mkdtemp(join(tmpdir(), "kamelog-thread-recovery-"));
   const store = new Store(directory);
   try {
