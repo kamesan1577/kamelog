@@ -1,5 +1,5 @@
 /**
- * Provider-neutral inference ports.  Keep these values limited to the post
+ * Provider-neutral inference ports. Keep these values limited to the post
  * domain: the application layer must never receive a provider prompt or raw
  * response.
  */
@@ -49,7 +49,7 @@ function idsOf(candidates) {
 }
 
 export function validateTagResult(result, candidates) {
-  if (result?.status === "abstained" && Array.isArray(result.tags))
+  if (result?.status === "abstained" && Array.isArray(result.tags) && !result.tags.length)
     return abstainedTags();
   if (result?.status !== "classified" || !Array.isArray(result.tags))
     throw new InferenceFailure("invalid_result");
@@ -63,7 +63,8 @@ export function validateTagResult(result, candidates) {
     tags.push({ tag: item.tag });
     if (tags.length === 5) break;
   }
-  return tags.length ? classified(tags) : abstainedTags();
+  // A valid empty classification clears obsolete auto tags. Abstention does not.
+  return classified(tags);
 }
 
 export function validateThreadResult(result, candidates) {
