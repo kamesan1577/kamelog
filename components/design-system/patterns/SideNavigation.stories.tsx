@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
-import { expect, userEvent, within } from "storybook/test";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Globe, Home, MessageCircle, Settings } from "lucide-react";
 import { SideNavigation, type SideNavigationProps } from "./SideNavigation";
 import "./PublicNavigation.css";
@@ -86,15 +86,21 @@ export const FilledSelection: Story = {
     await expect(timeline).toHaveAttribute("aria-current", "page");
     await expect(home).not.toHaveAttribute("aria-current");
     await userEvent.unhover(timeline);
-    await expect(home).not.toHaveStyle({ backgroundColor: "rgb(55, 53, 47)" });
-    await expect(timeline).toHaveStyle({
-      backgroundColor: "rgb(55, 53, 47)",
-      color: "rgb(255, 255, 255)",
-    });
+    await waitFor(() =>
+      expect(home).not.toHaveStyle({ backgroundColor: "rgb(55, 53, 47)" }),
+    );
+    await waitFor(() =>
+      expect(timeline).toHaveStyle({
+        backgroundColor: "rgb(55, 53, 47)",
+        color: "rgb(255, 255, 255)",
+      }),
+    );
     await userEvent.hover(timeline);
-    await expect(timeline).toHaveStyle({
-      backgroundColor: "rgb(41, 40, 36)",
-      color: "rgb(255, 255, 255)",
-    });
+    await waitFor(() =>
+      expect(timeline).toHaveStyle({
+        backgroundColor: "rgb(41, 40, 36)",
+        color: "rgb(255, 255, 255)",
+      }),
+    );
   },
 };
