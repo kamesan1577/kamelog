@@ -19,6 +19,7 @@ import "../components/design-system/patterns/Sidebar.css";
 import "../components/design-system/patterns/TimelineFilter.css";
 import "../components/design-system/patterns/MarkdownContent.css";
 import "../components/design-system/patterns/DetailPage.css";
+import "../components/design-system/patterns/BlogTableOfContents.css";
 import "../components/design-system/patterns/MarkdownHelp.css";
 import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";

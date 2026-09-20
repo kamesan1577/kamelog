@@ -1,0 +1,87 @@
+/* The table of contents is inserted by BlogTableOfContentsBridge at runtime.
+   Keep these selectors global so its generated DOM receives the styles. */
+[data-ds="blog-table-of-contents"] {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0 0 30px;
+  padding: 16px 18px;
+  border: 1px solid var(--ds-color-border-subtle);
+  border-radius: 8px;
+  background: #f7f6f3;
+}
+
+[data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-title"] {
+  margin: 0;
+  color: var(--ds-color-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+[data-ds="blog-table-of-contents"] ol {
+  display: grid;
+  gap: 2px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-ds="blog-table-of-contents"] li {
+  min-width: 0;
+}
+
+[data-ds="blog-table-of-contents"] a {
+  display: block;
+  min-height: 32px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  color: #57534c;
+  font-size: 14px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  text-decoration: none;
+}
+
+[data-ds="blog-table-of-contents"] a:hover {
+  background: #eae8e3;
+  color: var(--ds-color-text-primary);
+}
+
+[data-ds="blog-table-of-contents"] a:focus-visible {
+  outline: 2px solid var(--ds-color-accent);
+  outline-offset: 1px;
+}
+
+[data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-level-3"] a {
+  padding-inline-start: 20px;
+}
+
+[data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-level-4"] a {
+  padding-inline-start: 32px;
+}
+
+[data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-level-5"] a {
+  padding-inline-start: 44px;
+}
+
+[data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-level-6"] a {
+  padding-inline-start: 56px;
+}
+
+[data-ds="detail-page"] [data-ds="detail-markdown"] [data-kamelog-toc-generated="true"] {
+  scroll-margin-top: 20px;
+}
+
+@media (max-width: 640px) {
+  [data-ds="blog-table-of-contents"] {
+    margin-bottom: 24px;
+    padding: 12px;
+  }
+
+  [data-ds="blog-table-of-contents"] a {
+    min-height: 36px;
+    padding-block: 7px;
+    font-size: 13px;
+  }
+}

@@ -26,6 +26,26 @@
   font-size: 13px;
 }
 
+/* A blog is a readable article surface, not an unframed feed entry.
+   The live detail renders meta, TOC, Markdown and actions inside one child div;
+   scope this card to that structure so tweet and vlog details stay unchanged. */
+[data-ds="detail-page"]:has(> div > [data-ds="detail-markdown"]) > div {
+  min-width: 0;
+  padding: clamp(22px, 3vw, 36px);
+  border: 1px solid #d7d2c9;
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-color-bg-surface);
+  box-shadow: 0 1px 0 rgb(55 53 47 / 4%);
+}
+
+[data-ds="detail-page"]:has(> div > [data-ds="detail-markdown"]) > div > [data-ds="post-meta"] {
+  margin-bottom: 26px;
+}
+
 @media (max-width: 640px) {
   [data-ds="detail-page"] .back-button { margin-bottom: 24px; }
+
+  [data-ds="detail-page"]:has(> div > [data-ds="detail-markdown"]) > div {
+    padding: 22px 18px;
+  }
 }
