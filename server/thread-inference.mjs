@@ -83,7 +83,7 @@ export async function processThreadInferenceJobs(
         threadInference,
       );
       const state =
-        result.status === "linked"
+        result.status === "linked" || result.status === "independent"
           ? "succeeded"
           : result.status === "skipped"
             ? "cancelled"
@@ -92,20 +92,36 @@ export async function processThreadInferenceJobs(
       summary.processed++;
       if (result.status in summary) summary[result.status]++;
     } catch (error) {
+      const errorCode = error?.code || "failed";
+      console.warn(
+        JSON.stringify({
+          event: "thread_inference_job_failed",
+          postId: job.post_id,
+          errorCode,
+          ...(Number.isInteger(error?.httpStatus)
+            ? { httpStatus: error.httpStatus }
+            : {}),
+        }),
+      );
       const retryable =
         error instanceof InferenceFailure &&
         ["timeout", "network", "rate_limited", "remote_error"].includes(
           error.code,
+        ) &&
+        !(
+          error.code === "remote_error" &&
+          error.httpStatus >= 400 &&
+          error.httpStatus < 500
         );
       if (retryable && job.attempts < 3) {
         store.finishInferenceJob(job.id, "retry", {
-          errorCode: error.code,
+          errorCode,
           retryAt: now + 60_000 * 2 ** (job.attempts - 1),
         });
         summary.retried++;
       } else {
         store.finishInferenceJob(job.id, "dead", {
-          errorCode: error?.code || "failed",
+          errorCode,
         });
         summary.dead++;
       }
