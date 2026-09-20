@@ -27,6 +27,10 @@ async function findE2EDataDirectory() {
   throw new Error("active kamelog E2E data directory not found");
 }
 
+async function expectDividerAligned(childPost: ReturnType<import("@playwright/test")["test"]["extend"]>) {
+  // Placeholder
+}
+
 test("owner can append a tweet thread and public detail renders the chain", async ({
   page,
   context,
@@ -49,6 +53,17 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
     .getByRole("button", { name: "タイムライン", exact: true })
     .first()
     .click();
+  const imagePicker = page.locator(".desktop-composer .image-upload-button");
+  await expect(imagePicker).toBeVisible();
+  await expect(imagePicker).toHaveText(/画像/);
+  await expect(imagePicker).toHaveCSS("font-size", "0px");
+  await expect(imagePicker.locator("svg")).toHaveCSS("width", "20px");
+  await expect(imagePicker.locator("svg")).toHaveCSS("height", "20px");
+  await expect(imagePicker.locator('input[type="file"]')).toHaveAttribute(
+    "accept",
+    "image/png,image/jpeg,image/webp,image/gif",
+  );
+
   const inline = page.getByPlaceholder("いまどうしてる？");
   await inline.fill("スレッドの架空ルート投稿");
   await page.getByRole("button", { name: "投稿", exact: true }).first().click();
