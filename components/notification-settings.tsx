@@ -94,14 +94,24 @@ export function NotificationSettings() {
 
   async function test() {
     if (busy) return;
-    setBusy(true);
     setError("");
     setMessage("");
+    // The test API intentionally uses the encrypted, already-saved destination.
+    // Do not silently test an old URL when a replacement has been typed.
+    if (webhookUrl.trim() || draft?.provider !== original?.provider) {
+      setError("変更したWebhook URLを先に保存してからテストしてください。");
+      return;
+    }
+    setBusy(true);
     try {
       await api<{ delivered: boolean }>("notifications", "POST");
       setMessage("テスト通知を送信しました。通知先をご確認ください。");
-    } catch {
-      setError("送信に失敗しました。URLや通知先の設定を確認してください。");
+    } catch (failure) {
+      setError(
+        failure instanceof Error
+          ? failure.message
+          : "送信に失敗しました。通知先の設定を確認してください。",
+      );
     } finally {
       setBusy(false);
     }
@@ -341,6 +351,9 @@ export function NotificationSettings() {
               </Button>
             )}
           </div>
+          <p className="text-xs leading-5 text-[#787774]">
+            テスト送信は保存済みのWebhookに送ります。URLを変更した場合は、先に「設定を保存」を押してください。
+          </p>
         </form>
       )}
     </main>

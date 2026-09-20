@@ -3,8 +3,7 @@ import { request as httpsRequest } from "node:https";
 import { BlockList, isIP } from "node:net";
 import { inferenceSecretBox } from "./inference/secret.mjs";
 
-// Source and destination are independent: add an ID here and a reporter at the source,
-// or register another destination adapter without touching API error handling.
+// Sources and destinations remain independent.
 export const NOTIFICATION_SERVICES = Object.freeze([
   "api",
   "activitypub",
@@ -195,7 +194,6 @@ export function updateNotificationSettings(store, encryptionKey, input) {
     )
   )
     throw new TypeError("Configure a webhook before enabling notifications");
-  // Make provider, settings and encrypted destination change together.
   store.transaction(() => {
     if (next.provider !== current.provider && !hasUrl)
       store.remove("settings", CREDENTIAL_ID);
@@ -222,8 +220,43 @@ export function clearNotificationWebhook(store, encryptionKey) {
   return notificationSettings(store, encryptionKey);
 }
 
-// URL resolution is performed by the socket's own lookup callback, not a separate
-// check-then-connect DNS query. Redirects are never followed and bodies are bounded.
+// Only trusted, fixed diagnostic identifiers leave this module. Never expose URLs,
+// exception messages, response bodies, request details or DNS answers.
+const deliveryFailures = Object.freeze({
+  not_configured: true,
+  encryption_unavailable: true,
+  credential_unreadable: true,
+  invalid_destination: true,
+  dns_failed: true,
+  dns_rejected: true,
+  timeout: true,
+  network_failed: true,
+  remote_unauthorized: true,
+  remote_forbidden: true,
+  remote_not_found: true,
+  remote_rate_limited: true,
+  remote_rejected: true,
+  remote_unavailable: true,
+  unknown: true,
+});
+
+function deliveryError(reason) {
+  const error = new Error("Webhook delivery failed");
+  error.notificationReason = reason;
+  return error;
+}
+
+function classifyDeliveryFailure(error) {
+  if (error && typeof error === "object") {
+    if (Object.hasOwn(deliveryFailures, error.notificationReason))
+      return error.notificationReason;
+    if (error.code === "ETIMEDOUT") return "timeout";
+  }
+  return "network_failed";
+}
+
+// DNS validation is performed in the socket lookup itself to avoid TOCTOU.
+// Do not follow redirects or read/log remote response bodies.
 function sendHttps(urlString, payload) {
   return new Promise((resolve, reject) => {
     const url = new URL(urlString);
@@ -232,21 +265,23 @@ function sendHttps(urlString, payload) {
       url,
       {
         method: "POST",
-        timeout: 4_000,
+        timeout: 8_000,
         headers: {
           "Content-Type": "application/json",
           "Content-Length": bytes.length,
         },
         lookup(hostname, options, callback) {
           dnsLookup(hostname, { all: true }, (error, addresses) => {
+            if (error || !addresses?.length) {
+              callback(deliveryError("dns_failed"));
+              return;
+            }
             if (
-              error ||
-              !addresses?.length ||
               addresses.some(
                 ({ address, family }) => !publicAddress(address, family),
               )
             ) {
-              callback(new Error("Webhook DNS rejected"));
+              callback(deliveryError("dns_rejected"));
               return;
             }
             if (options.all) callback(null, addresses);
@@ -255,16 +290,31 @@ function sendHttps(urlString, payload) {
         },
       },
       (response) => {
-        // Deliberately do not read, return or log response bodies (which may contain secrets).
         response.resume();
         response.on("end", () => {
-          if (response.statusCode >= 200 && response.statusCode < 300)
+          const status = response.statusCode;
+          if (status >= 200 && status < 300) {
             resolve(true);
-          else reject(new Error("Webhook delivery failed"));
+            return;
+          }
+          const reason =
+            status === 401
+              ? "remote_unauthorized"
+              : status === 403
+                ? "remote_forbidden"
+                : status === 404
+                  ? "remote_not_found"
+                  : status === 429
+                    ? "remote_rate_limited"
+                    : status >= 500
+                      ? "remote_unavailable"
+                      : "remote_rejected";
+          reject(deliveryError(reason));
         });
+        response.on("error", () => reject(deliveryError("network_failed")));
       },
     );
-    request.on("timeout", () => request.destroy(new Error("Webhook timeout")));
+    request.on("timeout", () => request.destroy(deliveryError("timeout")));
     request.on("error", reject);
     request.end(bytes);
   });
@@ -289,17 +339,27 @@ export async function reportNotification(
   store,
   encryptionKey,
   event,
-  { send = sendHttps, force = false } = {},
+  { send = sendHttps, force = false, onFailure } = {},
 ) {
+  const fail = (reason) => {
+    // Only the owner-only test endpoint supplies onFailure; routine event reports
+    // keep the original best-effort boolean contract.
+    try {
+      onFailure?.(reason);
+    } catch {
+      /* Reporting a diagnostic must not change the application's behavior. */
+    }
+    return false;
+  };
   try {
     const settings = notificationSettings(store, encryptionKey);
+    if (!settings.webhookConfigured) return fail("not_configured");
+    if (!settings.enabled && !force) return false;
     if (
-      (!settings.enabled && !force) ||
-      !settings.webhookConfigured ||
-      (!force &&
-        (!settings.services.includes(event.service) ||
-          NOTIFICATION_LEVELS.indexOf(event.level) <
-            NOTIFICATION_LEVELS.indexOf(settings.minimumLevel)))
+      !force &&
+      (!settings.services.includes(event.service) ||
+        NOTIFICATION_LEVELS.indexOf(event.level) <
+          NOTIFICATION_LEVELS.indexOf(settings.minimumLevel))
     )
       return false;
     if (
@@ -308,17 +368,24 @@ export async function reportNotification(
       !Object.hasOwn(messages, event.code) ||
       inFlight >= 8
     )
-      return false;
+      return fail("unknown");
     const key = `${settings.provider}:${event.service}:${event.code}`;
     const now = Date.now();
     if (!force && now - (recent.get(key) || 0) < 60_000) return false;
     const box = inferenceSecretBox(encryptionKey);
-    if (!box) return false;
+    if (!box) return fail("encryption_unavailable");
     const credential = store.get("settings", CREDENTIAL_ID);
-    const url = validateWebhookUrl(
-      box.decrypt(credential.encrypted),
-      settings.provider,
-    );
+    let url;
+    try {
+      url = box.decrypt(credential.encrypted);
+    } catch {
+      return fail("credential_unreadable");
+    }
+    try {
+      url = validateWebhookUrl(url, settings.provider);
+    } catch {
+      return fail("invalid_destination");
+    }
     const payload = {
       timestamp: new Date(now).toISOString(),
       level: event.level,
@@ -332,11 +399,12 @@ export async function reportNotification(
     try {
       await notificationDestinations[settings.provider](url, payload, send);
       return true;
+    } catch (error) {
+      return fail(classifyDeliveryFailure(error));
     } finally {
       inFlight--;
     }
   } catch {
-    // Notifications must never affect HTTP responses, worker progress or process exit.
-    return false;
+    return fail("unknown");
   }
 }
