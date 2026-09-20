@@ -77,11 +77,13 @@ export async function processNextFederationDelivery(
   }
 }
 
-export async function runFederationWorker(
-  store,
-  config,
-  { signal, pollMs = 1_000, ...options } = {},
-) {
+/**
+ * @param {unknown} store
+ * @param {{ origin: string }} config
+ * @param {{ signal?: AbortSignal; pollMs?: number; log?: (entry: unknown) => void }} [workerOptions]
+ */
+export async function runFederationWorker(store, config, workerOptions = {}) {
+  const { signal, pollMs = 1_000, ...options } = workerOptions;
   while (!signal?.aborted) {
     const result = await processNextFederationDelivery(store, config, options);
     if (!result) await sleep(pollMs);
