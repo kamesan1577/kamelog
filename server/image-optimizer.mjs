@@ -2,6 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export const MAX_IMAGE_EDGE = 2560;
+const MIN_REENCODE_BYTES = 256 * 1024;
 
 function hasPrivateMetadata(bytes, type) {
   if (type === "image/jpeg") {
@@ -42,7 +43,8 @@ function isAnimatedWebp(bytes, type) {
   );
 }
 
-// MIME and size are validated before entry. The caller owns and removes workdir.
+// Server-side fallback only: the browser already resizes and encodes images.
+// The caller validates MIME, signature and dimensions and removes workdir.
 export async function optimizeImage(
   bytes,
   type,
@@ -58,14 +60,19 @@ export async function optimizeImage(
     width: dimensions.width,
     height: dimensions.height,
   };
-  // Re-encoding animated images into a single frame would silently destroy them.
+  // Preserve animations rather than silently converting them into one frame.
   if (type === "image/gif" || isAnimatedWebp(bytes, type)) return original;
 
   const needsResize =
     Math.max(dimensions.width, dimensions.height) > MAX_IMAGE_EDGE;
   const needsMetadataRemoval = hasPrivateMetadata(bytes, type);
-  // Avoid paying an FFmpeg process startup cost for icon-sized, clean images.
-  if (!needsResize && !needsMetadataRemoval && bytes.length < 1024)
+  // Browser-produced, metadata-free WebP is already optimized. Do not decode
+  // and re-encode it: that wastes CPU and can degrade visual quality.
+  if (
+    !needsResize &&
+    !needsMetadataRemoval &&
+    (type === "image/webp" || bytes.length < MIN_REENCODE_BYTES)
+  )
     return original;
 
   const source = join(workdir, `source.${dimensions.extension}`);
