@@ -9,11 +9,17 @@ function gitFiles(args: string[]): string[] {
     .filter(Boolean);
 }
 
+function resolveBase(configuredBase: string | undefined): string {
+  if (!configuredBase || /^0{40}$/.test(configuredBase)) {
+    return "HEAD^";
+  }
+  return configuredBase;
+}
+
 // CI supplies the PR base or pre-push revision, covering every commit in a PR
 // or push. HEAD^ is the local fallback; index and untracked files are checked
 // separately so the gate also catches work that has not been committed yet.
-const configuredBase = process.env.KAMELOG_TS_POLICY_BASE?.trim();
-const base = configuredBase && !/^0{40}$/.test(configuredBase) ? configuredBase : "HEAD^";
+const base = resolveBase(process.env.KAMELOG_TS_POLICY_BASE?.trim());
 const added = new Set([
   ...gitFiles([
     "diff",
