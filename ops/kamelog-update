@@ -40,7 +40,12 @@ mkdir -p "$BACKUP_ROOT" "$STATE_DIR"
 cd "$APP_DIR"
 test -z "$(git status --porcelain --untracked-files=no)" || fail "tracked files in the production checkout were modified"
 free_kib="$(df -Pk "$APP_DIR" | awk 'NR == 2 {print $4}')"
-test "$free_kib" -ge "$MIN_FREE_KIB" || fail "less than $MIN_FREE_KIB KiB is free; prune reviewed build cache before deploying"
+if test "$free_kib" -lt "$MIN_FREE_KIB"; then
+  log "disk space below deployment minimum; pruning unused build cache"
+  docker builder prune --all --force --keep-storage 8GB >/dev/null || log "WARNING: build cache pruning failed"
+  free_kib="$(df -Pk "$APP_DIR" | awk 'NR == 2 {print $4}')"
+fi
+test "$free_kib" -ge "$MIN_FREE_KIB" || fail "less than $MIN_FREE_KIB KiB is free after cache pruning"
 remote_sha="$(git ls-remote origin "refs/heads/$BRANCH" | awk 'NR == 1 {print $1}')"
 test "$remote_sha" || fail "could not resolve origin/$BRANCH"
 runs_url="https://api.github.com/repos/$REPOSITORY/actions/workflows/$WORKFLOW/runs?branch=$BRANCH&event=push&status=success&per_page=1"
@@ -66,9 +71,13 @@ healthcheck_replica() {
   test "$healthy" = 1
 }
 healthcheck_worker() {
-  local healthy=0
+  local healthy=0 container_id
   for _attempt in $(seq 1 30); do
-    if "${compose[@]}" exec -T federation-worker node scripts/federation-worker-health.ts; then healthy=1; break; fi
+    container_id="$("${compose[@]}" ps -q federation-worker)"
+    if test -n "$container_id" && test "$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$container_id")" = healthy; then
+      healthy=1
+      break
+    fi
     sleep 1
   done
   test "$healthy" = 1
@@ -76,25 +85,60 @@ healthcheck_worker() {
 deploy_replica() {
   local replica="$1"
   log "rolling $replica"
-  "${compose[@]}" up -d --no-deps "$replica"
+  "${compose[@]}" up -d --no-deps "$replica" || return 1
   healthcheck_replica "$replica"
 }
+# The backup command must come from the image that is running BEFORE checkout.
+# Support both the pre- and post-TypeScript releases during rolling upgrades.
+backup_online() {
+  "${compose[@]}" run --rm --no-deps -v "$BACKUP_ROOT:/backups" app-blue sh -eu -c '
+    for admin in scripts/admin.ts scripts/admin.mjs; do
+      if test -f "$admin"; then exec node "$admin" backup /data "$1"; fi
+    done
+    echo "ERROR: no supported backup CLI in the running image" >&2
+    exit 1
+  ' backup "/backups/$backup_name"
+}
+deployment_started=0
 restore_previous_release() {
-  local failed_status=$?
+  local failed_status=$? rollback_ok=1
   trap - ERR
+  if test "$deployment_started" != 1; then
+    log "deployment aborted before switching release; existing containers unchanged"
+    exit "$failed_status"
+  fi
   log "deployment failed; restoring code revision $current_sha"
-  docker image tag "$previous_image" kamelog-app:current || true
-  deploy_replica app-blue || true
-  deploy_replica app-green || true
-  "${compose[@]}" up -d --no-deps federation-worker || true
-  "${compose[@]}" up -d --no-deps gateway || true
-  git checkout --quiet --detach "$current_sha" || true
-  log "rollback attempted; backup retained at $BACKUP_ROOT/$backup_name"
+  # Compose reads its configuration at EACH invocation: restore the matching
+  # manifest before touching images or starting old containers.
+  if ! git checkout --quiet --detach "$current_sha"; then
+    log "ERROR: could not restore previous checkout; rollback requires intervention"
+    exit "$failed_status"
+  fi
+  if ! docker image tag "$previous_image" kamelog-app:current; then
+    log "ERROR: could not restore previous image; rollback requires intervention"
+    exit "$failed_status"
+  fi
+  deploy_replica app-blue || rollback_ok=0
+  deploy_replica app-green || rollback_ok=0
+  "${compose[@]}" up -d --no-deps federation-worker || rollback_ok=0
+  healthcheck_worker || rollback_ok=0
+  "${compose[@]}" up -d --no-deps gateway || rollback_ok=0
+  curl --fail --silent --show-error "$HEALTH_URL" >/dev/null || rollback_ok=0
+  if test "$rollback_ok" = 1; then
+    log "rollback verified: $current_sha; backup retained at $BACKUP_ROOT/$backup_name"
+  else
+    log "ERROR: rollback incomplete; backup retained at $BACKUP_ROOT/$backup_name"
+  fi
   exit "$failed_status"
 }
 trap restore_previous_release ERR
 log "creating an online SQLite and immutable-media backup"
-"${compose[@]}" run --rm --no-deps -v "$BACKUP_ROOT:/backups" app-blue node scripts/admin.ts backup /data "/backups/$backup_name"
+backup_online
+# Explicitly retain the immediate predecessor, even after its last container
+# is replaced. Never prune the data volume or a running image.
+previous_rollback_image="$(docker image inspect --format '{{.Id}}' kamelog-app:rollback 2>/dev/null || true)"
+docker image tag "$previous_image" kamelog-app:rollback
+deployment_started=1
 log "deploying CI-approved revision $remote_sha"
 git checkout --quiet --detach "$remote_sha"
 KAMELOG_BUILD_SHA="$remote_sha" "${compose[@]}" build app-blue
@@ -107,3 +151,9 @@ curl --fail --silent --show-error "$HEALTH_URL" >/dev/null
 printf '%s\n' "$remote_sha" >"$STATE_DIR/deployed-sha"
 trap - ERR
 log "deployment completed: $remote_sha"
+# Housekeeping is best-effort and must never trigger a rollback of a healthy
+# release. Only remove the former explicitly managed rollback image.
+if test -n "$previous_rollback_image" && test "$previous_rollback_image" != "$(docker image inspect --format '{{.Id}}' kamelog-app:rollback)"; then
+  docker image rm "$previous_rollback_image" >/dev/null 2>&1 || log "WARNING: former rollback image still in use"
+fi
+docker builder prune --all --force --keep-storage 8GB >/dev/null || log "WARNING: build cache pruning failed"
