@@ -139,10 +139,14 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
     .filter({ hasText: "スレッドの架空の続き" });
   await expect(childPost).toBeVisible();
   expect(
-    await childPost.evaluate((element) => parseFloat(getComputedStyle(element).paddingTop)),
+    await childPost.evaluate((element) =>
+      parseFloat(getComputedStyle(element).paddingTop),
+    ),
   ).toBeGreaterThanOrEqual(28);
   await page.setViewportSize({ width: 1280, height: 900 });
   expect(
-    await childPost.evaluate((element) => parseFloat(getComputedStyle(element).paddingTop)),
+    await childPost.evaluate((element) =>
+      parseFloat(getComputedStyle(element).paddingTop),
+    ),
   ).toBeGreaterThanOrEqual(32);
 });
