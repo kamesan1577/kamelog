@@ -4,10 +4,7 @@ import type { Store } from "./store.mjs";
 // publish recovers only old claims, never jobs another process is still doing.
 // Each batch handles at most 20 jobs at an 8-second upstream timeout, so ten
 // minutes is comfortably longer than an ordinary in-flight batch.
-export function recoverStaleThreadJobs(
-  store: Store,
-  now = Date.now(),
-): number {
+export function recoverStaleThreadJobs(store: Store, now = Date.now()): number {
   const updatedAt = new Date(now).toISOString();
   const staleBefore = new Date(now - 10 * 60_000).toISOString();
   const result = store.db
