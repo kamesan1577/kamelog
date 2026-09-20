@@ -68,7 +68,9 @@ test("publishing responds before Jev completes and then links the post", async (
     const secondResponse = await publish("その続き");
     assert.equal(secondResponse.status, 201);
     const second = await secondResponse.json();
-    for (let i = 0; i < 100 && !completeRequest; i++) await sleep(10);
+    for (let i = 0; i < 100 && !completeRequest; i++) {
+      await sleep(10);
+    }
     assert.equal(requests, 1);
     assert.equal(store.get("posts", second.id).effectiveParentId, undefined);
     assert.ok(completeRequest);
@@ -123,7 +125,9 @@ test("recover only stale processing thread claims", async () => {
     store.claimInferenceJobs("thread", now);
     store.claimInferenceJobs("tag", now);
     store.db
-      .prepare("UPDATE inference_jobs SET updated_at=? WHERE post_id IN ('stale','tag')")
+      .prepare(
+        "UPDATE inference_jobs SET updated_at=? WHERE post_id IN ('stale','tag')",
+      )
       .run(new Date(now - 11 * 60_000).toISOString());
     assert.equal(recoverStaleThreadJobs(store, now), 1);
     assert.deepEqual(
