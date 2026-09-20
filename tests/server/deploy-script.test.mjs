@@ -15,7 +15,7 @@ test("deployment is serialized and restricted to a successful main CI commit", (
   assert.match(script, /remote_sha" != "\$ci_sha/);
 });
 test("deployment backs up online and rolls the two app replicas one at a time", () => {
-  const backup = script.indexOf("scripts/admin.mjs backup");
+  const backup = script.indexOf("scripts/admin.ts backup");
   const checkout = script.indexOf(
     'git checkout --quiet --detach "$remote_sha"',
   );
@@ -62,7 +62,7 @@ test("compose keeps a gateway in front of two application replicas", async () =>
   assert.match(compose, /app-blue:/);
   assert.match(compose, /app-green:/);
   assert.match(compose, /federation-worker:/);
-  assert.match(compose, /scripts\/federation-worker-health\.mjs/);
+  assert.match(compose, /scripts\/federation-worker-health\.ts/);
   assert.match(compose, /127\.0\.0\.1:3000:3000/);
   assert.match(gateway, /server app-blue:3000 resolve/);
   assert.match(gateway, /server app-green:3000 resolve/);
