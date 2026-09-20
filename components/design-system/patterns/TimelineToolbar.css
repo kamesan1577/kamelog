@@ -5,13 +5,13 @@
   border-bottom: 1px solid #e5e3df;
 }
 
-[data-ds="timeline-toolbar"] .timeline-toolbar-actions {
+[data-ds="timeline-toolbar-actions"] {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-[data-ds="timeline-toolbar"] .timeline-toolbar-actions > button {
+[data-ds="timeline-toolbar-actions"] > button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -20,7 +20,7 @@
   color: #7b7970;
 }
 
-[data-ds="timeline-toolbar"] .timeline-toolbar-actions > button:disabled {
+[data-ds="timeline-toolbar-actions"] > button:disabled {
   opacity: 0.55;
   cursor: default;
 }
