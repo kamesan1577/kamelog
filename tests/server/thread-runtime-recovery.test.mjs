@@ -96,7 +96,10 @@ test("Jev thread adapter uses named choice questions and typed answers", async (
   assert.equal(Array.isArray(request.questions), false);
   assert.deepEqual(Object.keys(request.questions), ["parent"]);
   assert.equal(request.questions.parent.type, "choice");
-  assert.deepEqual(Object.keys(request.questions.parent.criteria), ["none", "root"]);
+  assert.deepEqual(Object.keys(request.questions.parent.criteria), [
+    "none",
+    "root",
+  ]);
   assert.deepEqual(request.state, input);
   choice = "none";
   assert.deepEqual(await inference.inferParent(input), {
@@ -130,11 +133,7 @@ test("malformed Jev choice answers fail instead of silently abstaining", async (
 test("HTTP 422 status is retained and not retried as a temporary outage", async () => {
   await withStore(async (store) => {
     store.save("posts", "root", post("前半", "2026-01-01T00:00:00.000Z"));
-    store.save(
-      "posts",
-      "follow-up",
-      post("後半", "2026-01-01T00:01:00.000Z"),
-    );
+    store.save("posts", "follow-up", post("後半", "2026-01-01T00:01:00.000Z"));
     enqueue(store, "follow-up");
     const inference = new JevThreadInference(
       new JevClient({
@@ -145,15 +144,13 @@ test("HTTP 422 status is retained and not retried as a temporary outage", async 
     const summary = await processThreadInferenceJobs(store, inference);
     assert.equal(summary.dead, 1);
     assert.equal(summary.retried, 0);
-    assert.deepEqual(
-      {
-        ...store.db
-          .prepare(
-            "SELECT state, attempts, last_error_code AS errorCode FROM inference_jobs",
-          )
-          .get(),
-      },
-      { state: "dead", attempts: 1, errorCode: "remote_error" },
-    );
+    const job = store.db
+      .prepare(
+        "SELECT state, attempts, last_error_code AS errorCode FROM inference_jobs",
+      )
+      .get();
+    assert.equal(job.state, "dead");
+    assert.equal(job.attempts, 1);
+    assert.equal(job.errorCode, "remote_error");
   });
 });
