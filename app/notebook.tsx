@@ -184,6 +184,11 @@ type FederationTimelineResponse = {
   items: FederationTimelineItem[];
   nextCursor: string | null;
 };
+type InferenceStatus = {
+  autoTagEnabled: boolean;
+  autoThreadEnabled: boolean;
+  credential: { configured: boolean; encryptionAvailable: boolean };
+};
 type PublicRepost = {
   id: string;
   kind: "repost";
@@ -549,6 +554,7 @@ export default function Notebook({
       const saved = await api<Draft[]>("drafts");
       setDrafts(saved);
       await loadFederationStatus();
+      await loadInferenceStatus();
     });
     if (authenticated) setLogin(true);
   };
@@ -637,6 +643,11 @@ export default function Notebook({
     [federationRepostBusy, setFederationRepostBusy] = useState<string | null>(
       null,
     );
+  const [inferenceStatus, setInferenceStatus] =
+      useState<InferenceStatus | null>(null),
+    [inferenceKey, setInferenceKey] = useState(""),
+    [inferenceBusy, setInferenceBusy] = useState(false),
+    [inferenceError, setInferenceError] = useState("");
   const loadFederationFollowing = useCallback(async () => {
     const following = await api<FederationFollowing[]>("federation/following");
     setFederationFollowing(following);
@@ -659,6 +670,14 @@ export default function Notebook({
       setFederationLoadError(true);
     }
   }, [loadFederationFollowing]);
+  const loadInferenceStatus = useCallback(async () => {
+    try {
+      setInferenceStatus(await api<InferenceStatus>("inference/status"));
+      setInferenceError("");
+    } catch {
+      setInferenceError("推論設定を読み込めませんでした。");
+    }
+  }, []);
   const federationFollow = async () => {
     const handle = federationFollowHandle.trim();
     if (!/^@?[^@\s]+@[^@\s]+$/.test(handle)) {
@@ -891,6 +910,7 @@ export default function Notebook({
           if (!cancelled) {
             setDrafts(saved);
             await loadFederationStatus();
+            await loadInferenceStatus();
           }
         }
       })
@@ -910,7 +930,7 @@ export default function Notebook({
       cancelled = true;
       objectUrls.forEach(URL.revokeObjectURL);
     };
-  }, [loadFederationStatus]);
+  }, [loadFederationStatus, loadInferenceStatus]);
   useEffect(() => {
     if (ready)
       try {
@@ -2079,6 +2099,147 @@ export default function Notebook({
                             : "ActivityPubを有効にする"}
                         </Button>
                       </form>
+                    )}
+                  </OwnerSection>
+                  <OwnerSection
+                    data-ds="owner-inference"
+                    className="federation-settings"
+                    title="投稿の自動判定"
+                    description="公開済みの投稿だけをJevへ送信して、タグ付けや連投の接続を行います。"
+                    icon={<MessageCircle size={18} aria-hidden="true" />}
+                  >
+                    {inferenceError ? (
+                      <p className="federation-error" role="alert">
+                        {inferenceError}
+                      </p>
+                    ) : !inferenceStatus ? (
+                      <p className="federation-state" role="status">
+                        設定を読み込んでいます
+                      </p>
+                    ) : (
+                      <div className="federation-enabled">
+                        <p className="federation-state">
+                          {inferenceStatus.credential.configured
+                            ? "Jev APIキーを設定済みです。キーは再表示されません。"
+                            : "Jev APIキーは未設定です。"}
+                        </p>
+                        {!inferenceStatus.credential.encryptionAvailable && (
+                          <p className="federation-error" role="alert">
+                            ホストの暗号化鍵が未設定のため、APIキーを保存できません。
+                          </p>
+                        )}
+                        <label className="field" htmlFor="jev-api-key">
+                          Jev APIキー
+                          <input
+                            id="jev-api-key"
+                            name="jev-api-key"
+                            type="password"
+                            value={inferenceKey}
+                            autoComplete="new-password"
+                            spellCheck={false}
+                            onChange={(event) =>
+                              setInferenceKey(event.target.value)
+                            }
+                          />
+                        </label>
+                        <div className="editor-actions">
+                          <Button
+                            type="button"
+                            disabled={
+                              inferenceBusy ||
+                              !inferenceStatus.credential.encryptionAvailable ||
+                              inferenceKey.length < 8
+                            }
+                            onClick={() => {
+                              setInferenceBusy(true);
+                              void api("inference/credentials/jev", "POST", {
+                                apiKey: inferenceKey,
+                              })
+                                .then(async () => {
+                                  setInferenceKey("");
+                                  await loadInferenceStatus();
+                                  toast.success("Jev APIキーを保存しました");
+                                })
+                                .catch((error) =>
+                                  setInferenceError(
+                                    error instanceof Error
+                                      ? error.message
+                                      : "APIキーを保存できませんでした。",
+                                  ),
+                                )
+                                .finally(() => setInferenceBusy(false));
+                            }}
+                          >
+                            APIキーを保存
+                          </Button>
+                          {inferenceStatus.credential.configured && (
+                            <Button
+                              type="button"
+                              disabled={inferenceBusy}
+                              onClick={() => {
+                                setInferenceBusy(true);
+                                void api("inference/credentials/jev", "DELETE")
+                                  .then(async () => {
+                                    await loadInferenceStatus();
+                                    toast.success("Jev APIキーを削除しました");
+                                  })
+                                  .catch((error) =>
+                                    setInferenceError(
+                                      error instanceof Error
+                                        ? error.message
+                                        : "APIキーを削除できませんでした。",
+                                    ),
+                                  )
+                                  .finally(() => setInferenceBusy(false));
+                              }}
+                            >
+                              APIキーを削除
+                            </Button>
+                          )}
+                        </div>
+                        {(
+                          [
+                            ["autoTagEnabled", "自動タグ付け"],
+                            ["autoThreadEnabled", "空リプを自動接続"],
+                          ] as const
+                        ).map(([setting, caption]) => (
+                          <label key={setting} className="x-intent-toggle">
+                            <span>{caption}</span>
+                            <input
+                              type="checkbox"
+                              role="switch"
+                              checked={inferenceStatus[setting]}
+                              disabled={inferenceBusy}
+                              onChange={(event) => {
+                                setInferenceBusy(true);
+                                void api<InferenceStatus>(
+                                  "inference/settings",
+                                  "PUT",
+                                  { [setting]: event.target.checked },
+                                )
+                                  .then((settings) =>
+                                    setInferenceStatus((status) =>
+                                      status
+                                        ? { ...status, ...settings }
+                                        : status,
+                                    ),
+                                  )
+                                  .catch((error) =>
+                                    setInferenceError(
+                                      error instanceof Error
+                                        ? error.message
+                                        : "設定を保存できませんでした。",
+                                    ),
+                                  )
+                                  .finally(() => setInferenceBusy(false));
+                              }}
+                            />
+                            <span className="x-intent-track" aria-hidden="true">
+                              <span />
+                            </span>
+                          </label>
+                        ))}
+                      </div>
                     )}
                   </OwnerSection>
                 </section>

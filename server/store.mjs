@@ -31,7 +31,7 @@ export class Store {
         post_id TEXT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
         tag TEXT NOT NULL,
         source TEXT NOT NULL CHECK(source IN ('manual', 'auto')),
-        confidence REAL NOT NULL CHECK(confidence >= 0 AND confidence <= 1),
+        confidence REAL CHECK(confidence >= 0 AND confidence <= 1),
         model_version TEXT NOT NULL,
         content_hash TEXT NOT NULL,
         training_hash TEXT NOT NULL,
@@ -42,6 +42,46 @@ export class Store {
         content_hash TEXT NOT NULL,
         model_version TEXT NOT NULL,
         training_hash TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS inference_settings(
+        id INTEGER PRIMARY KEY CHECK(id = 1),
+        data TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS inference_credentials(
+        provider TEXT PRIMARY KEY,
+        payload TEXT NOT NULL,
+        metadata TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS inference_jobs(
+        id TEXT PRIMARY KEY,
+        task TEXT NOT NULL CHECK(task IN ('tag', 'thread')),
+        post_id TEXT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+        input_hash TEXT NOT NULL,
+        engine_id TEXT NOT NULL,
+        state TEXT NOT NULL CHECK(state IN ('pending', 'retry', 'processing', 'succeeded', 'abstained', 'dead', 'cancelled')),
+        attempts INTEGER NOT NULL DEFAULT 0 CHECK(attempts >= 0),
+        next_attempt_at INTEGER NOT NULL,
+        last_error_code TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        completed_at TEXT,
+        UNIQUE(task, post_id, input_hash, engine_id)
+      );
+      CREATE INDEX IF NOT EXISTS inference_jobs_ready
+        ON inference_jobs(task, state, next_attempt_at, created_at);
+      CREATE TABLE IF NOT EXISTS inference_runs(
+        id TEXT PRIMARY KEY,
+        task TEXT NOT NULL CHECK(task IN ('tag', 'thread')),
+        post_id TEXT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+        engine_id TEXT NOT NULL,
+        provider_id TEXT NOT NULL,
+        model_version TEXT,
+        adapter_version TEXT NOT NULL,
+        input_hash TEXT NOT NULL,
+        candidate_hash TEXT NOT NULL,
+        usage TEXT,
+        executed_at TEXT NOT NULL
       );
       CREATE TABLE IF NOT EXISTS federation_identity(
         id INTEGER PRIMARY KEY CHECK(id = 1),
@@ -164,6 +204,35 @@ export class Store {
       INSERT OR IGNORE INTO migrations VALUES(7);
       INSERT OR IGNORE INTO migrations VALUES(8);
       INSERT OR IGNORE INTO migrations VALUES(9);`);
+    const migration9 = this.db
+      .prepare("SELECT 1 AS found FROM migrations WHERE version=9")
+      .get();
+    if (migration9) {
+      const confidence = this.db
+        .prepare("PRAGMA table_info(post_tags)")
+        .all()
+        .find(({ name }) => name === "confidence");
+      if (confidence?.notnull) {
+        this.transaction(() => {
+          this.db.exec(`
+            ALTER TABLE post_tags RENAME TO post_tags_legacy;
+            CREATE TABLE post_tags(
+              post_id TEXT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+              tag TEXT NOT NULL,
+              source TEXT NOT NULL CHECK(source IN ('manual', 'auto')),
+              confidence REAL CHECK(confidence >= 0 AND confidence <= 1),
+              model_version TEXT NOT NULL,
+              content_hash TEXT NOT NULL,
+              training_hash TEXT NOT NULL,
+              PRIMARY KEY(post_id, tag, source)
+            );
+            INSERT INTO post_tags SELECT * FROM post_tags_legacy;
+            DROP TABLE post_tags_legacy;
+          `);
+        });
+      }
+    }
+    this.db.prepare("INSERT OR IGNORE INTO migrations VALUES(10)").run();
     this.db
       .prepare(
         `SELECT object_id AS objectId, attachments
@@ -276,7 +345,7 @@ export class Store {
       .filter((row) => row.source === "auto")
       .map(({ tag, confidence, model_version, content_hash }) => ({
         tag,
-        confidence: Number(confidence),
+        ...(confidence === null ? {} : { confidence: Number(confidence) }),
         modelVersion: model_version,
         contentHash: content_hash,
       }));
@@ -401,7 +470,7 @@ export class Store {
           .run(
             id,
             tag.tag,
-            tag.confidence,
+            tag.confidence ?? null,
             run.modelVersion,
             run.contentHash,
             run.trainingHash,
@@ -418,6 +487,59 @@ export class Store {
         .run(id, run.contentHash, run.modelVersion, run.trainingHash);
       return this.get("posts", id);
     });
+  }
+  inferenceSettings() {
+    const row = this.db
+      .prepare("SELECT data FROM inference_settings WHERE id=1")
+      .get();
+    return row ? JSON.parse(row.data) : null;
+  }
+  saveInferenceSettings(value) {
+    this.db
+      .prepare(
+        `INSERT INTO inference_settings(id, data) VALUES(1, ?)
+         ON CONFLICT(id) DO UPDATE SET data=excluded.data`,
+      )
+      .run(JSON.stringify(value));
+    return this.inferenceSettings();
+  }
+  hasInferenceCredential(provider) {
+    return Boolean(
+      this.db
+        .prepare(
+          "SELECT 1 AS found FROM inference_credentials WHERE provider=?",
+        )
+        .get(provider),
+    );
+  }
+  inferenceCredential(provider) {
+    const row = this.db
+      .prepare(
+        `SELECT provider, payload, metadata, updated_at AS updatedAt
+         FROM inference_credentials WHERE provider=?`,
+      )
+      .get(provider);
+    return row ? { ...row, metadata: JSON.parse(row.metadata) } : null;
+  }
+  saveInferenceCredential(provider, payload, metadata) {
+    this.db
+      .prepare(
+        `INSERT INTO inference_credentials(provider, payload, metadata, updated_at)
+         VALUES (?, ?, ?, ?)
+         ON CONFLICT(provider) DO UPDATE SET
+           payload=excluded.payload, metadata=excluded.metadata, updated_at=excluded.updated_at`,
+      )
+      .run(
+        provider,
+        payload,
+        JSON.stringify(metadata),
+        new Date().toISOString(),
+      );
+  }
+  removeInferenceCredential(provider) {
+    this.db
+      .prepare("DELETE FROM inference_credentials WHERE provider=?")
+      .run(provider);
   }
   federationIdentity() {
     return this.db

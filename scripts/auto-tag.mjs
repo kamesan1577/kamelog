@@ -3,7 +3,7 @@ import { Store } from "../server/store.mjs";
 
 const store = new Store(process.env.KAMELOG_DATA_DIR || "/data");
 try {
-  console.log(JSON.stringify(autoTagPosts(store)));
+  console.log(JSON.stringify(await autoTagPosts(store)));
 } finally {
   store.close();
 }
