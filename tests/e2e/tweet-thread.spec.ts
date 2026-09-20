@@ -1,7 +1,7 @@
 import { access, readdir, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { test, expect } from "@playwright/test";
+import { test, expect, type Locator } from "@playwright/test";
 import { Store } from "../../server/store.mjs";
 
 async function findE2EDataDirectory() {
@@ -27,8 +27,22 @@ async function findE2EDataDirectory() {
   throw new Error("active kamelog E2E data directory not found");
 }
 
-async function expectDividerAligned(childPost: ReturnType<import("@playwright/test")["test"]["extend"]>) {
-  // Placeholder
+async function expectDividerAligned(childPost: Locator) {
+  const divider = await childPost.evaluate((element) => {
+    const style = getComputedStyle(element, "::after");
+    const bounds = element.getBoundingClientRect();
+    const feed = element.closest(".feed")?.getBoundingClientRect();
+    return {
+      left: bounds.left + parseFloat(style.left),
+      feedLeft: feed?.left,
+      thickness: style.height,
+      color: style.backgroundColor,
+    };
+  });
+  expect(divider.feedLeft).toBeDefined();
+  expect(Math.abs(divider.left - divider.feedLeft!)).toBeLessThanOrEqual(1);
+  expect(divider.thickness).toBe("1px");
+  expect(divider.color).not.toBe("rgba(0, 0, 0, 0)");
 }
 
 test("owner can append a tweet thread and public detail renders the chain", async ({
@@ -43,9 +57,7 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
   await context.addCookies([
     {
       name: "kamelog-session",
-      value: session,
-      url: "http://localhost:3000",
-    },
+      value: session, url: "http://localhost:3000" },
   ]);
 
   await page.goto("/");
@@ -158,10 +170,12 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
       parseFloat(getComputedStyle(element).paddingTop),
     ),
   ).toBeGreaterThanOrEqual(28);
+  await expectDividerAligned(childPost);
   await page.setViewportSize({ width: 1280, height: 900 });
   expect(
     await childPost.evaluate((element) =>
       parseFloat(getComputedStyle(element).paddingTop),
     ),
   ).toBeGreaterThanOrEqual(32);
+  await expectDividerAligned(childPost);
 });
