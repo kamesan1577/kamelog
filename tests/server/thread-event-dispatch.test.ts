@@ -137,10 +137,7 @@ test("recover only stale processing thread claims", async () => {
       store.db
         .prepare("SELECT post_id, state FROM inference_jobs ORDER BY post_id")
         .all()
-        .map((job: { post_id: string; state: string }) => ({
-          post_id: job.post_id,
-          state: job.state,
-        })),
+        .map((row) => ({ post_id: row.post_id, state: row.state })),
       [
         { post_id: "fresh", state: "processing" },
         { post_id: "stale", state: "retry" },
