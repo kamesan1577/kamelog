@@ -35,6 +35,7 @@ jobs:
       - run: make check
         env:
           KAMELOG_PRIVATE_MARKERS: ${{ secrets.KAMELOG_PRIVATE_MARKERS }}
+          KAMELOG_TS_POLICY_BASE: ${{ github.event.pull_request.base.sha || github.event.before || '' }}
       - run: npm audit --audit-level=high
   e2e:
     runs-on: ubuntu-latest
