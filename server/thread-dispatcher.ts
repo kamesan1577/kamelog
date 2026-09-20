@@ -5,10 +5,8 @@ import { processThreadInferenceJobs } from "./thread-inference.mjs";
 import { recoverStaleThreadJobs } from "./thread-recovery.ts";
 import type { Store } from "./store.mjs";
 
-// A per-process dispatcher only wakes after a successful post write. SQLite is
-// the durable queue and atomically claims jobs across the blue/green servers.
-// The existing systemd timer remains a fallback if this process exits before
-// dispatching. Never await this dispatcher in the post request.
+// SQLite is the durable queue across blue and green. The existing systemd
+// timer recovers missed wakeups; publishing never awaits Jev.
 export function createThreadDispatcher(store: Store, encryptionKey: string) {
   let running = false;
   let requested = false;
@@ -26,27 +24,24 @@ export function createThreadDispatcher(store: Store, encryptionKey: string) {
     try {
       while (requested) {
         requested = false;
-        const apiKey = loadJevCredential(
-          store,
-          inferenceSecretBox(encryptionKey),
-        );
+        const box = inferenceSecretBox(encryptionKey);
+        const apiKey = loadJevCredential(store, box);
         if (!apiKey) break;
-
-        const inference = new JevThreadInference(new JevClient({ apiKey }));
+        const client = new JevClient({ apiKey });
+        const inference = new JevThreadInference(client);
         let count: number;
         do {
           recoverStaleThreadJobs(store);
           const summary = await processThreadInferenceJobs(store, inference);
           count = summary.processed + summary.retried + summary.dead;
-          if (count)
-            console.info(
-              JSON.stringify({ event: "thread_inference_dispatched", ...summary }),
-            );
+          if (count > 0) {
+            const event = { event: "thread_inference_dispatched", ...summary };
+            console.info(JSON.stringify(event));
+          }
         } while (count === 20);
       }
     } catch {
-      // The queue remains durable; the periodic runner will recover. Do not log
-      // arbitrary exception messages, credentials or user-generated post text.
+      // Only fixed codes are logged: no credentials or post content.
       requested = false;
       console.warn(JSON.stringify({ event: "thread_dispatch_failed" }));
     } finally {
