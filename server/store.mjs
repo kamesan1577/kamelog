@@ -83,6 +83,14 @@ export class Store {
         usage TEXT,
         executed_at TEXT NOT NULL
       );
+      CREATE TABLE IF NOT EXISTS inferred_thread_links(
+        post_id TEXT PRIMARY KEY REFERENCES posts(id) ON DELETE CASCADE,
+        parent_id TEXT REFERENCES posts(id) ON DELETE CASCADE,
+        state TEXT NOT NULL CHECK(state IN ('linked', 'independent', 'abstained', 'rejected')),
+        engine_id TEXT NOT NULL,
+        input_hash TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+      );
       CREATE TABLE IF NOT EXISTS federation_identity(
         id INTEGER PRIMARY KEY CHECK(id = 1),
         username TEXT NOT NULL UNIQUE,
@@ -233,6 +241,7 @@ export class Store {
       }
     }
     this.db.prepare("INSERT OR IGNORE INTO migrations VALUES(10)").run();
+    this.db.prepare("INSERT OR IGNORE INTO migrations VALUES(11)").run();
     this.db
       .prepare(
         `SELECT object_id AS objectId, attachments
@@ -349,6 +358,11 @@ export class Store {
         modelVersion: model_version,
         contentHash: content_hash,
       }));
+    const inferred = this.db
+      .prepare(
+        "SELECT parent_id AS parentId, state FROM inferred_thread_links WHERE post_id=?",
+      )
+      .get(value.id);
     return {
       ...value,
       tags: [
@@ -358,6 +372,9 @@ export class Store {
           .filter((tag) => !fallbackManual.includes(tag)),
       ],
       ...(autoTags.length ? { autoTags } : {}),
+      ...(inferred?.state === "linked" && inferred.parentId
+        ? { effectiveParentId: value.parentId || inferred.parentId }
+        : {}),
     };
   }
   localPostLikes(id) {
@@ -540,6 +557,103 @@ export class Store {
     this.db
       .prepare("DELETE FROM inference_credentials WHERE provider=?")
       .run(provider);
+  }
+  inferredThreadLink(postId) {
+    return (
+      this.db
+        .prepare(
+          "SELECT post_id AS postId, parent_id AS parentId, state, engine_id AS engineId, input_hash AS inputHash, updated_at AS updatedAt FROM inferred_thread_links WHERE post_id=?",
+        )
+        .get(postId) || null
+    );
+  }
+  saveInferredThreadLink(link) {
+    this.db
+      .prepare(
+        `INSERT INTO inferred_thread_links(post_id, parent_id, state, engine_id, input_hash, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON CONFLICT(post_id) DO UPDATE SET parent_id=excluded.parent_id, state=excluded.state,
+           engine_id=excluded.engine_id, input_hash=excluded.input_hash, updated_at=excluded.updated_at`,
+      )
+      .run(
+        link.postId,
+        link.parentId || null,
+        link.state,
+        link.engineId,
+        link.inputHash,
+        new Date().toISOString(),
+      );
+    return this.inferredThreadLink(link.postId);
+  }
+  rejectInferredThreadLink(postId) {
+    const current = this.inferredThreadLink(postId);
+    if (!current) return null;
+    return this.saveInferredThreadLink({
+      ...current,
+      state: "rejected",
+      parentId: null,
+    });
+  }
+  claimInferenceJobs(task, now = Date.now(), limit = 20) {
+    return this.transaction(() => {
+      const jobs = this.db
+        .prepare(
+          `SELECT * FROM inference_jobs
+           WHERE task=? AND state IN ('pending', 'retry') AND next_attempt_at<=?
+           ORDER BY created_at LIMIT ?`,
+        )
+        .all(task, now, limit);
+      const updatedAt = new Date(now).toISOString();
+      for (const job of jobs)
+        this.db
+          .prepare(
+            `UPDATE inference_jobs SET state='processing', attempts=attempts+1, updated_at=?
+             WHERE id=? AND state IN ('pending', 'retry')`,
+          )
+          .run(updatedAt, job.id);
+      return jobs.map((job) => ({
+        ...job,
+        attempts: Number(job.attempts) + 1,
+      }));
+    });
+  }
+  finishInferenceJob(id, state, { errorCode = null, retryAt = null } = {}) {
+    const completed = ["succeeded", "abstained", "dead", "cancelled"].includes(
+      state,
+    );
+    const now = new Date().toISOString();
+    this.db
+      .prepare(
+        `UPDATE inference_jobs SET state=?, last_error_code=?, next_attempt_at=?, updated_at=?, completed_at=?
+         WHERE id=? AND state='processing'`,
+      )
+      .run(
+        state,
+        errorCode,
+        retryAt || Date.now(),
+        now,
+        completed ? now : null,
+        id,
+      );
+  }
+  enqueueInferenceJob({ task, postId, inputHash, engineId }) {
+    const now = new Date();
+    const id = randomUUID();
+    this.db
+      .prepare(
+        `INSERT OR IGNORE INTO inference_jobs(id, task, post_id, input_hash, engine_id, state, next_attempt_at, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, 'pending', ?, ?, ?)`,
+      )
+      .run(
+        id,
+        task,
+        postId,
+        inputHash,
+        engineId,
+        now.getTime(),
+        now.toISOString(),
+        now.toISOString(),
+      );
   }
   federationIdentity() {
     return this.db

@@ -3,37 +3,38 @@
 すべての応答はno-store。書込はOrigin一致、owner session、入力検証を要求する。
 認証APIだけは未ログインで利用可能だがceremony cookieと署名を検証する。
 
-| Method                    | Path                           | 意味                                                    |
-| ------------------------- | ------------------------------ | ------------------------------------------------------- |
-| GET                       | /api/health                    | 生存とschema version                                    |
-| GET                       | /api/posts?kind=&q=            | 公開投稿。kind省略で全種別                              |
-| GET                       | /api/posts/:id                 | 公開詳細、存在しなければ404                             |
-| POST                      | /api/posts/:id/view            | 公開詳細の閲覧数を加算                                  |
-| POST / PUT / DELETE       | /api/posts[/id]                | ownerの投稿作成・更新・削除                             |
-| GET / POST / PUT / DELETE | /api/drafts[/id]               | owner限定の下書き                                       |
-| GET / PUT                 | /api/profile                   | 公開プロフィール/owner更新                              |
-| GET                       | /api/inference/status          | owner限定。推論のON/OFFとJev資格情報の設定有無のみ      |
-| PUT                       | /api/inference/settings        | owner限定。タグ/スレッド推論を独立してON/OFF            |
-| POST / DELETE             | /api/inference/credentials/jev | owner限定。暗号化されたJev APIキーの保存/削除           |
-| POST                      | /api/media?seconds=2           | raw動画、64MiB以下、尺2/5/10/30                         |
-| POST                      | /api/media?kind=image          | PNG/JPEG/WebP/GIF画像、1枚12MiB以下                     |
-| GET                       | /api/media/:id                 | 公開投稿から参照される媒体、またはowner専用の未投稿媒体 |
-| GET                       | /api/auth/session              | authenticated booleanのみ                               |
-| POST                      | /api/auth/register/options     | 初回token、またはログイン済み追加登録                   |
-| POST                      | /api/auth/register/verify      | WebAuthn登録response検証                                |
-| POST                      | /api/auth/login/options        | 認証challenge生成                                       |
-| POST                      | /api/auth/login/verify         | WebAuthn認証response検証                                |
-| POST                      | /api/auth/logout               | session失効                                             |
-| GET                       | /api/federation/status         | owner限定の有効状態・handle・配送/worker診断            |
-| POST                      | /api/federation/setup          | owner限定の一度だけのidentity初期化                     |
-| GET                       | /api/federation/following      | owner限定のfollowing一覧と状態                          |
-| POST                      | /api/federation/follow         | handleをWebFinger解決しFollowをqueueへ登録              |
-| DELETE                    | /api/federation/follow         | actorIdのUndo(Follow)をqueueへ登録                      |
-| GET                       | /api/federation/timeline       | owner限定のfollowing+self timeline、cursor対応          |
-| GET                       | /api/federation/reposts        | 公開Timelineへ出す有効なRP一覧                          |
-| POST                      | /api/federation/reposts        | owner限定で受信済みobjectをRPしAnnounceをqueueへ登録    |
-| DELETE                    | /api/federation/reposts/:id    | owner限定でRPを解除しUndo(Announce)をqueueへ登録        |
-| GET                       | /api/federation/media/:id      | ownerまたは公開中RP向けの検証済みremote画像cache        |
+| Method                    | Path                              | 意味                                                    |
+| ------------------------- | --------------------------------- | ------------------------------------------------------- |
+| GET                       | /api/health                       | 生存とschema version                                    |
+| GET                       | /api/posts?kind=&q=               | 公開投稿。kind省略で全種別                              |
+| GET                       | /api/posts/:id                    | 公開詳細、存在しなければ404                             |
+| POST                      | /api/posts/:id/view               | 公開詳細の閲覧数を加算                                  |
+| POST / PUT / DELETE       | /api/posts[/id]                   | ownerの投稿作成・更新・削除                             |
+| GET / POST / PUT / DELETE | /api/drafts[/id]                  | owner限定の下書き                                       |
+| GET / PUT                 | /api/profile                      | 公開プロフィール/owner更新                              |
+| GET                       | /api/inference/status             | owner限定。推論のON/OFFとJev資格情報の設定有無のみ      |
+| PUT                       | /api/inference/settings           | owner限定。タグ/スレッド推論を独立してON/OFF            |
+| POST / DELETE             | /api/inference/credentials/jev    | owner限定。暗号化されたJev APIキーの保存/削除           |
+| POST                      | /api/inference/threads/:id/reject | owner限定。AI接続を解除し、再自動接続を拒否             |
+| POST                      | /api/media?seconds=2              | raw動画、64MiB以下、尺2/5/10/30                         |
+| POST                      | /api/media?kind=image             | PNG/JPEG/WebP/GIF画像、1枚12MiB以下                     |
+| GET                       | /api/media/:id                    | 公開投稿から参照される媒体、またはowner専用の未投稿媒体 |
+| GET                       | /api/auth/session                 | authenticated booleanのみ                               |
+| POST                      | /api/auth/register/options        | 初回token、またはログイン済み追加登録                   |
+| POST                      | /api/auth/register/verify         | WebAuthn登録response検証                                |
+| POST                      | /api/auth/login/options           | 認証challenge生成                                       |
+| POST                      | /api/auth/login/verify            | WebAuthn認証response検証                                |
+| POST                      | /api/auth/logout                  | session失効                                             |
+| GET                       | /api/federation/status            | owner限定の有効状態・handle・配送/worker診断            |
+| POST                      | /api/federation/setup             | owner限定の一度だけのidentity初期化                     |
+| GET                       | /api/federation/following         | owner限定のfollowing一覧と状態                          |
+| POST                      | /api/federation/follow            | handleをWebFinger解決しFollowをqueueへ登録              |
+| DELETE                    | /api/federation/follow            | actorIdのUndo(Follow)をqueueへ登録                      |
+| GET                       | /api/federation/timeline          | owner限定のfollowing+self timeline、cursor対応          |
+| GET                       | /api/federation/reposts           | 公開Timelineへ出す有効なRP一覧                          |
+| POST                      | /api/federation/reposts           | owner限定で受信済みobjectをRPしAnnounceをqueueへ登録    |
+| DELETE                    | /api/federation/reposts/:id       | owner限定でRPを解除しUndo(Announce)をqueueへ登録        |
+| GET                       | /api/federation/media/:id         | ownerまたは公開中RP向けの検証済みremote画像cache        |
 
 ActivityPub server-to-server endpointは `/api` と別の公開routeで提供する。詳細は [activitypub.md](activitypub.md) を参照する。`POST /activitypub/inbox` はbrowser Origin/sessionではなくHTTP signatureを認証境界にする。
 
