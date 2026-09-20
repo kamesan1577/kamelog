@@ -131,4 +131,22 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
   await expect(
     page.getByText("スレッドの架空ルート投稿", { exact: true }),
   ).toBeVisible();
+
+  // The child card must not touch the divider or the preceding post's actions.
+  await page.goto("/timeline");
+  const childPost = page
+    .locator('[data-ds="thread-post"]')
+    .filter({ hasText: "スレッドの架空の続き" });
+  await expect(childPost).toBeVisible();
+  expect(
+    await childPost.evaluate((element) =>
+      parseFloat(getComputedStyle(element).paddingTop),
+    ),
+  ).toBeGreaterThanOrEqual(28);
+  await page.setViewportSize({ width: 1280, height: 900 });
+  expect(
+    await childPost.evaluate((element) =>
+      parseFloat(getComputedStyle(element).paddingTop),
+    ),
+  ).toBeGreaterThanOrEqual(32);
 });
