@@ -54,7 +54,7 @@ test("backup CLI is selected from the running image, regardless of TS migration"
       await mkdir(join(directory, "scripts"));
       await writeFile(
         join(directory, "scripts", `admin.${extension}`),
-        'require("node:fs").writeFileSync(process.env.BACKUP_MARKER, process.argv.slice(2).join("|"));',
+        'import { writeFileSync } from "node:fs"; writeFileSync(process.env.BACKUP_MARKER, process.argv.slice(2).join("|"));',
       );
       const marker = join(directory, "backup-marker");
       const result = spawnSync(
