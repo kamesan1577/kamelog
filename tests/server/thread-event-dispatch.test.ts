@@ -41,7 +41,10 @@ test("publishing responds before Jev completes and then links the post", async (
         resolve(
           Response.json({
             answers: {
-              parent: { type: "choice", choice: payload.state.candidates[0].id },
+              parent: {
+                type: "choice",
+                choice: payload.state.candidates[0].id,
+              },
             },
           }),
         );
