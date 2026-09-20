@@ -22,5 +22,7 @@ if (violations.length) {
   console.error("Use .ts or .tsx instead:\n" + violations.join("\n"));
   process.exitCode = 1;
 } else {
-  console.log("TypeScript-only gate passed (no new first-party JavaScript files)");
+  console.log(
+    "TypeScript-only gate passed (no new first-party JavaScript files)",
+  );
 }
