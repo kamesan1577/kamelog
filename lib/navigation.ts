@@ -8,8 +8,8 @@ export const viewPaths = Object.freeze({
 
 export type PublicView = keyof typeof viewPaths;
 
-export function isPublicView(value: string): value is PublicView {
-  return Object.hasOwn(viewPaths, value);
+export function isPublicView(value: unknown): value is PublicView {
+  return typeof value === "string" && Object.hasOwn(viewPaths, value);
 }
 
 export function viewFromPathname(pathname: string): PublicView | null {
