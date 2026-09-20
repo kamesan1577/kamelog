@@ -7,7 +7,9 @@ test.describe("timeline tab indicator", () => {
     hasTouch: true,
   });
 
-  test("slides to the selected tab after a swipe and a tap", async ({ page }) => {
+  test("slides to the selected tab after a swipe and a tap", async ({
+    page,
+  }) => {
     await page.goto("/timeline");
     const toolbar = page.locator('[data-ds="timeline-toolbar"]');
     const tabs = toolbar.locator('[data-ds="timeline-tabs"]');
@@ -68,7 +70,9 @@ test.describe("timeline tab indicator", () => {
       "data-state",
       "active",
     );
-    await expect.poll(async () => (await geometry()).x).toBeGreaterThan(initial.x);
+    await expect
+      .poll(async () => (await geometry()).x)
+      .toBeGreaterThan(initial.x);
     const afterSwipe = await geometry();
     expect(afterSwipe.x).toBe(afterSwipe.activeX);
     expect(afterSwipe.width).toBe(afterSwipe.activeWidth);
@@ -79,7 +83,9 @@ test.describe("timeline tab indicator", () => {
       "data-state",
       "active",
     );
-    await expect.poll(async () => (await geometry()).x).toBeGreaterThan(afterSwipe.x);
+    await expect
+      .poll(async () => (await geometry()).x)
+      .toBeGreaterThan(afterSwipe.x);
     const afterTap = await geometry();
     expect(afterTap.x).toBe(afterTap.activeX);
     expect(afterTap.width).toBe(afterTap.activeWidth);
