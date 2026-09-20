@@ -91,7 +91,9 @@ test("rollback restores the matching Compose before containers", () => {
     script.indexOf("restore_previous_release() {"),
     script.indexOf("\ntrap restore_previous_release ERR"),
   );
-  const checkout = rollback.indexOf('git checkout --quiet --detach "$current_sha"');
+  const checkout = rollback.indexOf(
+    'git checkout --quiet --detach "$current_sha"',
+  );
   const tag = rollback.indexOf(
     'docker image tag "$previous_image" kamelog-app:current',
   );
