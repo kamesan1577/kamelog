@@ -1,0 +1,32 @@
+name: Temporary notification diagnostics formatting
+on:
+  push:
+    branches: [fix/notification-test-diagnostics]
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: fix/notification-test-diagnostics
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Apply repository Prettier formatting
+        run: npx prettier --write app/api/notifications/route.ts tests/server/notifications.test.mjs
+      - name: Commit formatted files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/api/notifications/route.ts tests/server/notifications.test.mjs
+          if ! git diff --cached --quiet; then
+            git commit -m 'style: format webhook diagnostic implementation'
+            git push origin HEAD:fix/notification-test-diagnostics
+          fi
