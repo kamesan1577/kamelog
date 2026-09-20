@@ -19,10 +19,17 @@ COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/.next/static ./.next/static
 COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/server ./server
+# Node 24 runs the typed implementation through each legacy CLI entry point.
 COPY --from=build --chown=node:node /app/scripts/admin.mjs ./scripts/admin.mjs
+COPY --from=build --chown=node:node /app/scripts/admin.ts ./scripts/admin.ts
 COPY --from=build --chown=node:node /app/scripts/auto-tag.mjs ./scripts/auto-tag.mjs
+COPY --from=build --chown=node:node /app/scripts/auto-tag.ts ./scripts/auto-tag.ts
+COPY --from=build --chown=node:node /app/scripts/auto-thread.mjs ./scripts/auto-thread.mjs
+COPY --from=build --chown=node:node /app/scripts/auto-thread.ts ./scripts/auto-thread.ts
 COPY --from=build --chown=node:node /app/scripts/federation-worker.mjs ./scripts/federation-worker.mjs
+COPY --from=build --chown=node:node /app/scripts/federation-worker.ts ./scripts/federation-worker.ts
 COPY --from=build --chown=node:node /app/scripts/federation-worker-health.mjs ./scripts/federation-worker-health.mjs
+COPY --from=build --chown=node:node /app/scripts/federation-worker-health.ts ./scripts/federation-worker-health.ts
 RUN mkdir /data && chown node:node /data
 USER node
 EXPOSE 3000
