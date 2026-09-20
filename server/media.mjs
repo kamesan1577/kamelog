@@ -59,7 +59,7 @@ function imageDimensions(bytes, type) {
       0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce,
       0xcf,
     ]);
-    for (let offset = 2; offset + 8 < bytes.length; ) {
+    for (let offset = 2; offset + 8 < bytes.length;) {
       if (bytes[offset] !== 0xff) return null;
       const marker = bytes[offset + 1];
       if (marker === 0xd9 || marker === 0xda) return null;
