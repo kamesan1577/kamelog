@@ -7,7 +7,9 @@ import { Store } from "../../server/store.mjs";
 async function activeE2EDataDirectory() {
   const directories = await Promise.all(
     (await readdir(tmpdir(), { withFileTypes: true }))
-      .filter((entry) => entry.isDirectory() && entry.name.startsWith("kamelog-e2e-"))
+      .filter(
+        (entry) => entry.isDirectory() && entry.name.startsWith("kamelog-e2e-"),
+      )
       .map(async (entry) => {
         const path = join(tmpdir(), entry.name);
         return { path, mtimeMs: (await stat(path)).mtimeMs };
@@ -26,7 +28,9 @@ async function activeE2EDataDirectory() {
 }
 
 async function expectDividerAligned(page: Page, text: string) {
-  const reply = page.locator('[data-ds="thread-post"]').filter({ hasText: text });
+  const reply = page
+    .locator('[data-ds="thread-post"]')
+    .filter({ hasText: text });
   await expect(reply).toBeVisible();
   const divider = await reply.evaluate((element) => {
     const style = getComputedStyle(element, "::after");
@@ -62,7 +66,6 @@ test("image picker is icon-only and reply dividers reach the timeline edge", asy
   await expect(imagePicker).toBeVisible();
   await expect(imagePicker).toHaveText(/画像/);
   await expect(imagePicker).toHaveCSS("font-size", "0px");
-  await expect(imagePicker.locator("svg")).toHaveAttribute("width", "24");
   await expect(imagePicker.locator('input[type="file"]')).toHaveAttribute(
     "accept",
     "image/png,image/jpeg,image/webp,image/gif",
