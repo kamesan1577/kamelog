@@ -26,9 +26,31 @@
 }
 
 [data-ds="timeline-tabs"] {
+  position: relative;
   height: 42px !important;
   padding: 0 !important;
   gap: 14px !important;
+}
+
+/* One indicator moves between the actual tab bounds, including unequal labels. */
+[data-ds="timeline-tabs"]::before {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: var(--timeline-indicator-width, 0px);
+  height: 2px;
+  background: var(--kamelog-ink, #37352f);
+  content: "";
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(var(--timeline-indicator-x, 0px), 0, 0);
+}
+
+[data-ds="timeline-tabs"][data-indicator-ready="true"]::before {
+  opacity: 1;
+  transition:
+    transform 240ms cubic-bezier(0.2, 0, 0, 1),
+    width 240ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 [data-ds="timeline-tabs"] [data-slot="tabs-trigger"] {
@@ -41,9 +63,9 @@
   gap: 5px;
 }
 
+/* Hide Radix's per-tab underline; it would fade instead of sliding. */
 [data-ds="timeline-tabs"] [data-slot="tabs-trigger"]::after {
-  bottom: -1px !important;
-  height: 2px !important;
+  display: none;
 }
 
 [data-ds="timeline-tabs"] [data-slot="tabs-trigger"][data-state="active"] {
@@ -74,6 +96,12 @@
 
   [data-ds="timeline-tabs"] [data-slot="tabs-trigger"] svg {
     width: 12px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-ds="timeline-tabs"]::before {
+    transition: none !important;
   }
 }
 
