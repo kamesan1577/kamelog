@@ -125,16 +125,17 @@ export async function POST(request: Request) {
   const denied = permit(request);
   if (denied) return denied;
   let failure = "unknown";
+  const testOptions = {
+    force: true,
+    onFailure(reason: string) {
+      failure = reason;
+    },
+  };
   const delivered = await reportNotification(
     getStore(),
     configuration().inferenceEncryptionKey,
     { service: "api", level: "info", code: "test" },
-    {
-      force: true,
-      onFailure(reason: string) {
-        failure = reason;
-      },
-    },
+    testOptions,
   );
   return delivered
     ? json({ delivered: true })
