@@ -66,6 +66,12 @@
   font-size: 13px;
   padding: 6px;
 }
+@media (min-width: 641px) {
+  [data-ds="inline-composer"].desktop-composer .inline-tweet {
+    min-height: 112px;
+    max-height: 280px;
+  }
+}
 @media (max-width: 640px) {
   [data-ds="inline-composer"] .inline-tweet {
     font-size: 16px;

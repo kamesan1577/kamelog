@@ -5,6 +5,26 @@
   border-bottom: 1px solid #e5e3df;
 }
 
+[data-ds="timeline-toolbar-actions"] {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+[data-ds="timeline-toolbar-actions"] > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 32px;
+  color: #7b7970;
+}
+
+[data-ds="timeline-toolbar-actions"] > button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 [data-ds="timeline-tabs"] {
   height: 42px !important;
   padding: 0 !important;
@@ -62,4 +82,13 @@
   color: #b4afa5;
   font-size: 12px;
   padding: 24px;
+}
+
+.timeline-pull-indicator,
+.timeline-refresh-status {
+  margin: 0;
+  padding: 8px 0;
+  text-align: center;
+  color: #7b7970;
+  font-size: 12px;
 }

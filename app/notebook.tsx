@@ -46,6 +46,10 @@ import { PostMeta } from "@/components/design-system/patterns/PostMeta";
 import { PostPreview } from "@/components/design-system/patterns/PostPreview";
 import { TimelineItem } from "@/components/design-system/patterns/TimelineItem";
 import { InlineComposer } from "@/components/design-system/patterns/InlineComposer";
+import {
+  scrollTimelineToTop,
+  useTimelineGestures,
+} from "@/components/timeline-gestures";
 import { BlogEditorToolbar } from "@/components/design-system/patterns/BlogEditorToolbar";
 import { BlogEditorWorkspace } from "@/components/design-system/patterns/BlogEditorWorkspace";
 import { EditorFooter } from "@/components/design-system/patterns/EditorFooter";
@@ -526,6 +530,8 @@ export default function Notebook({
   initialSelected?: string | null;
 }) {
   const inFlight = useRef(false);
+  const refreshFlight = useRef<Promise<boolean> | null>(null);
+  const federationRequest = useRef(0);
   const guard = async (fn: () => Promise<void>) => {
     if (inFlight.current) return false;
     inFlight.current = true;
@@ -581,6 +587,7 @@ export default function Notebook({
     [liked, setLiked] = useState<string[]>([]),
     [drafts, setDrafts] = useState<Draft[]>([]),
     [ready, setReady] = useState(false);
+  const [refreshBusy, setRefreshBusy] = useState(false);
   const [login, setLogin] = useState(false),
     [view, setView] = useState<View>("home"),
     [filter, setFilter] = useState<"all" | Kind>("all"),
@@ -722,26 +729,63 @@ export default function Notebook({
   const loadFederationTimeline = async (
     cursor: string | null = null,
     append = false,
-  ) => {
+  ): Promise<boolean> => {
+    const request = ++federationRequest.current;
     setFederationTimelineBusy(true);
     setFederationTimelineError("");
     try {
       const result = await api<FederationTimelineResponse>(
         `federation/timeline${cursor ? `?cursor=${encodeURIComponent(cursor)}` : ""}`,
       );
+      if (request !== federationRequest.current) return false;
       setFederationTimeline((current) =>
         append ? [...current, ...result.items] : result.items,
       );
       setFederationTimelineCursor(result.nextCursor);
+      return true;
     } catch (error) {
-      setFederationTimelineError(
-        error instanceof Error
-          ? error.message
-          : "Fediverseを読み込めませんでした。",
-      );
+      if (request === federationRequest.current) {
+        setFederationTimelineError(
+          error instanceof Error
+            ? error.message
+            : "Fediverseを読み込めませんでした。",
+        );
+      }
+      return false;
     } finally {
-      setFederationTimelineBusy(false);
+      if (request === federationRequest.current)
+        setFederationTimelineBusy(false);
     }
+  };
+  const refreshVisibleTimeline = (): Promise<boolean> => {
+    if (refreshFlight.current) return refreshFlight.current;
+    setRefreshBusy(true);
+    const task = (async () => {
+      if (timelineMode === "fediverse") {
+        const refreshed = await loadFederationTimeline();
+        if (!refreshed) toast.error("Fediverseを更新できませんでした。");
+        return refreshed;
+      }
+      try {
+        await refresh();
+        return true;
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "タイムラインを更新できませんでした。",
+        );
+        return false;
+      }
+    })();
+    refreshFlight.current = task;
+    void task.finally(() => {
+      if (refreshFlight.current === task) {
+        refreshFlight.current = null;
+        setRefreshBusy(false);
+      }
+    });
+    return task;
   };
   const federationRepost = async (timelineItem: FederationTimelineItem) => {
     setFederationRepostBusy(timelineItem.objectId);
@@ -997,6 +1041,26 @@ export default function Notebook({
     setSelected(null);
     setTag("");
   };
+  const handleTimelineNavigation = () => {
+    // Re-tapping the active timeline must preserve search, tags, tabs, and sort.
+    if (view !== "timeline" || selected) nav("timeline");
+    requestAnimationFrame(scrollTimelineToTop);
+    void refreshVisibleTimeline();
+  };
+  const timelineGestures = useTimelineGestures({
+    active:
+      view === "timeline" &&
+      !selected &&
+      !editor &&
+      !closeAsk &&
+      !draftList &&
+      !remove,
+    mode: timelineMode,
+    filter,
+    onFilterChange: setFilter,
+    onRefresh: refreshVisibleTimeline,
+    refreshing: refreshBusy,
+  });
   const openPost = (id: string) => {
     if (postFromLocation() !== id) {
       window.history.pushState(
@@ -1686,7 +1750,9 @@ export default function Notebook({
                 active: view === "projects",
               },
             ]}
-            onSelect={(id) => nav(id as View)}
+            onSelect={(id) =>
+              id === "timeline" ? handleTimelineNavigation() : nav(id as View)
+            }
           />
           <div data-ds="sidebar-section" className="sidebar-section">
             <span>コンテンツ</span>
@@ -1804,7 +1870,16 @@ export default function Notebook({
             }
             data-ds="content-grid"
           >
-            <main data-ds="main-content" className="main-content">
+            <main
+              data-ds="main-content"
+              className="main-content"
+              aria-busy={refreshBusy}
+              onTouchStartCapture={timelineGestures.onTouchStartCapture}
+              onTouchMoveCapture={timelineGestures.onTouchMoveCapture}
+              onTouchEndCapture={timelineGestures.onTouchEndCapture}
+              onTouchCancelCapture={timelineGestures.onTouchCancelCapture}
+              onClickCapture={timelineGestures.onClickCapture}
+            >
               {view === "account" && login ? (
                 <section data-ds="owner-settings" className="settings-page">
                   <PageHeader title="アカウント" />
@@ -2456,6 +2531,22 @@ export default function Notebook({
               ) : (
                 <>
                   <PageHeader className="page-heading" title="タイムライン" />
+                  {timelineGestures.pullDistance > 0 && (
+                    <div className="timeline-pull-indicator" role="status">
+                      {timelineGestures.pullDistance >= 44
+                        ? "離して更新"
+                        : "下に引いて更新"}
+                    </div>
+                  )}
+                  {refreshBusy && (
+                    <p
+                      data-ds="timeline-refresh-status"
+                      className="timeline-refresh-status"
+                      role="status"
+                    >
+                      更新中…
+                    </p>
+                  )}
                   {timelineMode === "kamelog" && (
                     <label
                       data-ds="mobile-search"
@@ -2595,6 +2686,8 @@ export default function Notebook({
                     <>
                       <TimelineToolbar
                         className="timeline-toolbar"
+                        onRefresh={() => void refreshVisibleTimeline()}
+                        refreshing={refreshBusy}
                         filter={filter}
                         onFilterChange={(value) =>
                           setFilter(value as "all" | Kind)
@@ -2610,7 +2703,7 @@ export default function Notebook({
                           </button>
                         </div>
                       )}
-                      <div className="feed">
+                      <div className="feed" aria-busy={refreshBusy}>
                         {shown.map((p) =>
                           p.kind === "repost" ? (
                             <article className="post public-repost" key={p.id}>
@@ -2807,8 +2900,8 @@ export default function Notebook({
                         <button
                           type="button"
                           aria-label="Fediverseを更新"
-                          disabled={federationTimelineBusy}
-                          onClick={() => void loadFederationTimeline()}
+                          disabled={refreshBusy || federationTimelineBusy}
+                          onClick={() => void refreshVisibleTimeline()}
                         >
                           <RefreshCw
                             size={17}
@@ -2836,7 +2929,10 @@ export default function Notebook({
                             <p>受信した投稿はまだありません。</p>
                           </EmptyState>
                         )}
-                      <div className="fediverse-feed">
+                      <div
+                        className="fediverse-feed"
+                        aria-busy={refreshBusy || federationTimelineBusy}
+                      >
                         {federationTimeline.map((timelineItem) => (
                           <article
                             className="fediverse-post"
@@ -3028,7 +3124,9 @@ export default function Notebook({
                 active: view === "projects",
               },
             ]}
-            onSelect={(id) => nav(id as View)}
+            onSelect={(id) =>
+              id === "timeline" ? handleTimelineNavigation() : nav(id as View)
+            }
           />
           {login && (
             <button
