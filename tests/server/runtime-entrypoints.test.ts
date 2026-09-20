@@ -11,7 +11,7 @@ for (const service of ["kamelog-auto-tag", "kamelog-auto-thread"]) {
       new URL(`../../ops/systemd/${service}.service`, import.meta.url),
       "utf8",
     );
-    const entrypoint = unit.match(/node (scripts\/[\w-]+\.mjs)/)?.[1];
+    const entrypoint = unit.match(/node (scripts\/[\w-]+\.ts)/)?.[1];
     assert.ok(entrypoint, `${service} must declare a Node entrypoint`);
     const expectedCopy = `COPY --from=build --chown=node:node /app/${entrypoint} ./${entrypoint}`;
     assert.ok(
