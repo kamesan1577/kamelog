@@ -179,7 +179,7 @@
   color: #fff;
 }
 
-[data-ds="public-sidebar"] [data-ds="side-navigation"] button[aria-current="page"] small {
+[data-ds="public-sidebar"] [data-ds="side-navigation"] button[aria-current="page"] span.ds-text-xs {
   color: #d8d6d0;
 }
 
