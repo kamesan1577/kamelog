@@ -40,7 +40,11 @@ test("automatic tag labels", async ({ page }) => {
     await route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify(taggedPost),
+      // GET returns a list; POST returns the newly created post.
+      body:
+        route.request().method() === "GET"
+          ? "[]"
+          : JSON.stringify(taggedPost),
     });
   });
   await page.route("**/api/posts/**", async (route) => {
