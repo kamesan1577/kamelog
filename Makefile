@@ -16,8 +16,6 @@ check: public-repo-check
 	npm run check:ui
 	npm run typecheck
 	npm run lint
-	npx prettier --write lib/api-error.mjs server/image-optimizer.mjs server/media.mjs tests/server/api-error.test.mjs tests/server/image-optimizer.test.mjs
-	git diff -- lib/api-error.mjs server/image-optimizer.mjs server/media.mjs tests/server/api-error.test.mjs tests/server/image-optimizer.test.mjs
 	npm run format:check
 	npm test
 	npm run build
