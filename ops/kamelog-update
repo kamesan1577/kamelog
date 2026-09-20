@@ -17,6 +17,25 @@ exec 9>"$LOCK_FILE"
 flock -n 9 || { log "another deployment is running"; exit 0; }
 test -d "$APP_DIR/.git" || fail "not a Git checkout: $APP_DIR"
 test -r "$ENV_FILE" || fail "environment file is not readable: $ENV_FILE"
+ensure_inference_encryption_key() {
+  if grep -Eq '^[[:space:]]*(export[[:space:]]+)?KAMELOG_INFERENCE_ENCRYPTION_KEY=[^[:space:]#]+' "$ENV_FILE"; then
+    return 0
+  fi
+  command -v openssl >/dev/null 2>&1 || fail "openssl is required to initialize the inference encryption key"
+  local key generated_env
+  key="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d '=\n')"
+  test "${#key}" = 43 || fail "could not generate a 32 byte inference encryption key"
+  generated_env="$(mktemp "$(dirname "$ENV_FILE")/.kamelog-env.XXXXXX")"
+  {
+    cat "$ENV_FILE"
+    printf '\nKAMELOG_INFERENCE_ENCRYPTION_KEY=%s\n' "$key"
+  } >"$generated_env"
+  chown --reference="$ENV_FILE" "$generated_env"
+  chmod --reference="$ENV_FILE" "$generated_env"
+  mv -f -- "$generated_env" "$ENV_FILE"
+  log "initialized KAMELOG_INFERENCE_ENCRYPTION_KEY in $ENV_FILE"
+}
+ensure_inference_encryption_key
 mkdir -p "$BACKUP_ROOT" "$STATE_DIR"
 cd "$APP_DIR"
 test -z "$(git status --porcelain --untracked-files=no)" || fail "tracked files in the production checkout were modified"
