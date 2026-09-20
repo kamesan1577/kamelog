@@ -59,7 +59,10 @@ export function TimelineToolbar({
             disabled={refreshing}
             onClick={onRefresh}
           >
-            <RefreshCw size={17} className={refreshing ? "animate-spin" : undefined} />
+            <RefreshCw
+              size={17}
+              className={refreshing ? "animate-spin" : undefined}
+            />
           </button>
         )}
         <DropdownMenu>
