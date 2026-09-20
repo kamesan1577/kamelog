@@ -123,6 +123,7 @@ type Post = {
   video?: string;
   time?: string;
   pinned?: boolean;
+  effectiveParentId?: string;
   images?: string[];
   federationEnabled?: boolean;
   threadDepth?: number;

@@ -24,6 +24,7 @@ export type ThreadPost = {
   body: string;
   date: string;
   parentId?: string;
+  effectiveParentId?: string;
   images?: string[];
   federationEnabled?: boolean;
 };
@@ -47,12 +48,14 @@ function buildAncestors(posts: ThreadPost[], selected: ThreadPost) {
   const ancestors: ThreadPost[] = [];
   const seen = new Set([selected.id]);
   let cursor = selected;
-  while (cursor.parentId) {
-    const parent = byId.get(cursor.parentId);
+  let parentId = cursor.effectiveParentId || cursor.parentId;
+  while (parentId) {
+    const parent = byId.get(parentId);
     if (!parent || parent.kind !== "tweet" || seen.has(parent.id)) break;
     ancestors.unshift(parent);
     seen.add(parent.id);
     cursor = parent;
+    parentId = cursor.effectiveParentId || cursor.parentId;
   }
   return ancestors;
 }
@@ -63,7 +66,11 @@ function buildChildren(
   seen = new Set<string>(),
 ): ThreadNode[] {
   return posts
-    .filter((post) => post.kind === "tweet" && post.parentId === parentId)
+    .filter(
+      (post) =>
+        post.kind === "tweet" &&
+        (post.effectiveParentId || post.parentId) === parentId,
+    )
     .sort((a, b) => a.date.localeCompare(b.date))
     .flatMap((post) => {
       if (seen.has(post.id)) return [];
@@ -218,9 +225,11 @@ export default function TweetThreadDetail({
   const selected = posts.find((post) => post.id === selectedId);
   const selectedParentMissing = Boolean(
     selected?.kind === "tweet" &&
-    selected.parentId &&
+    (selected.effectiveParentId || selected.parentId) &&
     !posts.some(
-      (post) => post.id === selected.parentId && post.kind === "tweet",
+      (post) =>
+        post.id === (selected.effectiveParentId || selected.parentId) &&
+        post.kind === "tweet",
     ),
   );
   const ancestors = useMemo(
