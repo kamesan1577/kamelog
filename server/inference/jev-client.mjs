@@ -16,6 +16,9 @@ const TAG_ADAPTER_VERSION = "jev-tags-noul-v1";
 const MIN_TAG_SUPPORT = 0.85;
 
 export class JevClient {
+  /**
+   * @param {{ apiKey?: string, fetchImpl?: typeof fetch, url?: string, model?: string }} [options]
+   */
   constructor({
     apiKey,
     fetchImpl = fetch,
