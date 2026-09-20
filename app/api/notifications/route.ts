@@ -14,7 +14,10 @@ export const dynamic = "force-dynamic";
 function json(value: unknown, status = 200) {
   return Response.json(value, {
     status,
-    headers: { "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" },
+    headers: {
+      "Cache-Control": "no-store",
+      "X-Content-Type-Options": "nosniff",
+    },
   });
 }
 
@@ -78,7 +81,10 @@ export function DELETE(request: Request) {
   const denied = permit(request);
   if (denied) return denied;
   return json(
-    clearNotificationWebhook(getStore(), configuration().inferenceEncryptionKey),
+    clearNotificationWebhook(
+      getStore(),
+      configuration().inferenceEncryptionKey,
+    ),
   );
 }
 
@@ -93,5 +99,8 @@ export async function POST(request: Request) {
   );
   return delivered
     ? json({ delivered: true })
-    : json({ error: "通知テストに失敗しました。設定を確認してください。" }, 502);
+    : json(
+        { error: "通知テストに失敗しました。設定を確認してください。" },
+        502,
+      );
 }

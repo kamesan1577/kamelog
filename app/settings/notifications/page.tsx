@@ -13,7 +13,9 @@ export const metadata: Metadata = {
 };
 
 export default async function NotificationSettingsPage() {
-  const sessionName = configuration().secure ? "__Host-kamelog-session" : "kamelog-session";
+  const sessionName = configuration().secure
+    ? "__Host-kamelog-session"
+    : "kamelog-session";
   const session = (await cookies()).get(sessionName)?.value;
   if (!getStore().authenticated(session)) redirect("/");
   return <NotificationSettings />;

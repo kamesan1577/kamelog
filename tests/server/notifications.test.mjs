@@ -31,7 +31,10 @@ async function withStore(run) {
 test("notification settings persist with an encrypted destination", async () => {
   await withStore(async (store, directory) => {
     assert.equal(notificationSettings(store, encryptionKey).enabled, false);
-    assert.equal(notificationSettings(store, encryptionKey).webhookConfigured, false);
+    assert.equal(
+      notificationSettings(store, encryptionKey).webhookConfigured,
+      false,
+    );
     const settings = updateNotificationSettings(store, encryptionKey, {
       enabled: true,
       provider: "generic",
@@ -44,11 +47,17 @@ test("notification settings persist with an encrypted destination", async () => 
     const encrypted = store.get("settings", "notifications:webhook");
     assert.equal(encrypted.provider, "generic");
     assert.doesNotMatch(encrypted.encrypted, /alerts\.example\.net/);
-    assert.equal(inferenceSecretBox(encryptionKey).decrypt(encrypted.encrypted), fakeUrl);
+    assert.equal(
+      inferenceSecretBox(encryptionKey).decrypt(encrypted.encrypted),
+      fakeUrl,
+    );
     const reopened = new Store(directory);
     try {
       assert.equal(notificationSettings(reopened, encryptionKey).enabled, true);
-      assert.equal(notificationSettings(reopened, encryptionKey).minimumLevel, "warn");
+      assert.equal(
+        notificationSettings(reopened, encryptionKey).minimumLevel,
+        "warn",
+      );
     } finally {
       reopened.close();
     }
@@ -71,10 +80,11 @@ test("unsafe destination URLs and missing keys are rejected without changes", as
     assert.throws(() => validateWebhookUrl(fakeUrl, "discord"), TypeError);
     assert.throws(() => validateWebhookUrl(fakeUrl, "slack"), TypeError);
     assert.throws(
-      () => updateNotificationSettings(store, "", {
-        provider: "generic",
-        webhookUrl: fakeUrl,
-      }),
+      () =>
+        updateNotificationSettings(store, "", {
+          provider: "generic",
+          webhookUrl: fakeUrl,
+        }),
       TypeError,
     );
     assert.throws(
@@ -99,7 +109,10 @@ test("level and service filters deliver only safe messages and deduplicate", asy
       code: "unexpected_failure",
       message: "never publish arbitrary exception and request secrets",
     };
-    assert.equal(await reportNotification(store, encryptionKey, event, { send }), false);
+    assert.equal(
+      await reportNotification(store, encryptionKey, event, { send }),
+      false,
+    );
     updateNotificationSettings(store, encryptionKey, {
       enabled: true,
       provider: "generic",
@@ -107,19 +120,31 @@ test("level and service filters deliver only safe messages and deduplicate", asy
       services: ["process"],
       webhookUrl: fakeUrl,
     });
-    assert.equal(await reportNotification(store, encryptionKey, event, { send }), false);
+    assert.equal(
+      await reportNotification(store, encryptionKey, event, { send }),
+      false,
+    );
     updateNotificationSettings(store, encryptionKey, {
       minimumLevel: "error",
       services: ["api"],
     });
-    assert.equal(await reportNotification(store, encryptionKey, event, { send }), true);
+    assert.equal(
+      await reportNotification(store, encryptionKey, event, { send }),
+      true,
+    );
     assert.equal(sent.length, 1);
     assert.equal(sent[0].url, fakeUrl);
     assert.equal(sent[0].payload.service, "api");
     assert.equal(JSON.stringify(sent).includes(event.message), false);
-    assert.equal(await reportNotification(store, encryptionKey, event, { send }), false);
+    assert.equal(
+      await reportNotification(store, encryptionKey, event, { send }),
+      false,
+    );
     updateNotificationSettings(store, encryptionKey, { enabled: false });
-    assert.equal(await reportNotification(store, encryptionKey, event, { send }), false);
+    assert.equal(
+      await reportNotification(store, encryptionKey, event, { send }),
+      false,
+    );
   });
 });
 
@@ -134,7 +159,11 @@ test("notification delivery errors are isolated and deleting a webhook disables 
       store,
       encryptionKey,
       { service: "activitypub", level: "critical", code: "delivery_failure" },
-      { send: async () => { throw new Error("private remote response"); } },
+      {
+        send: async () => {
+          throw new Error("private remote response");
+        },
+      },
     );
     assert.equal(delivered, false);
     const cleared = clearNotificationWebhook(store, encryptionKey);

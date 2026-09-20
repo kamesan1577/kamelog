@@ -11,9 +11,14 @@ export function installProcessNotificationMonitor() {
   process[installed] = true;
   const report = (level, code) => {
     try {
-      void reportNotification(getStore(), configuration().inferenceEncryptionKey,
-        { service: "process", level, code });
-    } catch { /* A broken alerting setup may never interrupt the application. */ }
+      void reportNotification(
+        getStore(),
+        configuration().inferenceEncryptionKey,
+        { service: "process", level, code },
+      );
+    } catch {
+      /* A broken alerting setup may never interrupt the application. */
+    }
   };
   const originalError = console.error;
   console.error = (...args) => {
@@ -22,5 +27,7 @@ export function installProcessNotificationMonitor() {
   };
   // This listener does not suppress the default uncaught exception handling.
   // A fatal process exit can prevent the best-effort HTTP request from completing.
-  process.on("uncaughtExceptionMonitor", () => report("critical", "unhandled_exception"));
+  process.on("uncaughtExceptionMonitor", () =>
+    report("critical", "unhandled_exception"),
+  );
 }
