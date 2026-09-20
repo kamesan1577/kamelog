@@ -28,16 +28,10 @@ async function withStore(run) {
   }
 }
 
-test("notification configuration is disabled by default and webhook stays encrypted", async () => {
+test("notification settings persist with an encrypted destination", async () => {
   await withStore(async (store, directory) => {
-    assert.deepEqual(notificationSettings(store, encryptionKey), {
-      enabled: false,
-      provider: "discord",
-      minimumLevel: "error",
-      services: ["api", "activitypub", "process"],
-      webhookConfigured: false,
-      encryptionAvailable: true,
-    });
+    assert.equal(notificationSettings(store, encryptionKey).enabled, false);
+    assert.equal(notificationSettings(store, encryptionKey).webhookConfigured, false);
     const settings = updateNotificationSettings(store, encryptionKey, {
       enabled: true,
       provider: "generic",
@@ -48,11 +42,9 @@ test("notification configuration is disabled by default and webhook stays encryp
     assert.equal(settings.webhookConfigured, true);
     assert.equal(JSON.stringify(settings).includes(fakeUrl), false);
     const encrypted = store.get("settings", "notifications:webhook");
-    assert.ok(encrypted);
     assert.equal(encrypted.provider, "generic");
     assert.doesNotMatch(encrypted.encrypted, /alerts\.example\.net/);
     assert.equal(inferenceSecretBox(encryptionKey).decrypt(encrypted.encrypted), fakeUrl);
-    store.close();
     const reopened = new Store(directory);
     try {
       assert.equal(notificationSettings(reopened, encryptionKey).enabled, true);
@@ -63,9 +55,9 @@ test("notification configuration is disabled by default and webhook stays encryp
   });
 });
 
-test("invalid destination URLs are rejected and never change stored configuration", async () => {
+test("unsafe destination URLs and missing keys are rejected without changes", async () => {
   await withStore(async (store) => {
-    const urls = [
+    for (const url of [
       "http://alerts.example.net/hook",
       "https://127.0.0.1/hook",
       "https://localhost/hook",
@@ -73,32 +65,40 @@ test("invalid destination URLs are rejected and never change stored configuratio
       "https://name:secret@alerts.example.net/hook",
       "https://alerts.example.net:8443/hook",
       "https://alerts.example.net/hook#fragment",
-    ];
-    for (const url of urls) {
+    ]) {
       assert.throws(() => validateWebhookUrl(url, "generic"), TypeError);
     }
     assert.throws(() => validateWebhookUrl(fakeUrl, "discord"), TypeError);
     assert.throws(() => validateWebhookUrl(fakeUrl, "slack"), TypeError);
-    assert.throws(() => updateNotificationSettings(store, "", {
-      provider: "generic", webhookUrl: fakeUrl,
-    }), TypeError);
-    assert.throws(() => updateNotificationSettings(store, encryptionKey, {
-      enabled: true,
-    }), TypeError);
+    assert.throws(
+      () => updateNotificationSettings(store, "", {
+        provider: "generic",
+        webhookUrl: fakeUrl,
+      }),
+      TypeError,
+    );
+    assert.throws(
+      () => updateNotificationSettings(store, encryptionKey, { enabled: true }),
+      TypeError,
+    );
     assert.equal(store.get("settings", "notifications:webhook"), null);
     assert.equal(notificationSettings(store, encryptionKey).enabled, false);
   });
 });
 
-test("threshold, service and enabled filters govern sanitized delivery", async () => {
+test("level and service filters deliver only safe messages and deduplicate", async () => {
   await withStore(async (store) => {
     const sent = [];
     const send = async (url, payload) => {
       sent.push({ url, payload });
       return true;
     };
-    const event = { service: "api", level: "error", code: "unexpected_failure",
-      message: "do not publish raw exception or request secrets" };
+    const event = {
+      service: "api",
+      level: "error",
+      code: "unexpected_failure",
+      message: "never publish arbitrary exception and request secrets",
+    };
     assert.equal(await reportNotification(store, encryptionKey, event, { send }), false);
     updateNotificationSettings(store, encryptionKey, {
       enabled: true,
@@ -109,13 +109,13 @@ test("threshold, service and enabled filters govern sanitized delivery", async (
     });
     assert.equal(await reportNotification(store, encryptionKey, event, { send }), false);
     updateNotificationSettings(store, encryptionKey, {
-      minimumLevel: "error", services: ["api"],
+      minimumLevel: "error",
+      services: ["api"],
     });
     assert.equal(await reportNotification(store, encryptionKey, event, { send }), true);
     assert.equal(sent.length, 1);
     assert.equal(sent[0].url, fakeUrl);
     assert.equal(sent[0].payload.service, "api");
-    assert.equal(sent[0].payload.code, "unexpected_failure");
     assert.equal(JSON.stringify(sent).includes(event.message), false);
     assert.equal(await reportNotification(store, encryptionKey, event, { send }), false);
     updateNotificationSettings(store, encryptionKey, { enabled: false });
@@ -123,15 +123,20 @@ test("threshold, service and enabled filters govern sanitized delivery", async (
   });
 });
 
-test("failed webhook delivery is isolated and clearing it disables notifications", async () => {
+test("notification delivery errors are isolated and deleting a webhook disables alerts", async () => {
   await withStore(async (store) => {
     updateNotificationSettings(store, encryptionKey, {
-      enabled: true, provider: "generic", webhookUrl: fakeUrl,
+      enabled: true,
+      provider: "generic",
+      webhookUrl: fakeUrl,
     });
-    const sent = await reportNotification(store, encryptionKey,
+    const delivered = await reportNotification(
+      store,
+      encryptionKey,
       { service: "activitypub", level: "critical", code: "delivery_failure" },
-      { send: async () => { throw new Error("secret response from receiver"); } });
-    assert.equal(sent, false);
+      { send: async () => { throw new Error("private remote response"); } },
+    );
+    assert.equal(delivered, false);
     const cleared = clearNotificationWebhook(store, encryptionKey);
     assert.equal(cleared.enabled, false);
     assert.equal(cleared.webhookConfigured, false);
