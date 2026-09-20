@@ -2,7 +2,9 @@ import { Store } from "./store.mjs";
 import { configuration, createAPI } from "./api.mjs";
 import { createActivityPubHandler } from "./activitypub.mjs";
 import { reportNotification } from "./notifications.mjs";
+import { createThreadDispatcher } from "./thread-dispatcher.ts";
 let store;
+let threadDispatcher;
 export function getStore() {
   return (store ??= new Store(process.env.KAMELOG_DATA_DIR || ".runtime"));
 }
@@ -40,9 +42,28 @@ async function monitored(request, service, handler, config) {
   }
 }
 
-export function handle(request) {
+export async function handle(request) {
   const config = configuration();
-  return monitored(request, "api", createAPI(getStore(), config), config);
+  const response = await monitored(
+    request,
+    "api",
+    createAPI(getStore(), config),
+    config,
+  );
+  // The API has committed both post and durable inference job before returning.
+  // Wake a per-process dispatcher without awaiting Jev or delaying the response.
+  if (
+    response.ok &&
+    (request.method === "POST" || request.method === "PUT") &&
+    /^\/api\/posts(?:\/[^/]+)?$/.test(new URL(request.url).pathname) &&
+    getStore().inferenceSettings()?.autoThreadEnabled
+  ) {
+    (threadDispatcher ??= createThreadDispatcher(
+      getStore(),
+      config.inferenceEncryptionKey,
+    ))();
+  }
+  return response;
 }
 export function handleActivityPub(request) {
   const config = configuration();
