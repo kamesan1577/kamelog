@@ -6,7 +6,31 @@
 
 /* A reply follows its parent's actions; separate the header from that boundary. */
 [data-ds="thread-post"] {
+  position: relative;
   padding-top: 32px;
+  border-bottom: 0;
+  /* The timeline caps reply indentation at three levels. */
+  --thread-divider-indent: 54px;
+}
+
+[data-ds="thread-post"][data-thread-depth="1"] {
+  --thread-divider-indent: 18px;
+}
+
+[data-ds="thread-post"][data-thread-depth="2"] {
+  --thread-divider-indent: 36px;
+}
+
+/* Extend the divider back to the root edge without moving reply content. */
+[data-ds="thread-post"]::after {
+  position: absolute;
+  inset-inline-start: calc(-1 * var(--thread-divider-indent));
+  inset-inline-end: 0;
+  bottom: 0;
+  height: 1px;
+  background: #e8e4dc;
+  content: "";
+  pointer-events: none;
 }
 
 [data-ds="post-card"] > .pinned {
