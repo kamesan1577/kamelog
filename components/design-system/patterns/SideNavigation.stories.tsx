@@ -47,10 +47,7 @@ export const OwnerNavigation: Story = {
 function InteractiveSidebar(args: SideNavigationProps) {
   const [activeId, setActiveId] = useState("home");
   return (
-    <div
-      data-ds="public-sidebar"
-      style={{ minHeight: "auto", position: "static" }}
-    >
+    <div data-ds="public-sidebar">
       <SideNavigation
         {...args}
         items={args.items.map((item) => ({
