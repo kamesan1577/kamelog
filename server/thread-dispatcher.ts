@@ -13,6 +13,15 @@ export function createThreadDispatcher(store: Store, encryptionKey: string) {
   let running = false;
   let requested = false;
 
+  function dispatch() {
+    requested = true;
+    if (running) return;
+    running = true;
+    setImmediate(() => {
+      void drain();
+    });
+  }
+
   async function drain() {
     try {
       while (requested) {
@@ -46,12 +55,5 @@ export function createThreadDispatcher(store: Store, encryptionKey: string) {
     }
   }
 
-  return function dispatch() {
-    requested = true;
-    if (running) return;
-    running = true;
-    setImmediate(() => {
-      void drain();
-    });
-  };
+  return dispatch;
 }
