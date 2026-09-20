@@ -44,8 +44,10 @@ test("deployment backs up online before rolling the two app replicas", () => {
   assert.doesNotMatch(script, /down\s+(?:[^\n]*\s)?-v/);
 });
 
-test("backup CLI is selected from the running image, regardless of TS migration", async () => {
-  const match = script.match(/app-blue sh -eu -c '([\s\S]*?)' backup "\/backups\/\$backup_name"/);
+test("backup supports both deployed CLI versions", async () => {
+  const match = script.match(
+    /app-blue sh -eu -c '([\s\S]*?)' backup "\/backups\/\$backup_name"/,
+  );
   assert.ok(match, "backup command must execute in the pre-upgrade image");
   const backupCommand = match[1];
   for (const extension of ["mjs", "ts"]) {
@@ -67,21 +69,24 @@ test("backup CLI is selected from the running image, regardless of TS migration"
         },
       );
       assert.equal(result.status, 0, result.stderr);
-      assert.equal(await readFile(marker, "utf8"), "backup|/data|/backups/fixture");
+      assert.equal(
+        await readFile(marker, "utf8"),
+        "backup|/data|/backups/fixture",
+      );
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
   }
 });
 
-test("missing backup CLI fails closed before replacing any release", () => {
+test("missing backup CLI fails before switching", () => {
   assert.match(script, /no supported backup CLI in the running image/);
   assert.match(script, /deployment_started=0/);
   assert.match(script, /if test "\$deployment_started" != 1/);
   assert.match(script, /deployment_started=1\nlog "deploying/);
 });
 
-test("rollback restores old checkout and Compose manifest before old image and containers", () => {
+test("rollback restores the matching Compose before containers", () => {
   const rollback = script.slice(
     script.indexOf("restore_previous_release() {"),
     script.indexOf("\ntrap restore_previous_release ERR"),
@@ -92,16 +97,21 @@ test("rollback restores old checkout and Compose manifest before old image and c
   );
   const blue = rollback.indexOf("deploy_replica app-blue");
   const green = rollback.indexOf("deploy_replica app-green");
-  const worker = rollback.indexOf('"${compose[@]}" up -d --no-deps federation-worker');
+  const worker = rollback.indexOf(
+    '"${compose[@]}" up -d --no-deps federation-worker',
+  );
   assert.ok(checkout >= 0 && tag > checkout && blue > tag);
   assert.ok(green > blue && worker > green);
   assert.match(rollback, /healthcheck_worker \|\| rollback_ok=0/);
   assert.match(rollback, /rollback verified/);
   assert.match(rollback, /rollback incomplete/);
-  assert.match(script, /docker image tag "\$previous_image" kamelog-app:rollback/);
+  assert.match(
+    script,
+    /docker image tag "\$previous_image" kamelog-app:rollback/,
+  );
 });
 
-test("worker health reads Docker health status rather than calling the next release CLI", () => {
+test("worker health does not depend on CLI names", () => {
   const workerHealth = script.slice(
     script.indexOf("healthcheck_worker() {"),
     script.indexOf("\ndeploy_replica() {"),
@@ -110,7 +120,7 @@ test("worker health reads Docker health status rather than calling the next rele
   assert.doesNotMatch(workerHealth, /federation-worker-health\.(?:ts|mjs)/);
 });
 
-test("deployment preserves free space without pruning volumes or the rollback image", () => {
+test("cache pruning retains images and volumes", () => {
   assert.match(script, /MIN_FREE_KIB/);
   assert.match(script, /builder prune --all --force --keep-storage 8GB/);
   assert.match(script, /previous_rollback_image/);
