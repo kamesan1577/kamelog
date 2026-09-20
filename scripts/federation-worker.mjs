@@ -1,5 +1,6 @@
 import { configuration } from "../server/api.mjs";
 import { runFederationWorker } from "../server/federation-worker.mjs";
+import { reportNotification } from "../server/notifications.mjs";
 import { Store } from "../server/store.mjs";
 
 const directory = process.env.KAMELOG_DATA_DIR || ".runtime";
@@ -19,12 +20,28 @@ if (!store)
 const controller = new AbortController();
 for (const signal of ["SIGINT", "SIGTERM"])
   process.on(signal, () => controller.abort());
+const config = configuration();
 
 try {
-  await runFederationWorker(store, configuration(), {
+  await runFederationWorker(store, config, {
     signal: controller.signal,
-    log: (entry) => console.log(JSON.stringify(entry)),
+    log: (entry) => {
+      console.log(JSON.stringify(entry));
+      if (entry.status === "retry" || entry.status === "dead")
+        void reportNotification(store, config.inferenceEncryptionKey, {
+          service: "activitypub",
+          level: entry.status === "dead" ? "critical" : "warn",
+          code: "delivery_failure",
+        });
+    },
   });
+} catch (error) {
+  void reportNotification(store, config.inferenceEncryptionKey, {
+    service: "process",
+    level: "critical",
+    code: "unhandled_exception",
+  });
+  throw error;
 } finally {
   store.close();
 }
