@@ -396,6 +396,17 @@ export function createAPI(store, config, options = {}) {
         store.removeInferenceCredential("jev");
         return json({ configured: false });
       }
+      if (
+        path[0] === "inference" &&
+        path[1] === "threads" &&
+        path[2] &&
+        path[3] === "reject" &&
+        method === "POST"
+      ) {
+        if (!store.rejectInferredThreadLink(path[2]))
+          return json({ error: "Not found" }, 404);
+        return json({ ok: true });
+      }
       if (path[0] === "federation" && path[1] === "status" && method === "GET")
         return json(federationStatus(store, config));
       if (
@@ -600,13 +611,28 @@ export function createAPI(store, config, options = {}) {
               },
               input.revision,
               table === "posts"
-                ? (saved, previous) =>
+                ? (saved, previous) => {
                     enqueuePostFederationTransition(
                       store,
                       config,
                       saved,
                       previous,
+                    );
+                    const inference = store.inferenceSettings();
+                    if (
+                      inference?.autoThreadEnabled &&
+                      saved.kind === "tweet" &&
+                      !saved.parentId
                     )
+                      store.enqueueInferenceJob({
+                        task: "thread",
+                        postId: saved.id,
+                        inputHash: createHash("sha256")
+                          .update(`${saved.id}:${saved.revision}`)
+                          .digest("hex"),
+                        engineId: "jev-thread-v1",
+                      });
+                  }
                 : undefined,
             ),
             method === "POST" ? 201 : 200,

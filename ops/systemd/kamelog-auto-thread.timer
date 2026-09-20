@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodically connect eligible kamelog tweets
+
+[Timer]
+OnBootSec=10min
+OnUnitActiveSec=5min
+RandomizedDelaySec=1min
+Persistent=true
+Unit=kamelog-auto-thread.service
+
+[Install]
+WantedBy=timers.target
