@@ -40,6 +40,12 @@ import {
   publicFederationReposts,
   undoFederationRepost,
 } from "./federation-reposts.mjs";
+import { inferenceSecretBox } from "./inference/secret.mjs";
+import {
+  inferenceStatus,
+  saveJevCredential,
+  updateInferenceSettings,
+} from "./inference/settings.mjs";
 
 export function configuration(env = process.env) {
   const origin = env.KAMELOG_ORIGIN || "http://localhost:3000";
@@ -54,6 +60,7 @@ export function configuration(env = process.env) {
     rpID: parsed.hostname,
     secure,
     bootstrap: env.KAMELOG_BOOTSTRAP_TOKEN || "",
+    inferenceEncryptionKey: env.KAMELOG_INFERENCE_ENCRYPTION_KEY || "",
   };
 }
 const cookie = (name, value, secure, maxAge) =>
@@ -70,6 +77,9 @@ const equal = (a, b) =>
     createHash("sha256").update(b).digest(),
   );
 export function createAPI(store, config, options = {}) {
+  const inferenceBox = inferenceSecretBox(config.inferenceEncryptionKey);
+  if (config.inferenceEncryptionKey && !inferenceBox)
+    throw new Error("Invalid inference encryption key");
   const sessionName = config.secure
     ? "__Host-kamelog-session"
     : "kamelog-session";
@@ -363,6 +373,29 @@ export function createAPI(store, config, options = {}) {
         }
       }
       if (!owner) return json({ error: "Unauthorized" }, 401);
+      if (path[0] === "inference" && path[1] === "status" && method === "GET")
+        return json(inferenceStatus(store, inferenceBox));
+      if (path[0] === "inference" && path[1] === "settings" && method === "PUT")
+        return json(updateInferenceSettings(store, await body()));
+      if (
+        path[0] === "inference" &&
+        path[1] === "credentials" &&
+        path[2] === "jev" &&
+        method === "POST"
+      ) {
+        const input = await body();
+        saveJevCredential(store, inferenceBox, input?.apiKey);
+        return json({ configured: true }, 201);
+      }
+      if (
+        path[0] === "inference" &&
+        path[1] === "credentials" &&
+        path[2] === "jev" &&
+        method === "DELETE"
+      ) {
+        store.removeInferenceCredential("jev");
+        return json({ configured: false });
+      }
       if (path[0] === "federation" && path[1] === "status" && method === "GET")
         return json(federationStatus(store, config));
       if (

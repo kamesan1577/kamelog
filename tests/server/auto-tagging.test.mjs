@@ -26,14 +26,14 @@ test("local classifier learns only from manual tags and normalizes to existing t
       body: "SQLiteのデータベースとストレージを使ったバックアップ処理を実装した",
       tags: [],
     });
-    const first = autoTagPosts(store);
+    const first = await autoTagPosts(store);
     assert.equal(first.processed, 2);
     const tagged = store.get("posts", "target");
     assert.deepEqual(tagged.tags, ["データベース"]);
     assert.equal(tagged.autoTags[0].tag, "データベース");
     assert.equal(tagged.autoTags[0].modelVersion, AUTO_TAG_MODEL_VERSION);
     assert.match(tagged.autoTags[0].contentHash, /^[a-f0-9]{64}$/);
-    assert.equal(autoTagPosts(store).skipped, 2);
+    assert.equal((await autoTagPosts(store)).skipped, 2);
 
     store.save(
       "posts",
@@ -46,7 +46,7 @@ test("local classifier learns only from manual tags and normalizes to existing t
       },
       1,
     );
-    const second = autoTagPosts(store);
+    const second = await autoTagPosts(store);
     assert.equal(second.processed, 2);
     assert.deepEqual(store.get("posts", "target").tags, ["ストレージ"]);
   } finally {

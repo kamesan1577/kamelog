@@ -1,4 +1,6 @@
 import { hash } from "./store.mjs";
+import { LocalTagInference } from "./inference/local-tag-inference.mjs";
+import { validateTagResult } from "./inference/ports.mjs";
 
 export const AUTO_TAG_MODEL_VERSION = "local-tfidf-v1";
 const AUTO_TAG_THRESHOLD = 0.42;
@@ -128,9 +130,22 @@ export function classifyPosts(posts) {
   return { result, trainingHash: trainingHash(posts) };
 }
 
-export function autoTagPosts(store) {
+export async function autoTagPosts(
+  store,
+  { tagInference = new LocalTagInference() } = {},
+) {
   const posts = store.list("posts");
-  const { result, trainingHash: currentTrainingHash } = classifyPosts(posts);
+  const { trainingHash: currentTrainingHash } = classifyPosts(posts);
+  const candidates = [
+    ...new Set(posts.flatMap((post) => manualTags(post))),
+  ].map((tag) => ({
+    tag,
+    aliases: [],
+    examples: posts
+      .filter((post) => manualTags(post).includes(tag))
+      .map((post) => textOf(post))
+      .slice(0, 3),
+  }));
   let processed = 0;
   let skipped = 0;
   for (const post of posts) {
@@ -144,10 +159,20 @@ export function autoTagPosts(store) {
       skipped++;
       continue;
     }
-    store.replaceAutoTags(post.id, result.get(post.id) || [], {
+    const inference = await tagInference.inferTags({
+      post: { id: post.id, title: post.title || "", body: post.body || "" },
+      candidates,
+      context: posts.map(({ id, body }) => ({ id, body: body || "" })),
+    });
+    const result = manualTags(post).length
+      ? { status: "abstained", tags: [] }
+      : validateTagResult(inference, candidates);
+    store.replaceAutoTags(post.id, result.tags, {
       contentHash: currentContentHash,
       modelVersion: AUTO_TAG_MODEL_VERSION,
       trainingHash: currentTrainingHash,
+      engineId: tagInference.constructor.name,
+      adapterVersion: AUTO_TAG_MODEL_VERSION,
     });
     processed++;
   }
