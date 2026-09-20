@@ -31,10 +31,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ffmpeg
       - run: npm ci
-      - name: Show event test Prettier difference
-        run: |
-          npx prettier tests/server/thread-event-dispatch.test.ts > /tmp/event-test.ts
-          diff -u tests/server/thread-event-dispatch.test.ts /tmp/event-test.ts || true
       - run: npx playwright install --with-deps chromium
       - run: make check
         env:
