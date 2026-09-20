@@ -2,48 +2,24 @@ import { execFileSync } from "node:child_process";
 import { isNewJavaScriptSource } from "./typescript-policy.ts";
 
 function gitFiles(args: string[]): string[] {
-  return execFileSync("git", [...args, "-z"], {
-    encoding: "utf8",
-  })
-    .split("\0")
-    .filter(Boolean);
+  const output = execFileSync("git", [...args, "-z"], { encoding: "utf8" });
+  return output.split("\0").filter(Boolean);
 }
 
-function resolveBase(configuredBase: string | undefined): string {
-  if (!configuredBase || /^0{40}$/.test(configuredBase)) {
-    return "HEAD^";
-  }
-  return configuredBase;
-}
+// CI supplies the full PR or push range. Local checks also inspect staged
+// and untracked files so new JavaScript cannot bypass the gate before commit.
+const candidate = process.env.KAMELOG_TS_POLICY_BASE?.trim() || "HEAD^";
+const base = /^0{40}$/.test(candidate) ? "HEAD^" : candidate;
+const diffArgs = ["diff", "--no-renames", "--diff-filter=A", "--name-only"];
+const committed = gitFiles([...diffArgs, base, "HEAD"]);
+const staged = gitFiles([...diffArgs, "--cached", "HEAD"]);
+const untracked = gitFiles(["ls-files", "--others", "--exclude-standard"]);
+const files = new Set([...committed, ...staged, ...untracked]);
+const violations = [...files].filter(isNewJavaScriptSource).sort();
 
-// CI supplies the PR base or pre-push revision, covering every commit in a PR
-// or push. HEAD^ is the local fallback; index and untracked files are checked
-// separately so the gate also catches work that has not been committed yet.
-const base = resolveBase(process.env.KAMELOG_TS_POLICY_BASE?.trim());
-const added = new Set([
-  ...gitFiles([
-    "diff",
-    "--no-renames",
-    "--diff-filter=A",
-    "--name-only",
-    base,
-    "HEAD",
-  ]),
-  ...gitFiles([
-    "diff",
-    "--cached",
-    "--no-renames",
-    "--diff-filter=A",
-    "--name-only",
-    "HEAD",
-  ]),
-  ...gitFiles(["ls-files", "--others", "--exclude-standard"]),
-]);
-const violations = [...added].filter(isNewJavaScriptSource).sort();
 if (violations.length) {
-  console.error(
-    `New first-party JavaScript files are forbidden; use .ts or .tsx instead:\n${violations.join("\n")}`,
-  );
+  console.error("New first-party JavaScript files are forbidden.");
+  console.error("Use .ts or .tsx instead:\n" + violations.join("\n"));
   process.exitCode = 1;
 } else {
   console.log("TypeScript-only gate passed (no new first-party JavaScript files)");
