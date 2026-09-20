@@ -11,11 +11,14 @@ test("API failures explain an actionable next step", () => {
   assert.match(apiErrorMessage(413, "Payload too large"), /サイズ/);
   assert.match(apiErrorMessage(429, "Try later"), /再試行/);
   assert.match(apiErrorMessage(503, "internal private exception"), /再試行/);
-  assert.doesNotMatch(apiErrorMessage(503, "internal private exception"), /private/);
+  assert.doesNotMatch(
+    apiErrorMessage(503, "internal private exception"),
+    /private/,
+  );
   assert.match(networkErrorMessage, /接続を確認/);
 });
 
-test("specific, server-approved Japanese validation and conflict messages survive", () => {
+test("preserve safe Japanese API messages", () => {
   assert.equal(
     apiErrorMessage(400, "Fediverseアドレスを確認してください。"),
     "Fediverseアドレスを確認してください。",
