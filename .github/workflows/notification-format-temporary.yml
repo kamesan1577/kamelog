@@ -1,0 +1,33 @@
+name: Temporary notification PR formatting
+on:
+  push:
+    branches: [feat/configurable-server-error-notifications]
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: feat/configurable-server-error-notifications
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Format changed application files
+        run: |
+          npx prettier --write app/api/notifications/route.ts app/settings/notifications/page.tsx app/layout.tsx instrumentation.ts server/notifications.mjs server/notifications-process.mjs server/runtime.mjs scripts/federation-worker.mjs tests/server/notifications.test.mjs components/notification-settings.tsx components/notification-settings-link.tsx
+      - name: Commit formatted files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add app/api/notifications/route.ts app/settings/notifications/page.tsx app/layout.tsx instrumentation.ts server/notifications.mjs server/notifications-process.mjs server/runtime.mjs scripts/federation-worker.mjs tests/server/notifications.test.mjs components/notification-settings.tsx components/notification-settings-link.tsx
+          if ! git diff --cached --quiet; then
+            git commit -m 'style: format notification implementation'
+            git push origin HEAD:feat/configurable-server-error-notifications
+          fi
