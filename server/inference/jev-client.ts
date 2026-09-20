@@ -73,7 +73,9 @@ export class JevClient {
     } catch (error) {
       if (error instanceof InferenceUnavailable) throw error;
       throw new InferenceUnavailable(
-        error instanceof Error && error.name === "AbortError" ? "timeout" : "network",
+        error instanceof Error && error.name === "AbortError"
+          ? "timeout"
+          : "network",
       );
     } finally {
       clearTimeout(timer);
