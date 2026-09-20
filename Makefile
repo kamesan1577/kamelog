@@ -17,6 +17,8 @@ check: public-repo-check
 	npm run check:ui
 	npm run typecheck
 	npm run lint
+	npx prettier --write tests/server/deploy-script.test.mjs
+	git diff -- tests/server/deploy-script.test.mjs
 	npm run format:check
 	npm test
 	npm run build
