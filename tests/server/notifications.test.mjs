@@ -172,3 +172,50 @@ test("notification delivery errors are isolated and deleting a webhook disables 
     assert.equal(store.get("settings", "notifications:webhook"), null);
   });
 });
+
+test("test notifications return only approved failure reasons", async () => {
+  await withStore(async (store) => {
+    const event = { service: "api", level: "info", code: "test" };
+    const reasons = [];
+    const options = { force: true, onFailure: (reason) => reasons.push(reason) };
+    assert.equal(
+      await reportNotification(store, encryptionKey, event, options),
+      false,
+    );
+    assert.deepEqual(reasons, ["not_configured"]);
+    updateNotificationSettings(store, encryptionKey, {
+      provider: "generic",
+      webhookUrl: fakeUrl,
+    });
+    assert.equal(
+      await reportNotification(store, randomBytes(32).toString("base64url"), event, options),
+      false,
+    );
+    assert.equal(reasons.at(-1), "credential_unreadable");
+    assert.equal(
+      await reportNotification(store, encryptionKey, event, {
+        ...options,
+        send: async () => {
+          throw Object.assign(new Error("private body and webhook URL"), {
+            notificationReason: "remote_not_found",
+          });
+        },
+      }),
+      false,
+    );
+    assert.equal(reasons.at(-1), "remote_not_found");
+    assert.equal(
+      await reportNotification(store, encryptionKey, event, {
+        ...options,
+        send: async () => {
+          throw Object.assign(new Error("private body and webhook URL"), {
+            notificationReason: "private body and webhook URL",
+          });
+        },
+      }),
+      false,
+    );
+    assert.equal(reasons.at(-1), "network_failed");
+    assert.equal(JSON.stringify(reasons).includes(fakeUrl), false);
+  });
+});
