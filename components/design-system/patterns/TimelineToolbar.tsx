@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { Check, RefreshCw, SlidersHorizontal } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -34,6 +36,34 @@ export function TimelineToolbar({
   refreshing = false,
   ...props
 }: TimelineToolbarProps) {
+  const tabsListRef = React.useRef<HTMLDivElement>(null);
+
+  React.useLayoutEffect(() => {
+    const list = tabsListRef.current;
+    if (!list) return;
+
+    const updateIndicator = () => {
+      const active = list.querySelector<HTMLElement>(
+        '[data-slot="tabs-trigger"][data-state="active"]',
+      );
+      if (!active) return;
+      list.style.setProperty("--timeline-indicator-x", `${active.offsetLeft}px`);
+      list.style.setProperty(
+        "--timeline-indicator-width",
+        `${active.offsetWidth}px`,
+      );
+      list.dataset.indicatorReady = "true";
+    };
+
+    updateIndicator();
+    const observer = new ResizeObserver(updateIndicator);
+    observer.observe(list);
+    list
+      .querySelectorAll<HTMLElement>('[data-slot="tabs-trigger"]')
+      .forEach((tab) => observer.observe(tab));
+    return () => observer.disconnect();
+  }, [filter]);
+
   return (
     <div
       data-ds="timeline-toolbar"
@@ -44,7 +74,7 @@ export function TimelineToolbar({
         value={filter}
         onValueChange={(value) => onFilterChange(value as TimelineFilter)}
       >
-        <TabsList variant="line" data-ds="timeline-tabs">
+        <TabsList ref={tabsListRef} variant="line" data-ds="timeline-tabs">
           <TabsTrigger value="all">すべて</TabsTrigger>
           <TabsTrigger value="blog">ブログ</TabsTrigger>
           <TabsTrigger value="tweet">つぶやき</TabsTrigger>
