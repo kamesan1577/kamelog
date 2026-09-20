@@ -11,7 +11,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Page: Story = {
-  args: { onRetry: () => {} },
+  args: { onRetry: () => undefined },
 };
 
 export const Inline: Story = {
@@ -19,6 +19,6 @@ export const Inline: Story = {
     compact: true,
     title: "投稿を取得できませんでした",
     description: "通信を確認して、もう一度お試しください。",
-    onRetry: () => {},
+    onRetry: () => undefined,
   },
 };
