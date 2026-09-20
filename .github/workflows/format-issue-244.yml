@@ -1,0 +1,26 @@
+name: Format issue 244
+on:
+  push:
+    branches: [issue-244-jev-auto-tagging]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: issue-244-jev-auto-tagging
+          persist-credentials: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - run: npm ci --ignore-scripts
+      - name: Format changed files and push
+        run: |
+          npx prettier --write server/auto-tagging.mjs server/inference/jev-client.mjs server/inference/ports.mjs server/tag-repository.mjs scripts/auto-tag.mjs tests/server/jev-auto-tagging.test.mjs tests/server/jev-tag-inference.test.mjs
+          git add server/auto-tagging.mjs server/inference/jev-client.mjs server/inference/ports.mjs server/tag-repository.mjs scripts/auto-tag.mjs tests/server/jev-auto-tagging.test.mjs tests/server/jev-tag-inference.test.mjs
+          if ! git diff --cached --quiet; then
+            git -c user.name="$(git show -s --format=%an HEAD)" -c user.email="$(git show -s --format=%ae HEAD)" commit -m 'Format Jev tagging source and tests'
+            git push origin HEAD:issue-244-jev-auto-tagging
+          fi
