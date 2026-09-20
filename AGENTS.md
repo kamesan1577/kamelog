@@ -9,6 +9,14 @@
 4. 関連する `adr/` と `SECURITY.md`
 5. コードと対応するテスト
 
+## 言語ポリシー（新規実装はTypeScriptのみ）
+
+- 新規のアプリ、サーバー、ライブラリ、CLI、テスト、設定コードは `.ts` または `.tsx` を使う。JavaScript (`.js` / `.jsx` / `.mjs` / `.cjs`) の新規実装、移行用shim、再exportファイルは追加しない。
+- 既存のJavaScriptファイルはTypeScript移行までの暫定資産。機能追加でJavaScriptを増やさず、触る箇所を可能な範囲でTypeScriptへ移す。移行後は参照元と実行設定を更新して古いファイルを削除する。恒久的な互換レイヤーを作らない。
+- `vendor/` の第三者由来コードだけは上記の新規ファイル検査対象外。外部コードを自作のJavaScriptとして追加するために使わない。
+- `npm run check:typescript` が追加されたJavaScriptファイルを検出し、`make check` / CI で失敗させる。既存の `.mjs` が残っていても新規追加は許可しない。
+- 型注釈だけでなく、外部入力はZod等による実行時検証も維持する。既存の型エラーを `any` や安易な型アサーションで隠さない。
+
 ## 変更手順
 
 - UIを変更する場合は `.codex/skills/kamelog-ui-contract/SKILL.md` を読む。 UIの設計・実装・レビューでは `.codex/skills/ui-craft/SKILL.md` を読み、Design Systemのtoken・primitive・layoutとStorybook storyを優先する。
