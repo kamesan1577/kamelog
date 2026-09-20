@@ -177,7 +177,10 @@ test("test notifications return only approved failure reasons", async () => {
   await withStore(async (store) => {
     const event = { service: "api", level: "info", code: "test" };
     const reasons = [];
-    const options = { force: true, onFailure: (reason) => reasons.push(reason) };
+    const options = {
+      force: true,
+      onFailure: (reason) => reasons.push(reason),
+    };
     assert.equal(
       await reportNotification(store, encryptionKey, event, options),
       false,
@@ -188,7 +191,12 @@ test("test notifications return only approved failure reasons", async () => {
       webhookUrl: fakeUrl,
     });
     assert.equal(
-      await reportNotification(store, randomBytes(32).toString("base64url"), event, options),
+      await reportNotification(
+        store,
+        randomBytes(32).toString("base64url"),
+        event,
+        options,
+      ),
       false,
     );
     assert.equal(reasons.at(-1), "credential_unreadable");

@@ -91,7 +91,8 @@ export function DELETE(request: Request) {
 // Owner-only diagnostic messages are intentionally fixed: never reflect a URL,
 // DNS answer, remote response body or exception string to the browser.
 const testFailures: Record<string, string> = {
-  not_configured: "Webhookが保存されていません。URLを入力して設定を保存してください。",
+  not_configured:
+    "Webhookが保存されていません。URLを入力して設定を保存してください。",
   encryption_unavailable:
     "暗号化鍵が利用できません。サーバー側の鍵の設定を確認してください。",
   credential_unreadable:
@@ -118,7 +119,8 @@ const testFailures: Record<string, string> = {
     "通知先がHTTPエラーを返しました。通知先の種類やWebhook設定を確認してください。",
   remote_unavailable:
     "通知先がHTTP 5xxを返しました。通知先サービスの状態を確認して再試行してください。",
-  unknown: "通知テストを完了できませんでした。サーバー側の設定を確認してください。",
+  unknown:
+    "通知テストを完了できませんでした。サーバー側の設定を確認してください。",
 };
 
 export async function POST(request: Request) {
