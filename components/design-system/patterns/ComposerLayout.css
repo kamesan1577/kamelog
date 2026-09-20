@@ -11,12 +11,22 @@
 }
 
 .desktop-composer .composer-kinds > .image-upload-button {
+  display: flex;
+  align-items: center;
   grid-column: 1 / -1;
   min-height: 42px;
   margin: 0 0 10px;
   padding: 0;
   border-bottom: 1px solid #f0efec;
   color: #777168;
+  font-size: 0;
+  cursor: pointer;
+}
+
+/* Keep the label's accessible name while showing only its image icon. */
+.desktop-composer .composer-kinds > .image-upload-button svg {
+  width: 20px;
+  height: 20px;
 }
 
 .desktop-composer .image-upload-button input {
