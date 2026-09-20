@@ -14,9 +14,11 @@ export interface PostMetaProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("ja-JP", {
+  return new Date(value).toLocaleString("ja-JP", {
     month: "numeric",
     day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -32,11 +34,7 @@ export function PostMeta({
   ...props
 }: PostMetaProps) {
   return (
-    <div
-      data-ds="post-meta"
-      className={className}
-      {...props}
-    >
+    <div data-ds="post-meta" className={className} {...props}>
       {avatar}
       <b>{author}</b>
       <span aria-hidden="true">·</span>
