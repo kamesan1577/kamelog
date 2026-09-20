@@ -6,7 +6,7 @@ const MIN_REENCODE_BYTES = 256 * 1024;
 
 function hasPrivateMetadata(bytes, type) {
   if (type === "image/jpeg") {
-    for (let offset = 2; offset + 4 <= bytes.length; ) {
+    for (let offset = 2; offset + 4 <= bytes.length;) {
       if (bytes[offset] !== 0xff) break;
       const marker = bytes[offset + 1];
       if (marker === 0xda || marker === 0xd9) break;
@@ -16,20 +16,18 @@ function hasPrivateMetadata(bytes, type) {
       offset += 2 + length;
     }
   } else if (type === "image/png") {
-    for (let offset = 8; offset + 12 <= bytes.length; ) {
+    for (let offset = 8; offset + 12 <= bytes.length;) {
       const length = bytes.readUInt32BE(offset);
       const end = offset + 12 + length;
       if (end > bytes.length) break;
       const chunk = bytes.toString("ascii", offset + 4, offset + 8);
-      if (["eXIf", "tEXt", "zTXt", "iTXt", "tIME"].includes(chunk))
-        return true;
+      if (["eXIf", "tEXt", "zTXt", "iTXt", "tIME"].includes(chunk)) return true;
       if (chunk === "IEND") break;
       offset = end;
     }
   } else if (type === "image/webp") {
     return (
-      bytes.subarray(12, 16).toString() === "VP8X" &&
-      Boolean(bytes[20] & 0x0c)
+      bytes.subarray(12, 16).toString() === "VP8X" && Boolean(bytes[20] & 0x0c)
     );
   }
   return false;
