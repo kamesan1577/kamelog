@@ -2,9 +2,10 @@
 Description=Periodically connect eligible kamelog tweets
 
 [Timer]
-OnBootSec=10min
-OnUnitActiveSec=5min
-RandomizedDelaySec=1min
+OnBootSec=1min
+OnUnitActiveSec=1min
+AccuracySec=1s
+RandomizedDelaySec=0
 Persistent=true
 Unit=kamelog-auto-thread.service
 
