@@ -115,20 +115,20 @@ schema非互換変更時は古いimageだけに戻さず、更新前backupを空
 ## バックアップ
 
 SQLite backup APIのsnapshotを先に作り、DB登録前に確定して以後不変の媒体を同じbackupへコピーする。通常backupでアプリを停止しない。媒体の変更・削除を実装する場合はこの前提を再設計する。
-ホストで `node scripts/admin.mjs backup SOURCE_DATA EMPTY_BACKUP_DIR` を実行する。
-復元: `node scripts/admin.mjs restore BACKUP_DIR EMPTY_DATA_DIR`。
+ホストで `node scripts/admin.ts backup SOURCE_DATA EMPTY_BACKUP_DIR` を実行する。
+復元: `node scripts/admin.ts restore BACKUP_DIR EMPTY_DATA_DIR`。
 既存の宛先には上書きできない。manifestを変更して検査を迂回しない。
 日次backupをschedulerへ登録する。失敗時の通知も設定する。
 日次30世代、月次の復元訓練を標準とする。自動削除は復元成功後に運用者が設定する。
 バックアップは0700の場所に置き、オフホスト転送前に暗号化する。復号鍵は別保管する。
 ActivityPub identityとprivate keyもSQLite snapshotへ含まれる。復元後にkey pairを再生成しない。同じ `KAMELOG_ORIGIN` なら同じActorとして継続できるが、domain変更restoreでは同一federation identityの継続を保証しない。
-followers、following、remote object/timeline state、公開RP状態、remote reaction状態、投稿ごとのfederationEnabled、outbound activity、pending/dead deliveryも同じsnapshotへ含まれる。復元後はworkerを起動するとpending deliveryを再開する。復元検証では `docker compose exec federation-worker node scripts/federation-worker-health.mjs` とowner限定statusのpending/dead件数を確認する。
+followers、following、remote object/timeline state、公開RP状態、remote reaction状態、投稿ごとのfederationEnabled、outbound activity、pending/dead deliveryも同じsnapshotへ含まれる。復元後はworkerを起動するとpending deliveryを再開する。復元検証では `docker compose exec federation-worker node scripts/federation-worker-health.ts` とowner限定statusのpending/dead件数を確認する。
 `federation-media/` は検証済みremote画像の再取得可能なcacheであり、backupへ含めない。restore後はownerがFediverse timelineを開いたときに必要な画像だけを再取得する。
 
 ## 復旧
 
 パスキーを全て失った場合は公開を止め、DBをバックアップする。
-停止中に `node scripts/admin.mjs reset-auth SOURCE_DATA --confirm-reset-auth` を実行する。
+停止中に `node scripts/admin.ts reset-auth SOURCE_DATA --confirm-reset-auth` を実行する。
 新しい32文字以上のbootstrap tokenを環境へ設定して起動し、`/setup` から再登録する。
 登録完了後はtokenを環境から削除し、再起動してログインを確認する。
 この操作は全パスキー・session・未完了challengeを削除するが、投稿・下書き・媒体には触れない。

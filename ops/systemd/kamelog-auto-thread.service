@@ -10,6 +10,6 @@ User=kamelog
 Group=kamelog
 SupplementaryGroups=docker
 WorkingDirectory=/srv/kamelog
-ExecStart=/usr/bin/docker compose --env-file /etc/kamelog/env -f /srv/kamelog/compose.yaml run --rm --no-deps app-blue node scripts/auto-thread.mjs
+ExecStart=/usr/bin/docker compose --env-file /etc/kamelog/env -f /srv/kamelog/compose.yaml run --rm --no-deps app-blue node scripts/auto-thread.ts
 TimeoutStartSec=20min
 Nice=15

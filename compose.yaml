@@ -35,11 +35,11 @@ services:
     <<: *app
   federation-worker:
     <<: *app
-    command: ["node", "scripts/federation-worker.mjs"]
+    command: ["node", "scripts/federation-worker.ts"]
     depends_on:
       app-blue: { condition: service_healthy }
     healthcheck:
-      test: ["CMD", "node", "scripts/federation-worker-health.mjs"]
+      test: ["CMD", "node", "scripts/federation-worker-health.ts"]
       interval: 10s
       timeout: 5s
       start_period: 20s
