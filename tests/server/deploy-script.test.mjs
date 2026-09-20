@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { mkdtemp, readFile, rm, mkdir, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
+
 const script = await readFile(
   new URL("../../ops/kamelog-update", import.meta.url),
   "utf8",
@@ -9,13 +13,15 @@ const installer = await readFile(
   new URL("../../ops/install-host.sh", import.meta.url),
   "utf8",
 );
+
 test("deployment is serialized and restricted to a successful main CI commit", () => {
   assert.match(script, /flock -n/);
   assert.match(script, /status=success/);
   assert.match(script, /remote_sha" != "\$ci_sha/);
 });
-test("deployment backs up online and rolls the two app replicas one at a time", () => {
-  const backup = script.indexOf("scripts/admin.ts backup");
+
+test("deployment backs up online before rolling the two app replicas", () => {
+  const backup = script.indexOf("\nbackup_online\n");
   const checkout = script.indexOf(
     'git checkout --quiet --detach "$remote_sha"',
   );
@@ -37,18 +43,83 @@ test("deployment backs up online and rolls the two app replicas one at a time", 
   assert.doesNotMatch(script, /stop app/);
   assert.doesNotMatch(script, /down\s+(?:[^\n]*\s)?-v/);
 });
-test("deployment health checks, disk space and attempts a code rollback", () => {
-  assert.match(script, /curl --fail --silent --show-error "\$HEALTH_URL"/);
-  assert.match(script, /healthcheck_replica/);
-  assert.match(script, /healthcheck_worker/);
-  assert.match(
-    script,
-    /docker image tag "\$previous_image" kamelog-app:current/,
-  );
-  assert.match(script, /MIN_FREE_KIB/);
-  assert.match(script, /git checkout --quiet --detach "\$current_sha"/);
-  assert.match(script, /backup retained/);
+
+test("backup CLI is selected from the running image, regardless of TS migration", async () => {
+  const match = script.match(/app-blue sh -eu -c '([\s\S]*?)' backup "\/backups\/\$backup_name"/);
+  assert.ok(match, "backup command must execute in the pre-upgrade image");
+  const backupCommand = match[1];
+  for (const extension of ["mjs", "ts"]) {
+    const directory = await mkdtemp(join(tmpdir(), "kamelog-deploy-backup-"));
+    try {
+      await mkdir(join(directory, "scripts"));
+      await writeFile(
+        join(directory, "scripts", `admin.${extension}`),
+        'require("node:fs").writeFileSync(process.env.BACKUP_MARKER, process.argv.slice(2).join("|"));',
+      );
+      const marker = join(directory, "backup-marker");
+      const result = spawnSync(
+        "sh",
+        ["-eu", "-c", backupCommand, "backup", "/backups/fixture"],
+        {
+          cwd: directory,
+          env: { ...process.env, BACKUP_MARKER: marker },
+          encoding: "utf8",
+        },
+      );
+      assert.equal(result.status, 0, result.stderr);
+      assert.equal(await readFile(marker, "utf8"), "backup|/data|/backups/fixture");
+    } finally {
+      await rm(directory, { recursive: true, force: true });
+    }
+  }
 });
+
+test("missing backup CLI fails closed before replacing any release", () => {
+  assert.match(script, /no supported backup CLI in the running image/);
+  assert.match(script, /deployment_started=0/);
+  assert.match(script, /if test "\$deployment_started" != 1/);
+  assert.match(script, /deployment_started=1\nlog "deploying/);
+});
+
+test("rollback restores old checkout and Compose manifest before old image and containers", () => {
+  const rollback = script.slice(
+    script.indexOf("restore_previous_release() {"),
+    script.indexOf("\ntrap restore_previous_release ERR"),
+  );
+  const checkout = rollback.indexOf('git checkout --quiet --detach "$current_sha"');
+  const tag = rollback.indexOf(
+    'docker image tag "$previous_image" kamelog-app:current',
+  );
+  const blue = rollback.indexOf("deploy_replica app-blue");
+  const green = rollback.indexOf("deploy_replica app-green");
+  const worker = rollback.indexOf('"${compose[@]}" up -d --no-deps federation-worker');
+  assert.ok(checkout >= 0 && tag > checkout && blue > tag);
+  assert.ok(green > blue && worker > green);
+  assert.match(rollback, /healthcheck_worker \|\| rollback_ok=0/);
+  assert.match(rollback, /rollback verified/);
+  assert.match(rollback, /rollback incomplete/);
+  assert.match(script, /docker image tag "\$previous_image" kamelog-app:rollback/);
+});
+
+test("worker health reads Docker health status rather than calling the next release CLI", () => {
+  const workerHealth = script.slice(
+    script.indexOf("healthcheck_worker() {"),
+    script.indexOf("\ndeploy_replica() {"),
+  );
+  assert.match(workerHealth, /docker inspect --format/);
+  assert.doesNotMatch(workerHealth, /federation-worker-health\.(?:ts|mjs)/);
+});
+
+test("deployment preserves free space without pruning volumes or the rollback image", () => {
+  assert.match(script, /MIN_FREE_KIB/);
+  assert.match(script, /builder prune --all --force --keep-storage 8GB/);
+  assert.match(script, /previous_rollback_image/);
+  assert.match(script, /docker image rm "\$previous_rollback_image"/);
+  assert.doesNotMatch(script, /docker image prune/);
+  assert.doesNotMatch(script, /docker system prune/);
+  assert.doesNotMatch(script, /--volumes/);
+});
+
 test("compose keeps a gateway in front of two application replicas", async () => {
   const compose = await readFile(
     new URL("../../compose.yaml", import.meta.url),
@@ -68,6 +139,7 @@ test("compose keeps a gateway in front of two application replicas", async () =>
   assert.match(gateway, /server app-green:3000 resolve/);
   assert.match(gateway, /proxy_next_upstream/);
 });
+
 test("host installer preserves data and writes reproducible systemd overrides", () => {
   assert.match(installer, /test -r "\$ENV_FILE"/);
   assert.match(installer, /ensure_inference_encryption_key/);
