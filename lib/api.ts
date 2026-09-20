@@ -1,21 +1,36 @@
+import { apiErrorMessage, networkErrorMessage } from "./api-error.mjs";
+
 export async function api<T>(
   path: string,
   method = "GET",
   value?: unknown,
   headers: Record<string, string> = {},
 ): Promise<T> {
-  const response = await fetch("/api/" + path, {
-    method,
-    credentials: "same-origin",
-    cache: "no-store",
-    headers: {
-      ...(value === undefined ? {} : { "Content-Type": "application/json" }),
-      ...headers,
-    },
-    body: value === undefined ? undefined : JSON.stringify(value),
-  });
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.error || "操作に失敗しました。");
+  let response: Response;
+  try {
+    response = await fetch("/api/" + path, {
+      method,
+      credentials: "same-origin",
+      cache: "no-store",
+      headers: {
+        ...(value === undefined ? {} : { "Content-Type": "application/json" }),
+        ...headers,
+      },
+      body: value === undefined ? undefined : JSON.stringify(value),
+    });
+  } catch {
+    throw new Error(networkErrorMessage);
+  }
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    const message =
+      data && typeof data === "object" && "error" in data
+        ? data.error
+        : undefined;
+    throw new Error(apiErrorMessage(response.status, message));
+  }
+  if (data === null)
+    throw new Error("応答を読み取れませんでした。再試行してください。");
   return data as T;
 }
 export async function signIn() {
