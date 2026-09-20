@@ -43,6 +43,7 @@ import { ImageUploadBridge } from "@/components/image-upload-bridge";
 import { NavigationUrlBridge } from "@/components/navigation-url-bridge";
 import { ProfileSocialLinksBridge } from "@/components/profile-social-links-bridge";
 import { TweetLinkPreviewBridge } from "@/components/tweet-link-preview-bridge";
+import { NotificationSettingsLink } from "@/components/notification-settings-link";
 import {
   homeUrl,
   ogImageUrl,
@@ -93,6 +94,7 @@ export default function RootLayout({
         <BlogTableOfContentsBridge />
         <TweetLinkPreviewBridge />
         <ProfileSocialLinksBridge />
+        <NotificationSettingsLink />
         {children}
       </body>
     </html>
