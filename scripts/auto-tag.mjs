@@ -10,11 +10,17 @@ try {
   if (!store.inferenceSettings()?.autoTagEnabled) {
     console.log(JSON.stringify({ disabled: true, processed: 0 }));
   } else {
-    const box = inferenceSecretBox(process.env.KAMELOG_INFERENCE_ENCRYPTION_KEY);
+    const box = inferenceSecretBox(
+      process.env.KAMELOG_INFERENCE_ENCRYPTION_KEY,
+    );
     const apiKey = loadJevCredential(store, box);
-    if (!apiKey) throw new Error("Jev credentials or encryption key are unavailable");
+    if (!apiKey)
+      throw new Error("Jev credentials or encryption key are unavailable");
     const tagInference = new JevTagInference(new JevClient({ apiKey }));
-    const result = await autoTagPosts(store, { tagInference, requireEnabled: true });
+    const result = await autoTagPosts(store, {
+      tagInference,
+      requireEnabled: true,
+    });
     console.log(JSON.stringify(result));
     if (result.failed) process.exitCode = 1;
   }

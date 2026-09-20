@@ -16,7 +16,9 @@ function textOf(post) {
 }
 
 function normalize(text) {
-  return String(text || "").normalize("NFKC").toLocaleLowerCase("ja-JP");
+  return String(text || "")
+    .normalize("NFKC")
+    .toLocaleLowerCase("ja-JP");
 }
 
 // The old classifier remains an explicitly selectable, local implementation.
@@ -57,7 +59,9 @@ function cosine(left, right, idf) {
     const weight = count * (idf.get(feature) || 1);
     rightLength += weight * weight;
   }
-  return leftLength && rightLength ? dot / Math.sqrt(leftLength * rightLength) : 0;
+  return leftLength && rightLength
+    ? dot / Math.sqrt(leftLength * rightLength)
+    : 0;
 }
 
 function lexicalScore(tag, text) {
@@ -77,7 +81,10 @@ function trainingHash(posts) {
     posts
       .filter((post) => manualTags(post).length)
       .sort((left, right) => left.id.localeCompare(right.id))
-      .map((post) => `${post.id}:${post.revision || 0}:${manualTags(post).join("\u001f")}`)
+      .map(
+        (post) =>
+          `${post.id}:${post.revision || 0}:${manualTags(post).join("\u001f")}`,
+      )
       .join("\n"),
   );
 }
@@ -108,13 +115,19 @@ export function classifyPosts(posts) {
     for (const [tag, exemplars] of candidates) {
       if (manualTags(post).includes(tag)) continue;
       const similarity = Math.max(
-        ...exemplars.map((exemplar) => cosine(document, features(textOf(exemplar)), idf)),
+        ...exemplars.map((exemplar) =>
+          cosine(document, features(textOf(exemplar)), idf),
+        ),
       );
       const score = Math.max(similarity, lexicalScore(tag, text) * 0.9);
       if (score >= AUTO_TAG_THRESHOLD)
         tags.push({ tag, confidence: Number(Math.min(score, 1).toFixed(4)) });
     }
-    tags.sort((left, right) => right.confidence - left.confidence || left.tag.localeCompare(right.tag, "ja"));
+    tags.sort(
+      (left, right) =>
+        right.confidence - left.confidence ||
+        left.tag.localeCompare(right.tag, "ja"),
+    );
     result.set(post.id, tags.slice(0, MAX_AUTO_TAGS));
   }
   return { result, trainingHash: trainingHash(posts) };
@@ -133,26 +146,49 @@ function createCandidates(posts, manual, aliasesByTag) {
   return [...examples].map(([tag, samples]) => ({
     tag,
     aliases: Array.isArray(aliasesByTag[tag])
-      ? aliasesByTag[tag].filter((alias) => typeof alias === "string" && alias.length <= 80).slice(0, 8)
+      ? aliasesByTag[tag]
+          .filter((alias) => typeof alias === "string" && alias.length <= 80)
+          .slice(0, 8)
       : [],
     examples: samples,
   }));
 }
 
 /** Keep literal name/alias matches ahead of the bounded semantic shortlist. */
-export function selectTagCandidates(post, candidates, limit = DEFAULT_CANDIDATES) {
+export function selectTagCandidates(
+  post,
+  candidates,
+  limit = DEFAULT_CANDIDATES,
+) {
   const text = normalize(textOf(post));
   const ranked = candidates.map((candidate) => {
-    const names = [candidate.tag, ...candidate.aliases].map(normalize).filter(Boolean);
+    const names = [candidate.tag, ...candidate.aliases]
+      .map(normalize)
+      .filter(Boolean);
     const exact = names.some((name) => text.includes(name));
-    const lexical = Math.max(0, ...names.map((name) => lexicalScore(name, text)));
-    const exemplar = Math.max(0, ...candidate.examples.map((sample) => lexicalScore(sample.slice(0, 60), text)));
+    const lexical = Math.max(
+      0,
+      ...names.map((name) => lexicalScore(name, text)),
+    );
+    const exemplar = Math.max(
+      0,
+      ...candidate.examples.map((sample) =>
+        lexicalScore(sample.slice(0, 60), text),
+      ),
+    );
     return { candidate, exact, score: lexical + exemplar * 0.1 };
   });
-  ranked.sort((a, b) => Number(b.exact) - Number(a.exact) || b.score - a.score || a.candidate.tag.localeCompare(b.candidate.tag, "ja"));
+  ranked.sort(
+    (a, b) =>
+      Number(b.exact) - Number(a.exact) ||
+      b.score - a.score ||
+      a.candidate.tag.localeCompare(b.candidate.tag, "ja"),
+  );
   // Do not silently discard an explicitly matching name when >limit match.
   const exactCount = ranked.filter((item) => item.exact).length;
-  return ranked.slice(0, Math.max(limit, exactCount)).map(({ candidate }) => candidate);
+  return ranked
+    .slice(0, Math.max(limit, exactCount))
+    .map(({ candidate }) => candidate);
 }
 
 export async function autoTagPosts(
@@ -212,14 +248,30 @@ export async function autoTagPosts(
     const shortPost = textOf(post).trim().length < 35;
     const context = shortPost
       ? posts
-          .filter((previous) => previous.id !== post.id && String(previous.createdAt || "") <= String(post.createdAt || ""))
+          .filter(
+            (previous) =>
+              previous.id !== post.id &&
+              String(previous.createdAt || "") <= String(post.createdAt || ""),
+          )
           .slice(-3)
-          .map(({ id, title, body }) => ({ id, title: (title || "").slice(0, 120), body: (body || "").slice(0, 500) }))
+          .map(({ id, title, body }) => ({
+            id,
+            title: (title || "").slice(0, 120),
+            body: (body || "").slice(0, 500),
+          }))
       : [];
     try {
       const inference = candidates.length
         ? await tagInference.inferTags({
-            post: { id: post.id, title: (post.title || "").replace(hashtagPattern, " ").slice(0, 300), body: (post.body || "").replace(hashtagPattern, " ").slice(0, 12_000) },
+            post: {
+              id: post.id,
+              title: (post.title || "")
+                .replace(hashtagPattern, " ")
+                .slice(0, 300),
+              body: (post.body || "")
+                .replace(hashtagPattern, " ")
+                .slice(0, 12_000),
+            },
             candidates,
             context,
           })
@@ -230,7 +282,9 @@ export async function autoTagPosts(
         failed++;
         continue;
       }
-      const tags = [...new Set([...explicit, ...result.tags.map(({ tag }) => tag)])]
+      const tags = [
+        ...new Set([...explicit, ...result.tags.map(({ tag }) => tag)]),
+      ]
         .slice(0, MAX_AUTO_TAGS)
         .map((tag) => ({ tag }));
       const saved = repository.replace(post.id, tags, {
@@ -253,5 +307,11 @@ export async function autoTagPosts(
       if (error?.code === "not_configured") break;
     }
   }
-  return { processed, skipped, failed, posts: posts.length, trainingHash: currentTrainingHash };
+  return {
+    processed,
+    skipped,
+    failed,
+    posts: posts.length,
+    trainingHash: currentTrainingHash,
+  };
 }

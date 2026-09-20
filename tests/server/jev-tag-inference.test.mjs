@@ -1,7 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { JevClient, JevTagInference } from "../../server/inference/jev-client.mjs";
-import { InferenceFailure, InferenceUnavailable } from "../../server/inference/ports.mjs";
+import {
+  JevClient,
+  JevTagInference,
+} from "../../server/inference/jev-client.mjs";
+import {
+  InferenceFailure,
+  InferenceUnavailable,
+} from "../../server/inference/ports.mjs";
 
 const candidates = [
   { tag: "Go", aliases: ["Golang"], examples: ["GoでAPIを実装した"] },
@@ -39,32 +45,53 @@ test("Jev uses a single System One request with independent Noul questions", asy
   assert.equal(request.init.headers.Authorization, "Bearer fictional-api-key");
   assert.equal(request.body.model, "jev-1.13.0");
   assert.equal(Array.isArray(request.body.questions), false);
-  assert.deepEqual(Object.keys(request.body.questions), ["tag_0", "tag_1", "tag_2"]);
+  assert.deepEqual(Object.keys(request.body.questions), [
+    "tag_0",
+    "tag_1",
+    "tag_2",
+  ]);
   assert.equal(request.body.questions.tag_0.type, "noul");
   assert.match(request.body.questions.tag_0.criteria.true, /Golang/);
   assert.deepEqual(request.body.state.recentOwnerPosts, []);
-  assert.equal(JSON.stringify(await inference.inferTags({ ...input, candidates: [] })), JSON.stringify({ status: "classified", tags: [] }));
+  assert.equal(
+    JSON.stringify(await inference.inferTags({ ...input, candidates: [] })),
+    JSON.stringify({ status: "classified", tags: [] }),
+  );
 });
 
 test("low-support and empty candidates are valid empty classifications; never expose raw scores", async () => {
-  const inference = new JevTagInference(new JevClient({
-    apiKey: "fictional-api-key",
-    fetchImpl: async () => Response.json({ answers: {
-      tag_0: { type: "noul", noul: 0.84 },
-      tag_1: { type: "noul", noul: 0.2 },
-      tag_2: { type: "noul", noul: 0.3 },
-    } }),
-  }));
-  assert.deepEqual(await inference.inferTags(input), { status: "classified", tags: [] });
+  const inference = new JevTagInference(
+    new JevClient({
+      apiKey: "fictional-api-key",
+      fetchImpl: async () =>
+        Response.json({
+          answers: {
+            tag_0: { type: "noul", noul: 0.84 },
+            tag_1: { type: "noul", noul: 0.2 },
+            tag_2: { type: "noul", noul: 0.3 },
+          },
+        }),
+    }),
+  );
+  assert.deepEqual(await inference.inferTags(input), {
+    status: "classified",
+    tags: [],
+  });
 });
 
 test("incomplete or malformed provider answers are failures, not tag deletion", async () => {
-  for (const answers of [null, {}, { tag_0: { type: "noul", noul: NaN } },
-    { tag_0: { type: "noul", noul: 1.1 } }]) {
-    const inference = new JevTagInference(new JevClient({
-      apiKey: "fictional-api-key",
-      fetchImpl: async () => Response.json({ answers }),
-    }));
+  for (const answers of [
+    null,
+    {},
+    { tag_0: { type: "noul", noul: NaN } },
+    { tag_0: { type: "noul", noul: 1.1 } },
+  ]) {
+    const inference = new JevTagInference(
+      new JevClient({
+        apiKey: "fictional-api-key",
+        fetchImpl: async () => Response.json({ answers }),
+      }),
+    );
     await assert.rejects(inference.inferTags(input), InferenceFailure);
   }
 });
@@ -74,8 +101,14 @@ test("HTTP rate limits and missing credentials are retryable errors", async () =
     apiKey: "fictional-api-key",
     fetchImpl: async () => new Response("", { status: 429 }),
   });
-  await assert.rejects(rateLimited.decide({ state: "x", questions: {} }), (error) =>
-    error instanceof InferenceUnavailable && error.code === "rate_limited");
-  await assert.rejects(new JevClient().decide({}), (error) =>
-    error instanceof InferenceUnavailable && error.code === "not_configured");
+  await assert.rejects(
+    rateLimited.decide({ state: "x", questions: {} }),
+    (error) =>
+      error instanceof InferenceUnavailable && error.code === "rate_limited",
+  );
+  await assert.rejects(
+    new JevClient().decide({}),
+    (error) =>
+      error instanceof InferenceUnavailable && error.code === "not_configured",
+  );
 });

@@ -10,7 +10,9 @@ export class TagRepository {
   manualTags() {
     const map = new Map();
     for (const row of this.store.db
-      .prepare("SELECT post_id, tag FROM post_tags WHERE source='manual' ORDER BY tag")
+      .prepare(
+        "SELECT post_id, tag FROM post_tags WHERE source='manual' ORDER BY tag",
+      )
       .all()) {
       if (!map.has(row.post_id)) map.set(row.post_id, []);
       map.get(row.post_id).push(row.tag);
@@ -37,7 +39,9 @@ export class TagRepository {
       if (hash(`${post.title || ""}\n${post.body || ""}`) !== run.contentHash)
         return false;
       const manual = this.store.db
-        .prepare("SELECT tag FROM post_tags WHERE post_id=? AND source='manual' ORDER BY tag")
+        .prepare(
+          "SELECT tag FROM post_tags WHERE post_id=? AND source='manual' ORDER BY tag",
+        )
         .all(postId)
         .map(({ tag }) => tag);
       if (JSON.stringify(manual) !== JSON.stringify([...run.manualTags].sort()))
@@ -55,7 +59,13 @@ export class TagRepository {
       );
       for (const { tag } of tags)
         if (!manual.includes(tag))
-          insert.run(postId, tag, run.modelVersion, run.contentHash, run.trainingHash);
+          insert.run(
+            postId,
+            tag,
+            run.modelVersion,
+            run.contentHash,
+            run.trainingHash,
+          );
       this.store.db
         .prepare(
           `INSERT INTO post_tag_runs(post_id, content_hash, model_version, training_hash)

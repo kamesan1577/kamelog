@@ -49,7 +49,11 @@ function idsOf(candidates) {
 }
 
 export function validateTagResult(result, candidates) {
-  if (result?.status === "abstained" && Array.isArray(result.tags) && !result.tags.length)
+  if (
+    result?.status === "abstained" &&
+    Array.isArray(result.tags) &&
+    !result.tags.length
+  )
     return abstainedTags();
   if (result?.status !== "classified" || !Array.isArray(result.tags))
     throw new InferenceFailure("invalid_result");
