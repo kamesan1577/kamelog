@@ -32,7 +32,6 @@ jobs:
           sudo apt-get install -y ffmpeg
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npx prettier tests/e2e/blog-detail-design.spec.ts | diff -u tests/e2e/blog-detail-design.spec.ts - || true
       - run: make check
         env:
           KAMELOG_PRIVATE_MARKERS: ${{ secrets.KAMELOG_PRIVATE_MARKERS }}
