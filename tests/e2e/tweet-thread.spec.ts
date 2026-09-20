@@ -57,7 +57,9 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
   await context.addCookies([
     {
       name: "kamelog-session",
-      value: session, url: "http://localhost:3000" },
+      value: session,
+      url: "http://localhost:3000",
+    },
   ]);
 
   await page.goto("/");
