@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -25,7 +31,7 @@ test("host updater initializes the key before skipping an unchanged release", ()
   );
 });
 
-test("key initialization is idempotent and does not print its secret", () => {
+test("key initialization is idempotent and preserves the env file", () => {
   const start = updater.indexOf("ensure_inference_encryption_key() {");
   const end = updater.indexOf("\nensure_inference_encryption_key\n", start);
   assert.ok(start >= 0 && end > start);
@@ -35,7 +41,7 @@ test("key initialization is idempotent and does not print its secret", () => {
     writeFileSync(envFile, "KAMELOG_ORIGIN=https://example.org\n", {
       mode: 0o600,
     });
-    const shell = `set -Eeuo pipefail\nlog() { :; }\nfail() { printf 'failed\\n' >&2; exit 1; }\n${updater.slice(start, end)}\nensure_inference_encryption_key\nensure_inference_encryption_key\n`;
+    const shell = `set -Eeuo pipefail\nlog() { printf '%s\\n' "$*"; }\nfail() { printf 'failed\\n' >&2; exit 1; }\n${updater.slice(start, end)}\nensure_inference_encryption_key\nensure_inference_encryption_key\n`;
     const output = execFileSync("bash", ["-c", shell], {
       env: { ...process.env, ENV_FILE: envFile },
       encoding: "utf8",
@@ -46,7 +52,9 @@ test("key initialization is idempotent and does not print its secret", () => {
     ];
     assert.equal(matches.length, 1);
     assert.equal(Buffer.from(matches[0][1], "base64url").length, 32);
-    assert.equal(output, "");
+    assert.equal(statSync(envFile).mode & 0o777, 0o600);
+    assert.doesNotMatch(output, new RegExp(matches[0][1]));
+    assert.equal(output.trim().split("\n").length, 1);
   } finally {
     rmSync(temporary, { recursive: true, force: true });
   }
