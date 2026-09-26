@@ -3102,7 +3102,6 @@ export default function Notebook({
               )}
             </aside>
           </div>
-
         </div>
       </div>
       <MobileNavigation
