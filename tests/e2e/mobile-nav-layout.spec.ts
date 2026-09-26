@@ -59,9 +59,20 @@ test("mobile bottom navigation stays anchored to the viewport while scrolling", 
   };
 
   await assertAnchored();
-  await page.evaluate(() => window.scrollTo(0, 600));
-  await expect
-    .poll(() => page.evaluate(() => window.scrollY))
-    .toBeGreaterThan(0);
+  const siteLayout = page.locator('[data-ds="site-layout"]');
+  const scrollsInsideLayout = await siteLayout.evaluate((element) =>
+    /auto|scroll/.test(getComputedStyle(element).overflowY),
+  );
+  if (scrollsInsideLayout) {
+    await siteLayout.evaluate((element) => element.scrollTo(0, 600));
+    await expect
+      .poll(() => siteLayout.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(0);
+  } else {
+    await page.evaluate(() => window.scrollTo(0, 600));
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY))
+      .toBeGreaterThan(0);
+  }
   await assertAnchored();
 });
