@@ -60,6 +60,8 @@ test("mobile bottom navigation stays anchored to the viewport while scrolling", 
 
   await assertAnchored();
   await page.evaluate(() => window.scrollTo(0, 600));
-  await expect\n    .poll(() => page.evaluate(() => window.scrollY))\n    .toBeGreaterThan(0);
+  await expect
+    .poll(() => page.evaluate(() => window.scrollY))
+    .toBeGreaterThan(0);
   await assertAnchored();
 });
