@@ -13,15 +13,18 @@ type GestureStart = {
 const filters: TimelineFilter[] = ["all", "blog", "tweet", "vlog"];
 
 function scrollingSurface(): HTMLElement | null {
-  const workspace = document.querySelector<HTMLElement>(
-    '[data-ds="workspace"]',
-  );
-  if (
-    workspace &&
-    workspace.scrollHeight > workspace.clientHeight + 1 &&
-    /auto|scroll/.test(getComputedStyle(workspace).overflowY)
-  ) {
-    return workspace;
+  const candidates = [
+    document.querySelector<HTMLElement>('[data-ds="site-layout"]'),
+    document.querySelector<HTMLElement>('[data-ds="workspace"]'),
+  ];
+  for (const surface of candidates) {
+    if (
+      surface &&
+      surface.scrollHeight > surface.clientHeight + 1 &&
+      /auto|scroll/.test(getComputedStyle(surface).overflowY)
+    ) {
+      return surface;
+    }
   }
   return document.scrollingElement as HTMLElement | null;
 }

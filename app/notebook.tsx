@@ -3102,44 +3102,44 @@ export default function Notebook({
               )}
             </aside>
           </div>
-          <MobileNavigation
-            className="mobile-nav"
-            items={[
-              {
-                id: "home",
-                label: "ホーム",
-                icon: <Home />,
-                active: view === "home",
-              },
-              {
-                id: "timeline",
-                label: "タイムライン",
-                icon: <MessageCircle />,
-                active: view === "timeline",
-              },
-              {
-                id: "projects",
-                label: "プロジェクト",
-                icon: <Globe />,
-                active: view === "projects",
-              },
-            ]}
-            onSelect={(id) =>
-              id === "timeline" ? handleTimelineNavigation() : nav(id as View)
-            }
-          />
-          {login && (
-            <button
-              data-ds="mobile-create"
-              className="mobile-create"
-              onClick={() => openEditor("tweet")}
-              aria-label="投稿を作成"
-            >
-              <Plus size={23} />
-            </button>
-          )}
         </div>
       </div>
+      <MobileNavigation
+        className="mobile-nav"
+        items={[
+          {
+            id: "home",
+            label: "ホーム",
+            icon: <Home />,
+            active: view === "home",
+          },
+          {
+            id: "timeline",
+            label: "タイムライン",
+            icon: <MessageCircle />,
+            active: view === "timeline",
+          },
+          {
+            id: "projects",
+            label: "プロジェクト",
+            icon: <Globe />,
+            active: view === "projects",
+          },
+        ]}
+        onSelect={(id) =>
+          id === "timeline" ? handleTimelineNavigation() : nav(id as View)
+        }
+      />
+      {login && (
+        <button
+          data-ds="mobile-create"
+          className="mobile-create"
+          onClick={() => openEditor("tweet")}
+          aria-label="投稿を作成"
+        >
+          <Plus size={23} />
+        </button>
+      )}
       <Dialog open={editor} onOpenChange={(o) => !o && askClose()}>
         <DialogContent
           data-ds="editor-dialog"
