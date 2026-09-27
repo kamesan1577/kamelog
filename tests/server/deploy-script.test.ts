@@ -147,6 +147,9 @@ test("compose keeps a gateway in front of two application replicas", async () =>
   assert.match(compose, /federation-worker:/);
   assert.match(compose, /scripts\/federation-worker-health\.ts/);
   assert.match(compose, /127\.0\.0\.1:3000:3000/);
+  assert.match(compose, /KAMELOG_DATA_VOLUME/);
+  assert.match(compose, /kamelog-data-hdd:/);
+  assert.match(compose, /KAMELOG_DATA_HOST_DIR/);
   assert.match(gateway, /server app-blue:3000 resolve/);
   assert.match(gateway, /server app-green:3000 resolve/);
   assert.match(gateway, /proxy_next_upstream/);

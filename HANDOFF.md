@@ -1,3 +1,9 @@
+2026-09-27 未公開だったstorage運用変更を現在のmainへ統合。Composeは明示設定時だけHDD bind volumeを選び、blue/green/workerで同じ保存先を共有する。既定named volumeとHDD選択のCompose展開を架空pathで検証済み。Node 24・FFmpeg・Playwrightの分離containerでmake checkが成功（server 134件、Storybook component 43件、production/Storybook buildを含む）。deploy契約testをTypeScriptへ移行し、公開例のpathを一般化。本番の保存先変更・実データ移行は未実施。CI check/e2e/containerはpush後に確認する。
+
+2026-09-26 本番deploy復旧を確認。root所有の固定 `kamelog-update` が旧 `admin.mjs` を呼び、TypeScript移行済みimageの更新前backupで停止していた。利用者の明示承認後、CI成功済みmain `668e32375cf614f3acffae98bd6724e50b2c12cf` の固定scriptを利用者が再設置し、serviceを起動。オンラインbackup、blue/green順次更新、worker health、deploy完了が成功。3 containerのbuild SHA、deployed-sha、公開ページのcommitリンクがmainと一致し、公開healthはHTTP 200。timerはenabled/activeで、次回実行もalready runningとして正常終了。対象mainのCI check/e2e/containerはすべて成功、分離checkoutのdeploy回帰9件も成功。ローカルmake checkは128/134件でFFmpeg未導入による媒体6件の失敗があり、合格とは扱わない。backup復元訓練・実機認証は今回未実施。
+
+2026-09-18 Docker build cacheを未使用分のみ安全に削除し、root使用率を約91%から80%へ低下させた。最新backup・kamelog health・自動更新完了を確認。ComposeにKAMELOG_DATA_VOLUME/KAMELOG_DATA_HOST_DIRの明示的なHDD切替設定を追加し、backup rootのHDD運用とbackup restore経由の移行手順をrunbookへ追加した。ローカル契約テスト・Compose構文・対象formatは成功。make checkは既存の依存不足（/compat未導入）でlint開始時に停止。
+
 2026-09-18 Issue #240で、Issue #99後に崩れたUIを修正。インライン画像inputの不要なファイル名表示を隠し、空状態の投稿ボタン文字と投稿種別/vlogタブの選択状態を視認できるようにした。スレッドの親子カード間隔を拡大し、vlogの非同期カメラ取得がモーダル終了後に解決してもtrackを停止する回帰を追加した。Issue専用unit 3件、typecheck、lint、format、public/UI guardは成功。ホストmake checkは実FFmpeg欠如のためmedia変換1件のみ未成功で、FFmpeg入りCI相当環境とリモートCIで確認する。
 
 2026-09-17 Issue #99 completed the remaining raw feature selectors in brand-theme for public header, mobile navigation, and create controls; all now use existing data-ds boundaries.
