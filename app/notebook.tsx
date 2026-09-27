@@ -1588,12 +1588,7 @@ export default function Notebook({
         b.latestDate.localeCompare(a.latestDate) ||
         b.root.id.localeCompare(a.root.id),
   );
-  const shownReposts = filterPublicReposts(
-    publicReposts,
-    filter,
-    tag,
-    query,
-  );
+  const shownReposts = filterPublicReposts(publicReposts, filter, tag, query);
   const shown = mergePublicTimelineItems(threadedPosts, shownReposts, sort);
   const tags = Object.entries(
     posts.reduce<Record<string, number>>((counts, post) => {
