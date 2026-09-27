@@ -8,10 +8,8 @@
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     justify-content: initial;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    position: static;
+    flex: 0 0 65px;
     height: 65px;
     padding-bottom: env(safe-area-inset-bottom, 0);
     background: #ffffffed;
@@ -47,7 +45,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    position: fixed;
+    position: absolute;
     bottom: 76px;
     right: 18px;
     width: 56px;

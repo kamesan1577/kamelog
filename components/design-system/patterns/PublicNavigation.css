@@ -184,8 +184,22 @@
 }
 
 @media (max-width: 640px) {
+  .notebook {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: 0;
+    overflow: hidden;
+  }
+
   [data-ds="site-layout"] {
     display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   [data-ds="public-sidebar"] {
