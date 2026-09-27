@@ -46,7 +46,7 @@ PCホームの画像添付は現在のつぶやきへ媒体を追加する操作
 ActivityPub有効化後は、つぶやき・ブログの新規投稿画面に独立した「Fediverseにも配信」を初期ONで表示する。選択は投稿データへ保存し、編集時は現在値を表示する。vlogと未設定時には表示しない。X Web Intentの選択・成否とは相互に影響させない。
 返信のActivityPub Noteは親のlocal object URLを `inReplyTo` に持ち、親がFediverse非公開の場合は子の新規配信だけを拒否する。ローカル返信は保存できる。
 ActivityPub有効化済みのオーナーにはTimelineの `kamelog | Fediverse` 切替を表示する。Fediverse側はfollowingから受信した投稿・RPと自分の配信対象投稿だけを表示し、公開visitorや未設定時には切替を出さない。refreshは受信済みserver stateだけを再取得する。
-オーナーがFediverse側のremote投稿をRPすると、公開Timelineの「すべて」に `かめさんがRP` として表示し、Announceをfollowersへ非同期配送する。RP解除とremote Deleteでは公開表示を止め、Undo(Announce)を配送する。
+オーナーがFediverse側のremote投稿をRPすると、公開Timelineの「すべて」と「つぶやき」に `かめさんがRP` として表示する。並び順にはRPした日時を使い、既存のつぶやきスレッドを分断しない。Announceはfollowersへ非同期配送し、RP解除とremote Deleteでは公開表示を止め、Undo(Announce)を配送する。
 local postへ届いたActivityPub Likeと対応済みのpositive reactionは、remote Actorごとに最大1件の「いいね」へ正規化し、既存のlocal likesと合算して表示する。UndoまたはreactionのDeleteでremote分だけを解除する。
 投稿URLは種別に応じた要約を含む1200x630のOGP画像を返す。ブログはタイトル、つぶやきは先頭の一文を優先し、長文は省略する。
 タイムラインのつぶやきは親子をグループ化し、検索・タグ一致時も親文脈を残して親→子孫の順に表示する。固定・いいね順の代表値はroot投稿を使う。

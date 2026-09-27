@@ -67,7 +67,7 @@ remote画像はlocal URLへ置換し、owner timelineまたは公開中RPの初�
 
 オーナーはowner-only Fediverse timelineで受信済みremote objectをRP・解除できる。RPはlocal DBへ先に保存し、`Announce` と各followerへのdeliveryを同じtransactionでqueueへ登録する。配送失敗はRP操作のlocal成功を取り消さない。解除は `Undo` のobjectへ元のAnnounce全体を埋め込み、同じdurable queueで配送する。
 
-有効なRPは公開Timelineの「すべて」だけに `かめさんがRP` として混在させ、ブログ・つぶやき・vlog filterには出さない。remote本文は保存済みsanitized HTML、画像は登録済みlocal proxy URL、遷移先はoriginal URLだけを使う。公開media endpointは有効なRPと結び付く画像だけを返す。
+有効なRPは公開Timelineの「すべて」と「つぶやき」に `かめさんがRP` として混在させ、ブログ・vlog filterには出さない。並び順にはremote投稿の公開日時ではなくRPした日時を使い、つぶやきスレッドの親子表示は分断しない。remote本文は保存済みsanitized HTML、画像は登録済みlocal proxy URL、遷移先はoriginal URLだけを使う。公開media endpointは有効なRPと結び付く画像だけを返す。
 
 元Actorから同じobject IDのDeleteを受信した場合は、objectをtombstone化するtransaction内でRPを無効化し、Undo(Announce)をqueueへ登録する。別ActorによるDeleteではRPもobjectも変更しない。
 

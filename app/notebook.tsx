@@ -90,6 +90,10 @@ import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
+import {
+  filterPublicReposts,
+  mergePublicTimelineItems,
+} from "@/lib/public-timeline";
 import { buildXIntentUrl } from "@/lib/x-intent.mjs";
 import { flattenTweetThreads as flattenTweetThreadsUntyped } from "@/lib/tweet-threads.mjs";
 import { hasTweetContent, tweetPostInput } from "@/lib/tweet-composer.mjs";
@@ -1584,23 +1588,8 @@ export default function Notebook({
         b.latestDate.localeCompare(a.latestDate) ||
         b.root.id.localeCompare(a.root.id),
   );
-  const shownReposts =
-    filter === "all" && !tag
-      ? publicReposts.filter(
-          (repost) =>
-            !query ||
-            (
-              repost.displayName +
-              " " +
-              repost.handle +
-              " " +
-              repost.contentHtml.replace(/<[^>]+>/g, " ")
-            )
-              .toLowerCase()
-              .includes(query.toLowerCase()),
-        )
-      : [];
-  const shown = [...threadedPosts, ...shownReposts];
+  const shownReposts = filterPublicReposts(publicReposts, filter, tag, query);
+  const shown = mergePublicTimelineItems(threadedPosts, shownReposts, sort);
   const tags = Object.entries(
     posts.reduce<Record<string, number>>((counts, post) => {
       for (const postTag of post.tags) {
