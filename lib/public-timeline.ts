@@ -27,7 +27,7 @@ export function filterPublicReposts<T extends PublicRepostTimelineItem>(
 ): T[] {
   if ((filter !== "all" && filter !== "tweet") || tag) return [];
 
-  const normalizedQuery = query.trim().toLowerCase();
+  const normalizedQuery = query.toLowerCase();
   if (!normalizedQuery) return reposts;
 
   return reposts.filter((repost) =>
@@ -56,18 +56,18 @@ export function mergePublicTimelineItems<
   P extends LocalTimelineItem,
   R extends PublicRepostTimelineItem,
 >(posts: P[], reposts: R[], sort: PublicTimelineSort): Array<P | R> {
-  const postGroups: TimelineGroup<P>[] = [];
+  const groups: TimelineGroup<P | R>[] = [];
 
   for (const post of posts) {
     const key = post.threadRootId || post.id;
-    const current = postGroups.at(-1);
+    const current = groups.at(-1);
     if (current?.key === key) {
       current.items.push(post);
       if (post.date.localeCompare(current.date) > 0) current.date = post.date;
       continue;
     }
 
-    postGroups.push({
+    groups.push({
       key,
       id: post.id,
       items: [post],
@@ -77,16 +77,18 @@ export function mergePublicTimelineItems<
     });
   }
 
-  const repostGroups: TimelineGroup<R>[] = reposts.map((repost) => ({
-    key: repost.id,
-    id: repost.id,
-    items: [repost],
-    date: repost.date,
-    likes: repost.likes,
-    pinned: false,
-  }));
+  for (const repost of reposts) {
+    groups.push({
+      key: repost.id,
+      id: repost.id,
+      items: [repost],
+      date: repost.date,
+      likes: repost.likes,
+      pinned: false,
+    });
+  }
 
-  return [...postGroups, ...repostGroups]
+  return groups
     .sort((left, right) =>
       sort === "popular"
         ? right.likes - left.likes ||
