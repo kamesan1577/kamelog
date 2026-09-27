@@ -60,6 +60,24 @@ bootstrap登録済みなら `KAMELOG_BOOTSTRAP_TOKEN` は書かない。
 KAMELOG_ORIGIN=https://kamesan.org
 ```
 
+本番のSQLite・媒体volumeは、通常はDockerの `kamelog-data` をSSDへ置く。backupのような低頻度アクセスのデータだけをHDDへ置く場合は、installerの引数でbackup rootを指定する。
+
+```sh
+sudo env \
+  KAMELOG_NODE_BIN="$(command -v node)" \
+  KAMELOG_BACKUP_ROOT=/mnt/storage/backups/kamelog \
+  ./ops/install-host.sh
+```
+
+ライブデータ全体をHDDへ置く選択肢もComposeに用意しているが、自動では切り替えない。空の専用ディレクトリを作成し、停止中に検証済みbackupを空の宛先へrestoreし、投稿・媒体・ログインを確認してから `.env` または `/etc/kamelog/env` に次を設定する。
+
+```dotenv
+KAMELOG_DATA_VOLUME=kamelog-data-hdd
+KAMELOG_DATA_HOST_DIR=/mnt/storage/kamelog-data
+```
+
+既存のDocker volumeから直接コピーしたり、稼働中にmount先を変更したりしない。SQLite、認証情報、ActivityPub identity、投稿、下書き、媒体を同じ整合性検証済みbackupから移行する。backup rootとlive data rootは別ディレクトリにし、`down -v` は使わない。
+
 権限を設定し、追跡対象のdeploy scriptとunitをroot領域へコピーする。
 
 ```sh
@@ -120,7 +138,7 @@ SQLite backup APIのsnapshotを先に作り、DB登録前に確定して以後�
 既存の宛先には上書きできない。manifestを変更して検査を迂回しない。
 日次backupをschedulerへ登録する。失敗時の通知も設定する。
 日次30世代、月次の復元訓練を標準とする。自動削除は復元成功後に運用者が設定する。
-バックアップは0700の場所に置き、オフホスト転送前に暗号化する。復号鍵は別保管する。
+バックアップは0700の場所に置き、オフホスト転送前に暗号化する。復号鍵は別保管する。HDDを使う場合も、backup rootは `KAMELOG_BACKUP_ROOT` で明示した専用ディレクトリに限定し、媒体cacheや開発データと混在させない。
 ActivityPub identityとprivate keyもSQLite snapshotへ含まれる。復元後にkey pairを再生成しない。同じ `KAMELOG_ORIGIN` なら同じActorとして継続できるが、domain変更restoreでは同一federation identityの継続を保証しない。
 followers、following、remote object/timeline state、公開RP状態、remote reaction状態、投稿ごとのfederationEnabled、outbound activity、pending/dead deliveryも同じsnapshotへ含まれる。復元後はworkerを起動するとpending deliveryを再開する。復元検証では `docker compose exec federation-worker node scripts/federation-worker-health.ts` とowner限定statusのpending/dead件数を確認する。
 `federation-media/` は検証済みremote画像の再取得可能なcacheであり、backupへ含めない。restore後はownerがFediverse timelineを開いたときに必要な画像だけを再取得する。

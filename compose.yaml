@@ -4,7 +4,7 @@ x-app: &app
     KAMELOG_ORIGIN: ${KAMELOG_ORIGIN:?Set the public HTTPS origin}
     KAMELOG_BOOTSTRAP_TOKEN: ${KAMELOG_BOOTSTRAP_TOKEN:-}
     KAMELOG_INFERENCE_ENCRYPTION_KEY: ${KAMELOG_INFERENCE_ENCRYPTION_KEY:-}
-  volumes: ["kamelog-data:/data"]
+  volumes: ["${KAMELOG_DATA_VOLUME:-kamelog-data}:/data"]
   init: true
   restart: unless-stopped
   security_opt: ["no-new-privileges:true"]
@@ -63,3 +63,10 @@ services:
     pids_limit: 64
 volumes:
   kamelog-data:
+  # Select the prepared bind volume only after a verified backup restore.
+  kamelog-data-hdd:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${KAMELOG_DATA_HOST_DIR:-/var/lib/kamelog-data}

@@ -24,6 +24,8 @@ CIはcheck/e2e/containerを別jobとして失敗を可視化する。失敗成�
 受入条件を弱める変更、テスト削除、baseline更新はその理由と承認を必要とする。
 branch protectionの設定は管理権限が必要。設定されていないなら「強制済み」と報告しない。
 
+保存先は運用設定で分離する。backup rootはHDDなどの低速・大容量ストレージへ移せる。Composeのlive data volumeは既定でSSDのnamed volumeを使い、必要な場合だけ明示的なHDD bind volumeへ切り替える。既存データを直接移動せず、空の宛先へのbackup restoreと検証を経て切り替える。
+
 本番配布はADR 0005のpull方式を採用する。
 systemdがアプリのboot起動と更新timerを管理し、更新scriptは成功済みpush CIのSHAとmain先頭が一致するまでdeployしない。
 GitHub Actions runnerへ本番サーバー資格情報を渡さない。
