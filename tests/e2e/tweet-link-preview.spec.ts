@@ -12,11 +12,21 @@ test("tweet URLs become working links and render a compact OGP card without over
         url: "https://example.test/articles/very-long-path",
         title: "架空のOGPタイトル",
         description: "架空の説明文です。",
-        image: null,
+        image: "https://preview-images.example.test/ogp.svg",
         siteName: "Example Test",
       }),
     });
   });
+  await page.route(
+    "https://preview-images.example.test/ogp.svg",
+    async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "image/svg+xml",
+        body: '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="63"><rect width="120" height="63" fill="gray"/></svg>',
+      });
+    },
+  );
   await context.route("https://example.test/**", async (route) => {
     await route.fulfill({
       status: 200,
@@ -63,6 +73,15 @@ test("tweet URLs become working links and render a compact OGP card without over
     .locator('[data-ds="tweet-link-card"]')
     .filter({ hasText: "架空のOGPタイトル" });
   await expect(card).toBeVisible();
+  await expect
+    .poll(() =>
+      card
+        .locator("img")
+        .evaluate(
+          (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
+        ),
+    )
+    .toBe(true);
   await expect(card).toContainText("Example Test");
   await expect(card).toContainText("架空の説明文です。");
 
