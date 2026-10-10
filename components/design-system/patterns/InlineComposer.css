@@ -1,8 +1,8 @@
 [data-ds="inline-composer"] {
   border: 1px solid #e8e7e3;
-  border-radius: 6px;
+  border-radius: 5px;
   margin-bottom: 27px;
-  box-shadow: 0 1px 2px #00000003;
+  background: var(--ds-color-bg-surface);
 }
 
 [data-ds="inline-composer"] > .composer-start {
@@ -15,7 +15,7 @@
 [data-ds="inline-composer"] > .composer-start > button:not(.compose-plus) {
   flex: 1;
   text-align: left;
-  color: #aaa79f;
+  color: #797970;
   font-size: 14px;
 }
 
@@ -58,7 +58,7 @@
   background: transparent;
 }
 [data-ds="inline-composer"] .inline-tweet::placeholder {
-  color: #aaa79f;
+  color: #797970;
 }
 [data-ds="inline-composer"] .draft-button {
   margin-left: auto;

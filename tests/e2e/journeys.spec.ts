@@ -224,6 +224,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .first()
     .click();
   await expect(page.locator('[data-ds="inline-composer"]')).toBeVisible();
+  await page.screenshot({
+    path: "ui-evidence/screen-evidence-owner-composer-desktop.png",
+    fullPage: true,
+  });
   await page.locator('[data-ds="inline-composer"]').screenshot({
     path: testInfo.outputPath("landing-x-intent-desktop.png"),
   });
@@ -448,6 +452,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await viewModes.getByRole("button", { name: "両方" }).click();
   const livePreview = page.getByLabel("プレビュー");
   await expect(livePreview).toContainText("リアルタイムプレビュー");
+  await page.screenshot({
+    path: "ui-evidence/screen-evidence-blog-editor-split-desktop.png",
+    fullPage: true,
+  });
   const editBox = await blogBody.boundingBox();
   const splitPreviewBox = await livePreview.boundingBox();
   expect(editBox).not.toBeNull();
@@ -561,6 +569,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     page.getByRole("button", { name: "リンクをコピー" }),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Xで共有" })).toBeVisible();
+  await page.screenshot({
+    path: "ui-evidence/screen-evidence-blog-detail-desktop.png",
+    fullPage: true,
+  });
   const posts = await (await page.request.get("/api/posts")).json();
   const blog = posts.find(
     (post: { title: string }) => post.title === "架空のブログ",
@@ -642,6 +654,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByPlaceholder("タイトル", { exact: true }),
   ).toBeVisible();
+  await page.screenshot({
+    path: "ui-evidence/screen-evidence-blog-editor-mobile.png",
+    fullPage: true,
+  });
   const mobileBlogDialog = page.locator('[data-ds="editor-dialog"]');
   const mobileMarkdownToolbar = page.getByRole("toolbar", {
     name: "Markdown記法",
@@ -683,6 +699,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.getByRole("tab", { name: "vlog", exact: true }).last().click();
   await page.getByRole("tab", { name: "動画を選ぶ", exact: true }).click();
   await expect(page.locator('[data-ds="vlog-stage"]')).toBeVisible();
+  await page.screenshot({
+    path: "ui-evidence/screen-evidence-vlog-editor-mobile.png",
+    fullPage: true,
+  });
   await page
     .locator('[data-ds="vlog-stage"] input[type="file"]')
     .setInputFiles("public/flower.mp4");
@@ -707,6 +727,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
         })),
     )
     .toEqual({ muted: true, loop: true });
+  await page.screenshot({
+    path: "ui-evidence/screen-evidence-vlog-published-mobile.png",
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "ループ再生を停止" }).first().click();
   await expect
     .poll(() =>

@@ -1,41 +1,36 @@
 [data-ds="profile-card"] {
-  padding: 0 0 23px;
-  border-bottom: 1px solid #ecebe7;
+  padding: 0 0 24px;
+  border-bottom: 1px solid var(--kamelog-line);
 }
-
 [data-ds="profile-card"] .avatar {
-  width: 55px;
-  height: 55px;
-  font-size: 39px;
-  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  font-size: 32px;
+  border-radius: 8px;
 }
-
 [data-ds="profile-card"] h2 {
-  margin: 15px 0 3px;
-  font-size: 18px;
+  margin: 12px 0 4px;
+  font-size: 16px;
   font-weight: 650;
 }
-
 [data-ds="profile-card"] > span {
-  color: #a3a096;
+  color: #717168;
   font-size: 12px;
 }
-
 [data-ds="profile-card"] p {
-  margin: 13px 0 14px;
-  color: #8f897e;
+  margin: 14px 0;
+  color: #66665f;
   font-size: 13px;
-  line-height: 1.95;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
 }
-
 [data-ds="profile-card"] a {
   display: flex;
   align-items: center;
   gap: 6px;
-  color: #857f74;
+  color: #575750;
   font-size: 12px;
 }
-
 [data-ds="profile-card"] a svg:last-child {
   margin-left: 3px;
 }
