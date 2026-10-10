@@ -12,11 +12,11 @@ test("landing polish keeps desktop and mobile controls readable", async ({
   await expect(primary).toHaveCSS("background-color", "rgb(55, 53, 47)");
   await expect(page.locator("body")).toHaveCSS(
     "background-color",
-    "rgb(246, 245, 244)",
+    "rgb(251, 251, 250)",
   );
   await expect(page.locator('[data-ds="landing-profile"]')).toHaveCSS(
     "background-color",
-    "rgb(243, 242, 239)",
+    "rgba(0, 0, 0, 0)",
   );
   await page.screenshot({
     path: testInfo.outputPath("landing-desktop.png"),

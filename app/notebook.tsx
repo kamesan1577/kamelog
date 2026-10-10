@@ -99,10 +99,7 @@ import { flattenTweetThreads as flattenTweetThreadsUntyped } from "@/lib/tweet-t
 import { hasTweetContent, tweetPostInput } from "@/lib/tweet-composer.mjs";
 import threadStyles from "@/components/design-system/patterns/TweetThreadDetail.module.css";
 import TweetThreadDetail from "./tweet-thread-detail";
-import {
-  EngineeringProfile,
-  ContactLinks,
-} from "@/components/engineering-profile";
+import { EngineeringProfile } from "@/components/engineering-profile";
 import { contact, projects } from "@/lib/public-profile";
 import "../components/design-system/patterns/Landing.css";
 import "../components/design-system/patterns/Engineering.css";
@@ -2409,9 +2406,8 @@ export default function Notebook({
                         </span>
                       </h1>
                       <p className="landing-lead">
-                        Goを中心に、自社Webサービスのバックエンド開発をしています。APIやデータベースの実装から、複数システムにまたがる機能設計、他職種との仕様調整まで担当しています。個人ではWebサービスの設計・実装から自宅サーバーでの運用までしています。
+                        Goを中心に、自社Webサービスのバックエンドを開発しています。個人ではWebサービスを作り、自宅サーバーで運用しています。
                       </p>
-                      <ContactLinks />
                       <div className="landing-actions">
                         <button
                           className="landing-primary"
@@ -2433,7 +2429,7 @@ export default function Notebook({
                       <div>
                         <span>プロフィール</span>
                         <h2>{profile.name}</h2>
-                        <p>@kamesan1577 · Backend Engineer</p>
+                        <p>@kamesan1577</p>
                       </div>
                       <p className="landing-bio">{profile.bio}</p>
                       <a href={contact.github} target="_blank" rel="noreferrer">
@@ -2442,7 +2438,6 @@ export default function Notebook({
                     </aside>
                   </div>
 
-                  <EngineeringProfile />
                   <div className="landing-lower">
                     <ContentIndex
                       className="content-index"
@@ -2516,6 +2511,7 @@ export default function Notebook({
                       )}
                     </div>
                   </div>
+                  <EngineeringProfile />
                 </section>
               ) : (
                 <>
@@ -2553,6 +2549,37 @@ export default function Notebook({
                         </button>
                       )}
                     </label>
+                  )}
+                  {timelineMode === "kamelog" && tags.length > 0 && (
+                    <details data-ds="inline-topics" className="inline-topics">
+                      <summary>タグで絞り込む</summary>
+                      <div data-ds="topic-list" className="topic-list">
+                        {visibleTags.map(({ name, count }) => (
+                          <button
+                            key={name}
+                            className={tag === name ? "active" : ""}
+                            onClick={() => {
+                              setTag(name);
+                              setFilter("all");
+                            }}
+                          >
+                            #{name}
+                            <small>{count}</small>
+                          </button>
+                        ))}
+                      </div>
+                      {visibleTagCount < tags.length && (
+                        <button
+                          data-ds="tag-load-more"
+                          className="tag-load-more"
+                          onClick={() =>
+                            setVisibleTagCount((count) => count + 5)
+                          }
+                        >
+                          もっと見る
+                        </button>
+                      )}
+                    </details>
                   )}
                   {login && federationStatus?.enabled && (
                     <Tabs
@@ -3769,23 +3796,38 @@ function VlogFrame({ post }: { post: Post }) {
     void element.play().catch(() => undefined);
   };
   return (
-    <div data-ds="vlog-frame" className="vlog-frame">
-      {post.video ? (
-        <video
-          ref={video}
-          src={post.video}
-          controls
-          playsInline
-          preload="metadata"
-          onLoadedMetadata={startShortLoop}
-          onClick={(e) => e.stopPropagation()}
-        />
-      ) : (
-        <div className="missing-video">
-          <Video />
-          動画なし
-        </div>
-      )}
+    <>
+      <div data-ds="vlog-frame" className="vlog-frame">
+        {post.video ? (
+          <video
+            ref={video}
+            src={post.video}
+            controls
+            playsInline
+            preload="metadata"
+            onLoadedMetadata={startShortLoop}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <div className="missing-video">
+            <Video />
+            動画なし
+          </div>
+        )}
+        {post.video && looping && (
+          <button
+            type="button"
+            className="vlog-loop-toggle"
+            onClick={(event) => {
+              event.stopPropagation();
+              if (video.current) video.current.loop = false;
+              setLooping(false);
+            }}
+          >
+            ループ再生を停止
+          </button>
+        )}
+      </div>
       <div className="vlog-overlay">
         <time>
           {post.time ||
@@ -3796,19 +3838,6 @@ function VlogFrame({ post }: { post: Post }) {
         </time>
         {post.body && <p data-ds="vlog-caption">{post.body}</p>}
       </div>
-      {post.video && looping && (
-        <button
-          type="button"
-          className="vlog-loop-toggle"
-          onClick={(event) => {
-            event.stopPropagation();
-            if (video.current) video.current.loop = false;
-            setLooping(false);
-          }}
-        >
-          ループ再生を停止
-        </button>
-      )}
-    </div>
+    </>
   );
 }

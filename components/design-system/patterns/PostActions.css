@@ -2,13 +2,13 @@
   display: flex;
   align-items: center;
   gap: 23px;
-  margin-top: 16px;
-  color: #aaa69d;
+  margin-top: 10px;
+  color: #717168;
 }
 
 [data-ds="post-actions"] button {
   display: flex;
-  min-height: 25px;
+  min-height: 36px;
   align-items: center;
   gap: 6px;
   font-size: 12px;
@@ -36,10 +36,10 @@
 
 @media (max-width: 640px) {
   [data-ds="post-actions"].post-actions {
-    margin-top: 13px;
+    margin-top: 8px;
     gap: 26px;
   }
   [data-ds="post-actions"].post-actions button {
-    min-height: 32px;
+    min-height: 44px;
   }
 }

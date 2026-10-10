@@ -1,38 +1,47 @@
+.detail-page > div:has(> .markdown),
 .detail-page:has(> .markdown) {
   position: relative;
 }
 
 @media (min-width: 1000px) {
+  .detail-page > div:has(> .markdown),
   .detail-page:has(> .markdown) {
     display: grid;
     grid-template-columns: 46px minmax(0, 1fr);
     column-gap: 18px;
   }
 
+  .detail-page > div:has(> .markdown) > :not(.post-actions),
   .detail-page:has(> .markdown) > :not(.post-actions) {
     grid-column: 2;
   }
 
+  .detail-page > div:has(> .markdown) > .back-button,
   .detail-page:has(> .markdown) > .back-button {
     grid-row: 1;
   }
 
+  .detail-page > div:has(> .markdown) > .post-meta,
   .detail-page:has(> .markdown) > .post-meta {
     grid-row: 2;
   }
 
+  .detail-page > div:has(> .markdown) > .blog-table-of-contents,
   .detail-page:has(> .markdown) > .blog-table-of-contents {
     grid-row: 3;
   }
 
+  .detail-page > div:has(> .markdown) > .markdown,
   .detail-page:has(> .markdown) > .markdown {
     grid-row: 4;
   }
 
+  .detail-page > div:has(> .markdown) > .tags,
   .detail-page:has(> .markdown) > .tags {
     grid-row: 5;
   }
 
+  .detail-page > div:has(> .markdown) > .post-actions,
   .detail-page:has(> .markdown) > .post-actions {
     grid-column: 1;
     grid-row: 1 / 6;
@@ -53,6 +62,7 @@
     backdrop-filter: blur(10px);
   }
 
+  .detail-page > div:has(> .markdown) > .post-actions button,
   .detail-page:has(> .markdown) > .post-actions button {
     width: 36px;
     min-height: 36px;
@@ -61,21 +71,28 @@
     border-radius: 7px;
   }
 
+  .detail-page > div:has(> .markdown) > .post-actions > button:first-child,
   .detail-page:has(> .markdown) > .post-actions > button:first-child {
     flex-direction: column;
     font-size: 11px;
   }
 
+  .detail-page
+    > div:has(> .markdown)
+    > .post-actions
+    > button:not(:first-child),
   .detail-page:has(> .markdown) > .post-actions > button:not(:first-child) {
     font-size: 0;
   }
 
+  .detail-page > div:has(> .markdown) > .post-actions .more,
   .detail-page:has(> .markdown) > .post-actions .more {
     margin-left: 0;
   }
 }
 
 @media (max-width: 999px) {
+  .detail-page > div:has(> .markdown) > .post-actions,
   .detail-page:has(> .markdown) > .post-actions {
     position: fixed;
     left: 50%;
@@ -96,6 +113,7 @@
     backdrop-filter: blur(12px);
   }
 
+  .detail-page > div:has(> .markdown) > .post-actions button,
   .detail-page:has(> .markdown) > .post-actions button {
     min-width: 38px;
     min-height: 38px;
@@ -104,21 +122,28 @@
     border-radius: 8px;
   }
 
+  .detail-page > div:has(> .markdown) > .post-actions > button:first-child,
   .detail-page:has(> .markdown) > .post-actions > button:first-child {
     flex-direction: column;
     font-size: 11px;
   }
 
+  .detail-page
+    > div:has(> .markdown)
+    > .post-actions
+    > button:not(:first-child),
   .detail-page:has(> .markdown) > .post-actions > button:not(:first-child) {
     font-size: 0;
   }
 
+  .detail-page > div:has(> .markdown) > .post-actions .more,
   .detail-page:has(> .markdown) > .post-actions .more {
     margin-left: 0;
   }
 }
 
 @media (max-width: 640px) {
+  .detail-page > div:has(> .markdown) > .post-actions,
   .detail-page:has(> .markdown) > .post-actions {
     bottom: calc(77px + env(safe-area-inset-bottom, 0px));
   }

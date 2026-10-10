@@ -1,6 +1,6 @@
 .page {
   min-height: 100vh;
-  background: #f7f6f3;
+  background: #fbfbfa;
   color: #37352f;
 }
 
@@ -43,9 +43,10 @@
 .hero h1 {
   max-width: 680px;
   margin: 0;
-  font-size: clamp(32px, 6vw, 54px);
+  font-size: clamp(28px, 4vw, 40px);
   font-weight: 720;
-  letter-spacing: -0.045em;
+  letter-spacing: normal;
+  text-wrap: balance;
   line-height: 1.18;
 }
 

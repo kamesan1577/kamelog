@@ -4,7 +4,8 @@
 }
 
 [data-ds="public-sidebar"] {
-  width: 222px;
+  width: 216px;
+  flex: 0 0 216px;
   min-height: 100dvh;
   position: sticky;
   top: 0;
@@ -12,7 +13,7 @@
   display: flex;
   flex-direction: column;
   border-right: 1px solid #ebeae6;
-  background: #f7f7f5;
+  background: #f3f3f0;
   padding: 0 10px 16px;
 }
 
@@ -20,7 +21,7 @@
   display: flex;
   align-items: center;
   width: 100%;
-  height: 66px;
+  height: 72px;
   gap: 8px;
   padding: 0 8px;
   font-size: 15px;
@@ -43,7 +44,7 @@
 [data-ds="public-sidebar"] nav button,
 [data-ds="sidebar-section"] button,
 [data-ds="admin-nav"] > button:not([data-slot="button"]) {
-  height: 34px;
+  height: 40px;
   padding: 0 9px;
   border-radius: 5px;
   text-align: left;
@@ -167,20 +168,27 @@
 
 /* Active navigation is driven by aria-current, not the legacy .active class.
    Keep this more specific than the sidebar's generic button and hover styles. */
-[data-ds="public-sidebar"] [data-ds="side-navigation"] button[aria-current="page"] {
-  background: #37352f;
-  border-color: #37352f;
-  color: #fff;
+[data-ds="public-sidebar"]
+  [data-ds="side-navigation"]
+  button[aria-current="page"] {
+  background: #e5e5df;
+  border-color: transparent;
+  color: #37352f;
 }
 
-[data-ds="public-sidebar"] [data-ds="side-navigation"] button[aria-current="page"]:hover {
-  background: #292824;
-  border-color: #292824;
-  color: #fff;
+[data-ds="public-sidebar"]
+  [data-ds="side-navigation"]
+  button[aria-current="page"]:hover {
+  background: #ddddd6;
+  border-color: transparent;
+  color: #37352f;
 }
 
-[data-ds="public-sidebar"] [data-ds="side-navigation"] button[aria-current="page"] span.ds-text-xs {
-  color: #d8d6d0;
+[data-ds="public-sidebar"]
+  [data-ds="side-navigation"]
+  button[aria-current="page"]
+  span.ds-text-xs {
+  color: #66665f;
 }
 
 @media (max-width: 640px) {

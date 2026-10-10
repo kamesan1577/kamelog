@@ -9,7 +9,7 @@
 }
 
 [data-ds="editor-dialog"] .editor-caption {
-  color: #aaa !important;
+  color: #717168 !important;
   font-size: 12px !important;
 }
 
@@ -28,12 +28,12 @@
 
 [data-ds="editor-dialog"] .editor-author span:not(.avatar) {
   margin-left: auto;
-  color: #999;
+  color: #717168;
   font-size: 12px;
 }
 
 [data-ds="editor-dialog"] .editor-author > svg {
-  color: #999;
+  color: #717168;
 }
 
 [data-ds="editor-dialog"] .title-input {
@@ -52,7 +52,7 @@
   padding: 10px 0;
   border-top: 1px solid #eee;
   border-bottom: 1px solid #eee;
-  color: #999;
+  color: #717168;
   font-size: 13px;
 }
 
@@ -121,7 +121,7 @@
 
 [data-ds="editor-dialog"] .editor-media-row > span {
   font-size: 12px;
-  color: #999;
+  color: #717168;
 }
 
 [data-ds="editor-footer"] {
@@ -134,7 +134,7 @@
 
 [data-ds="editor-footer"] > span {
   margin-right: auto;
-  color: #aaa;
+  color: #717168;
   font-size: 12px;
 }
 
@@ -245,8 +245,12 @@
   }
 }
 
-[data-ds="editor-dialog"] .editor-kinds [data-slot="tabs-trigger"][data-state="active"],
-[data-ds="editor-dialog"] .vlog-tabs [data-slot="tabs-trigger"][data-state="active"] {
+[data-ds="editor-dialog"]
+  .editor-kinds
+  [data-slot="tabs-trigger"][data-state="active"],
+[data-ds="editor-dialog"]
+  .vlog-tabs
+  [data-slot="tabs-trigger"][data-state="active"] {
   background: #37352f;
   color: #fff;
 }

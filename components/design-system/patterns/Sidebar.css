@@ -10,13 +10,13 @@
   padding: 8px 10px;
   border: 1px solid #eae8e2;
   border-radius: 5px;
-  color: #a6a197;
+  color: #717168;
 }
 
 [data-ds="side-search"] input {
   width: 100%;
   min-width: 0;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 [data-ds="side-search"] kbd {
@@ -30,7 +30,7 @@
 
 [data-ds="aside-section"] h3 {
   margin: 0 0 12px;
-  color: #a19a8e;
+  color: #717168;
   font-size: 12px;
   font-weight: 500;
 }
@@ -45,17 +45,17 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #827a6d;
+  color: #575750;
   font-size: 13px;
 }
 
 [data-ds="topic-list"] button span {
-  color: #b9b2a7;
+  color: #797970;
 }
 
 [data-ds="topic-list"] button small {
   margin-left: auto;
-  color: #b4ada1;
+  color: #717168;
   font-size: 12px;
 }
 

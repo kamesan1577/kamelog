@@ -1,11 +1,11 @@
 [data-ds="public-header"] {
-  height: 53px;
+  height: 56px;
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 0 28px;
-  border-bottom: 1px solid #f0efec;
-  color: #8d8a82;
+  border-bottom: 1px solid var(--kamelog-line);
+  color: #66665f;
   font-size: 12px;
 }
 

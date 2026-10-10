@@ -1,4 +1,83 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
+
+async function expectSettledEditor(page: Page) {
+  const dialog = page.locator('[data-ds="editor-dialog"]');
+  await expect(dialog).toHaveCSS("opacity", "1");
+  const selectedTabs = dialog.locator(
+    '.editor-kinds [role="tab"][data-state="active"], .vlog-tabs [role="tab"][data-state="active"]',
+  );
+  expect(await selectedTabs.count()).toBeGreaterThan(0);
+  for (const tab of await selectedTabs.all()) {
+    await expect(tab).toHaveCSS("background-color", "rgb(55, 53, 47)");
+    await expect(tab).toHaveCSS("color", "rgb(255, 255, 255)");
+  }
+}
+
+async function expectMobileBlogActions(page: Page) {
+  const actions = page.locator(
+    '[data-ds="detail-page"] [data-ds="post-actions"]',
+  );
+  await expect(actions).toHaveCount(1);
+  await expect(actions).toHaveCSS("position", "fixed");
+  await expect(actions).toBeInViewport();
+  await expect
+    .poll(
+      async () => {
+        const box = await actions.boundingBox();
+        return (
+          !!box &&
+          box.width > 0 &&
+          box.height > 0 &&
+          box.x >= 12 &&
+          box.x + box.width <= 378 &&
+          box.y >= 0 &&
+          box.y + box.height <= 844 - 70
+        );
+      },
+      {
+        message:
+          "Mobile blog actions must fit above navigation within the 390px viewport",
+      },
+    )
+    .toBe(true);
+  for (const button of [
+    actions.getByRole("button").first(),
+    actions.getByRole("button", { name: "リンクをコピー", exact: true }),
+    actions.getByRole("button", { name: "Xで共有", exact: true }),
+  ]) {
+    await expect(button).toBeVisible();
+    await expect(button).toBeInViewport();
+  }
+}
+
+async function scrollMobileContentTo(page: Page, selector: string) {
+  await page
+    .locator(selector)
+    .first()
+    .evaluate((target) => {
+      const surface = document.querySelector<HTMLElement>(
+        '[data-ds="site-layout"]',
+      );
+      if (!surface) throw new Error("Mobile scroll surface is missing");
+      surface.scrollTo({
+        top:
+          surface.scrollTop +
+          target.getBoundingClientRect().top -
+          surface.getBoundingClientRect().top -
+          16,
+        behavior: "instant",
+      });
+    });
+  await expect(page.locator(selector).first()).toBeInViewport();
+  await expect
+    .poll(() =>
+      page
+        .locator('[data-ds="site-layout"]')
+        .evaluate((surface) => surface.scrollTop),
+    )
+    .toBeGreaterThan(0);
+}
+
 test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   page,
   context,
@@ -82,10 +161,22 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator(`[data-ds="owner-settings"]`)).toBeVisible();
   await expect(page.locator(`[data-ds="owner-profile"]`)).toBeVisible();
   await expect(page.locator(`[data-ds="owner-federation"]`)).toBeVisible();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.screenshot({
+    animations: "disabled",
     path: "ui-evidence/screen-evidence-account-mobile.png",
     fullPage: true,
   });
+  await scrollMobileContentTo(page, '[data-ds="owner-inference"] h2');
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await page.screenshot({
+    animations: "disabled",
+    path: "ui-evidence/screen-evidence-account-inference-mobile.png",
+    fullPage: false,
+  });
+  await page
+    .locator('[data-ds="site-layout"]')
+    .evaluate((surface) => surface.scrollTo({ top: 0, behavior: "instant" }));
   const federationUsername = page.getByLabel("ユーザー名", { exact: true });
   await expect(federationUsername).toBeVisible();
   await expect
@@ -99,7 +190,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByText("@kamesan@localhost:3000", { exact: true }),
   ).toBeVisible();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.locator('[data-ds="owner-federation"]').screenshot({
+    animations: "disabled",
     path: testInfo.outputPath("federation-setup-mobile.png"),
   });
   const federationSetup = page.waitForResponse(
@@ -136,10 +229,14 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .toBe("16px");
   expect(await page.locator("body").innerText()).not.toContain("PRIVATE KEY");
   await page.setViewportSize({ width: 1280, height: 900 });
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.locator('[data-ds="owner-federation"]').screenshot({
+    animations: "disabled",
     path: testInfo.outputPath("federation-enabled-desktop.png"),
   });
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.screenshot({
+    animations: "disabled",
     path: "ui-evidence/screen-evidence-account-desktop.png",
     fullPage: true,
   });
@@ -163,7 +260,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   });
   await expect(mobileEditorHeader).toBeVisible();
   await expect(mobilePublish).toBeVisible();
+  await expectSettledEditor(page);
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.screenshot({
+    animations: "disabled",
     path: "ui-evidence/screen-evidence-editor-mobile.png",
     fullPage: true,
   });
@@ -182,7 +282,9 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByRole("switch", { name: "Fediverseにも配信" }),
   ).toBeChecked();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.locator('[data-ds="editor-dialog"]').screenshot({
+    animations: "disabled",
     path: testInfo.outputPath("landing-x-intent-mobile.png"),
   });
   await xSwitch.uncheck();
@@ -224,7 +326,32 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .first()
     .click();
   await expect(page.locator('[data-ds="inline-composer"]')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  const desktopSubmit = page
+    .locator('[data-ds="inline-composer"]')
+    .getByRole("button", { name: "投稿", exact: true });
+  await expect(desktopSubmit).toHaveCSS("flex-grow", "0");
+  await expect(desktopSubmit).toHaveCSS("align-self", "flex-end");
+  await expect
+    .poll(
+      async () => {
+        const box = await desktopSubmit.boundingBox();
+        return !!box && box.width > 0 && box.width <= 120;
+      },
+      {
+        message:
+          "Desktop submit must remain a compact button, not stretch across the composer",
+      },
+    )
+    .toBe(true);
+  await page.screenshot({
+    animations: "disabled",
+    path: "ui-evidence/screen-evidence-owner-composer-desktop.png",
+    fullPage: true,
+  });
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.locator('[data-ds="inline-composer"]').screenshot({
+    animations: "disabled",
     path: testInfo.outputPath("landing-x-intent-desktop.png"),
   });
   await expect(
@@ -448,6 +575,12 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await viewModes.getByRole("button", { name: "両方" }).click();
   const livePreview = page.getByLabel("プレビュー");
   await expect(livePreview).toContainText("リアルタイムプレビュー");
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await page.screenshot({
+    animations: "disabled",
+    path: "ui-evidence/screen-evidence-blog-editor-split-desktop.png",
+    fullPage: true,
+  });
   const editBox = await blogBody.boundingBox();
   const splitPreviewBox = await livePreview.boundingBox();
   expect(editBox).not.toBeNull();
@@ -561,6 +694,39 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     page.getByRole("button", { name: "リンクをコピー" }),
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Xで共有" })).toBeVisible();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  const desktopBlogActions = page.locator(
+    '[data-ds="detail-page"] [data-ds="post-actions"]',
+  );
+  await expect(desktopBlogActions).toHaveCount(1);
+  await expect(desktopBlogActions).toHaveCSS("position", "sticky");
+  await expect(desktopBlogActions).toBeVisible();
+  await page.screenshot({
+    animations: "disabled",
+    path: "ui-evidence/screen-evidence-blog-detail-desktop.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page
+    .locator('[data-ds="site-layout"]')
+    .evaluate((surface) => surface.scrollTo({ top: 0, behavior: "instant" }));
+  await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await expectMobileBlogActions(page);
+  await page.screenshot({
+    animations: "disabled",
+    path: "ui-evidence/screen-evidence-blog-detail-mobile.png",
+    fullPage: false,
+  });
+  await scrollMobileContentTo(page, '[data-ds="detail-markdown"] pre');
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await expectMobileBlogActions(page);
+  await page.screenshot({
+    animations: "disabled",
+    path: "ui-evidence/screen-evidence-blog-detail-body-mobile.png",
+    fullPage: false,
+  });
+  await page.setViewportSize({ width: 1280, height: 900 });
   const posts = await (await page.request.get("/api/posts")).json();
   const blog = posts.find(
     (post: { title: string }) => post.title === "架空のブログ",
@@ -597,11 +763,15 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   ).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.locator('[data-ds="fediverse-mode-switch"]')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.screenshot({
+    animations: "disabled",
     path: "ui-evidence/screen-evidence-fediverse-mobile.png",
     fullPage: true,
   });
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
   await page.locator('[data-ds="fediverse-timeline"]').screenshot({
+    animations: "disabled",
     path: testInfo.outputPath("fediverse-timeline-mobile.png"),
   });
   const refreshed = page.waitForResponse((response) =>
@@ -642,6 +812,13 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByPlaceholder("タイトル", { exact: true }),
   ).toBeVisible();
+  await expectSettledEditor(page);
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await page.screenshot({
+    animations: "disabled",
+    path: "ui-evidence/screen-evidence-blog-editor-mobile.png",
+    fullPage: true,
+  });
   const mobileBlogDialog = page.locator('[data-ds="editor-dialog"]');
   const mobileMarkdownToolbar = page.getByRole("toolbar", {
     name: "Markdown記法",
@@ -683,6 +860,13 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await page.getByRole("tab", { name: "vlog", exact: true }).last().click();
   await page.getByRole("tab", { name: "動画を選ぶ", exact: true }).click();
   await expect(page.locator('[data-ds="vlog-stage"]')).toBeVisible();
+  await expectSettledEditor(page);
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await page.screenshot({
+    animations: "disabled",
+    path: "ui-evidence/screen-evidence-vlog-editor-mobile.png",
+    fullPage: true,
+  });
   await page
     .locator('[data-ds="vlog-stage"] input[type="file"]')
     .setInputFiles("public/flower.mp4");
@@ -707,6 +891,12 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
         })),
     )
     .toEqual({ muted: true, loop: true });
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await page.screenshot({
+    animations: "disabled",
+    path: "ui-evidence/screen-evidence-vlog-published-mobile.png",
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "ループ再生を停止" }).first().click();
   await expect
     .poll(() =>
