@@ -13,6 +13,43 @@ async function expectSettledEditor(page: Page) {
   }
 }
 
+async function expectMobileBlogActions(page: Page) {
+  const actions = page.locator(
+    '[data-ds="detail-page"] [data-ds="post-actions"]',
+  );
+  await expect(actions).toHaveCount(1);
+  await expect(actions).toHaveCSS("position", "fixed");
+  await expect(actions).toBeInViewport();
+  await expect
+    .poll(
+      async () => {
+        const box = await actions.boundingBox();
+        return (
+          !!box &&
+          box.width > 0 &&
+          box.height > 0 &&
+          box.x >= 12 &&
+          box.x + box.width <= 378 &&
+          box.y >= 0 &&
+          box.y + box.height <= 844 - 70
+        );
+      },
+      {
+        message:
+          "Mobile blog actions must fit above navigation within the 390px viewport",
+      },
+    )
+    .toBe(true);
+  for (const button of [
+    actions.getByRole("button").first(),
+    actions.getByRole("button", { name: "リンクをコピー", exact: true }),
+    actions.getByRole("button", { name: "Xで共有", exact: true }),
+  ]) {
+    await expect(button).toBeVisible();
+    await expect(button).toBeInViewport();
+  }
+}
+
 async function scrollMobileContentTo(page: Page, selector: string) {
   await page
     .locator(selector)
@@ -658,6 +695,12 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   ).toBeVisible();
   await expect(page.getByRole("button", { name: "Xで共有" })).toBeVisible();
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  const desktopBlogActions = page.locator(
+    '[data-ds="detail-page"] [data-ds="post-actions"]',
+  );
+  await expect(desktopBlogActions).toHaveCount(1);
+  await expect(desktopBlogActions).toHaveCSS("position", "sticky");
+  await expect(desktopBlogActions).toBeVisible();
   await page.screenshot({
     animations: "disabled",
     path: "ui-evidence/screen-evidence-blog-detail-desktop.png",
@@ -669,6 +712,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     .evaluate((surface) => surface.scrollTo({ top: 0, behavior: "instant" }));
   await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await expectMobileBlogActions(page);
   await page.screenshot({
     animations: "disabled",
     path: "ui-evidence/screen-evidence-blog-detail-mobile.png",
@@ -676,6 +720,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   });
   await scrollMobileContentTo(page, '[data-ds="detail-markdown"] pre');
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await expectMobileBlogActions(page);
   await page.screenshot({
     animations: "disabled",
     path: "ui-evidence/screen-evidence-blog-detail-body-mobile.png",

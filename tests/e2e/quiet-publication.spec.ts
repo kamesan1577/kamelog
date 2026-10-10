@@ -21,6 +21,25 @@ for (const width of widths) {
     await expect(
       page.getByRole("heading", { name: "タイムライン", exact: true }),
     ).toBeVisible();
+    if (width >= 1240) {
+      const selectedNav = page.locator(
+        '[data-ds="public-sidebar"] [data-ds="side-navigation"] button[aria-current="page"]',
+      );
+      await expect(selectedNav).toHaveCSS(
+        "background-color",
+        "rgb(229, 229, 223)",
+      );
+      await selectedNav.hover();
+      await expect(selectedNav).toHaveCSS(
+        "background-color",
+        "rgb(221, 221, 214)",
+      );
+      await page.mouse.move(0, 0);
+      await expect(selectedNav).toHaveCSS(
+        "background-color",
+        "rgb(229, 229, 223)",
+      );
+    }
     const inlineSearch = page.locator('[data-ds="mobile-search"]');
     const sideSearch = page.locator('[data-ds="side-search"]');
     const search = width < 1240 ? inlineSearch : sideSearch;

@@ -92,12 +92,14 @@ export const FilledSelection: Story = {
         color: "rgb(55, 53, 47)",
       }),
     );
+    // Storybook userEvent dispatches DOM events, not a native CSS :hover.
+    // The real pointer hover color is covered by quiet-publication.spec.ts.
     await userEvent.hover(timeline);
     await expect(timeline).toHaveAttribute("aria-current", "page");
     await expect(timeline).toHaveStyle({ color: "rgb(55, 53, 47)" });
     await waitFor(() =>
       expect(timeline).toHaveStyle({
-        backgroundColor: "rgb(221, 221, 214)",
+        backgroundColor: "rgb(229, 229, 223)",
       }),
     );
   },
