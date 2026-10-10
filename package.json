@@ -80,5 +80,10 @@
     "vite": "8.2.2",
     "vitest": "^4.1.0"
   },
-  "type": "module"
+  "type": "module",
+  "overrides": {
+    "@next/eslint-plugin-next@16.3.8": {
+      "fast-glob": "npm:tinyglobby@0.2.17"
+    }
+  }
 }

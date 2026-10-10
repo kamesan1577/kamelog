@@ -33,3 +33,5 @@ GitHub Actions runnerへ本番サーバー資格情報を渡さない。
 schema非互換時のデータrollbackは自動化せず、runbookに従い別volumeへ復元する。
 
 Storybook commands: `npm run storybook`, `npm run storybook:build`, `npm run test:storybook`, and `npm run test:visual`. CI installs Node 24 and Playwright OS dependencies before running the Storybook and visual gates.
+
+Next.js lint の推移依存は [ADR 0022](../../adr/0022-remove-vulnerable-lint-dependency.md) に従い、バージョン限定の npm override を使う。現在の単一ルート構成では `settings.next.rootDir` を設定しない。独自ルートの追加、Next.js plugin の更新、glob の呼び出し箇所の変更は専用テストで検出し、互換性を再検証する。CI の依存監査は開発依存を含む `npm audit --audit-level=high` を維持する。
