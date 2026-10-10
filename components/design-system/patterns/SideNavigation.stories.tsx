@@ -95,8 +95,10 @@ export const FilledSelection: Story = {
     await userEvent.hover(timeline);
     await expect(timeline).toHaveAttribute("aria-current", "page");
     await expect(timeline).toHaveStyle({ color: "rgb(55, 53, 47)" });
-    await expect(timeline).toHaveStyle({
-      backgroundColor: "rgb(221, 221, 214)",
-    });
+    await waitFor(() =>
+      expect(timeline).toHaveStyle({
+        backgroundColor: "rgb(221, 221, 214)",
+      }),
+    );
   },
 };
