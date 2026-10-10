@@ -2429,7 +2429,7 @@ export default function Notebook({
                       <div>
                         <span>プロフィール</span>
                         <h2>{profile.name}</h2>
-                        <p>@kamesan1577 · Backend Engineer</p>
+                        <p>@kamesan1577</p>
                       </div>
                       <p className="landing-bio">{profile.bio}</p>
                       <a href={contact.github} target="_blank" rel="noreferrer">
@@ -3796,23 +3796,38 @@ function VlogFrame({ post }: { post: Post }) {
     void element.play().catch(() => undefined);
   };
   return (
-    <div data-ds="vlog-frame" className="vlog-frame">
-      {post.video ? (
-        <video
-          ref={video}
-          src={post.video}
-          controls
-          playsInline
-          preload="metadata"
-          onLoadedMetadata={startShortLoop}
-          onClick={(e) => e.stopPropagation()}
-        />
-      ) : (
-        <div className="missing-video">
-          <Video />
-          動画なし
-        </div>
-      )}
+    <>
+      <div data-ds="vlog-frame" className="vlog-frame">
+        {post.video ? (
+          <video
+            ref={video}
+            src={post.video}
+            controls
+            playsInline
+            preload="metadata"
+            onLoadedMetadata={startShortLoop}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <div className="missing-video">
+            <Video />
+            動画なし
+          </div>
+        )}
+        {post.video && looping && (
+          <button
+            type="button"
+            className="vlog-loop-toggle"
+            onClick={(event) => {
+              event.stopPropagation();
+              if (video.current) video.current.loop = false;
+              setLooping(false);
+            }}
+          >
+            ループ再生を停止
+          </button>
+        )}
+      </div>
       <div className="vlog-overlay">
         <time>
           {post.time ||
@@ -3823,19 +3838,6 @@ function VlogFrame({ post }: { post: Post }) {
         </time>
         {post.body && <p data-ds="vlog-caption">{post.body}</p>}
       </div>
-      {post.video && looping && (
-        <button
-          type="button"
-          className="vlog-loop-toggle"
-          onClick={(event) => {
-            event.stopPropagation();
-            if (video.current) video.current.loop = false;
-            setLooping(false);
-          }}
-        >
-          ループ再生を停止
-        </button>
-      )}
-    </div>
+    </>
   );
 }

@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   gap: 23px;
-  margin-top: 16px;
+  margin-top: 10px;
   color: #717168;
 }
 
@@ -36,7 +36,7 @@
 
 @media (max-width: 640px) {
   [data-ds="post-actions"].post-actions {
-    margin-top: 13px;
+    margin-top: 8px;
     gap: 26px;
   }
   [data-ds="post-actions"].post-actions button {

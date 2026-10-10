@@ -68,7 +68,7 @@
 }
 @media (min-width: 641px) {
   [data-ds="inline-composer"].desktop-composer .inline-tweet {
-    min-height: 112px;
+    min-height: 72px;
     max-height: 280px;
   }
 }
@@ -93,4 +93,13 @@
     gap: 21px;
     margin: 0 12px;
   }
+}
+
+[data-ds="inline-composer"].desktop-composer
+  > .composer-start
+  > [data-slot="button"] {
+  flex: 0 0 auto;
+  align-self: flex-end;
+  text-align: center;
+  color: #fff;
 }

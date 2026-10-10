@@ -22,26 +22,26 @@
   object-fit: cover;
 }
 .vlog-overlay {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 34px 18px 14px;
-  background: linear-gradient(transparent, #0009);
-  color: white;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 10px 0 0;
+  color: #37352f;
   text-align: left;
   pointer-events: none;
-  text-shadow: 0 1px 8px #000;
 }
 .vlog-overlay time {
-  font-family: Georgia, "Times New Roman", serif;
-  font-style: italic;
-  font-size: 27px;
-  letter-spacing: -0.5px;
+  color: #66665f;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 .vlog-overlay p {
+  flex: 1 1 180px;
   font-size: 14px;
-  margin: 3px 0 0;
+  line-height: 1.7;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 .post-focus.vlog-button {
   position: relative;
@@ -200,9 +200,9 @@
 }
 @media (max-width: 640px) {
   .vlog-overlay {
-    padding: 28px 13px 11px;
+    padding-top: 8px;
   }
   .vlog-overlay time {
-    font-size: 23px;
+    font-size: 12px;
   }
 }

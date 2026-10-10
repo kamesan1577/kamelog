@@ -91,6 +91,37 @@ test("home leads with content and retains profile links and expandable experienc
   await expect(details.locator(".engineering-outcomes")).toBeVisible();
   await details.locator("summary").click();
   await expect(details.locator(".engineering-outcomes")).toBeHidden();
+  await page.setViewportSize({ width: 390, height: 844 });
+  const scrollSurface = page.locator('[data-ds="site-layout"]');
+  for (const [section, name] of [
+    ["#experience-title", "experience"],
+    ["#contact-title", "contact"],
+  ] as const) {
+    await page.locator(section).evaluate((target) => {
+      const surface = document.querySelector<HTMLElement>(
+        '[data-ds="site-layout"]',
+      );
+      if (!surface) throw new Error("Mobile scroll surface is missing");
+      surface.scrollTo({
+        top:
+          surface.scrollTop +
+          target.getBoundingClientRect().top -
+          surface.getBoundingClientRect().top -
+          16,
+        behavior: "instant",
+      });
+    });
+    await expect(page.locator(section)).toBeInViewport();
+    await expect
+      .poll(() => scrollSurface.evaluate((surface) => surface.scrollTop))
+      .toBeGreaterThan(0);
+    await page.evaluate(() => document.fonts.ready.then(() => undefined));
+    await page.screenshot({
+      animations: "disabled",
+      path: `ui-evidence/quiet-publication-home-${name}-390.png`,
+      fullPage: false,
+    });
+  }
 });
 
 const fixturePosts = Array.from({ length: 8 }, (_, index) => {
@@ -158,7 +189,35 @@ for (const width of [390, 1440]) {
         `${count}件`,
       );
       await expectNoHorizontalOverflow(page);
+      if (kind === "vlog") {
+        const video = page.locator('[data-ds="vlog-frame"] video');
+        const caption = page.locator('[data-ds="vlog-caption"]');
+        await expect(video).toHaveCount(1);
+        await expect(caption).toHaveText("表示確認用の架空の投稿 2");
+        await expect
+          .poll(
+            async () => {
+              const videoBox = await video.boundingBox();
+              const captionBox = await caption.boundingBox();
+              return (
+                !!videoBox &&
+                !!captionBox &&
+                videoBox.width > 0 &&
+                videoBox.height > 0 &&
+                Math.abs(videoBox.height - (videoBox.width * 9) / 16) <= 1 &&
+                captionBox.y >= videoBox.y + videoBox.height
+              );
+            },
+            {
+              message:
+                "Vlog video must be 16:9 with its caption below the video controls",
+            },
+          )
+          .toBe(true);
+      }
+      await page.evaluate(() => document.fonts.ready.then(() => undefined));
       await page.screenshot({
+        animations: "disabled",
         path: `ui-evidence/quiet-publication-${kind}-${width}.png`,
         fullPage: true,
       });
