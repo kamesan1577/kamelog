@@ -218,3 +218,5 @@ Issueは作業追跡に限り、チャット内容を読む必要はない。
 2026-10-22 セキュリティ依存更新。sanitize-html 2.18.1、Mermaid 12.2.0（修正済みKaTeX/DOMPurify）、Vite 8.3.5、Storybook 10.6.3、Vitest 4.1.12へ更新。nginxは1.30.6の検証済みdigestへ固定。runtime buildでOS更新を適用し、実行に不要なnpm/corepackを除外する。旧版で再現したnoscript除去領域の脱出と継承されたKaTeX trust、およびremote HTMLの危険タグを回帰テストで確認。依存更新後のnpm auditは開発依存を含め0件。隔離環境でmake check（server 157件、Storybook 43件を含む）が成功。E2Eは中断しており、この記録時点ではCI check/e2e/containerと本番反映は未完了。runtimeのnpm除外はCIコンテナsmokeで検証する。
 
 2026-10-22 追加検証。E2EのCSS fixtureがReact hydrationに上書きされる競合を再現し、当該レイアウトテストだけJavaScript無効でfixtureを固定した。検証の省略・retry追加はせず、全59件が成功。Debian 12の更新済み候補でもmbedtls等に保守終了・未修正の検出が残ったため、公式Debian trackerの修正状況を確認してbuild/runtime/devのNode 24ベースをDebian 13 trixieへ更新する。production依存はlockfileからnpm ci --omit=devで再構成し、prune時の依存再解決を避ける。新ベースのコンテナ検証はこの記録時点で未完了。
+
+2026-10-22 動画入力の境界を追加修正。FFprobe/FFmpegへmov・matroska・webmのformat_whitelistを渡し、XML/DASH等を解析前に拒否する。実FFprobeを使う回帰テストで旧実装の失敗と修正後の成功を確認。これはDebianで未修正のlibxml2を利用する不要な入力形式への到達を防ぐ対策であり、OSライブラリ自体の修正ではない。Debian 13候補の起動・非root・npm不在・再起動後の保存・架空データのbackup/restore・workerは成功。runtime上のサーバーテストは156件成功、Git非同梱による公開検査1件の失敗を確認しており、Gitを備えた既存検証環境で全ゲートを再実行する。

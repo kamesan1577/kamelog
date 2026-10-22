@@ -6,7 +6,7 @@
 | API             | 未認証書込、CSRF、過大body                      | session検証、Origin必須、JSON上限、rate limit                                                                                                                           |
 | 閲覧数          | 水増し、閲覧者の追跡                            | 同一Origin、専用rate limit、合計値のみ保存、IP・閲覧者識別子を保存しない                                                                                                |
 | 下書き          | 公開responseやcacheへ漏洩                       | owner専用、全API no-store、公開projectionを明示                                                                                                                         |
-| 媒体            | traversal、偽形式、画像bomb、CPU/容量枯渇       | opaque ID、magic/dimension検証、bounded FFmpeg、サイズ/画素数/並列数制限                                                                                                |
+| 媒体            | traversal、偽形式、画像bomb、CPU/容量枯渇       | opaque ID、magic/dimension検証、bounded FFmpeg、動画demuxerの解析前allowlist、サイズ/画素数/並列数制限                                                                  |
 | Markdown        | script実行、危険URL、図へのコード混入           | HTML無効、URL allowlist、React escaping、Mermaid strict mode、埋め込みhost/id検証                                                                                       |
 | リンクpreview   | SSRF、DNS rebinding、過大HTML、内部到達         | scheme/port制限、全DNS結果のpublic判定、検証IP固定、redirect再検証、時間/512KiB/回数上限                                                                                |
 | Federation      | 署名偽造、replay、SSRF、remote HTML実行         | Digest/HTTP署名/Date検証、activity ID一意、HTTPS/public IP/検証IP固定、redirect再検証、HTML allowlist、本文/鍵をlogへ出さない                                           |
