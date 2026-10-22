@@ -10,7 +10,7 @@ RUN npm prune --omit=dev
 
 FROM node:24-bookworm-slim AS runtime
 ARG KAMELOG_BUILD_SHA
-RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends ffmpeg ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000 KAMELOG_DATA_DIR=/data KAMELOG_BUILD_SHA=${KAMELOG_BUILD_SHA}
 COPY --from=build --chown=node:node /app/.next/standalone ./
@@ -25,6 +25,9 @@ COPY --from=build --chown=node:node /app/scripts/auto-tag.ts ./scripts/auto-tag.
 COPY --from=build --chown=node:node /app/scripts/auto-thread.ts ./scripts/auto-thread.ts
 COPY --from=build --chown=node:node /app/scripts/federation-worker.ts ./scripts/federation-worker.ts
 COPY --from=build --chown=node:node /app/scripts/federation-worker-health.ts ./scripts/federation-worker-health.ts
+# Production entry points use Node directly; exclude unused package-manager dependencies.
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg /usr/local/bin/pnpm /usr/local/bin/pnpx
 RUN mkdir /data && chown node:node /data
 USER node
 EXPOSE 3000
