@@ -1,4 +1,4 @@
-FROM node:24-bookworm-slim AS build
+FROM node:24-trixie-slim AS build
 ARG KAMELOG_BUILD_SHA
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -6,9 +6,9 @@ RUN npm ci
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1 KAMELOG_BUILD_SHA=${KAMELOG_BUILD_SHA}
 RUN npm run build
-RUN npm prune --omit=dev
+RUN npm ci --omit=dev --no-audit --no-fund
 
-FROM node:24-bookworm-slim AS runtime
+FROM node:24-trixie-slim AS runtime
 ARG KAMELOG_BUILD_SHA
 RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends ffmpeg ca-certificates && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
