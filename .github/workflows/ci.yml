@@ -91,6 +91,7 @@ jobs:
           docker run -d --name kamelog-ci -e KAMELOG_ORIGIN=http://localhost:3000 -p 127.0.0.1:3000:3000 kamelog:ci
           trap 'docker rm -f kamelog-ci' EXIT
           test "$(docker exec kamelog-ci id -u)" != 0
+          docker exec kamelog-ci sh -c '! command -v npm && ! command -v npx'
           ready=0
           for attempt in $(seq 1 30); do
             if curl -fsS http://localhost:3000/api/health; then ready=1; break; fi

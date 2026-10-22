@@ -1,5 +1,8 @@
 import { test, expect, type Page } from "@playwright/test";
 
+// These CSS fixtures replace the document body; application hydration must not replace them.
+test.use({ javaScriptEnabled: false });
+
 async function renderBlogDetail(page: Page) {
   await page.goto("/");
   await page.evaluate(() => {
