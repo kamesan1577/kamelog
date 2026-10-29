@@ -1,7 +1,8 @@
 # API v1（同一Origin / JSON）
 
-すべての応答はno-store。書込はOrigin一致、owner session、入力検証を要求する。
-認証APIだけは未ログインで利用可能だがceremony cookieと署名を検証する。
+すべての応答はno-store。通常の書込はOrigin一致、owner session、入力検証を要求する。
+認証APIは未ログインで利用可能だがceremony cookieと署名を検証する。
+公開投稿の閲覧数といいねのAPIは未ログインでも利用でき、同一Originと専用rate limitを要求する。
 
 | Method                    | Path                              | 意味                                                    |
 | ------------------------- | --------------------------------- | ------------------------------------------------------- |
@@ -9,6 +10,7 @@
 | GET                       | /api/posts?kind=&q=               | 公開投稿。kind省略で全種別                              |
 | GET                       | /api/posts/:id                    | 公開詳細、存在しなければ404                             |
 | POST                      | /api/posts/:id/view               | 公開詳細の閲覧数を加算                                  |
+| POST                      | /api/posts/:id/like               | 匿名いいねを設定または解除                              |
 | POST / PUT / DELETE       | /api/posts[/id]                   | ownerの投稿作成・更新・削除                             |
 | GET / POST / PUT / DELETE | /api/drafts[/id]                  | owner限定の下書き                                       |
 | GET / PUT                 | /api/profile                      | 公開プロフィール/owner更新                              |
@@ -51,6 +53,12 @@ federationEnabledはidentity設定済みのブログ/つぶやきだけtrueに�
 federation followのPOST bodyは `handle`、DELETE bodyはfollowing一覧で取得した `actorId` を受け取る。任意URLをfetchするAPIにはせず、handleはserver側でWebFingerから解決する。Accept/Rejectとremote cacheは公開APIへ返さない。
 timelineは `{ items, nextCursor }` を返し、`?cursor=` で続きへ進む。remote attachment URLは登録済みobjectから生成したlocal media URLだけを返し、入力URLをproxy targetとして受け取らない。RPのPOST bodyはowner timelineで取得した `objectId` だけを受け付け、Accept済みfollowing由来の有効なcacheとの一致を必須にする。media endpointはowner、または現在公開中のRPに結び付くmediaだけを返し、解除済みRP・deleted object・未登録mappingを404として扱う。
 公開posts APIの `likes` は保存済みlocal likesと、有効なremote reactionのActor数を合算した値を返す。remote内訳・Actor・reaction種別は公開APIへ出さず、投稿更新時には合算値をlocal likesへ書き戻さない。
+いいねAPIは `{ clientId: UUID, liked: boolean }` を受け取り、対象投稿のいいね状態を設定する。
+成功時は更新後の公開投稿を返し、`likes` はremote分を含む合計値とする。対象投稿がなければ404を返す。
+同じ投稿とclientIdへの同じ状態の再送は加算や減算を繰り返さず、解除ではそのclientIdが登録したlocal likeだけを減らす。
+local likesの更新と重複防止recordの更新は同じtransactionで行い、投稿のrevision、公開日時、最終更新日時、remote reactionを変更しない。
+clientIdの原文を保存せず、投稿IDと組み合わせたSHA-256 hashだけを保存する。
+UUIDはブラウザの匿名識別子であり本人認証ではないため、端末や識別子を変えた同一人物の再いいねは防がない。
 下書きはkind=blog/tweet、title、body、画像、任意のtweet用 `parentId`、更新時revisionを保存する。親は公開tweetに限り、親が削除済みでも通常投稿へ黙って変換しない。
 プロフィールはname（80）、bio（500）、icon（短い絵文字または制限された画像data URL）。
 推論設定はタグとスレッドを別々に初期OFFで保持する。資格情報のGETは設けず、状態APIは `configured` とホスト復号鍵の利用可否だけを返す。未校正のprovider scoreを共通閾値に見せかけないため、閾値は設定できない。

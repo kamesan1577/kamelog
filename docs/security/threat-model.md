@@ -5,6 +5,7 @@
 | WebAuthn        | 偽署名、challenge再利用、別Origin               | 実ライブラリ検証、5分/単回、ceremony cookie、UV必須                                                                                                                     |
 | API             | 未認証書込、CSRF、過大body                      | session検証、Origin必須、JSON上限、rate limit                                                                                                                           |
 | 閲覧数          | 水増し、閲覧者の追跡                            | 同一Origin、専用rate limit、合計値のみ保存、IP・閲覧者識別子を保存しない                                                                                                |
+| 匿名いいね      | 再送による水増し、CSRF、識別子の追跡            | 同一Origin、専用の全体rate limit、UUIDとbooleanの入力検証、投稿別hashの一意制約、合計値と同一transactionで更新。生のUUIDやIPは保存しない                                |
 | 下書き          | 公開responseやcacheへ漏洩                       | owner専用、全API no-store、公開projectionを明示                                                                                                                         |
 | 媒体            | traversal、偽形式、画像bomb、CPU/容量枯渇       | opaque ID、magic/dimension検証、bounded FFmpeg、動画demuxerの解析前allowlist、サイズ/画素数/並列数制限                                                                  |
 | Markdown        | script実行、危険URL、図へのコード混入           | HTML無効、URL allowlist、React escaping、Mermaid strict mode、埋め込みhost/id検証                                                                                       |
@@ -18,4 +19,7 @@
 | 運用            | proxy偽装、秘密露出                             | HTTPS Origin固定、cookie Secure、proxyでrequest上限、汎用エラー                                                                                                         |
 
 公開前に認証E2E、実媒体変換、別環境復元、コンテナ起動を通す。
+匿名いいねの識別子は本人認証に使わない。
+新しいUUIDを生成した送信者の再いいねは防げず、rate limitは大量送信の抑制に限られる。
+公開APIへ識別子やhashの一覧を返さず、投稿削除時は対応するいいねrecordも削除する。
 一般的なgrepは網羅的な個人情報判定ではない。公開用fixtureと無出力private marker検査を併用する。

@@ -1,3 +1,4 @@
+import { initializeLocalLikes } from "./local-likes.ts";
 import { DatabaseSync, backup } from "node:sqlite";
 import { mkdirSync, rmSync } from "node:fs";
 import { resolve, join } from "node:path";
@@ -242,6 +243,7 @@ export class Store {
     }
     this.db.prepare("INSERT OR IGNORE INTO migrations VALUES(10)").run();
     this.db.prepare("INSERT OR IGNORE INTO migrations VALUES(11)").run();
+    initializeLocalLikes(this.db);
     this.db
       .prepare(
         `SELECT object_id AS objectId, attachments
@@ -401,12 +403,17 @@ export class Store {
         throw new Conflict("Revision conflict");
       if (!old && revision !== undefined && revision !== 0)
         throw new Conflict("Missing revision");
-      let persisted = value;
+      // Anonymous likes can change without an editor revision. Read the local
+      // counter under this write transaction, not from an earlier API snapshot.
+      let persisted =
+        table === "posts" && old
+          ? { ...value, likes: this.localPostLikes(id) }
+          : value;
       if (table === "posts" && old?.kind === "blog" && value.kind === "blog") {
         const contentChanged =
           old.title !== value.title || old.body !== value.body;
         persisted = {
-          ...value,
+          ...persisted,
           ...(old.updatedAt ? { updatedAt: old.updatedAt } : {}),
           ...(contentChanged ? { updatedAt: new Date().toISOString() } : {}),
         };

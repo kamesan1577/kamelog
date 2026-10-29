@@ -588,6 +588,9 @@ export default function Notebook({
     [liked, setLiked] = useState<string[]>([]),
     [drafts, setDrafts] = useState<Draft[]>([]),
     [ready, setReady] = useState(false);
+  const likeClientId = useRef<string | null>(null);
+  const pendingLikes = useRef(new Set<string>());
+  const [likeBusy, setLikeBusy] = useState<string[]>([]);
   const [refreshBusy, setRefreshBusy] = useState(false);
   const [login, setLogin] = useState(false),
     [view, setView] = useState<View>("home"),
@@ -961,16 +964,34 @@ export default function Notebook({
         }
       })
       .catch(() => toast.error("接続できません。再読み込みしてください。"));
+    let clientId = crypto.randomUUID();
+    let savedLikes: string[] = [];
     try {
-      const ls = JSON.parse(localStorage.getItem("kamelog-likes") || "[]");
-      if (Array.isArray(ls))
-        requestAnimationFrame(() => {
-          setLiked(ls.filter((x) => typeof x === "string"));
-          setReady(true);
-        });
-    } catch {
-      requestAnimationFrame(() => setReady(true));
-    }
+      const saved: unknown = JSON.parse(
+        localStorage.getItem("kamelog-likes-v2") || "null",
+      );
+      if (
+        saved &&
+        typeof saved === "object" &&
+        "clientId" in saved &&
+        typeof saved.clientId === "string" &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          saved.clientId,
+        ) &&
+        "liked" in saved &&
+        Array.isArray(saved.liked) &&
+        saved.liked.every((id) => typeof id === "string")
+      ) {
+        clientId = saved.clientId;
+        savedLikes = saved.liked;
+      }
+    } catch {}
+    likeClientId.current = clientId;
+    requestAnimationFrame(() => {
+      if (cancelled) return;
+      setLiked(savedLikes);
+      setReady(true);
+    });
     const objectUrls = urls.current;
     return () => {
       cancelled = true;
@@ -980,7 +1001,10 @@ export default function Notebook({
   useEffect(() => {
     if (ready)
       try {
-        localStorage.setItem("kamelog-likes", JSON.stringify(liked));
+        localStorage.setItem(
+          "kamelog-likes-v2",
+          JSON.stringify({ clientId: likeClientId.current, liked }),
+        );
       } catch {}
   }, [liked, ready]);
   useEffect(() => {
@@ -993,7 +1017,9 @@ export default function Notebook({
     void api<Post>(`posts/${selected}/view`, "POST", {})
       .then((viewed) =>
         setPosts((current) =>
-          current.map((post) => (post.id === viewed.id ? viewed : post)),
+          current.map((post) =>
+            post.id === viewed.id ? { ...post, views: viewed.views } : post,
+          ),
         ),
       )
       .catch(() => {
@@ -1619,21 +1645,52 @@ export default function Notebook({
       kindLabelClassName={"type-label " + p.kind}
     />
   );
+  const toggleLike = async (post: Post) => {
+    if (!ready || !likeClientId.current || pendingLikes.current.has(post.id))
+      return;
+    pendingLikes.current.add(post.id);
+    setLikeBusy((current) => [...current, post.id]);
+    const nextLiked = !liked.includes(post.id);
+    try {
+      const saved = await api<Post>(`posts/${post.id}/like`, "POST", {
+        clientId: likeClientId.current,
+        liked: nextLiked,
+      });
+      setPosts((current) =>
+        current.map((item) =>
+          item.id === post.id ? { ...item, likes: saved.likes } : item,
+        ),
+      );
+      setLiked((current) =>
+        nextLiked
+          ? [...current.filter((id) => id !== post.id), post.id]
+          : current.filter((id) => id !== post.id),
+      );
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "いいねを保存できませんでした。",
+      );
+    } finally {
+      pendingLikes.current.delete(post.id);
+      setLikeBusy((current) => current.filter((id) => id !== post.id));
+    }
+  };
   const actions = (p: Post) => (
     <PostActions className="post-actions">
       <button
         className={liked.includes(p.id) ? "liked" : ""}
-        onClick={() =>
-          setLiked((ls) =>
-            ls.includes(p.id) ? ls.filter((x) => x !== p.id) : [...ls, p.id],
-          )
-        }
+        disabled={!ready || likeBusy.includes(p.id)}
+        aria-label={liked.includes(p.id) ? "いいねを取り消す" : "いいね"}
+        aria-pressed={liked.includes(p.id)}
+        onClick={() => void toggleLike(p)}
       >
         <Heart
           size={17}
           fill={liked.includes(p.id) ? "currentColor" : "none"}
         />
-        {p.likes + (liked.includes(p.id) ? 1 : 0)}
+        {p.likes}
       </button>
       <button
         onClick={async () => {

@@ -1,3 +1,4 @@
+import { setLocalLike } from "./local-likes.ts";
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
@@ -107,13 +108,23 @@ export function createAPI(store, config, options = {}) {
         Boolean(path[1]) &&
         path[2] === "view" &&
         method === "POST";
+      const publicLike =
+        path.length === 3 &&
+        path[0] === "posts" &&
+        Boolean(path[1]) &&
+        path[2] === "like" &&
+        method === "POST";
       if (method !== "GET" && method !== "HEAD") {
         if (req.headers.get("origin") !== config.origin)
           return json({ error: "Origin rejected" }, 403);
         if (
           !store.rate(
-            publicView ? "view-global" : "write-global",
-            publicView ? 600 : 120,
+            publicLike
+              ? "like-global"
+              : publicView
+                ? "view-global"
+                : "write-global",
+            publicView || publicLike ? 600 : 120,
           )
         )
           return json({ error: "Try later" }, 429);
@@ -270,6 +281,10 @@ export function createAPI(store, config, options = {}) {
                 b.date.localeCompare(a.date),
             ),
         );
+      }
+      if (publicLike) {
+        const post = setLocalLike(store, path[1], await body());
+        return post ? json(post) : json({ error: "Not found" }, 404);
       }
       if (publicView) {
         const post = store.recordView(path[1]);

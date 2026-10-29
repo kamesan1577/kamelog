@@ -16,6 +16,8 @@
 | I12 自動更新 | main先頭と成功CIの一致、排他、オンラインbackup、片系ずつのhealth、失敗時rollback、volume非削除 | deploy契約テスト  |
 
 閲覧・共有のE2Eは、投稿詳細URLと詳細内の戻る、ブラウザの戻る/進むが同期することも確認する。
+匿名いいねは別ブラウザへの件数反映、再送の冪等性、解除、Origin拒否、入力検証、専用rate limit、remote件数との合算を回帰対象にする。
+保存テストでは再起動とbackup/restore後の件数および重複防止状態を確認し、いいね操作で投稿revisionや日時が変わらないことも検証する。
 
 `make check` は公開検査・型検査・lint・テスト・本番buildを集約する。
 Storybookのcatalogは `npm run storybook`、production buildは `npm run storybook:build`、Storybook component testは `npm run test:storybook`、固定viewportのvisual regressionは `npm run test:visual` で実行する。CIのcheckはNode 24とPlaywrightのOS依存を導入してStorybook build/component testを実行し、e2e jobはvisual regressionも実行する。
