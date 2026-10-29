@@ -66,16 +66,20 @@ function renderToc(markdown: HTMLElement) {
     return;
   }
 
-  const parent = markdown.parentElement;
+  const readerSlot = markdown.querySelector<HTMLElement>(
+    '[data-ds="reader-toc-slot"]',
+  );
+  const parent = readerSlot || markdown.parentElement;
   if (!parent) return;
+  const before = readerSlot ? null : markdown;
 
   if (
     current &&
     current.dataset.signature === signature &&
     current.parentElement === parent
   ) {
-    if (current.nextElementSibling !== markdown) {
-      parent.insertBefore(current, markdown);
+    if (current.nextElementSibling !== before) {
+      parent.insertBefore(current, before);
     }
     return;
   }
@@ -113,7 +117,7 @@ function renderToc(markdown: HTMLElement) {
     list.append(item);
   }
   nav.append(list);
-  parent.insertBefore(nav, markdown);
+  parent.insertBefore(nav, before);
 }
 
 export function BlogTableOfContentsBridge() {

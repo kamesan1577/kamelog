@@ -38,14 +38,108 @@
   box-shadow: 0 1px 0 rgb(55 53 47 / 4%);
 }
 
-[data-ds="detail-page"]:has(> div > [data-ds="detail-markdown"]) > div > [data-ds="post-meta"] {
+[data-ds="detail-page"]:has(> div > [data-ds="detail-markdown"])
+  > div
+  > [data-ds="post-meta"] {
   margin-bottom: 26px;
 }
 
 @media (max-width: 640px) {
-  [data-ds="detail-page"] .back-button { margin-bottom: 24px; }
+  [data-ds="detail-page"] .back-button {
+    margin-bottom: 24px;
+  }
 
   [data-ds="detail-page"]:has(> div > [data-ds="detail-markdown"]) > div {
     padding: 22px 18px;
+  }
+}
+
+/* The reader owns the article surface and scroll frame. Keep legacy detail
+   layouts available outside it, without nesting a second card in the reader. */
+[data-ds="post-reader"]
+  [data-ds="detail-page"]
+  > div:has(> [data-ds="detail-markdown"]) {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+[data-ds="post-reader"] [data-ds="detail-markdown"] {
+  font-size: 15px;
+  line-height: 2.2;
+}
+
+[data-ds="post-reader"] [data-ds="detail-markdown"] h1,
+[data-ds="post-reader"] [data-ds="detail-markdown"] h2,
+[data-ds="post-reader"] [data-ds="detail-markdown"] h3 {
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif CJK JP", serif;
+  letter-spacing: 0.025em;
+  font-weight: 600;
+}
+
+[data-ds="post-reader"] [data-ds="detail-markdown"] h1 {
+  margin: 0 0 20px;
+  font-size: 32px;
+  line-height: 1.6;
+}
+
+[data-ds="post-reader"] [data-ds="detail-markdown"] h2 {
+  margin: 44px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
+  font-size: 21px;
+  line-height: 1.7;
+}
+
+[data-ds="post-reader"] [data-ds="detail-markdown"] h3 {
+  margin: 32px 0 16px;
+  font-size: 18px;
+}
+
+[data-ds="post-reader"] [data-ds="detail-markdown"] p {
+  margin: 0 0 22px;
+}
+
+[data-ds="reader-article-header"] [data-ds="post-meta"] {
+  margin-bottom: 30px;
+}
+
+[data-ds="post-reader"] [data-ds="blog-table-of-contents"] {
+  margin: 0 0 32px;
+  padding: 20px 24px;
+}
+
+[data-ds="post-reader"] [data-ds="detail-markdown"] [data-ds="blog-table-of-contents-title"] {
+  margin: 0;
+}
+
+[data-ds="post-reader"] [data-ds="blog-table-of-contents"] ol {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+[data-ds="post-reader"] [data-ds="blog-table-of-contents"] li {
+  margin: 0;
+}
+
+[data-ds="post-reader"] [data-ds="blog-table-of-contents"] a {
+  text-decoration: none;
+}
+
+@media (max-width: 700px) {
+  [data-ds="post-reader"] [data-ds="detail-markdown"] h1 {
+    font-size: 26px;
+  }
+
+  [data-ds="post-reader"] [data-ds="detail-markdown"] h2 {
+    font-size: 20px;
+  }
+
+  [data-ds="post-reader"] [data-ds="blog-table-of-contents"] {
+    padding: 16px 18px;
   }
 }

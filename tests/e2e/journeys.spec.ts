@@ -15,10 +15,9 @@ async function expectSettledEditor(page: Page) {
 
 async function expectMobileBlogActions(page: Page) {
   const actions = page.locator(
-    '[data-ds="detail-page"] [data-ds="post-actions"]',
+    '[data-ds="reader-actions"] [data-ds="post-actions"]',
   );
   await expect(actions).toHaveCount(1);
-  await expect(actions).toHaveCSS("position", "fixed");
   await expect(actions).toBeInViewport();
   await expect
     .poll(
@@ -31,12 +30,12 @@ async function expectMobileBlogActions(page: Page) {
           box.x >= 12 &&
           box.x + box.width <= 378 &&
           box.y >= 0 &&
-          box.y + box.height <= 844 - 70
+          box.y + box.height <= 844 - 56
         );
       },
       {
         message:
-          "Mobile blog actions must fit above navigation within the 390px viewport",
+          "Mobile blog actions must fit above reading progress within the 390px reader",
       },
     )
     .toBe(true);
@@ -51,13 +50,14 @@ async function expectMobileBlogActions(page: Page) {
 }
 
 async function scrollMobileContentTo(page: Page, selector: string) {
+  const scrollSelector = (await page.locator('[data-ds="post-reader"]').count())
+    ? '[data-ds="reader-scroll"]'
+    : '[data-ds="site-layout"]';
   await page
     .locator(selector)
     .first()
-    .evaluate((target) => {
-      const surface = document.querySelector<HTMLElement>(
-        '[data-ds="site-layout"]',
-      );
+    .evaluate((target, surfaceSelector) => {
+      const surface = document.querySelector<HTMLElement>(surfaceSelector);
       if (!surface) throw new Error("Mobile scroll surface is missing");
       surface.scrollTo({
         top:
@@ -67,13 +67,11 @@ async function scrollMobileContentTo(page: Page, selector: string) {
           16,
         behavior: "instant",
       });
-    });
+    }, scrollSelector);
   await expect(page.locator(selector).first()).toBeInViewport();
   await expect
     .poll(() =>
-      page
-        .locator('[data-ds="site-layout"]')
-        .evaluate((surface) => surface.scrollTop),
+      page.locator(scrollSelector).evaluate((surface) => surface.scrollTop),
     )
     .toBeGreaterThan(0);
 }
@@ -394,6 +392,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     page.locator('[data-ds="detail-page"] [data-ds="tweet-link-card"]'),
   ).toHaveCount(1);
   for (let index = 0; index < 3; index += 1) {
+    await page.getByRole("button", { name: "投稿を閉じる" }).click();
     await page
       .getByRole("button", { name: "プロジェクト", exact: true })
       .first()
@@ -401,12 +400,16 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
     await expect(page.locator('[data-ds="projects-page"]')).toBeVisible();
     await expect(page.locator('[data-ds="tweet-link-card"]')).toHaveCount(0);
     await page.goBack();
+    await page
+      .locator('[data-ds="post-preview"]')
+      .filter({ hasText: draftBody })
+      .press("Enter");
     await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
     await expect(
       page.locator('[data-ds="detail-page"] [data-ds="tweet-link-card"]'),
     ).toHaveCount(1);
   }
-  await page.getByRole("button", { name: "戻る", exact: true }).click();
+  await page.getByRole("button", { name: "投稿を閉じる" }).click();
   const inlineTweet = page.getByPlaceholder("いまどうしてる？");
   await page
     .locator('[data-ds="composer-toolbar"] .image-upload-button input')
@@ -620,7 +623,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
       }, openedPostId),
     )
     .toBe(1);
-  await page.getByRole("button", { name: "戻る", exact: true }).click();
+  await page.getByRole("button", { name: "投稿を閉じる" }).click();
   await expect(
     page.getByRole("heading", { name: "タイムライン", exact: true }),
   ).toBeVisible();
@@ -646,6 +649,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
   expect(new URL(page.url()).searchParams.get("post")).toBe(openedPostId);
 
+  await page.getByRole("button", { name: "投稿を閉じる" }).click();
   await page.locator('[data-ds="site-name"]').click();
   await expect(
     page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
@@ -655,12 +659,15 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   );
   expect(new URL(page.url()).searchParams.has("post")).toBe(false);
   await page.goBack();
+  await page
+    .getByRole("heading", { name: "架空のブログ", exact: true })
+    .click();
   await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
   expect(new URL(page.url()).searchParams.get("post")).toBe(openedPostId);
 
   await page.goto("/?post=" + openedPostId);
   await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
-  await page.getByRole("button", { name: "戻る", exact: true }).click();
+  await page.getByRole("button", { name: "投稿を閉じる" }).click();
   await expect(
     page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
   ).toBeVisible();
@@ -703,11 +710,10 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.getByRole("button", { name: "Xで共有" })).toBeVisible();
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
   const desktopBlogActions = page.locator(
-    '[data-ds="detail-page"] [data-ds="post-actions"]',
+    '[data-ds="reader-actions"] [data-ds="post-actions"]',
   );
   await expect(desktopBlogActions).toHaveCount(1);
-  await expect(desktopBlogActions).toHaveCSS("position", "sticky");
-  await expect(desktopBlogActions).toBeVisible();
+  await expect(desktopBlogActions).toBeInViewport();
   await page.screenshot({
     animations: "disabled",
     path: "ui-evidence/screen-evidence-blog-detail-desktop.png",
@@ -715,7 +721,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page
-    .locator('[data-ds="site-layout"]')
+    .locator('[data-ds="reader-scroll"]')
     .evaluate((surface) => surface.scrollTo({ top: 0, behavior: "instant" }));
   await expect(page.locator('[data-ds="detail-page"]')).toBeVisible();
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
@@ -752,6 +758,7 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
       (activity: { type: string }) => activity.type === "Create",
     ),
   ).toBe(true);
+  await page.getByRole("button", { name: "投稿を閉じる" }).click();
   await page
     .getByRole("button", { name: "タイムライン", exact: true })
     .first()
