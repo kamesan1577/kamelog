@@ -82,6 +82,13 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   page,
   context,
 }, testInfo) => {
+  // The journey verifies the handoff URL, not X's availability or login UI.
+  await context.route("https://x.com/intent/tweet?*", (route) =>
+    route.fulfill({
+      contentType: "text/html",
+      body: "<!doctype html><title>Fictional X intent</title>",
+    }),
+  );
   await page.route("**/api/link-preview?*", async (route) => {
     await route.fulfill({
       status: 200,

@@ -130,6 +130,13 @@ gatewayのhealthと匿名閲覧・ログイン・投稿を確認する。
 schema非互換変更時は古いimageだけに戻さず、更新前backupを空volumeへ復元する。
 旧volumeは検証完了まで保持する。
 
+schema 12では匿名いいねの重複防止用 `local_post_likes` tableを追加する。
+既存の投稿や保存済みlocal likesを置き換えず、更新時に通常のmigrationで追加する。
+新しいいいねrecordはSQLite backupに含まれ、復元時も合計値と重複防止状態を一緒に戻す。
+従来の `kamelog-likes` は各ブラウザにだけ存在した押下状態のため、サーバーから過去の件数を回収できない。
+新しいブラウザ保存キーから記録を始め、旧キーの内容を一括送信しない。
+隔離した検証環境の架空データで、別ブラウザ間の件数反映、同一操作の再送、解除、再起動後の保持、backup/restoreを検証する。
+
 ## バックアップ
 
 SQLite backup APIのsnapshotを先に作り、DB登録前に確定して以後不変の媒体を同じbackupへコピーする。通常backupでアプリを停止しない。媒体の変更・削除を実装する場合はこの前提を再設計する。
