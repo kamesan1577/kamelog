@@ -853,21 +853,23 @@ export default function Notebook({
     clipData = useRef<Blob | null>(null),
     urls = useRef<string[]>([]);
   useEffect(() => {
-    const stored = {
-      blog:
-        localStorage.getItem("kamelog:x-intent:blog") === null
-          ? true
-          : localStorage.getItem("kamelog:x-intent:blog") === "true",
-      tweet:
-        localStorage.getItem("kamelog:x-intent:tweet") === null
-          ? true
-          : localStorage.getItem("kamelog:x-intent:tweet") === "true",
-      vlog:
-        localStorage.getItem("kamelog:x-intent:vlog") === null
-          ? false
-          : localStorage.getItem("kamelog:x-intent:vlog") === "true",
-    };
-    queueMicrotask(() => setXIntent(stored));
+    try {
+      const stored = {
+        blog:
+          localStorage.getItem("kamelog:x-intent:blog") === null
+            ? true
+            : localStorage.getItem("kamelog:x-intent:blog") === "true",
+        tweet:
+          localStorage.getItem("kamelog:x-intent:tweet") === null
+            ? true
+            : localStorage.getItem("kamelog:x-intent:tweet") === "true",
+        vlog:
+          localStorage.getItem("kamelog:x-intent:vlog") === null
+            ? false
+            : localStorage.getItem("kamelog:x-intent:vlog") === "true",
+      };
+      queueMicrotask(() => setXIntent(stored));
+    } catch {}
   }, []);
   const toggleXIntent = (target: Kind) => {
     const next = !xIntent[target];
