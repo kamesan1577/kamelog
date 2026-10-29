@@ -16,6 +16,28 @@ export function MediaGallery({
 }: MediaGalleryProps) {
   const [large, setLarge] = React.useState<string | null>(null);
   const triggerRef = React.useRef<HTMLButtonElement | null>(null);
+  const lightboxRef = React.useRef<HTMLDivElement | null>(null);
+
+  React.useLayoutEffect(() => {
+    if (!large) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (
+        event.key !== "Escape" ||
+        !(event.target instanceof Node) ||
+        !lightboxRef.current?.contains(event.target)
+      ) {
+        return;
+      }
+      // A parent Radix layer can retain its document-capture listener until
+      // passive effects run. Consume the lightbox's Escape before that listener.
+      event.preventDefault();
+      event.stopPropagation();
+      setLarge(null);
+    };
+    window.addEventListener("keydown", closeOnEscape, true);
+    return () => window.removeEventListener("keydown", closeOnEscape, true);
+  }, [large]);
+
   if (!images.length) return null;
   return (
     <>
@@ -37,6 +59,7 @@ export function MediaGallery({
       </div>
       <Dialog open={!!large} onOpenChange={(open) => !open && setLarge(null)}>
         <DialogContent
+          ref={lightboxRef}
           data-ds="media-gallery-lightbox"
           onCloseAutoFocus={(event) => {
             event.preventDefault();

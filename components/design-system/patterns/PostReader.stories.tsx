@@ -9,6 +9,7 @@ import {
   within,
 } from "storybook/test";
 import { PostReader, type PostReaderProps } from "./PostReader";
+import { MediaGallery } from "./MediaGallery";
 
 function ReaderExample(args: PostReaderProps) {
   const [open, setOpen] = useState(false);
@@ -148,5 +149,38 @@ export const LongArticle: Story = {
     scroll.scrollTop = 0;
     fireEvent.scroll(scroll);
     await waitFor(() => expect(progress).toHaveAttribute("aria-valuenow", "0"));
+  },
+};
+
+export const NestedImage: Story = {
+  args: {
+    title: "画像付きの投稿",
+    kind: "tweet",
+    onClose: fn(),
+    children: <MediaGallery images={["/github-mark.svg"]} />,
+  },
+  play: async ({ canvasElement, args }) => {
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "投稿を読む" }),
+    );
+    const page = within(canvasElement.ownerDocument.body);
+    const reader = await page.findByRole("dialog", { name: "画像付きの投稿" });
+    const imageTrigger = within(reader).getByRole("button", {
+      name: "画像1を拡大",
+    });
+    for (let index = 0; index < 3; index += 1) {
+      await userEvent.click(imageTrigger);
+      const lightbox = await page.findByRole("dialog", { name: "添付画像" });
+      await waitFor(() =>
+        expect(
+          within(lightbox).getByRole("button", { name: "Close" }),
+        ).toHaveFocus(),
+      );
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => expect(lightbox).not.toBeInTheDocument());
+      await expect(reader).toBeVisible();
+      await waitFor(() => expect(imageTrigger).toHaveFocus());
+    }
+    await expect(args.onClose).not.toHaveBeenCalled();
   },
 };
