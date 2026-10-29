@@ -60,16 +60,18 @@ function DialogOverlay({
 
 function DialogContent({
   className,
+  overlayDataDs,
   children,
   showCloseButton = true,
   onOpenAutoFocus,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  overlayDataDs?: string
 }) {
   return (
     <DialogPortal data-slot="dialog-portal">
-      <DialogOverlay />
+      <DialogOverlay data-ds={overlayDataDs} />
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
@@ -122,6 +124,7 @@ function DialogFooter({
   ...props
 }: React.ComponentProps<"div"> & {
   showCloseButton?: boolean
+  overlayDataDs?: string
 }) {
   return (
     <div

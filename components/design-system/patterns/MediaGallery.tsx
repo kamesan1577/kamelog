@@ -1,10 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import * as React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import "./MediaGallery.css";
 
 export interface MediaGalleryProps {
@@ -19,6 +15,7 @@ export function MediaGallery({
   buttonClassName,
 }: MediaGalleryProps) {
   const [large, setLarge] = React.useState<string | null>(null);
+  const triggerRef = React.useRef<HTMLButtonElement | null>(null);
   if (!images.length) return null;
   return (
     <>
@@ -28,7 +25,10 @@ export function MediaGallery({
             type="button"
             className={buttonClassName}
             key={src}
-            onClick={() => setLarge(src)}
+            onClick={(event) => {
+              triggerRef.current = event.currentTarget;
+              setLarge(src);
+            }}
             aria-label={`画像${index + 1}を拡大`}
           >
             <img src={src} alt={`添付画像 ${index + 1}`} />
@@ -36,7 +36,13 @@ export function MediaGallery({
         ))}
       </div>
       <Dialog open={!!large} onOpenChange={(open) => !open && setLarge(null)}>
-        <DialogContent data-ds="media-gallery-lightbox">
+        <DialogContent
+          data-ds="media-gallery-lightbox"
+          onCloseAutoFocus={(event) => {
+            event.preventDefault();
+            triggerRef.current?.focus({ preventScroll: true });
+          }}
+        >
           <DialogTitle>添付画像</DialogTitle>
           {large && <img src={large} alt="拡大した添付画像" />}
         </DialogContent>

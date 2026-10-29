@@ -6,9 +6,9 @@ import {
   useId,
   useRef,
   useState,
+  type ReactNode,
 } from "react";
 import {
-  ArrowLeft,
   ArrowUpRight,
   Check,
   ChevronDown,
@@ -43,6 +43,7 @@ import { PageHeader } from "@/components/design-system/patterns/PageHeader";
 import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
 import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToolbar";
 import { PostMeta } from "@/components/design-system/patterns/PostMeta";
+import { PostReader } from "@/components/design-system/patterns/PostReader";
 import { PostPreview } from "@/components/design-system/patterns/PostPreview";
 import { TimelineItem } from "@/components/design-system/patterns/TimelineItem";
 import { InlineComposer } from "@/components/design-system/patterns/InlineComposer";
@@ -351,7 +352,13 @@ function EmbeddedLink({ href }: { href: string }) {
   return null;
 }
 
-export function Markdown({ text }: { text: string }) {
+export function Markdown({
+  text,
+  articleMeta,
+}: {
+  text: string;
+  articleMeta?: ReactNode;
+}) {
   return (
     <div data-ds="detail-markdown" className="markdown">
       <ReactMarkdown
@@ -359,6 +366,17 @@ export function Markdown({ text }: { text: string }) {
         rehypePlugins={[[rehypeHighlight, { detect: false }]]}
         skipHtml
         components={{
+          h1({ children, node }) {
+            return articleMeta && node?.position?.start.line === 1 ? (
+              <header data-ds="reader-article-header">
+                <h1>{children}</h1>
+                {articleMeta}
+                <div data-ds="reader-toc-slot" />
+              </header>
+            ) : (
+              <h1>{children}</h1>
+            );
+          },
           code({ className, children }) {
             return className?.split(" ").includes("language-mermaid") ? (
               <MermaidDiagram chart={String(children).trim()} />
@@ -846,6 +864,8 @@ export default function Notebook({
     [count, setCount] = useState(0),
     [cameraError, setCameraError] = useState("");
   const cameraRequest = useRef(0);
+  const [readerReturnFocusSelector, setReaderReturnFocusSelector] =
+    useState<string>();
   const live = useRef<HTMLVideoElement>(null),
     bodyInput = useRef<HTMLTextAreaElement>(null),
     titleInput = useRef<HTMLInputElement>(null),
@@ -1091,6 +1111,14 @@ export default function Notebook({
     refreshing: refreshBusy,
   });
   const openPost = (id: string) => {
+    const opener = document.activeElement?.closest<HTMLElement>(
+      "[data-reader-opener]",
+    );
+    if (opener?.dataset.readerOpener) {
+      setReaderReturnFocusSelector(
+        `[data-reader-opener="${CSS.escape(opener.dataset.readerOpener)}"]`,
+      );
+    }
     if (postFromLocation() !== id) {
       window.history.pushState(
         navigationHistoryState({ view: "home", post: id, internal: true }),
@@ -1103,6 +1131,12 @@ export default function Notebook({
     setTag("");
   };
   const closePost = () => {
+    if (
+      !document.dispatchEvent(
+        new Event("kamelog:before-reader-close", { cancelable: true }),
+      )
+    )
+      return;
     const post = postFromLocation();
     if (!post) {
       setSelected(null);
@@ -1647,37 +1681,56 @@ export default function Notebook({
       kindLabelClassName={"type-label " + p.kind}
     />
   );
-  const toggleLike = async (post: Post) => {
-    if (!ready || !likeClientId.current || pendingLikes.current.has(post.id))
-      return;
-    pendingLikes.current.add(post.id);
-    setLikeBusy((current) => [...current, post.id]);
-    const nextLiked = !liked.includes(post.id);
-    try {
-      const saved = await api<Post>(`posts/${post.id}/like`, "POST", {
-        clientId: likeClientId.current,
-        liked: nextLiked,
+  const toggleLike = useCallback(
+    async (post: Post) => {
+      if (!ready || !likeClientId.current || pendingLikes.current.has(post.id))
+        return;
+      pendingLikes.current.add(post.id);
+      setLikeBusy((current) => [...current, post.id]);
+      const nextLiked = !liked.includes(post.id);
+      try {
+        const saved = await api<Post>(`posts/${post.id}/like`, "POST", {
+          clientId: likeClientId.current,
+          liked: nextLiked,
+        });
+        setPosts((current) =>
+          current.map((item) =>
+            item.id === post.id ? { ...item, likes: saved.likes } : item,
+          ),
+        );
+        setLiked((current) =>
+          nextLiked
+            ? [...current.filter((id) => id !== post.id), post.id]
+            : current.filter((id) => id !== post.id),
+        );
+      } catch (error) {
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "いいねを保存できませんでした。",
+        );
+      } finally {
+        pendingLikes.current.delete(post.id);
+        setLikeBusy((current) => current.filter((id) => id !== post.id));
+      }
+    },
+    [liked, ready],
+  );
+  const togglePinned = (p: Post) => {
+    void guard(async () => {
+      await api("posts/" + p.id, "PUT", {
+        kind: p.kind,
+        title: p.title,
+        body: p.body,
+        tags: p.tags,
+        pinned: !p.pinned,
+        revision: p.revision,
+        ...(p.video ? { video: p.video, time: p.time } : {}),
+        images: p.images || [],
+        federationEnabled: p.federationEnabled === true,
       });
-      setPosts((current) =>
-        current.map((item) =>
-          item.id === post.id ? { ...item, likes: saved.likes } : item,
-        ),
-      );
-      setLiked((current) =>
-        nextLiked
-          ? [...current.filter((id) => id !== post.id), post.id]
-          : current.filter((id) => id !== post.id),
-      );
-    } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "いいねを保存できませんでした。",
-      );
-    } finally {
-      pendingLikes.current.delete(post.id);
-      setLikeBusy((current) => current.filter((id) => id !== post.id));
-    }
+      await refresh();
+    });
   };
   const actions = (p: Post) => (
     <PostActions className="post-actions">
@@ -1686,7 +1739,9 @@ export default function Notebook({
         disabled={!ready || likeBusy.includes(p.id)}
         aria-label={liked.includes(p.id) ? "いいねを取り消す" : "いいね"}
         aria-pressed={liked.includes(p.id)}
-        onClick={() => void toggleLike(p)}
+        onClick={() => {
+          void toggleLike(p);
+        }}
       >
         <Heart
           size={17}
@@ -1727,24 +1782,7 @@ export default function Notebook({
                 編集
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem
-              onClick={() =>
-                guard(async () => {
-                  await api("posts/" + p.id, "PUT", {
-                    kind: p.kind,
-                    title: p.title,
-                    body: p.body,
-                    tags: p.tags,
-                    pinned: !p.pinned,
-                    revision: p.revision,
-                    ...(p.video ? { video: p.video, time: p.time } : {}),
-                    images: p.images || [],
-                    federationEnabled: p.federationEnabled === true,
-                  });
-                  await refresh();
-                })
-              }
-            >
+            <DropdownMenuItem onClick={() => togglePinned(p)}>
               <Pin />
               固定
             </DropdownMenuItem>
@@ -2382,78 +2420,86 @@ export default function Notebook({
                   />
                 </section>
               ) : item ? (
-                <section
-                  data-ds="detail-page"
-                  className={`detail-page${
-                    item.kind === "tweet" ? " tweet-thread-detail" : ""
-                  }`}
+                <PostReader
+                  postId={item.id}
+                  title={item.kind === "blog" ? item.title : label[item.kind]}
+                  kind={item.kind}
+                  onClose={closePost}
+                  returnFocusSelector={readerReturnFocusSelector}
+                  actions={item.kind === "blog" ? actions(item) : undefined}
                 >
-                  <button className="back-button" onClick={closePost}>
-                    <ArrowLeft size={17} />
-                    戻る
-                  </button>
-                  <TweetThreadDetail
-                    posts={posts}
-                    selectedId={selected}
-                    authenticated={login}
-                    federationAvailable={Boolean(federationStatus?.enabled)}
-                    onOpenPost={openPost}
-                    onPostCreated={(saved) =>
-                      setPosts((current) => [saved as Post, ...current])
-                    }
-                    enabled={item.kind === "tweet"}
+                  <section
+                    data-ds="detail-page"
+                    className={`detail-page${
+                      item.kind === "tweet" ? " tweet-thread-detail" : ""
+                    }`}
                   >
-                    <div
-                      className={
-                        item.kind === "tweet" ? threadStyles.current : undefined
+                    <TweetThreadDetail
+                      posts={posts}
+                      selectedId={selected}
+                      authenticated={login}
+                      federationAvailable={Boolean(federationStatus?.enabled)}
+                      onOpenPost={openPost}
+                      onPostCreated={(saved) =>
+                        setPosts((current) => [saved as Post, ...current])
                       }
+                      enabled={item.kind === "tweet"}
                     >
-                      {item.kind === "tweet" && (
-                        <span className={threadStyles.currentLabel}>
-                          表示中の投稿
-                        </span>
-                      )}
-                      {meta(item)}
-                      {item.kind === "blog" ? (
-                        <Markdown
-                          text={
-                            item.body.startsWith("# ")
-                              ? item.body
-                              : "# " + item.title + "\n\n" + item.body
-                          }
-                        />
-                      ) : item.kind === "vlog" ? (
-                        <VlogFrame post={item} />
-                      ) : (
-                        <p data-ds="tweet-body" className="tweet-body">
-                          {item.body}
-                        </p>
-                      )}
-                      {item.kind === "tweet" && (
-                        <ImageGallery images={item.images} />
-                      )}
-                      <TagList
-                        className="tags"
-                        tags={item.tags}
-                        automaticTags={item.autoTags?.map((tag) => tag.tag)}
-                        renderTag={(tag, automatic) => (
-                          <Badge
-                            variant="gray"
-                            title={
-                              automatic ? "自動で付与されたタグ" : undefined
-                            }
-                            aria-label={
-                              automatic ? "自動タグ " + tag : undefined
-                            }
-                          >
-                            {automatic ? "AI · " + tag : tag}
-                          </Badge>
+                      <div
+                        className={
+                          item.kind === "tweet"
+                            ? threadStyles.current
+                            : undefined
+                        }
+                      >
+                        {item.kind === "tweet" && (
+                          <span className={threadStyles.currentLabel}>
+                            表示中の投稿
+                          </span>
                         )}
-                      />
-                      {actions(item)}
-                    </div>
-                  </TweetThreadDetail>
-                </section>
+                        {item.kind !== "blog" && meta(item)}
+                        {item.kind === "blog" ? (
+                          <Markdown
+                            articleMeta={meta(item)}
+                            text={
+                              item.body.startsWith("# ")
+                                ? item.body
+                                : "# " + item.title + "\n\n" + item.body
+                            }
+                          />
+                        ) : item.kind === "vlog" ? (
+                          <VlogFrame post={item} />
+                        ) : (
+                          <p data-ds="tweet-body" className="tweet-body">
+                            {item.body}
+                          </p>
+                        )}
+                        {item.kind === "tweet" && (
+                          <ImageGallery images={item.images} />
+                        )}
+                        <TagList
+                          className="tags"
+                          tags={item.tags}
+                          automaticTags={item.autoTags?.map((tag) => tag.tag)}
+                          renderTag={(tag, automatic) => (
+                            <Badge
+                              variant="gray"
+                              title={
+                                automatic ? "自動で付与されたタグ" : undefined
+                              }
+                              aria-label={
+                                automatic ? "自動タグ " + tag : undefined
+                              }
+                            >
+                              {automatic ? "AI · " + tag : tag}
+                            </Badge>
+                          )}
+                        />
+                        {item.kind !== "blog" && actions(item)}
+                      </div>
+                    </TweetThreadDetail>
+                  </section>
+                </PostReader>
               ) : view === "home" ? (
                 <section data-ds="landing-page" className="landing-page">
                   <div className="landing-intro">
@@ -2542,6 +2588,7 @@ export default function Notebook({
                         <button
                           data-ds="featured-post"
                           className="featured-post"
+                          data-reader-opener={featuredPost.id}
                           onClick={() => openPost(featuredPost.id)}
                         >
                           <span className="featured-meta">
@@ -2880,6 +2927,7 @@ export default function Notebook({
                                   <VlogFrame post={p} />
                                   <button
                                     className="open-vlog-detail"
+                                    data-reader-opener={p.id}
                                     onClick={() => openPost(p.id)}
                                   >
                                     詳細
@@ -2887,6 +2935,7 @@ export default function Notebook({
                                 </div>
                               ) : (
                                 <PostPreview
+                                  data-reader-opener={p.id}
                                   title={
                                     p.kind === "blog" ? p.title : undefined
                                   }

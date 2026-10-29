@@ -257,11 +257,20 @@ export default function TweetThreadDetail({
     const onPointerDown = (event: PointerEvent) => {
       if (!composerRef.current?.contains(event.target as Node)) closeComposer();
     };
+    const onReaderClose = (event: Event) => {
+      event.preventDefault();
+      closeComposer();
+    };
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("kamelog:before-reader-close", onReaderClose);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener(
+        "kamelog:before-reader-close",
+        onReaderClose,
+      );
     };
   }, [closeComposer, composing]);
 

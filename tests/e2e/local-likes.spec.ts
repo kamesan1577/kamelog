@@ -40,7 +40,7 @@ async function seedPost() {
 
 const likeButton = (page: Page) =>
   page
-    .locator('[data-ds="detail-page"] [data-ds="post-actions"] button')
+    .locator('[data-ds="reader-actions"] [data-ds="post-actions"] button')
     .first();
 
 for (const width of [1280, 390]) {
