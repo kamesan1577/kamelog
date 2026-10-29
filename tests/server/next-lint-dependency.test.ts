@@ -17,6 +17,9 @@ const pluginRoot = dirname(
   require.resolve("@next/eslint-plugin-next/package.json"),
 );
 const pluginRequire = createRequire(join(pluginRoot, "package.json"));
+const nextConfigRequire = createRequire(
+  require.resolve("eslint-config-next/core-web-vitals"),
+);
 const helperPath = "dist/utils/get-root-dirs.js";
 const reviewedHelperSha =
   "886677432990a735e5ebdfb345ff1cbd40e264f9947a8432eeeb254b3a926bde";
@@ -117,8 +120,8 @@ test("the Next glob replacement is scoped and pinned to the reviewed packages", 
       ),
     })
     .parse(json(join(root, "package.json")));
-  assert.equal(manifest.devDependencies["eslint-config-next"], "16.3.8");
-  assert.deepEqual(manifest.overrides["@next/eslint-plugin-next@16.3.8"], {
+  assert.equal(manifest.devDependencies["eslint-config-next"], "16.4.3");
+  assert.deepEqual(manifest.overrides["@next/eslint-plugin-next@16.4.3"], {
     "fast-glob": "npm:tinyglobby@0.2.17",
   });
   assert.equal(manifest.overrides["fast-glob"], undefined);
@@ -127,7 +130,7 @@ test("the Next glob replacement is scoped and pinned to the reviewed packages", 
     packageSchema.parse(json(join(pluginRoot, "package.json"))),
     {
       name: "@next/eslint-plugin-next",
-      version: "16.3.8",
+      version: "16.4.3",
     },
   );
   assert.deepEqual(
@@ -211,18 +214,34 @@ test("the root guard rejects rootDir on callable or inherited Next settings", ()
   }
 });
 
-test("all notebook rules and settings match the pre-replacement baseline", async () => {
+test("all notebook rules and settings retain the baseline with reviewed resolver paths", async () => {
   const eslint = new ESLint({ cwd: root });
   const config = await eslint.calculateConfigForFile(
     join(root, "app/notebook.tsx"),
   );
   assert.ok(config);
+  // Next 16.4.3 resolves these packages from its own dependency tree instead
+  // of asking eslint-plugin-import to resolve short names from the linted file.
+  // Verify both exact targets and options before normalizing machine-specific
+  // paths. All remaining rules/settings still use the original baseline hash.
+  const nodeResolver = nextConfigRequire.resolve("eslint-import-resolver-node");
+  const typescriptResolver = nextConfigRequire.resolve(
+    "eslint-import-resolver-typescript",
+  );
+  const resolverOptions = {
+    node: { extensions: [".js", ".jsx", ".ts", ".tsx"] },
+    typescript: { alwaysTryTypes: true },
+  };
+  assert.deepEqual(config.settings["import/resolver"], {
+    [nodeResolver]: resolverOptions.node,
+    [typescriptResolver]: resolverOptions.typescript,
+  });
+  const settings = {
+    ...config.settings,
+    "import/resolver": resolverOptions,
+  };
   assert.equal(
-    hash(
-      JSON.stringify(
-        canonical({ rules: config.rules, settings: config.settings }),
-      ),
-    ),
+    hash(JSON.stringify(canonical({ rules: config.rules, settings }))),
     originalNotebookConfigSha,
     "The dependency fix must not change the existing effective lint configuration",
   );
@@ -266,7 +285,7 @@ for (const router of ["pages", "src/pages", "app", "src/app"]) {
     assert.ok(config);
     assertDefaultRoot(config.settings, filePath);
 
-    // The upstream 16.3.8 App Router URL matcher supports this root route;
+    // The upstream 16.4.3 App Router URL matcher supports this root route;
     // nested App Router matching has a pre-existing trailing-slash mismatch.
     const href = router.endsWith("pages") ? "/fixture-destination" : "/";
     const cases = [
