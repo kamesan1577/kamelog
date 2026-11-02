@@ -1,5 +1,8 @@
 # デプロイ前と運用
 
+Cloudflareへの保存先移行と出力、ローカルへの復元は[Cloudflare保存先の運用](cloud-storage.md)を参照。
+以下のローカルSQLite運用は既定の保存方式として維持する。
+
 ## 公開ゲート
 
 - [ ] clean checkoutからnpm ciとmake checkが成功

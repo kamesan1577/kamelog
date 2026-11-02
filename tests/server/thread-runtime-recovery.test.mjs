@@ -8,7 +8,7 @@ import {
   JevThreadInference,
 } from "../../server/inference/jev-client.mjs";
 import { InferenceFailure } from "../../server/inference/ports.mjs";
-import { Store } from "../../server/store.mjs";
+import { Store } from "../../server/storage/local-store.ts";
 import { processThreadInferenceJobs } from "../../server/thread-inference.mjs";
 
 async function withStore(fn) {

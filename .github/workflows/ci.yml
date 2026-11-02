@@ -98,7 +98,7 @@ jobs:
             sleep 1
           done
           test "$ready" = 1
-          docker exec kamelog-ci node --input-type=module -e "import {Store} from './server/store.mjs'; const store=new Store('/data'); store.save('posts','container-fixture',{kind:'tweet',body:'fictional persisted post',tags:[],date:'2026-01-01T00:00:00.000Z'}); store.close()"
+          docker exec kamelog-ci node --input-type=module -e "import {Store} from './server/storage/local-store.ts'; const store=new Store('/data'); store.save('posts','container-fixture',{kind:'tweet',body:'fictional persisted post',tags:[],date:'2026-01-01T00:00:00.000Z'}); store.close()"
           docker exec kamelog-ci node scripts/auto-tag.ts
           docker exec kamelog-ci node scripts/auto-thread.ts
           docker restart kamelog-ci

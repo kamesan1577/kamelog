@@ -1,3 +1,4 @@
+import { executeCommand } from "./storage/commands.ts";
 import {
   createHash,
   createSign,
@@ -316,43 +317,16 @@ async function inbox(store, request, options) {
           options.fetchOptions,
         ).toString()
       : null;
-    store.transaction(() => {
-      if (
-        !store.recordFederationActivity({
-          id: activity.id,
-          actorId: actor.id,
-          type: activity.type,
-          receivedAt,
-        })
-      )
-        return;
-      store.saveFederationFollower({
+    executeCommand(store, "receiveFollow", [
+      {
+        config: { origin: options.config.origin },
+        activity,
         actorId: actor.id,
         inboxUrl,
         sharedInboxUrl,
-        followActivityId: activity.id,
-        followedAt: receivedAt,
-      });
-      const acceptId = `${options.config.origin}/activitypub/activities/accept/${createHash("sha256").update(activity.id).digest("hex")}`;
-      store.enqueueFederationActivity(
-        {
-          id: acceptId,
-          type: "Accept",
-          objectId: activity.id,
-          createdAt: receivedAt,
-          nextAttemptAt: Date.parse(receivedAt),
-          body: {
-            "@context": ACTIVITY_STREAMS,
-            id: acceptId,
-            type: "Accept",
-            actor: localActor,
-            object: activity,
-            to: [actor.id],
-          },
-        },
-        [sharedInboxUrl || inboxUrl],
-      );
-    });
+        receivedAt,
+      },
+    ]);
     return new Response(null, { status: 202 });
   }
   await processIncomingRemoteActivity(store, activity, actor, options);

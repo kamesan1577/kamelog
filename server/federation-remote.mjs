@@ -1,16 +1,11 @@
-import { randomUUID } from "node:crypto";
+import { executeCommand } from "./storage/commands.ts";
 import { Conflict } from "./store.mjs";
 import {
   fetchFederationJson,
   normalizeFederationUrl,
 } from "./federation-fetch.mjs";
-import {
-  ACTIVITY_STREAMS,
-  localObjectUrl,
-  PUBLIC_AUDIENCE,
-} from "./federation-outbound.mjs";
+import { PUBLIC_AUDIENCE } from "./federation-outbound.mjs";
 import { sanitizeRemoteHtml } from "./federation-content.mjs";
-import { enqueueFederationRepostUndo } from "./federation-reposts.mjs";
 
 const ACTOR_TYPES = new Set([
   "Person",
@@ -25,7 +20,6 @@ const IMAGE_TYPES = new Set([
   "image/webp",
   "image/gif",
 ]);
-const POSITIVE_REACTIONS = new Set(["Like", "EmojiReact"]);
 
 export class InvalidFederationHandle extends TypeError {}
 
@@ -136,76 +130,23 @@ export async function resolveRemoteHandle(value, options = {}) {
 export async function followRemoteActor(store, config, handle, options = {}) {
   if (!store.federationIdentity()) throw new Conflict("Federation is disabled");
   const actor = await resolveRemoteHandle(handle, options);
-  if (store.federationFollowing(actor.actorId))
-    throw new Conflict("Already following");
-  const now = options.now || new Date();
-  const localActor = `${config.origin}/activitypub/actor`;
-  const activityId = `${config.origin}/activitypub/activities/follow/${randomUUID()}`;
-  const body = {
-    "@context": ACTIVITY_STREAMS,
-    id: activityId,
-    type: "Follow",
-    actor: localActor,
-    object: actor.actorId,
-    to: [actor.actorId],
-  };
-  return store.transaction(() => {
-    store.saveFederationRemoteActor(actor);
-    const following = store.saveFederationFollowing({
-      actorId: actor.actorId,
-      state: "pending",
-      followActivityId: activityId,
-      createdAt: now.toISOString(),
-      updatedAt: now.toISOString(),
-    });
-    store.enqueueFederationActivity(
-      {
-        id: activityId,
-        type: "Follow",
-        objectId: actor.actorId,
-        body,
-        createdAt: now.toISOString(),
-        nextAttemptAt: now.getTime(),
-      },
-      [actor.sharedInboxUrl || actor.inboxUrl],
-    );
-    return following;
-  });
+  return executeCommand(store, "followActor", [
+    {
+      config: { origin: config.origin },
+      actor,
+      now: (options.now || new Date()).getTime(),
+    },
+  ]);
 }
 
 export function unfollowRemoteActor(store, config, actorId, now = new Date()) {
-  const following = store.federationFollowing(actorId);
-  const actor = store.federationRemoteActor(actorId);
-  if (!following || !actor) throw new Conflict("Not following");
-  const original = store.federationOutboundActivity(
-    following.followActivityId,
-  )?.body;
-  if (!original) throw new Conflict("Follow activity is unavailable");
-  const localActor = `${config.origin}/activitypub/actor`;
-  const activityId = `${config.origin}/activitypub/activities/undo-follow/${randomUUID()}`;
-  const body = {
-    "@context": ACTIVITY_STREAMS,
-    id: activityId,
-    type: "Undo",
-    actor: localActor,
-    object: original,
-    to: [actor.actorId],
-  };
-  return store.transaction(() => {
-    store.enqueueFederationActivity(
-      {
-        id: activityId,
-        type: "Undo",
-        objectId: following.followActivityId,
-        body,
-        createdAt: now.toISOString(),
-        nextAttemptAt: now.getTime(),
-      },
-      [actor.sharedInboxUrl || actor.inboxUrl],
-    );
-    store.removeFederationFollowing(actorId);
-    return { ok: true };
-  });
+  return executeCommand(store, "unfollowActor", [
+    {
+      config: { origin: config.origin },
+      actorId,
+      now: now.getTime(),
+    },
+  ]);
 }
 
 function activityObjectId(value) {
@@ -276,23 +217,6 @@ function followed(store, actorId) {
   return store.federationFollowing(actorId)?.state === "accepted";
 }
 
-function localReactionPost(store, config, object) {
-  if (!config) return null;
-  const objectId = activityObjectId(object);
-  const prefix = `${config.origin}/activitypub/objects/`;
-  if (!objectId?.startsWith(prefix)) return null;
-  let postId;
-  try {
-    postId = decodeURIComponent(objectId.slice(prefix.length));
-  } catch {
-    return null;
-  }
-  const post = store.get("posts", postId);
-  return post?.federationEnabled && localObjectUrl(config, postId) === objectId
-    ? post
-    : null;
-}
-
 export async function processIncomingRemoteActivity(
   store,
   activity,
@@ -321,129 +245,18 @@ export async function processIncomingRemoteActivity(
         : activity.object;
     note = normalizeRemoteNote(object, receivedAt, options);
   }
-  return store.transaction(() => {
-    if (
-      !store.recordFederationActivity({
-        id: activity.id,
-        actorId: actor.actorId,
-        type: activity.type.slice(0, 80),
-        receivedAt,
-      })
-    )
-      return false;
-    store.saveFederationRemoteActor(actor);
-    if (activity.type === "Accept" || activity.type === "Reject") {
-      const followId = activityObjectId(activity.object);
-      if (followId)
-        store.updateFederationFollowingState(
-          actor.actorId,
-          followId,
-          activity.type === "Accept" ? "accepted" : "rejected",
-          receivedAt,
-        );
-      return true;
-    }
-    if (activity.type === "Undo") {
-      const undone = activity.object;
-      const undoneId = activityObjectId(undone);
-      if (undoneId)
-        store.undoFederationRemoteReaction(undoneId, actor.actorId, receivedAt);
-      if (undoneId && (typeof undone === "string" || undone?.type === "Follow"))
-        store.removeFederationFollower(actor.actorId, undoneId);
-      if (
-        undoneId &&
-        (typeof undone === "string" || undone?.type === "Announce")
-      )
-        store.undoFederationTimelineEntry(undoneId, actor.actorId, receivedAt);
-      return true;
-    }
-    if (POSITIVE_REACTIONS.has(activity.type)) {
-      const post = localReactionPost(store, options.config, activity.object);
-      if (post)
-        store.saveFederationRemoteReaction({
-          postId: post.id,
-          actorId: actor.actorId,
-          activityId: activity.id,
-          type: activity.type,
-          reactedAt: receivedAt,
-        });
-      return true;
-    }
-    if (!followed(store, actor.actorId) && activity.type !== "Delete")
-      return true;
-    if (activity.type === "Create" && note) {
-      if (note.actorId !== actor.actorId) return true;
-      if (!store.saveFederationRemoteObject(note)) return true;
-      store.saveFederationTimelineEntry({
-        activityId: activity.id,
-        actorId: actor.actorId,
-        type: "Create",
-        objectId: note.objectId,
-        publishedAt: note.publishedAt,
-        receivedAt,
-      });
-      return true;
-    }
-    if (activity.type === "Update" && note) {
-      const existing = store.federationRemoteObject(note.objectId);
-      if (existing?.actorId === actor.actorId && note.actorId === actor.actorId)
-        store.saveFederationRemoteObject(note);
-      return true;
-    }
-    if (activity.type === "Delete") {
-      const objectId = activityObjectId(activity.object);
-      if (objectId) {
-        if (
-          store.undoFederationRemoteReaction(
-            objectId,
-            actor.actorId,
-            receivedAt,
-          )
-        )
-          return true;
-        const normalizedObjectId = normalizedUrl(
-          objectId,
-          options.fetchOptions,
-        );
-        const existing = store.federationRemoteObject(normalizedObjectId);
-        if (
-          existing?.actorId === actor.actorId &&
-          store.federationRepost(normalizedObjectId)
-        ) {
-          if (options.config)
-            enqueueFederationRepostUndo(
-              store,
-              options.config,
-              normalizedObjectId,
-              now,
-            );
-          else store.undoFederationRepost(normalizedObjectId, receivedAt);
-        }
-        if (existing?.actorId === actor.actorId)
-          store.deleteFederationRemoteObject(
-            normalizedObjectId,
-            actor.actorId,
-            receivedAt,
-          );
-      }
-      return true;
-    }
-    if (activity.type === "Announce" && note) {
-      if (!store.saveFederationRemoteObject(note)) return true;
-      store.saveFederationTimelineEntry({
-        activityId: activity.id,
-        actorId: actor.actorId,
-        type: "Announce",
-        objectId: note.objectId,
-        publishedAt: new Date(
-          Number.isFinite(Date.parse(activity.published || ""))
-            ? Date.parse(activity.published)
-            : Date.parse(note.publishedAt),
-        ).toISOString(),
-        receivedAt,
-      });
-      return true;
-    }
-    return true;
-  });
+  const deletedId =
+    activity.type === "Delete" ? activityObjectId(activity.object) : null;
+  return executeCommand(store, "receiveRemoteActivity", [
+    {
+      activity,
+      actor,
+      note,
+      receivedAt,
+      config: options.config ? { origin: options.config.origin } : null,
+      deleteObjectId: deletedId
+        ? normalizedUrl(deletedId, options.fetchOptions)
+        : null,
+    },
+  ]);
 }

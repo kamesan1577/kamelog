@@ -2,7 +2,7 @@ import { access, readdir, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test, type Locator, type Page } from "@playwright/test";
-import { Store } from "../../server/store.mjs";
+import { Store } from "../../server/storage/local-store.ts";
 
 const blogId = "fictional-reader-blog";
 const tweetId = "fictional-reader-tweet";

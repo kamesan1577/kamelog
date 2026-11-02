@@ -21,6 +21,7 @@ COPY --from=build --chown=node:node /app/public ./public
 COPY --from=build --chown=node:node /app/server ./server
 # Node 24 executes the TypeScript CLI entry points directly.
 COPY --from=build --chown=node:node /app/scripts/admin.ts ./scripts/admin.ts
+COPY --from=build --chown=node:node /app/scripts/migrate-storage.ts ./scripts/migrate-storage.ts
 COPY --from=build --chown=node:node /app/scripts/auto-tag.ts ./scripts/auto-tag.ts
 COPY --from=build --chown=node:node /app/scripts/auto-thread.ts ./scripts/auto-thread.ts
 COPY --from=build --chown=node:node /app/scripts/federation-worker.ts ./scripts/federation-worker.ts

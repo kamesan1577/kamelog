@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { Store, Conflict } from "../../server/store.mjs";
+import { Store, Conflict } from "../../server/storage/local-store.ts";
 import { backupStore, restoreBackup } from "../../server/backup.mjs";
 test("persistence, revision conflicts, rollback and backup restore", async () => {
   const root = await mkdtemp(join(tmpdir(), "kamelog-store-"));

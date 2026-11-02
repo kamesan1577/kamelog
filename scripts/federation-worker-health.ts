@@ -1,6 +1,6 @@
-import { Store } from "../server/store.mjs";
+import { openStore } from "../server/storage/provider.ts";
 
-const store = new Store(process.env.KAMELOG_DATA_DIR || ".runtime");
+const store = openStore(process.env.KAMELOG_DATA_DIR || ".runtime");
 try {
   process.exitCode = store.federationDiagnostics().worker.healthy ? 0 : 1;
 } finally {

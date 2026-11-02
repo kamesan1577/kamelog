@@ -4,7 +4,7 @@ import { randomBytes } from "node:crypto";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Store } from "../../server/store.mjs";
+import { Store } from "../../server/storage/local-store.ts";
 import {
   clearNotificationWebhook,
   notificationSettings,

@@ -1,13 +1,13 @@
 import { configuration } from "../server/api.mjs";
 import { runFederationWorker } from "../server/federation-worker.mjs";
 import { reportNotification } from "../server/notifications.mjs";
-import { Store } from "../server/store.mjs";
+import { openStore } from "../server/storage/provider.ts";
 
 const directory = process.env.KAMELOG_DATA_DIR || ".runtime";
-let store: InstanceType<typeof Store> | undefined;
+let store: ReturnType<typeof openStore> | undefined;
 for (let attempt = 0; attempt < 10; attempt += 1) {
   try {
-    store = new Store(directory);
+    store = openStore(directory);
     break;
   } catch (error) {
     if (

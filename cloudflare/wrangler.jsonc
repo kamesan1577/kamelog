@@ -1,0 +1,17 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "kamelog-storage",
+  "main": "storage-worker.ts",
+  "compatibility_date": "2026-11-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "durable_objects": {
+    "bindings": [{ "name": "STORAGE", "class_name": "StorageObject" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["StorageObject"] }],
+  "r2_buckets": [
+    { "binding": "MEDIA", "bucket_name": "kamelog-private-media" },
+  ],
+  "vars": { "MAX_STORAGE_BYTES": "9000000000" },
+  "observability": { "enabled": false },
+}

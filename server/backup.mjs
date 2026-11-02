@@ -1,5 +1,8 @@
 import {
   mkdir,
+  mkdtemp,
+  rename,
+  rm,
   readdir,
   readFile,
   writeFile,
@@ -7,8 +10,10 @@ import {
   stat,
   lstat,
 } from "node:fs/promises";
-import { resolve, join, relative } from "node:path";
-import { hash, Store } from "./store.mjs";
+import { resolve, join, relative, dirname } from "node:path";
+import { DatabaseSync } from "node:sqlite";
+import { hash, Store } from "./storage/local-store.ts";
+import { getBlobStorage } from "./storage/blobs.ts";
 
 async function emptyTarget(directory) {
   await mkdir(directory, { recursive: true, mode: 0o700 });
@@ -23,13 +28,27 @@ export async function backupStore(store, target) {
   await store.snapshot(join(target, "kamelog.sqlite"));
   await mkdir(join(target, "media"), { mode: 0o700 });
   const files = ["kamelog.sqlite"];
-  for (const media of store.list("media")) {
+  const snapshot = new DatabaseSync(join(target, "kamelog.sqlite"), {
+    readOnly: true,
+  });
+  let mediaRecords;
+  try {
+    mediaRecords = snapshot
+      .prepare("SELECT id, data FROM media")
+      .all()
+      .map(({ id, data }) => ({ ...JSON.parse(data), id }));
+  } finally {
+    snapshot.close();
+  }
+  for (const media of mediaRecords) {
     if (!/^[a-f0-9-]{36}$/.test(media.id)) throw new Error("Invalid media id");
     const extension = media.extension || "mp4";
     if (!/^(mp4|png|jpg|webp|gif)$/.test(extension))
       throw new Error("Invalid media extension");
     const file = "media/" + media.id + "." + extension;
-    await copyFile(join(store.directory, file), join(target, file));
+    await writeFile(join(target, file), await getBlobStorage(store).get(file), {
+      mode: 0o600,
+    });
     files.push(file);
   }
   const manifest = {
@@ -67,34 +86,44 @@ export async function restoreBackup(source, target) {
       throw new Error("Backup checksum mismatch");
   }
   await emptyTarget(target);
-  await mkdir(join(target, "media"), { mode: 0o700 });
-  for (const file of Object.keys(manifest.files))
-    await copyFile(join(source, file), join(target, file));
-  const restored = new Store(target);
+  const staging = await mkdtemp(join(dirname(target), ".kamelog-restore-"));
   try {
-    if (
-      restored.db.prepare("PRAGMA integrity_check").get().integrity_check !==
-      "ok"
-    )
-      throw new Error("Invalid database");
-    for (const media of restored.list("media")) {
-      const extension = media.extension || "mp4";
+    await mkdir(join(staging, "media"), { mode: 0o700 });
+    for (const [file, digest] of Object.entries(manifest.files)) {
+      await copyFile(join(source, file), join(staging, file));
+      if (hash(await readFile(join(staging, file))) !== digest)
+        throw new Error("Backup changed during restoration");
+    }
+    const restored = new Store(staging);
+    try {
       if (
-        !/^[a-f0-9-]{36}$/.test(media.id) ||
-        !/^(mp4|png|jpg|webp|gif)$/.test(extension) ||
-        !manifest.files["media/" + media.id + "." + extension]
+        restored.db.prepare("PRAGMA integrity_check").get().integrity_check !==
+        "ok"
       )
-        throw new Error("Missing media");
-      await stat(join(target, "media", media.id + "." + extension));
-    }
-    for (const p of restored.list("posts")) {
-      if (p.video && !restored.get("media", p.video.split("/").pop()))
-        throw new Error("Dangling media reference");
-      for (const image of p.images || [])
-        if (!restored.get("media", image.split("/").pop()))
+        throw new Error("Invalid database");
+      for (const media of restored.list("media")) {
+        const extension = media.extension || "mp4";
+        if (
+          !/^[a-f0-9-]{36}$/.test(media.id) ||
+          !/^(mp4|png|jpg|webp|gif)$/.test(extension) ||
+          !manifest.files["media/" + media.id + "." + extension]
+        )
+          throw new Error("Missing media");
+        await stat(join(staging, "media", media.id + "." + extension));
+      }
+      for (const p of restored.list("posts")) {
+        if (p.video && !restored.get("media", p.video.split("/").pop()))
           throw new Error("Dangling media reference");
+        for (const image of p.images || [])
+          if (!restored.get("media", image.split("/").pop()))
+            throw new Error("Dangling media reference");
+      }
+    } finally {
+      restored.close();
     }
+    // Replacing an empty directory is atomic; a concurrent writer prevents it.
+    await rename(staging, target);
   } finally {
-    restored.close();
+    await rm(staging, { recursive: true, force: true });
   }
 }

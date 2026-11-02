@@ -1,7 +1,4 @@
 import { initializeLocalLikes } from "./local-likes.ts";
-import { DatabaseSync, backup } from "node:sqlite";
-import { mkdirSync, rmSync } from "node:fs";
-import { resolve, join } from "node:path";
 import { randomUUID, createHash } from "node:crypto";
 
 export const hash = (value) => createHash("sha256").update(value).digest("hex");
@@ -9,12 +6,21 @@ export const SESSION_TTL_SECONDS = 30 * 24 * 3600;
 const SESSION_TTL_MS = SESSION_TTL_SECONDS * 1000;
 export class Conflict extends Error {}
 export class Store {
-  constructor(directory) {
-    this.directory = resolve(directory);
-    mkdirSync(this.directory, { recursive: true, mode: 0o700 });
-    this.db = new DatabaseSync(join(this.directory, "kamelog.sqlite"));
-    this.db
-      .exec(`PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON; PRAGMA busy_timeout=5000;
+  /**
+   * @param {string} directory
+   * @param {import('./storage/sql.ts').SqlDatabase} database
+   * @param {import('./storage/sql.ts').StoreHooks} hooks
+   */
+  constructor(directory, database, hooks = {}) {
+    this.directory = directory;
+    this.db = database;
+    this.hooks = hooks;
+    if (hooks.initialize === false) {
+      if (this.schemaVersion() !== 12)
+        throw new Error("Unsupported storage schema");
+      return;
+    }
+    this.db.exec(`PRAGMA foreign_keys=ON;
       CREATE TABLE IF NOT EXISTS migrations(version INTEGER PRIMARY KEY);
       CREATE TABLE IF NOT EXISTS posts(id TEXT PRIMARY KEY, data TEXT NOT NULL, revision INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS drafts(id TEXT PRIMARY KEY, data TEXT NOT NULL, revision INTEGER NOT NULL);
@@ -281,16 +287,9 @@ export class Store {
       }),
     );
   }
+  /** @template T @param {() => T} fn @returns {T} */
   transaction(fn) {
-    this.db.exec("BEGIN IMMEDIATE");
-    try {
-      const value = fn();
-      this.db.exec("COMMIT");
-      return value;
-    } catch (error) {
-      this.db.exec("ROLLBACK");
-      throw error;
-    }
+    return this.db.transaction(fn);
   }
   list(table) {
     this.table(table);
@@ -1076,14 +1075,7 @@ export class Store {
         /^(png|jpg|webp|gif)$/.test(file.extension || "")
       )
         try {
-          rmSync(
-            join(
-              this.directory,
-              "federation-media",
-              `${file.id}.${file.extension}`,
-            ),
-            { force: true },
-          );
+          this.hooks.deleteFederationMedia?.(file.id, file.extension);
         } catch {
           // A stale cache file is inaccessible and can be evicted later.
         }
@@ -1475,7 +1467,9 @@ export class Store {
     });
   }
   async snapshot(path) {
-    await backup(this.db, path);
+    if (!this.db.snapshot)
+      throw new Error("This SQL engine does not support local snapshots");
+    await this.db.snapshot(path);
   }
   close() {
     this.db.close();

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Store } from "../../server/store.mjs";
+import { Store } from "../../server/storage/local-store.ts";
 
 test("blog content edits persist updatedAt without moving it for pin-only changes", async () => {
   const root = await mkdtemp(join(tmpdir(), "kamelog-blog-updated-at-"));

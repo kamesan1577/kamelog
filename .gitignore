@@ -49,3 +49,7 @@ next-env.d.ts
 /work/
 
 /storybook-static/
+.wrangler/
+.dev.vars
+.dev.vars.*
+/ui-evidence/

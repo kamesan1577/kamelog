@@ -36,7 +36,7 @@ import {
   createFederationRepost,
   publicFederationReposts,
 } from "../../server/federation-reposts.mjs";
-import { Store } from "../../server/store.mjs";
+import { Store } from "../../server/storage/local-store.ts";
 
 const origin = "https://example.test";
 const config = configuration({ KAMELOG_ORIGIN: origin });

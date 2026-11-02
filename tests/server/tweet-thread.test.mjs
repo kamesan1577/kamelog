@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Store } from "../../server/store.mjs";
+import { Store } from "../../server/storage/local-store.ts";
 import { createAPI, configuration } from "../../server/api.mjs";
 import { localPostObject } from "../../server/federation-outbound.mjs";
 import { createFederationIdentity } from "../../server/activitypub.mjs";

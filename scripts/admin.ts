@@ -1,9 +1,9 @@
-import { Store } from "../server/store.mjs";
+import { openStore } from "../server/storage/provider.ts";
 import { backupStore, restoreBackup } from "../server/backup.mjs";
 
 const [action, source, target] = process.argv.slice(2);
 const usage =
-  "Usage:\n  node scripts/admin.mjs backup SOURCE_DATA EMPTY_BACKUP_DIR\n  node scripts/admin.mjs restore BACKUP_DIR EMPTY_DATA_DIR\n  node scripts/admin.mjs reset-auth SOURCE_DATA --confirm-reset-auth\n\nRestore and reset-auth require the application to be stopped.";
+  "Usage:\n  node scripts/admin.ts backup SOURCE_DATA EMPTY_BACKUP_DIR\n  node scripts/admin.ts restore BACKUP_DIR EMPTY_DATA_DIR\n  node scripts/admin.ts reset-auth SOURCE_DATA --confirm-reset-auth\n\nRestore and reset-auth require the application to be stopped.";
 if (!source || !["backup", "restore", "reset-auth"].includes(action)) {
   console.error(usage);
   process.exit(1);
@@ -22,7 +22,7 @@ if (action === "restore") {
     console.error(usage);
     process.exit(1);
   }
-  const store = new Store(source);
+  const store = openStore(source);
   try {
     await backupStore(store, target);
   } finally {
@@ -36,7 +36,7 @@ if (action === "restore") {
     );
     process.exit(1);
   }
-  const store = new Store(source);
+  const store = openStore(source);
   try {
     const count = store.resetAuthentication();
     console.log(
