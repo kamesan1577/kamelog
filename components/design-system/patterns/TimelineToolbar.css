@@ -87,7 +87,7 @@
 }
 
 [data-ds="timeline-tabs"] [data-slot="tabs-trigger"][data-state="active"] {
-  color: var(--ds-color-text-primary);
+  color: var(--ds-color-accent);
   font-weight: 650;
 }
 

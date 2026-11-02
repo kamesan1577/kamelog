@@ -5,6 +5,7 @@ import { getStore } from "@/server/runtime.mjs";
 import { blogStructuredData, websiteStructuredData } from "@/server/seo.mjs";
 import { publicFederationReposts } from "@/server/federation-reposts.mjs";
 import { buildRevision } from "@/lib/build-revision.mjs";
+import type { ReaderMode } from "@/lib/navigation";
 
 function StructuredData({ value }: { value: Record<string, unknown> }) {
   return (
@@ -94,8 +95,12 @@ function SourceFooter() {
 
 export default async function SitePage({
   selectedPostId = null,
+  readerMode = "popup",
+  readerUrl = "/",
 }: {
   selectedPostId?: string | null;
+  readerMode?: ReaderMode;
+  readerUrl?: string;
 }) {
   const store = getStore();
   const posts = store.list("posts");
@@ -126,6 +131,8 @@ export default async function SitePage({
         initialReposts={reposts}
         initialProfile={profile}
         initialSelected={selectedPostId}
+        initialReaderMode={selectedPost?.kind === "blog" ? readerMode : "popup"}
+        initialReaderUrl={readerUrl}
       />
       <FederationTimelineLink />
       <SourceFooter />

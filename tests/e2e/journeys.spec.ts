@@ -8,7 +8,7 @@ async function expectSettledEditor(page: Page) {
   );
   expect(await selectedTabs.count()).toBeGreaterThan(0);
   for (const tab of await selectedTabs.all()) {
-    await expect(tab).toHaveCSS("background-color", "rgb(55, 53, 47)");
+    await expect(tab).toHaveCSS("background-color", "rgb(40, 85, 66)");
     await expect(tab).toHaveCSS("color", "rgb(255, 255, 255)");
   }
 }

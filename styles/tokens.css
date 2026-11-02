@@ -33,9 +33,9 @@
   --ds-color-accent: light-dark(#285542, #b7ccbc);
   --ds-color-accent-hover: light-dark(#1d4032, #d2dfd5);
   --ds-color-accent-foreground: light-dark(#ffffff, #202b22);
-  --ds-color-action: var(--ds-color-text-primary);
-  --ds-color-action-hover: light-dark(#292824, #ffffff);
-  --ds-color-action-foreground: light-dark(#ffffff, #20231f);
+  --ds-color-action: var(--ds-color-accent);
+  --ds-color-action-hover: var(--ds-color-accent-hover);
+  --ds-color-action-foreground: var(--ds-color-accent-foreground);
   --ds-color-text-inverse: var(--ds-color-action-foreground);
   --ds-color-danger: light-dark(#b9303c, #ff9da5);
   --ds-color-danger-bg: light-dark(#f9e9e9, #442a2d);

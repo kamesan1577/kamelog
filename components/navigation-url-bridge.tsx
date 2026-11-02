@@ -5,14 +5,17 @@ import {
   canonicalNavigationUrl,
   isPublicView,
   navigationStateKey,
+  readerModeFromSearch,
+  type ReaderMode,
   viewFromPathname,
-} from "@/lib/navigation.mjs";
+} from "@/lib/navigation";
 
 type View = "home" | "timeline" | "projects" | "account";
 type NavigationState = {
   view: View;
   post: string | null;
   internal: boolean;
+  readerMode: ReaderMode;
 };
 
 type HistoryUrl = string | URL | null | undefined;
@@ -27,13 +30,15 @@ function readNavigationState(value: unknown): NavigationState | null {
   const candidate = baseState(value)[navigationStateKey];
   if (!candidate || typeof candidate !== "object" || Array.isArray(candidate))
     return null;
-  const { view, post, internal } = candidate as Partial<NavigationState>;
+  const { view, post, internal, readerMode } =
+    candidate as Partial<NavigationState>;
   if (!isPublicView(view)) return null;
   if (post != null && typeof post !== "string") return null;
   return {
     view: view as View,
     post: post ?? null,
     internal: internal === true,
+    readerMode: readerMode === "page" ? "page" : "popup",
   };
 }
 
@@ -82,6 +87,7 @@ export function NavigationUrlBridge() {
         view: post ? "home" : (pathView as View),
         post,
         internal: false,
+        readerMode: readerModeFromSearch(window.location.search),
       };
       const initialState = {
         ...baseState(history.state),

@@ -93,7 +93,7 @@
   transform: translateX(18px);
 }
 .x-intent-toggle input:focus-visible + .x-intent-track {
-  outline: 2px solid var(--ds-color-text-primary);
+  outline: 2px solid var(--ds-color-focus);
   outline-offset: 3px;
 }
 .desktop-composer .composer-kinds > .x-intent-toggle {

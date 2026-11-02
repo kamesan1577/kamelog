@@ -172,7 +172,7 @@
 [data-ds="editor-dialog"] .editor-tool-list button:hover,
 [data-ds="editor-dialog"] .markdown-help-link:hover {
   background: var(--ds-color-bg-hover);
-  color: var(--ds-color-text-primary);
+  color: var(--ds-color-accent);
 }
 @media (max-width: 640px) {
   [data-ds="editor-dialog"] [data-slot="dialog-title"] {

@@ -23,7 +23,7 @@
 
 .back:hover,
 .footer a:hover {
-  color: var(--ds-color-text-primary);
+  color: var(--ds-color-accent);
 }
 
 .hero {

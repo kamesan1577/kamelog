@@ -7,6 +7,14 @@ export const viewPaths = Object.freeze({
 });
 
 export type PublicView = keyof typeof viewPaths;
+export type ReaderMode = "popup" | "page";
+
+export function readerModeFromSearch(search: string): ReaderMode {
+  const params = new URLSearchParams(search);
+  return params.get("post") && params.get("reader") === "page"
+    ? "page"
+    : "popup";
+}
 
 export function isPublicView(value: unknown): value is PublicView {
   return typeof value === "string" && Object.hasOwn(viewPaths, value);
@@ -25,9 +33,9 @@ export function pathnameForView(view: string) {
 
 export function canonicalNavigationUrl(
   currentHref: string,
-  navigation: { post?: string | null; view: string },
+  navigation: { post?: string | null; view: string; readerMode?: ReaderMode },
 ) {
-  const url = new URL(currentHref);
+  const url = new URL(currentHref, "https://kamelog.invalid");
   if (navigation.post) {
     url.pathname = "/";
     url.searchParams.set("post", navigation.post);
@@ -35,5 +43,8 @@ export function canonicalNavigationUrl(
     url.pathname = pathnameForView(navigation.view);
     url.searchParams.delete("post");
   }
+  if (navigation.post && navigation.readerMode === "page")
+    url.searchParams.set("reader", "page");
+  else url.searchParams.delete("reader");
   return url.pathname + url.search + url.hash;
 }

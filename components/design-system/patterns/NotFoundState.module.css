@@ -96,7 +96,7 @@
   justify-content: center;
   gap: 9px;
   padding: 11px 16px;
-  border: 1px solid var(--kamelog-ink);
+  border: 1px solid var(--ds-color-action);
   border-radius: 6px;
   font-size: 13px;
   font-weight: 650;
@@ -106,12 +106,12 @@
 }
 
 .primaryLink {
-  background: var(--kamelog-ink);
+  background: var(--ds-color-action);
   color: var(--ds-color-action-foreground);
 }
 
 .primaryLink:hover {
-  background: var(--kamelog-ink-hover);
+  background: var(--ds-color-action-hover);
 }
 
 .secondaryLink {

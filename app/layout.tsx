@@ -37,7 +37,6 @@ import "../components/design-system/patterns/AppShell.css";
 import "../components/design-system/patterns/HomeSearch.css";
 import "../components/design-system/patterns/PublicHeader.css";
 import "../components/design-system/patterns/PublicNavigation.css";
-import { BlogTableOfContentsBridge } from "@/components/blog-table-of-contents-bridge";
 import { ImageUploadBridge } from "@/components/image-upload-bridge";
 import { NavigationUrlBridge } from "@/components/navigation-url-bridge";
 import { ProfileSocialLinksBridge } from "@/components/profile-social-links-bridge";
@@ -96,7 +95,6 @@ export default function RootLayout({
         <ThemeProvider>
           <NavigationUrlBridge />
           <ImageUploadBridge />
-          <BlogTableOfContentsBridge />
           <TweetLinkPreviewBridge />
           <ProfileSocialLinksBridge />
           <NotificationSettingsLink />

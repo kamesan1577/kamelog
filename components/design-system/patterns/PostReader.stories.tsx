@@ -184,3 +184,141 @@ export const NestedImage: Story = {
     await expect(args.onClose).not.toHaveBeenCalled();
   },
 };
+
+export const BlogPageLink: Story = {
+  args: { pageHref: "/?post=reader-example&reader=page" },
+  play: async ({ canvasElement }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    await userEvent.click(
+      within(canvasElement).getByRole("button", { name: "投稿を読む" }),
+    );
+    const dialog = await page.findByRole("dialog", {
+      name: "投稿の閲覧画面",
+    });
+    await expect(
+      within(dialog).getByRole("link", { name: "ページで読む" }),
+    ).toHaveAttribute("href", "/?post=reader-example&reader=page");
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(dialog).not.toBeInTheDocument());
+  },
+};
+
+function PageExample(args: PostReaderProps) {
+  const [open, setOpen] = useState(true);
+  return (
+    <>
+      <button
+        data-reader-page-opener
+        type="button"
+        onClick={() => setOpen(true)}
+      >
+        記事の前の操作
+      </button>
+      {open && (
+        <PostReader
+          {...args}
+          returnFocusSelector="[data-reader-page-opener]"
+          onClose={() => {
+            args.onClose();
+            setOpen(false);
+          }}
+        />
+      )}
+      <button type="button">記事の後の操作</button>
+    </>
+  );
+}
+
+export const Page: Story = {
+  render: (args) => <PageExample {...args} />,
+  args: {
+    mode: "page",
+    popupHref: "/?post=reader-example",
+    title: "ページとして読む記事",
+    onClose: fn(),
+    actions: <button type="button">リンクをコピー</button>,
+    children: (
+      <div>
+        <h1>ページとして読む記事</h1>
+        <a href="#page-reader-last-section">本文末尾の見出しへ</a>
+        {Array.from({ length: 20 }, (_, index) => (
+          <section key={index} className="min-h-40">
+            <h2 id={index === 19 ? "page-reader-last-section" : undefined}>
+              見出し {index + 1}
+            </h2>
+            <p>
+              ページ表示では文書全体をスクロールします。記事の操作と読書進捗は本文と同じページに表示されます。
+            </p>
+          </section>
+        ))}
+      </div>
+    ),
+  },
+  play: async ({ canvasElement, args }) => {
+    const page = within(canvasElement.ownerDocument.body);
+    const article = page.getByRole("article", { name: "ページとして読む記事" });
+    const progress = within(article).getByRole("progressbar", {
+      name: "読書進捗",
+    });
+    const close = within(article).getByRole("button", { name: "投稿を閉じる" });
+    const view = canvasElement.ownerDocument.defaultView;
+    if (!view) throw new Error("The article window is unavailable");
+    try {
+      view.scrollTo({ top: 0, behavior: "instant" });
+      fireEvent.scroll(view);
+      await expect(article).not.toHaveAttribute("aria-modal");
+      await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
+      await expect(
+        canvasElement.ownerDocument.querySelector('[data-ds="reader-overlay"]'),
+      ).not.toBeInTheDocument();
+      await expect(
+        within(article).getByRole("link", { name: "ポップアップで読む" }),
+      ).toHaveAttribute("href", "/?post=reader-example");
+      await waitFor(() =>
+        expect(progress).toHaveAttribute("aria-valuenow", "0"),
+      );
+
+      close.focus();
+      await userEvent.keyboard("{Escape}");
+      await expect(args.onClose).not.toHaveBeenCalled();
+      await expect(article).toBeInTheDocument();
+      await userEvent.tab();
+      await expect(
+        within(article).getByRole("link", { name: "本文末尾の見出しへ" }),
+      ).toHaveFocus();
+      await userEvent.tab();
+      await expect(
+        within(article).getByRole("button", { name: "リンクをコピー" }),
+      ).toHaveFocus();
+      await userEvent.tab();
+      await expect(
+        page.getByRole("button", { name: "記事の後の操作" }),
+      ).toHaveFocus();
+
+      view.scrollTo({
+        top: canvasElement.ownerDocument.documentElement.scrollHeight,
+        behavior: "instant",
+      });
+      fireEvent.scroll(view);
+      await waitFor(() => expect(view.scrollY).toBeGreaterThan(0));
+      await waitFor(() =>
+        expect(progress).toHaveAttribute("aria-valuenow", "100"),
+      );
+      await expect(
+        article.querySelector('[data-ds="reader-scroll"]'),
+      ).toHaveStyle({
+        overflowY: "visible",
+      });
+      await userEvent.click(close);
+      await waitFor(() => expect(article).not.toBeInTheDocument());
+      await waitFor(() =>
+        expect(
+          page.getByRole("button", { name: "記事の前の操作" }),
+        ).toHaveFocus(),
+      );
+      await expect(args.onClose).toHaveBeenCalledTimes(1);
+    } finally {
+      view.scrollTo({ top: 0, behavior: "instant" });
+    }
+  },
+};

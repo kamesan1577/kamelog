@@ -88,7 +88,7 @@
 }
 
 .federation-setup > input:focus-visible {
-  border-color: var(--ds-color-text-primary);
+  border-color: var(--ds-color-focus);
   outline: 2px solid var(--ds-color-focus);
   outline-offset: 2px;
 }
@@ -191,7 +191,7 @@
 }
 
 .federation-follow-form input:focus-visible {
-  border-color: var(--ds-color-text-primary);
+  border-color: var(--ds-color-focus);
   outline: 2px solid var(--ds-color-focus);
   outline-offset: 2px;
 }
@@ -289,7 +289,7 @@
 
 .fediverse-mode-switch [data-slot="tabs-trigger"][data-state="active"] {
   background: var(--ds-color-bg-surface);
-  color: var(--ds-color-text-primary);
+  color: var(--ds-color-accent);
   box-shadow: 0 1px 2px var(--ds-color-shadow);
 }
 
@@ -325,7 +325,7 @@
 
 .fediverse-timeline-heading > button:hover {
   background: var(--ds-color-bg-muted);
-  color: var(--ds-color-text-primary);
+  color: var(--ds-color-accent);
 }
 
 .fediverse-timeline-heading .is-spinning {
