@@ -1,3 +1,5 @@
+2026-11-02 ローカルMacへの引き継ぎを復元。ZIPの602ソース、パッチ、START-HEREのSHA-256と実行権限を照合し、既存checkoutを変更せず独立cloneへ復元した。最新main 86886ecのVitest 5.0.5を維持して統合。公開検査、TypeScript方針、UI契約、型検査、lint、整形、Worker dry-runが成功。サーバーテストは209/210件成功し、既存のLinux向け運用スクリプトを実行する1件はmacOSのchownが--referenceに非対応のため失敗。実workerdの架空データ全件移行、一括切替、nested transaction、receipt再送、最新クラウド状態のexport/restoreは成功した。Wranglerの既存OAuth認証と本番SSH接続を確認したが、R2はアカウントで未有効。R2新規契約、実Cloudflare配備、本番データ移行は未実施。容量ガードはR2操作回数やアカウント全体の課金を停止しないため、厳格な0円要件の解決前に契約や実データ切替を行わない。CIと残りの検証は実行結果を追記する。
+
 2026-11-02 Vitest 5移行候補をmain 8ab4f28へ載せ直した。vitest・@vitest/browser・@vitest/browser-playwrightを5.0.5に固定し、lockfileを再解決。Storybook 10.6.4・Vite 8.3.5・本番依存・テスト設定・CI設定を維持し、生成物/.vitest/をGit除外へ追加した。Node 24.22.1でnpm ci、対象依存のnpm ls、公開検査・TypeScript方針・UI契約・型検査・lint・整形、サーバー162件・UI8件、本番buildが成功。npm audit --audit-level=highはhigh/critical 0件、既存moderate 21件。make checkはStorybook buildのuv_interface_addresses環境エラーで停止し、全体合格ではない。旧mainでの検証でもStorybook test・visualは同じ環境エラーで未実行、Playwright Chromiumは配布URLのSite Unavailable応答で取得不能。最新mainでのStorybook・E2E・visual・containerの最終結果は本変更のPR CIを参照し、全job成功をマージ条件とする。OS APIの差替え、テスト削除・skip・retry追加、画像基準の変更は行っていない。手動デプロイ・実機確認は未実施。
 
 2026-11-02 Cloudflare保存先と検証付き一括移行を実装。
@@ -18,7 +20,6 @@ exportの書込停止は5分の期限付きとし、ページ取得で更新す�
 コンテナbuildで作業領域が不足したため、今回の検証imageと未使用build cacheを削除し、約29GBの空きを復旧した。
 Cloudflareの本人認証は未完了（Wrangler device認証が期限切れ）。本番データや接続設定はこの実行環境にない。
 実Cloudflareへのデプロイ、本番データ移行、リモートCIは未実施。
-
 
 2026-11-02 PR #302の初回CIはcheckとcontainerが成功し、全E2E83件も成功したが、画像比較15件が失敗した。比較画像の寸法と配置を確認し、ローカルDebianのOS既定フォントとCIの既定フォントによる字形・文字幅・LCDサブピクセル描画差を特定。StorybookだけNoto Sans CJK JPを明示し、CIのテストjobへfonts-noto-cjkを導入、visual用Chromiumへ--disable-lcd-textを指定した。アプリのフォント、許容差、retryは変更していない。固定フォントの全15画像を目視して基準更新し、更新なしのローカル15件が成功。型検査とStorybook49件も再確認して成功。同一コミットのCIで一致することを確認してからマージする。ログはoutputs/feed/validation、CI画像は診断artifactから確認した。
 
