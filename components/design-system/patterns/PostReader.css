@@ -35,11 +35,11 @@
   translate: -50% -50%;
   transform: none;
   border: 1px solid var(--ds-color-border-subtle);
-  border-radius: 14px;
+  border-radius: 8px;
   background: var(--ds-color-bg-surface);
   color: var(--ds-color-text-primary);
-  box-shadow: 0 16px 100px
-    color-mix(in srgb, var(--ds-color-text-primary) 17%, transparent);
+  box-shadow: 0 24px 80px
+    color-mix(in srgb, var(--ds-color-text-primary) 15%, transparent);
   outline: none;
   font-family: var(--ds-font-family-body, inherit);
 }
@@ -60,7 +60,7 @@
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   color: var(--ds-color-text-tertiary);
 }
 
@@ -90,7 +90,7 @@
   padding: 0;
   place-items: center;
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   background: transparent;
   color: var(--ds-color-text-primary);
   cursor: pointer;
@@ -103,7 +103,7 @@
 
 [data-ds="reader-close"]:focus-visible,
 [data-ds="reader-scroll"]:focus-visible {
-  outline: 2px solid var(--ds-color-text-primary);
+  outline: 2px solid var(--ds-color-accent);
   outline-offset: -4px;
 }
 
@@ -126,7 +126,7 @@
   width: 100%;
   max-width: 750px;
   margin: 0 auto;
-  padding: 44px 48px 56px;
+  padding: 32px 40px 40px;
   overflow-wrap: anywhere;
 }
 
@@ -177,7 +177,7 @@
   gap: 20px;
   padding: 12px 24px;
   color: var(--ds-color-text-tertiary);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
@@ -229,7 +229,7 @@
   }
 
   [data-ds="reader-body"] {
-    padding: 28px 24px 40px;
+    padding: 24px 20px 32px;
   }
 
   [data-ds="reading-progress"] {
@@ -243,12 +243,11 @@
   }
 
   [data-ds="reader-actions"] [data-ds="post-actions"].post-actions {
-    gap: 4px 14px;
+    gap: 4px 12px;
   }
 
   [data-ds="reader-actions"] [data-ds="post-actions"].post-actions button {
     gap: 4px;
-    font-size: 11px;
   }
 }
 
@@ -256,10 +255,6 @@
   [data-ds="reader-body"] {
     padding-right: 20px;
     padding-left: 20px;
-  }
-
-  [data-ds="reading-progress"] {
-    font-size: 10px;
   }
 }
 
@@ -273,4 +268,87 @@
   [data-ds="reader-scroll"] {
     scroll-behavior: auto;
   }
+}
+
+[data-ds="post-reader"] [data-ds="reader-heading"] > svg {
+  color: var(--ds-color-accent);
+}
+[data-ds="post-reader"] [data-ds="reader-body"] [data-ds="detail-markdown"] {
+  font-size: 16px;
+  line-height: 1.9;
+}
+[data-ds="post-reader"]
+  [data-ds="reader-body"]
+  [data-ds="detail-markdown"]
+  :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ds-font-family-body, inherit);
+  font-weight: 600;
+  letter-spacing: normal;
+  line-height: 1.5;
+}
+[data-ds="post-reader"] [data-ds="reader-body"] [data-ds="detail-markdown"] h1 {
+  margin: 0 0 16px;
+  font-size: 28px;
+}
+[data-ds="post-reader"] [data-ds="reader-body"] [data-ds="detail-markdown"] h2 {
+  margin: 32px 0 16px;
+  padding-bottom: 8px;
+  font-size: 22px;
+}
+[data-ds="post-reader"] [data-ds="reader-body"] [data-ds="detail-markdown"] h3 {
+  margin: 24px 0 12px;
+  font-size: 18px;
+}
+[data-ds="post-reader"] [data-ds="reader-body"] [data-ds="detail-markdown"] p {
+  margin: 0 0 20px;
+}
+[data-ds="post-reader"]
+  [data-ds="reader-article-header"]
+  [data-ds="post-meta"] {
+  margin-bottom: 24px;
+}
+[data-ds="post-reader"]
+  [data-ds="reader-body"]
+  [data-ds="blog-table-of-contents"] {
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  border-color: var(--ds-color-border-subtle);
+  background: var(--ds-color-bg-page);
+}
+[data-ds="post-reader"]
+  [data-ds="reader-body"]
+  [data-ds="blog-table-of-contents"]
+  [data-ds="blog-table-of-contents-title"] {
+  margin: 0;
+}
+@media (max-width: 700px) {
+  [data-ds="post-reader"]
+    [data-ds="reader-body"]
+    [data-ds="detail-markdown"]
+    h1 {
+    font-size: 24px;
+  }
+  [data-ds="post-reader"]
+    [data-ds="reader-body"]
+    [data-ds="detail-markdown"]
+    h2 {
+    font-size: 20px;
+  }
+  [data-ds="post-reader"]
+    [data-ds="reader-body"]
+    [data-ds="blog-table-of-contents"] {
+    padding: 16px;
+  }
+}
+
+[data-ds="post-reader-fallback"] [data-ds="detail-markdown"] {
+  font-size: 16px;
+  line-height: 1.9;
+}
+[data-ds="post-reader-fallback"]
+  [data-ds="detail-markdown"]
+  :is(h1, h2, h3, h4, h5, h6) {
+  font-family: var(--ds-font-family-body, inherit);
+  font-weight: 600;
+  letter-spacing: normal;
 }

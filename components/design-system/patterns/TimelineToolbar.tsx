@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Check, RefreshCw, SlidersHorizontal } from "lucide-react";
+import { Check, RefreshCw, Search, SlidersHorizontal } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
@@ -24,6 +24,11 @@ export interface TimelineToolbarProps extends Omit<
   onSortChange: (sort: TimelineSort) => void;
   onRefresh?: () => void;
   refreshing?: boolean;
+  searchOpen?: boolean;
+  searchActive?: boolean;
+  searchPanelId?: string;
+  onSearchToggle?: () => void;
+  searchButtonRef?: React.Ref<HTMLButtonElement>;
 }
 
 export function TimelineToolbar({
@@ -34,6 +39,11 @@ export function TimelineToolbar({
   onSortChange,
   onRefresh,
   refreshing = false,
+  searchOpen = false,
+  searchActive = false,
+  searchPanelId,
+  onSearchToggle,
+  searchButtonRef,
   ...props
 }: TimelineToolbarProps) {
   const tabsListRef = React.useRef<HTMLDivElement>(null);
@@ -47,7 +57,10 @@ export function TimelineToolbar({
         '[data-slot="tabs-trigger"][data-state="active"]',
       );
       if (!active) return;
-      list.style.setProperty("--timeline-indicator-x", `${active.offsetLeft}px`);
+      list.style.setProperty(
+        "--timeline-indicator-x",
+        `${active.offsetLeft}px`,
+      );
       list.style.setProperty(
         "--timeline-indicator-width",
         `${active.offsetWidth}px`,
@@ -82,6 +95,20 @@ export function TimelineToolbar({
         </TabsList>
       </Tabs>
       <div data-ds="timeline-toolbar-actions">
+        {onSearchToggle && (
+          <button
+            ref={searchButtonRef}
+            type="button"
+            data-ds="timeline-search-toggle"
+            data-active={searchActive}
+            aria-label="検索とタグ"
+            aria-expanded={searchOpen}
+            aria-controls={searchPanelId}
+            onClick={onSearchToggle}
+          >
+            <Search size={17} />
+          </button>
+        )}
         {onRefresh && (
           <button
             type="button"

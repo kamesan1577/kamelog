@@ -1,0 +1,7 @@
+/* CI installs fonts-noto-cjk so visual fixtures use the same font on Linux hosts. */
+:root {
+  --font-sans: "Noto Sans CJK JP", sans-serif;
+}
+body {
+  font-family: var(--font-sans);
+}

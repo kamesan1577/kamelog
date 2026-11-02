@@ -45,6 +45,26 @@ async function expectDividerAligned(childPost: Locator) {
   expect(divider.color).not.toBe("rgba(0, 0, 0, 0)");
 }
 
+async function expectThreadSeparation(childPost: Locator) {
+  const geometry = await childPost.evaluate((element) => {
+    const parentActions = element.previousElementSibling?.querySelector(
+      '[data-ds="post-actions"]',
+    );
+    const childMeta = element.querySelector('[data-ds="post-meta"]');
+    if (!parentActions || !childMeta) return null;
+    return {
+      gap:
+        childMeta.getBoundingClientRect().top -
+        parentActions.getBoundingClientRect().bottom,
+      overflows: element.scrollWidth > element.clientWidth,
+    };
+  });
+  expect(geometry).not.toBeNull();
+  // The dense feed still separates a parent's controls from its reply header.
+  expect(geometry!.gap).toBeGreaterThanOrEqual(24);
+  expect(geometry!.overflows).toBe(false);
+}
+
 test("owner can append a tweet thread and public detail renders the chain", async ({
   page,
   context,
@@ -167,17 +187,9 @@ test("owner can append a tweet thread and public detail renders the chain", asyn
     .locator('[data-ds="thread-post"]')
     .filter({ hasText: "スレッドの架空の続き" });
   await expect(childPost).toBeVisible();
-  expect(
-    await childPost.evaluate((element) =>
-      parseFloat(getComputedStyle(element).paddingTop),
-    ),
-  ).toBeGreaterThanOrEqual(28);
+  await expectThreadSeparation(childPost);
   await expectDividerAligned(childPost);
   await page.setViewportSize({ width: 1280, height: 900 });
-  expect(
-    await childPost.evaluate((element) =>
-      parseFloat(getComputedStyle(element).paddingTop),
-    ),
-  ).toBeGreaterThanOrEqual(32);
+  await expectThreadSeparation(childPost);
   await expectDividerAligned(childPost);
 });

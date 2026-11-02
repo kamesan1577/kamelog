@@ -69,6 +69,17 @@ TLS終端、公開ドメイン、upload制限、backup schedulerはホスト側�
 Issueは進捗の索引であり、仕様や開発ルールの正本ではありません。
 UI変更とデータ安全性の反復作業には `.codex/skills/` のリポジトリ固有skillを使います。
 
+### unslopによるUIレビュー
+
+[unslop](https://github.com/heydamir/unslop)（Damir Sokolovsky、CC BY 4.0）を `vendor/unslop` に原文のまま同梱しています。
+取得元のコミットは `4652254daff586ff4739849395a127b56f7f8cc7`。著者表記とライセンスは同ディレクトリの `README.md`、`CITATION.cff`、`LICENSE` に保持しています。
+Claude Code用の[SKILL.md](.claude/skills/unslop/SKILL.md)とCodex用の[SKILL.md](.codex/skills/unslop/SKILL.md)には、参照パスを調整した本文と、その調整を説明する注記を置いています。
+参考資料とスクリプトは `vendor/unslop/skills/unslop` に保持し、スクリプトはリポジトリのルートから実行します。
+Claude Codeでは `/unslop`、Codexでは `$unslop` またはスキル名を指定して依頼します。
+既存のUI契約・Design Systemを先に読み、監査結果に応じて余白・配色・文字・操作部品を調整してください。
+導入の記録は[ADR 0025](adr/0025-unslop-ui-polish.md)、現在のTwitter型フィードは[ADR 0027](adr/0027-twitter-style-feed.md)、分類と検索の入口は[ADR 0028](adr/0028-feed-navigation-and-search.md)を参照してください。
+現行の振る舞いは[プロダクト仕様](spec/current/README.md)、検証結果は[HANDOFF](HANDOFF.md)に記録します。
+
 ## セキュリティとプライバシー
 
 公開リポジトリ向け検査は、秘密値らしい文字列、runtime data、私的マーカー、コミット名義を検査します。

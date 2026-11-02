@@ -42,6 +42,7 @@ import { MobileNavigation } from "@/components/design-system/patterns/MobileNavi
 import { PageHeader } from "@/components/design-system/patterns/PageHeader";
 import { ContentIndex } from "@/components/design-system/patterns/ContentIndex";
 import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToolbar";
+import { TimelineSearch } from "@/components/design-system/patterns/TimelineSearch";
 import { PostMeta } from "@/components/design-system/patterns/PostMeta";
 import { PostReader } from "@/components/design-system/patterns/PostReader";
 import { PostPreview } from "@/components/design-system/patterns/PostPreview";
@@ -618,6 +619,16 @@ export default function Notebook({
     [sort, setSort] = useState<"new" | "popular">("new"),
     [selected, setSelected] = useState<string | null>(initialSelected),
     [visibleTagCount, setVisibleTagCount] = useState(5);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const searchToggle = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const narrow = window.matchMedia("(max-width: 1239px)");
+    const revealActiveSearch = () => {
+      if (narrow.matches && (query || tag)) setSearchOpen(true);
+    };
+    narrow.addEventListener("change", revealActiveSearch);
+    return () => narrow.removeEventListener("change", revealActiveSearch);
+  }, [query, tag]);
   const [editor, setEditor] = useState(false),
     [kind, setKind] = useState<Kind>("tweet"),
     [title, setTitle] = useState(""),
@@ -1837,29 +1848,6 @@ export default function Notebook({
               id === "timeline" ? handleTimelineNavigation() : nav(id as View)
             }
           />
-          <div data-ds="sidebar-section" className="sidebar-section">
-            <span>コンテンツ</span>
-            {(
-              [
-                { id: "blog", icon: FileText },
-                { id: "tweet", icon: MessageCircle },
-                { id: "vlog", icon: Video },
-              ] as const
-            ).map(({ id, icon: Icon }) => (
-              <button
-                key={id}
-                className={filter === id ? "active" : ""}
-                onClick={() => {
-                  nav("timeline");
-                  setFilter(id);
-                }}
-              >
-                <Icon />
-                <span>{label[id]}</span>
-                <small>{posts.filter((p) => p.kind === id).length}</small>
-              </button>
-            ))}
-          </div>
           <a
             className="side-link"
             href={contact.github}
@@ -2503,13 +2491,26 @@ export default function Notebook({
               ) : view === "home" ? (
                 <section data-ds="landing-page" className="landing-page">
                   <div className="landing-intro">
+                    <aside
+                      data-ds="landing-profile"
+                      className="landing-profile"
+                    >
+                      <Avatar value={profile.icon} large />
+                      <div className="landing-identity">
+                        <h1>
+                          {profile.name}
+                          <span className="engineering-role">
+                            Backend Engineer
+                          </span>
+                        </h1>
+                        <p>@kamesan1577</p>
+                      </div>
+                      <p className="landing-bio">{profile.bio}</p>
+                      <a href={contact.github} target="_blank" rel="noreferrer">
+                        GitHubでコードを見る <ArrowUpRight size={14} />
+                      </a>
+                    </aside>
                     <div className="landing-copy">
-                      <h1>
-                        かめさん{" "}
-                        <span className="engineering-role">
-                          Backend Engineer
-                        </span>
-                      </h1>
                       <p className="landing-lead">
                         Goを中心に、自社Webサービスのバックエンドを開発しています。個人ではWebサービスを作り、自宅サーバーで運用しています。
                       </p>
@@ -2518,68 +2519,16 @@ export default function Notebook({
                           className="landing-primary"
                           onClick={() => nav("timeline")}
                         >
-                          タイムラインを見る
-                          <ArrowUpRight size={16} />
+                          タイムラインを見る <ArrowUpRight size={16} />
                         </button>
                         <button onClick={() => nav("projects")}>
                           作ったもの
                         </button>
                       </div>
                     </div>
-                    <aside
-                      data-ds="landing-profile"
-                      className="landing-profile"
-                    >
-                      <Avatar value={profile.icon} large />
-                      <div>
-                        <span>プロフィール</span>
-                        <h2>{profile.name}</h2>
-                        <p>@kamesan1577</p>
-                      </div>
-                      <p className="landing-bio">{profile.bio}</p>
-                      <a href={contact.github} target="_blank" rel="noreferrer">
-                        GitHubでコードを見る <ArrowUpRight size={14} />
-                      </a>
-                    </aside>
                   </div>
 
                   <div className="landing-lower">
-                    <ContentIndex
-                      className="content-index"
-                      items={
-                        [
-                          {
-                            id: "blog",
-                            icon: <FileText size={18} />,
-                            title: "ブログ",
-                            description: "技術、開発、個人制作についての記事",
-                            count: posts.filter((p) => p.kind === "blog")
-                              .length,
-                          },
-                          {
-                            id: "tweet",
-                            icon: <MessageCircle size={18} />,
-                            title: "つぶやき",
-                            description: "日々の短いメモ",
-                            count: posts.filter((p) => p.kind === "tweet")
-                              .length,
-                          },
-                          {
-                            id: "vlog",
-                            icon: <Video size={18} />,
-                            title: "vlog",
-                            description: "数秒から30秒までの動画",
-                            count: posts.filter((p) => p.kind === "vlog")
-                              .length,
-                          },
-                        ] as const
-                      }
-                      onSelect={(id) => {
-                        nav("timeline");
-                        setFilter(id as Kind);
-                      }}
-                    />
-
                     <div className="featured-area">
                       <div className="landing-section-title">
                         <h2>いま読まれている</h2>
@@ -2616,6 +2565,41 @@ export default function Notebook({
                         </div>
                       )}
                     </div>
+                    <ContentIndex
+                      className="content-index"
+                      items={
+                        [
+                          {
+                            id: "blog",
+                            icon: <FileText size={18} />,
+                            title: "ブログ",
+                            description: "技術、開発、個人制作についての記事",
+                            count: posts.filter((p) => p.kind === "blog")
+                              .length,
+                          },
+                          {
+                            id: "tweet",
+                            icon: <MessageCircle size={18} />,
+                            title: "つぶやき",
+                            description: "日々の短いメモ",
+                            count: posts.filter((p) => p.kind === "tweet")
+                              .length,
+                          },
+                          {
+                            id: "vlog",
+                            icon: <Video size={18} />,
+                            title: "vlog",
+                            description: "数秒から30秒までの動画",
+                            count: posts.filter((p) => p.kind === "vlog")
+                              .length,
+                          },
+                        ] as const
+                      }
+                      onSelect={(id) => {
+                        nav("timeline");
+                        setFilter(id as Kind);
+                      }}
+                    />
                   </div>
                   <EngineeringProfile />
                 </section>
@@ -2637,55 +2621,6 @@ export default function Notebook({
                     >
                       更新中…
                     </p>
-                  )}
-                  {timelineMode === "kamelog" && (
-                    <label
-                      data-ds="mobile-search"
-                      className="home-search mobile-search"
-                    >
-                      <Search size={17} />
-                      <input
-                        value={query}
-                        onChange={(e) => setQuery(e.target.value)}
-                        placeholder="投稿を検索"
-                      />
-                      {query && (
-                        <button onClick={() => setQuery("")}>
-                          <X size={15} />
-                        </button>
-                      )}
-                    </label>
-                  )}
-                  {timelineMode === "kamelog" && tags.length > 0 && (
-                    <details data-ds="inline-topics" className="inline-topics">
-                      <summary>タグで絞り込む</summary>
-                      <div data-ds="topic-list" className="topic-list">
-                        {visibleTags.map(({ name, count }) => (
-                          <button
-                            key={name}
-                            className={tag === name ? "active" : ""}
-                            onClick={() => {
-                              setTag(name);
-                              setFilter("all");
-                            }}
-                          >
-                            #{name}
-                            <small>{count}</small>
-                          </button>
-                        ))}
-                      </div>
-                      {visibleTagCount < tags.length && (
-                        <button
-                          data-ds="tag-load-more"
-                          className="tag-load-more"
-                          onClick={() =>
-                            setVisibleTagCount((count) => count + 5)
-                          }
-                        >
-                          もっと見る
-                        </button>
-                      )}
-                    </details>
                   )}
                   {login && federationStatus?.enabled && (
                     <Tabs
@@ -2816,13 +2751,59 @@ export default function Notebook({
                         }
                         sort={sort}
                         onSortChange={setSort}
+                        searchOpen={searchOpen}
+                        searchActive={Boolean(query || tag)}
+                        searchPanelId="timeline-search-panel"
+                        searchButtonRef={searchToggle}
+                        onSearchToggle={() => setSearchOpen((open) => !open)}
                       />
-                      {tag && (
-                        <div data-ds="filter-active" className="filter-active">
-                          #{tag}
-                          <button onClick={() => setTag("")}>
-                            <X size={14} />
-                          </button>
+                      <TimelineSearch
+                        id="timeline-search-panel"
+                        open={searchOpen}
+                        query={query}
+                        onQueryChange={setQuery}
+                        tag={tag}
+                        tags={visibleTags}
+                        onTagChange={(value) => {
+                          setTag(value);
+                          setFilter("all");
+                        }}
+                        hasMoreTags={visibleTagCount < tags.length}
+                        onMoreTags={() =>
+                          setVisibleTagCount((count) => count + 5)
+                        }
+                        onClose={() => {
+                          setSearchOpen(false);
+                          searchToggle.current?.focus();
+                        }}
+                      />
+                      {(query || tag) && (
+                        <div
+                          data-ds="filter-active"
+                          className="filter-active"
+                          aria-label="適用中の絞り込み"
+                        >
+                          {query && (
+                            <button
+                              type="button"
+                              aria-label={`検索を解除: ${query}`}
+                              onClick={() => setQuery("")}
+                            >
+                              <Search size={14} aria-hidden="true" />
+                              <span>{query}</span>
+                              <X size={14} aria-hidden="true" />
+                            </button>
+                          )}
+                          {tag && (
+                            <button
+                              type="button"
+                              aria-label={`タグを解除: ${tag}`}
+                              onClick={() => setTag("")}
+                            >
+                              <span>#{tag}</span>
+                              <X size={14} aria-hidden="true" />
+                            </button>
+                          )}
                         </div>
                       )}
                       <div className="feed" aria-busy={refreshBusy}>

@@ -1,8 +1,30 @@
 [data-ds="filter-active"] {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+  color: var(--ds-color-text-secondary);
+  font-size: 12px;
+}
+[data-ds="filter-active"] > button {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 0 0;
-  color: #337ea9;
-  font-size: 13px;
+  gap: 8px;
+  min-height: 32px;
+  max-width: 100%;
+  padding: 4px 12px;
+  border: 1px solid var(--ds-color-border-subtle);
+  border-radius: 16px;
+  background: var(--ds-color-bg-hover);
+}
+[data-ds="filter-active"] > button:hover {
+  border-color: var(--ds-color-accent);
+}
+[data-ds="filter-active"] > button > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+[data-ds="filter-active"] svg {
+  flex-shrink: 0;
 }

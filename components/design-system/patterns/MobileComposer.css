@@ -7,15 +7,20 @@
     overscroll-behavior: contain;
   }
 
+  [data-ds="editor-dialog"].vlog-dialog,
+  [data-ds="editor-dialog"].blog-dialog.is-full-page {
+    padding: 20px !important;
+  }
+
   .mobile-editor-header {
     position: sticky;
-    top: -21px;
+    top: -20px;
     z-index: 4;
     display: grid;
     grid-template-columns: 40px minmax(0, 1fr) auto;
     align-items: center;
     min-height: 58px;
-    margin: -21px -21px 0;
+    margin: -20px -20px 0;
     padding: 8px 12px;
     border-bottom: 1px solid #ebe9e3;
     background: #fff;
@@ -24,7 +29,7 @@
   .mobile-editor-header > strong {
     overflow: hidden;
     font-size: 15px;
-    font-weight: 650;
+    font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
   }

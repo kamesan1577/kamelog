@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("landing polish keeps desktop and mobile controls readable", async ({
+test("social profile keeps desktop and mobile controls readable", async ({
   page,
 }, testInfo) => {
   await page.setViewportSize({ width: 1280, height: 900 });
@@ -9,10 +9,10 @@ test("landing polish keeps desktop and mobile controls readable", async ({
   const primary = page.getByRole("button", {
     name: /タイムラインを見る/,
   });
-  await expect(primary).toHaveCSS("background-color", "rgb(55, 53, 47)");
+  await expect(primary).toHaveCSS("background-color", "rgb(40, 85, 66)");
   await expect(page.locator("body")).toHaveCSS(
     "background-color",
-    "rgb(251, 251, 250)",
+    "rgb(248, 249, 246)",
   );
   await expect(page.locator('[data-ds="landing-profile"]')).toHaveCSS(
     "background-color",
@@ -27,7 +27,7 @@ test("landing polish keeps desktop and mobile controls readable", async ({
     .getByRole("region", { name: "コンテンツ" })
     .getByRole("button", { name: /ブログ/ });
   await contentRow.hover();
-  await expect(contentRow).toHaveCSS("background-color", "rgb(247, 247, 245)");
+  await expect(contentRow).toHaveCSS("background-color", "rgb(237, 241, 233)");
 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(primary).toBeVisible();

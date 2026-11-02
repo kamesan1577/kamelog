@@ -1,15 +1,15 @@
 @import "tailwindcss";
 :root {
-  --ds-color-bg-page: #fbfbfa;
+  --ds-color-bg-page: #f8f9f6;
   --ds-color-bg-surface: #ffffff;
-  --ds-color-bg-hover: #efefec;
+  --ds-color-bg-hover: #edf1e9;
   --ds-color-text-primary: #37352f;
   --ds-color-text-secondary: #66665f;
   --ds-color-text-tertiary: #717168;
   --ds-color-border-subtle: #e5e3df;
   --ds-color-border-strong: #c9c6bd;
-  --ds-color-accent: #37352f;
-  --ds-color-accent-hover: #292824;
+  --ds-color-accent: #285542;
+  --ds-color-accent-hover: #1d4032;
   --ds-color-danger: #c93f46;
   --ds-space-1: 0.25rem;
   --ds-space-2: 0.5rem;
@@ -31,7 +31,7 @@
   --ds-sidebar-width: 13.5rem;
 }
 
-inline {
+@theme inline {
   --color-ds-page: var(--ds-color-bg-page);
   --color-ds-surface: var(--ds-color-bg-surface);
   --color-ds-hover: var(--ds-color-bg-hover);

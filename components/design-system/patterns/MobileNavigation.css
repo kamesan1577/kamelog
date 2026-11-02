@@ -1,0 +1,21 @@
+[data-ds="mobile-navigation"] button {
+  border-top: 2px solid transparent;
+  color: var(--ds-color-text-secondary);
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+[data-ds="mobile-navigation"] button[aria-current="page"] {
+  border-top-color: var(--ds-color-accent);
+  background: #e8eee5;
+  color: var(--ds-color-accent);
+  font-weight: 500;
+}
+[data-ds="mobile-navigation"] button:hover {
+  background: var(--ds-color-bg-hover);
+}
+[data-ds="mobile-navigation"] button svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.5;
+}

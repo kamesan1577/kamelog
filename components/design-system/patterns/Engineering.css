@@ -3,8 +3,8 @@
   font-size: 14px;
   font-weight: 400;
   letter-spacing: 0;
-  color: #6e6e66;
-  margin-top: 5px;
+  color: var(--ds-color-text-tertiary);
+  margin-top: 8px;
 }
 .engineering-links {
   display: flex;
@@ -14,26 +14,26 @@
 }
 .engineering-links a,
 .engineering-email {
-  color: #33332e;
+  color: var(--ds-color-text-primary);
   text-decoration: underline;
   text-underline-offset: 4px;
-  font-size: 13px;
+  font-size: 14px;
   min-height: 40px;
   display: inline-flex;
   align-items: center;
   overflow-wrap: anywhere;
 }
 .engineering-profile {
-  margin-top: 28px;
-  color: #575750;
-  font-size: 13px;
+  margin-top: 24px;
+  color: var(--ds-color-text-secondary);
+  font-size: 14px;
   line-height: 1.8;
 }
 .engineering-profile section {
   display: grid;
-  grid-template-columns: 128px minmax(0, 1fr);
-  gap: 28px;
-  padding: 28px 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 24px 0;
   border-bottom: 1px solid #e5e5df;
 }
 .engineering-profile section:last-child {
@@ -43,42 +43,42 @@
   min-width: 0;
 }
 .engineering-profile h2 {
-  color: #6e6e66;
-  font-size: 13px;
+  color: var(--ds-color-text-primary);
+  font-size: 18px;
   font-weight: 500;
   margin: 0;
 }
 .engineering-profile p {
-  margin: 0 0 10px;
+  margin: 0 0 12px;
 }
 .engineering-profile strong {
-  color: #33332e;
+  color: var(--ds-color-text-primary);
   font-weight: 500;
 }
 .engineering-position span {
   display: block;
-  color: #6e6e66;
-  margin-top: 3px;
+  color: var(--ds-color-text-tertiary);
+  margin-top: 4px;
 }
 .engineering-profile ul {
-  padding-left: 18px;
+  padding-left: 20px;
   margin: 12px 0;
 }
 .engineering-profile li {
-  margin: 5px 0;
+  margin: 8px 0;
 }
 .engineering-details {
   margin-top: 16px;
 }
 .engineering-details summary {
   cursor: pointer;
-  color: #33332e;
+  color: var(--ds-color-text-primary);
   padding: 8px 0;
 }
 .engineering-outcomes {
   display: grid;
   gap: 16px;
-  padding-top: 14px;
+  padding-top: 16px;
 }
 .engineering-outcomes p {
   margin: 4px 0 0;
@@ -101,14 +101,14 @@
   padding-bottom: 0;
 }
 .engineering-skills dt {
-  color: #6e6e66;
+  color: var(--ds-color-text-tertiary);
 }
 .engineering-skills dd {
   margin: 0;
 }
 .engineering-skills dd span {
   display: block;
-  margin-top: 3px;
+  margin-top: 4px;
 }
 .engineering-career {
   list-style: none;
@@ -117,26 +117,29 @@
 }
 .engineering-career li {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-columns: 64px minmax(0, 1fr);
   gap: 16px;
-  padding: 0 0 18px;
+  padding: 0 0 20px;
   margin: 0;
 }
 .engineering-career time {
-  color: #6e6e66;
+  font-size: 16px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  color: var(--ds-color-text-tertiary);
 }
 .engineering-career p {
   margin: 4px 0 0;
 }
 .engineering-profile .engineering-qualifications {
-  color: #6e6e66;
+  color: var(--ds-color-text-tertiary);
   margin: 0;
 }
 .project-article {
   max-width: 840px;
   margin: 0 auto;
   padding: 60px 28px 100px;
-  color: #5f5e5b;
+  color: var(--ds-color-text-secondary);
   line-height: 1.8;
   background: #fff;
   min-height: 100dvh;
@@ -147,31 +150,32 @@
 }
 .project-article h1 {
   font-size: 32px;
+  font-weight: 500;
   color: #37352f;
   margin: 24px 0 4px;
 }
 .project-article h2 {
   color: #37352f;
   font-size: 18px;
-  font-weight: 700;
-  margin: 0 0 10px;
+  font-weight: 500;
+  margin: 0 0 12px;
 }
 .project-article ul {
   padding-left: 20px;
-  margin: 9px 0;
+  margin: 12px 0;
 }
 .project-article li {
-  margin: 5px 0;
+  margin: 8px 0;
 }
 .project-article dl > div {
   display: grid;
   grid-template-columns: 160px 1fr;
-  padding: 9px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #eeede9;
   gap: 12px;
 }
 .project-article dt {
-  color: #787774;
+  color: var(--ds-color-text-tertiary);
 }
 .project-article dd {
   margin: 0;
@@ -179,13 +183,13 @@
 .project-article section {
   border-top: 1px solid #dededb;
   padding-top: 24px;
-  margin-top: 28px;
+  margin-top: 32px;
 }
 .project-summary {
   font-size: 17px;
 }
 .project-architecture {
-  padding: 14px;
+  padding: 16px;
   background: #f7f7f5;
   overflow-wrap: anywhere;
 }
@@ -197,7 +201,7 @@
   }
   .engineering-skills > div {
     grid-template-columns: minmax(0, 1fr);
-    gap: 3px;
+    gap: 4px;
   }
 }
 @media (max-width: 700px) {

@@ -27,7 +27,7 @@ export function SideNavigation({
   return (
     <nav
       data-ds="side-navigation"
-      aria-label={props["aria-label"] ?? "サイドナビゲーション"}
+      aria-label={props["aria-label"] ?? "メインナビゲーション"}
       className={className}
       {...props}
     >

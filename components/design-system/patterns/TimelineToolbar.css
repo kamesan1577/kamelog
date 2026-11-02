@@ -2,13 +2,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #e5e3df;
+  gap: 8px;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
+}
+
+[data-ds="timeline-toolbar"] > [data-slot="tabs"] {
+  flex: 1;
+  min-width: 0;
 }
 
 [data-ds="timeline-toolbar-actions"] {
   display: flex;
   align-items: center;
-  gap: 12px;
+  flex-shrink: 0;
+  gap: 2px;
 }
 
 [data-ds="timeline-toolbar-actions"] > button {
@@ -16,8 +23,13 @@
   align-items: center;
   justify-content: center;
   width: 36px;
-  height: 44px;
-  color: #7b7970;
+  height: 48px;
+  color: var(--ds-color-text-secondary);
+}
+
+[data-ds="timeline-toolbar-actions"] > button:hover:not(:disabled) {
+  color: var(--ds-color-accent);
+  background: var(--ds-color-bg-hover);
 }
 
 [data-ds="timeline-toolbar-actions"] > button:disabled {
@@ -27,9 +39,10 @@
 
 [data-ds="timeline-tabs"] {
   position: relative;
-  height: 42px !important;
+  width: 100%;
+  height: 48px !important;
   padding: 0 !important;
-  gap: 14px !important;
+  gap: 0 !important;
 }
 
 /* One indicator moves between the actual tab bounds, including unequal labels. */
@@ -39,7 +52,7 @@
   left: 0;
   width: var(--timeline-indicator-width, 0px);
   height: 2px;
-  background: var(--kamelog-ink, #37352f);
+  background: var(--ds-color-accent);
   content: "";
   opacity: 0;
   pointer-events: none;
@@ -54,13 +67,18 @@
 }
 
 [data-ds="timeline-tabs"] [data-slot="tabs-trigger"] {
-  height: 42px !important;
-  padding: 0 2px;
+  min-width: 0;
+  height: 48px !important;
+  padding: 0 8px;
   border-radius: 0;
-  color: #717168;
-  font-size: 13px;
-  font-weight: 400;
-  gap: 5px;
+  color: var(--ds-color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  gap: 4px;
+}
+
+[data-ds="timeline-tabs"] [data-slot="tabs-trigger"]:hover {
+  background: var(--ds-color-bg-hover);
 }
 
 /* Hide Radix's per-tab underline; it would fade instead of sliding. */
@@ -69,33 +87,24 @@
 }
 
 [data-ds="timeline-tabs"] [data-slot="tabs-trigger"][data-state="active"] {
-  color: #37352f;
-  font-weight: 600;
+  color: var(--ds-color-text-primary);
+  font-weight: 650;
 }
 
 [data-ds="timeline-tabs"] [data-slot="tabs-trigger"] svg {
-  width: 14px !important;
-  height: 14px !important;
-}
-
-@media (max-width: 1150px) {
-  [data-ds="timeline-tabs"] {
-    gap: 10px !important;
-  }
+  width: 16px !important;
+  height: 16px !important;
 }
 
 @media (max-width: 640px) {
-  [data-ds="timeline-tabs"] {
-    gap: 14px !important;
-  }
-
   [data-ds="timeline-tabs"] [data-slot="tabs-trigger"] {
-    font-size: 12px;
+    padding-inline: 4px;
+    font-size: 13px;
     gap: 4px;
   }
 
   [data-ds="timeline-tabs"] [data-slot="tabs-trigger"] svg {
-    width: 12px !important;
+    width: 16px !important;
   }
 }
 
@@ -107,7 +116,7 @@
 
 [data-ds="feed-count"] {
   text-align: center;
-  color: #717168;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
   padding: 24px;
 }
@@ -117,15 +126,45 @@
   margin: 0;
   padding: 8px 0;
   text-align: center;
-  color: #7b7970;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
 }
 
 @media (max-width: 380px) {
-  [data-ds="timeline-tabs"] {
-    gap: 8px !important;
+  [data-ds="timeline-toolbar"] {
+    gap: 0;
+  }
+  [data-ds="timeline-tabs"] [data-slot="tabs-trigger"] {
+    padding-inline: 2px;
+    font-size: 12px;
+    flex: 1 1 auto;
   }
   [data-ds="timeline-toolbar-actions"] {
-    gap: 2px;
+    gap: 0;
+  }
+}
+
+[data-ds="timeline-toolbar-actions"] > [data-ds="timeline-search-toggle"] {
+  display: none;
+}
+@media (max-width: 1239px) {
+  [data-ds="timeline-toolbar-actions"] > [data-ds="timeline-search-toggle"] {
+    position: relative;
+    display: inline-flex;
+  }
+  [data-ds="timeline-search-toggle"][aria-expanded="true"],
+  [data-ds="timeline-search-toggle"][data-active="true"] {
+    color: var(--ds-color-accent);
+    background: var(--ds-color-bg-hover);
+  }
+  [data-ds="timeline-search-toggle"][data-active="true"]::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    right: 6px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
   }
 }

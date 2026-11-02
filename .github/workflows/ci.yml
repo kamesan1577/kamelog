@@ -29,7 +29,7 @@ jobs:
             fi
           done
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg fonts-noto-cjk
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: make check
@@ -54,7 +54,7 @@ jobs:
             fi
           done
           sudo apt-get update
-          sudo apt-get install -y ffmpeg
+          sudo apt-get install -y ffmpeg fonts-noto-cjk
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run build

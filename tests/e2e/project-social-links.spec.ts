@@ -45,14 +45,25 @@ test("project cards stay inside narrow viewports without cropping thumbnails", a
     ).toHaveCount(1);
     await expect(projects.getByRole("link", { name: /Qiita/ })).toHaveCount(0);
 
-    if (width === 320) {
-      const cardBox = await cards.first().boundingBox();
-      const imageBox = await cards.first().locator("img").boundingBox();
-      expect(cardBox).not.toBeNull();
-      expect(imageBox).not.toBeNull();
-      if (!cardBox || !imageBox)
-        throw new Error("project image geometry unavailable");
-      expect(imageBox.width).toBeGreaterThan(cardBox.width - 4);
+    // Thumbnails and descriptions remain side by side, including at 320px.
+    for (const card of await cards.all()) {
+      const geometry = await card.evaluate((element) => {
+        const image = element.querySelector("img");
+        const content = element.querySelector(":scope > div");
+        if (!image || !content) throw new Error("Project row is incomplete");
+        const imageBox = image.getBoundingClientRect();
+        const textBox = content.getBoundingClientRect();
+        return {
+          imageWidth: imageBox.width,
+          textWidth: textBox.width,
+          gap: textBox.left - imageBox.right,
+          topDifference: Math.abs(textBox.top - imageBox.top),
+        };
+      });
+      expect(geometry.imageWidth).toBeGreaterThanOrEqual(80);
+      expect(geometry.textWidth).toBeGreaterThan(geometry.imageWidth);
+      expect(geometry.gap).toBeGreaterThanOrEqual(12);
+      expect(geometry.topDifference).toBeLessThanOrEqual(1);
     }
   }
 });
