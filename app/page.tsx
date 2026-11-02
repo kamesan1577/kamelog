@@ -4,10 +4,17 @@ import SitePage from "./site-page";
 import { getStore } from "@/server/runtime.mjs";
 import { ogImageUrl, postUrl, seoDescription } from "@/server/seo.mjs";
 import { socialCopy } from "@/lib/social";
+import { readerModeFromSearch } from "@/lib/navigation";
 
 export const dynamic = "force-dynamic";
 
-type PageSearchParams = { embed?: string; preview?: string; post?: string };
+type PageSearchParams = {
+  embed?: string;
+  preview?: string;
+  post?: string;
+  reader?: string;
+  [key: string]: string | string[] | undefined;
+};
 type PublicPost = {
   id: string;
   kind: "blog" | "tweet" | "vlog";
@@ -82,5 +89,17 @@ export default async function Page({
   if (process.env.NODE_ENV === "development" && params.preview === "1")
     return <PreviewShell />;
 
-  return <SitePage selectedPostId={params.post || null} />;
+  const query = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (Array.isArray(value))
+      value.forEach((entry) => query.append(key, entry));
+    else if (value !== undefined) query.set(key, value);
+  }
+  return (
+    <SitePage
+      selectedPostId={params.post || null}
+      readerMode={readerModeFromSearch(query.toString())}
+      readerUrl={`/?${query}`}
+    />
+  );
 }

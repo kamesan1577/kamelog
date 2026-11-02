@@ -15,10 +15,11 @@
 }
 
 [data-ds="post-actions"] button:hover {
-  color: var(--ds-color-text-primary);
+  color: var(--ds-color-accent);
 }
 
-[data-ds="post-actions"] .liked {
+[data-ds="post-actions"] .liked,
+[data-ds="post-actions"] .liked:hover {
   color: var(--ds-color-danger);
 }
 

@@ -46,7 +46,7 @@
   justify-content: center;
   gap: 9px;
   padding: 11px 16px;
-  border: 1px solid var(--kamelog-ink);
+  border: 1px solid var(--ds-color-action);
   border-radius: 6px;
   font: inherit;
   font-size: 13px;
@@ -57,7 +57,7 @@
 }
 
 .primary {
-  background: var(--kamelog-ink);
+  background: var(--ds-color-action);
   color: var(--ds-color-action-foreground);
 }
 

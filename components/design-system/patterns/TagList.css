@@ -26,7 +26,7 @@
 
 [data-ds="tag-list"] button:hover {
   background: var(--ds-color-bg-hover);
-  color: var(--ds-color-text-primary);
+  color: var(--ds-color-accent);
 }
 @media (max-width: 640px) {
   [data-ds="tag-list"] {

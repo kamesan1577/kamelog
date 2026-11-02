@@ -60,3 +60,19 @@
     display: none;
   }
 }
+
+/* Article pages use the document's scroll and native Back/Forward restoration. */
+.notebook[data-reader-mode="page"] {
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
+}
+.notebook[data-reader-mode="page"] [data-ds="site-layout"] {
+  overflow: visible;
+}
+.notebook[data-reader-mode="page"] [data-ds="main-content"] {
+  padding: 0;
+}
+.notebook[data-reader-mode="page"] [data-ds="mobile-create"] {
+  display: none;
+}

@@ -133,7 +133,7 @@
 }
 .duration-picker button.active {
   background: var(--ds-color-action);
-  border-color: var(--ds-color-text-primary);
+  border-color: var(--ds-color-action);
   color: var(--ds-color-action-foreground);
 }
 .record-button {

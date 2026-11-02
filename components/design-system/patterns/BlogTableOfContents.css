@@ -1,5 +1,4 @@
-/* The table of contents is inserted by BlogTableOfContentsBridge at runtime.
-   Keep these selectors global so its generated DOM receives the styles. */
+/* The article's Markdown renderer includes the table of contents in its HTML. */
 [data-ds="blog-table-of-contents"] {
   box-sizing: border-box;
   min-width: 0;
@@ -45,7 +44,7 @@
 
 [data-ds="blog-table-of-contents"] a:hover {
   background: var(--ds-color-bg-hover);
-  color: var(--ds-color-text-primary);
+  color: var(--ds-color-accent);
 }
 
 [data-ds="blog-table-of-contents"] a:focus-visible {

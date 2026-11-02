@@ -14,12 +14,12 @@ body,
 
 button:focus-visible,
 a:focus-visible {
-  outline-color: var(--kamelog-ink);
+  outline-color: var(--ds-color-focus);
 }
 
 input:focus,
 textarea:focus {
-  border-color: var(--kamelog-ink);
+  border-color: var(--ds-color-accent);
 }
 
 [data-ds="public-sidebar"] {
@@ -45,12 +45,12 @@ textarea:focus {
 [data-ds="aside-section"] button:hover,
 [data-ds="admin-nav"] > button:hover {
   background: var(--ds-color-bg-hover);
-  color: var(--kamelog-ink);
+  color: var(--ds-color-accent);
 }
 
 [data-ds="public-sidebar"] button.active {
   background: var(--ds-color-bg-active);
-  color: var(--kamelog-ink);
+  color: var(--ds-color-accent);
 }
 
 [data-ds="public-sidebar"] button.active small {
@@ -73,7 +73,7 @@ textarea:focus {
 
 [data-ds="mobile-search"]:focus-within,
 [data-ds="side-search"]:focus-within {
-  border-color: var(--kamelog-ink);
+  border-color: var(--ds-color-accent);
   box-shadow: 0 0 0 2px
     color-mix(in srgb, var(--ds-color-focus) 15%, transparent);
 }
@@ -85,7 +85,7 @@ textarea:focus {
 [data-ds="editor-dialog"] .editor-tools .active,
 [data-ds="editor-dialog"] .editor-tools .markdown-help-link,
 [data-ds="site-source-footer"] a {
-  color: var(--kamelog-ink);
+  color: var(--ds-color-accent);
 }
 
 [data-ds="site-source-footer"] {
@@ -96,23 +96,23 @@ textarea:focus {
 [data-ds="site-source-footer"] a:hover,
 [data-ds="profile-card"] a:hover,
 [data-ds="detail-markdown"] a:hover {
-  color: var(--kamelog-ink-hover);
+  color: var(--ds-color-accent-hover);
   text-decoration-thickness: 2px;
 }
 
 [data-ds="tag-load-more"]:hover,
 [data-ds="topic-list"] button:hover,
 [data-ds="topic-list"] .active {
-  color: var(--kamelog-ink);
+  color: var(--ds-color-accent);
 }
 
 [data-ds="owner-avatar-picker"] .chosen {
-  border-color: var(--kamelog-ink);
+  border-color: var(--ds-color-accent);
   background: var(--kamelog-soft);
 }
 
 [data-ds="detail-markdown"] .task-list-item input {
-  accent-color: var(--kamelog-ink);
+  accent-color: var(--ds-color-accent);
 }
 
 @media (max-width: 640px) {
@@ -126,12 +126,12 @@ textarea:focus {
   }
 
   [data-ds="mobile-navigation"] button.active {
-    color: var(--kamelog-ink);
+    color: var(--ds-color-accent);
     font-weight: 650;
   }
 
   [data-ds="mobile-create"] {
-    border-color: var(--kamelog-ink);
-    background: var(--kamelog-ink);
+    border-color: var(--ds-color-accent);
+    background: var(--ds-color-action);
   }
 }

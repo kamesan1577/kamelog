@@ -4,8 +4,9 @@ import test from "node:test";
 import {
   canonicalNavigationUrl,
   pathnameForView,
+  readerModeFromSearch,
   viewFromPathname,
-} from "../../lib/navigation.mjs";
+} from "../../lib/navigation.ts";
 
 test("public main views have stable shareable paths", () => {
   assert.equal(pathnameForView("home"), "/");
@@ -21,7 +22,6 @@ test("post detail remains on the existing root query URL", () => {
     canonicalNavigationUrl("https://kamesan.org/timeline?foo=1", {
       view: "home",
       post: "post-123",
-      internal: true,
     }),
     "/?foo=1&post=post-123",
   );
@@ -32,10 +32,60 @@ test("view navigation removes the post query and changes pathname", () => {
     canonicalNavigationUrl("https://kamesan.org/?post=post-123", {
       view: "projects",
       post: null,
-      internal: true,
     }),
     "/projects",
   );
+});
+
+test("leaving an article removes its presentation mode and preserves unrelated URL state", () => {
+  assert.equal(
+    canonicalNavigationUrl(
+      "https://kamesan.org/?post=post-123&reader=page&source=feed#section",
+      {
+        view: "projects",
+        post: null,
+        readerMode: "page",
+      },
+    ),
+    "/projects?source=feed#section",
+  );
+});
+
+test("page mode requires an explicit supported URL preference and a post", () => {
+  assert.equal(readerModeFromSearch("?post=example&reader=page"), "page");
+  for (const search of [
+    "",
+    "?reader=page",
+    "?post=&reader=page",
+    "?post=example",
+    "?post=example&reader=popup",
+    "?post=example&reader=invalid",
+  ])
+    assert.equal(readerModeFromSearch(search), "popup");
+});
+
+test("page links canonicalize relative URLs while preserving unrelated query and hash", () => {
+  assert.equal(
+    canonicalNavigationUrl("/timeline?source=feed&reader=invalid#intro", {
+      view: "home",
+      post: "article & detail",
+      readerMode: "page",
+    }),
+    "/?source=feed&reader=page&post=article+%26+detail#intro",
+  );
+});
+
+test("normal post navigation clears a previous page preference", () => {
+  for (const readerMode of [undefined, "popup"] as const) {
+    assert.equal(
+      canonicalNavigationUrl("/?post=old&reader=page&source=feed", {
+        view: "home",
+        post: "next",
+        readerMode,
+      }),
+      "/?post=next&source=feed",
+    );
+  }
 });
 
 test("projects route delegates to the existing main UI", async () => {

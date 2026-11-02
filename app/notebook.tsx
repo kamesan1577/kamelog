@@ -45,6 +45,11 @@ import { TimelineToolbar } from "@/components/design-system/patterns/TimelineToo
 import { TimelineSearch } from "@/components/design-system/patterns/TimelineSearch";
 import { PostMeta } from "@/components/design-system/patterns/PostMeta";
 import { PostReader } from "@/components/design-system/patterns/PostReader";
+import {
+  canonicalNavigationUrl,
+  readerModeFromSearch,
+  type ReaderMode,
+} from "@/lib/navigation";
 import { PostPreview } from "@/components/design-system/patterns/PostPreview";
 import { TimelineItem } from "@/components/design-system/patterns/TimelineItem";
 import { InlineComposer } from "@/components/design-system/patterns/InlineComposer";
@@ -92,6 +97,7 @@ import { toast } from "sonner";
 import { api, signIn } from "@/lib/api";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
+import rehypeBlogToc from "@/lib/blog-toc-rehype";
 import remarkGfm from "remark-gfm";
 import { shouldAutoplayVlog, socialCopy } from "@/lib/social";
 import {
@@ -216,6 +222,7 @@ type NavigationState = {
   view: View;
   post: string | null;
   internal: boolean;
+  readerMode?: ReaderMode;
 };
 const label: Record<Kind, string> = {
   blog: "ブログ",
@@ -242,18 +249,26 @@ function readNavigationState(): NavigationState | null {
   const candidate = baseHistoryState()[navigationStateKey];
   if (!candidate || typeof candidate !== "object") return null;
   if (Array.isArray(candidate)) return null;
-  const { view, post, internal } = candidate as Partial<NavigationState>;
+  const { view, post, internal, readerMode } =
+    candidate as Partial<NavigationState>;
   if (!isView(view)) return null;
   if (post != null && typeof post !== "string") return null;
-  return { view, post: post ?? null, internal: internal === true };
+  return {
+    view,
+    post: post ?? null,
+    internal: internal === true,
+    readerMode: readerMode === "page" ? "page" : "popup",
+  };
 }
 function postFromLocation() {
   return new URL(window.location.href).searchParams.get("post");
 }
-function navigationUrl(post: string | null) {
+function navigationUrl(post: string | null, readerMode: ReaderMode = "popup") {
   const url = new URL(window.location.href);
   if (post) url.searchParams.set("post", post);
   else url.searchParams.delete("post");
+  if (post && readerMode === "page") url.searchParams.set("reader", "page");
+  else url.searchParams.delete("reader");
   return url.pathname + url.search + url.hash;
 }
 function navigationHistoryState(next: NavigationState) {
@@ -397,18 +412,50 @@ export function Markdown({
     <div data-ds="detail-markdown" className="markdown">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
-        rehypePlugins={[[rehypeHighlight, { detect: false }]]}
+        rehypePlugins={[
+          [rehypeHighlight, { detect: false }],
+          ...(articleMeta ? [rehypeBlogToc] : []),
+        ]}
         skipHtml
         components={{
           h1({ children, node }) {
             return articleMeta && node?.position?.start.line === 1 ? (
-              <header data-ds="reader-article-header">
+              <>
                 <h1>{children}</h1>
                 {articleMeta}
-                <div data-ds="reader-toc-slot" />
-              </header>
+              </>
             ) : (
               <h1>{children}</h1>
+            );
+          },
+          a({ node, children, href, ...props }) {
+            const isToc = node?.properties["data-kamelog-toc-link"] === "true";
+            return (
+              <a
+                {...props}
+                href={href}
+                onClick={
+                  isToc
+                    ? (event) => {
+                        if (
+                          event.button !== 0 ||
+                          event.metaKey ||
+                          event.ctrlKey ||
+                          event.shiftKey ||
+                          event.altKey ||
+                          !href?.startsWith("#")
+                        )
+                          return;
+                        const heading = document.getElementById(href.slice(1));
+                        if (!heading) return;
+                        event.preventDefault();
+                        heading.scrollIntoView({ block: "start" });
+                      }
+                    : undefined
+                }
+              >
+                {children}
+              </a>
             );
           },
           code({ className, children }) {
@@ -430,7 +477,8 @@ export function Markdown({
               <pre>{children}</pre>
             );
           },
-          p({ children }) {
+          p({ children, ...props }) {
+            delete props.node;
             const child =
               Array.isArray(children) && children.length === 1
                 ? children[0]
@@ -444,7 +492,7 @@ export function Markdown({
               )
                 return embed;
             }
-            return <p>{children}</p>;
+            return <p {...props}>{children}</p>;
           },
         }}
       >
@@ -576,11 +624,15 @@ export default function Notebook({
   initialReposts = [],
   initialProfile,
   initialSelected = null,
+  initialReaderMode = "popup",
+  initialReaderUrl = "/",
 }: {
   initialPosts?: Post[];
   initialReposts?: PublicRepost[];
   initialProfile?: { name: string; icon: string; bio: string };
   initialSelected?: string | null;
+  initialReaderMode?: ReaderMode;
+  initialReaderUrl?: string;
 }) {
   const { resolvedTheme } = useTheme();
   const inFlight = useRef(false);
@@ -654,6 +706,8 @@ export default function Notebook({
     [selected, setSelected] = useState<string | null>(initialSelected),
     [visibleTagCount, setVisibleTagCount] = useState(5);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [readerMode, setReaderMode] = useState<ReaderMode>(initialReaderMode);
+  const [readerLocation, setReaderLocation] = useState(initialReaderUrl);
   const searchToggle = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     const narrow = window.matchMedia("(max-width: 1239px)");
@@ -1104,18 +1158,22 @@ export default function Notebook({
       const state = readNavigationState();
       setView(post ? "home" : (state?.view ?? "home"));
       setSelected(post);
+      setReaderMode(readerModeFromSearch(window.location.search));
+      setReaderLocation(window.location.href);
       if (post) setTag("");
     };
     const initialPost = postFromLocation();
+    const initialMode = readerModeFromSearch(window.location.search);
     const initialState = readNavigationState();
     window.history.replaceState(
       navigationHistoryState({
         view: initialPost ? "home" : (initialState?.view ?? "home"),
         post: initialPost,
         internal: false,
+        readerMode: initialMode,
       }),
       "",
-      navigationUrl(initialPost),
+      navigationUrl(initialPost, initialMode),
     );
     syncNavigation();
     window.addEventListener("popstate", syncNavigation);
@@ -1131,8 +1189,11 @@ export default function Notebook({
         navigationUrl(null),
       );
     }
+    // Reset the destination only after preserving the article's history entry.
+    if (readerMode === "page") window.scrollTo({ top: 0, behavior: "instant" });
     setView(v);
     setSelected(null);
+    setReaderMode("popup");
     setTag("");
   };
   const handleTimelineNavigation = () => {
@@ -1164,7 +1225,10 @@ export default function Notebook({
         `[data-reader-opener="${CSS.escape(opener.dataset.readerOpener)}"]`,
       );
     }
-    if (postFromLocation() !== id) {
+    if (
+      postFromLocation() !== id ||
+      readerModeFromSearch(window.location.search) !== "popup"
+    ) {
       window.history.pushState(
         navigationHistoryState({ view: "home", post: id, internal: true }),
         "",
@@ -1173,6 +1237,8 @@ export default function Notebook({
     }
     setView("home");
     setSelected(id);
+    setReaderMode("popup");
+    setReaderLocation(window.location.href);
     setTag("");
   };
   const closePost = () => {
@@ -1182,9 +1248,11 @@ export default function Notebook({
       )
     )
       return;
+    if (readerMode === "page") window.scrollTo({ top: 0, behavior: "instant" });
     const post = postFromLocation();
     if (!post) {
       setSelected(null);
+      setReaderMode("popup");
       return;
     }
     const state = readNavigationState();
@@ -1199,6 +1267,7 @@ export default function Notebook({
     );
     setView("home");
     setSelected(null);
+    setReaderMode("popup");
     setTag("");
   };
   const replaceMarkdownSelection = (
@@ -1844,7 +1913,12 @@ export default function Notebook({
     </PostActions>
   );
   return (
-    <div className="notebook">
+    <div
+      className="notebook"
+      data-reader-mode={
+        item?.kind === "blog" && readerMode === "page" ? "page" : undefined
+      }
+    >
       <Toaster position="bottom-center" theme={resolvedTheme} />
       {xFallbackAction}
       <div data-ds="site-layout" className="site-layout">
@@ -2450,6 +2524,17 @@ export default function Notebook({
                   postId={item.id}
                   title={item.kind === "blog" ? item.title : label[item.kind]}
                   kind={item.kind}
+                  mode={readerMode}
+                  pageHref={canonicalNavigationUrl(readerLocation, {
+                    view: "home",
+                    post: item.id,
+                    readerMode: "page",
+                  })}
+                  popupHref={canonicalNavigationUrl(readerLocation, {
+                    view: "home",
+                    post: item.id,
+                    readerMode: "popup",
+                  })}
                   onClose={closePost}
                   returnFocusSelector={readerReturnFocusSelector}
                   actions={item.kind === "blog" ? actions(item) : undefined}

@@ -1,30 +1,33 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { Store } from "../../server/storage/local-store.ts";
+import { findE2EDataDirectory, removePostFixtures } from "./fixture-store";
 
-async function addBlogDetailFixture(page: Page) {
-  await page.goto("/");
-  await page.evaluate(() => {
-    const fixture = document.createElement("section");
-    fixture.id = "blog-detail-design-fixture";
-    fixture.className = "detail-page";
-    fixture.dataset.ds = "detail-page";
-    fixture.innerHTML = `
-      <button class="back-button">戻る</button>
-      <div>
-        <div data-ds="post-meta" class="post-meta">架空の投稿者 · 9/7</div>
-        <div data-ds="detail-markdown" class="markdown">
-          <h1>長い記事のタイトル</h1>
-          <p>本文</p>
-          <h2>導入</h2>
-          <h3>かなり長い見出しでも画面の外へはみ出さずに折り返して読みやすい状態を保つ</h3>
-          <h4>詳細</h4>
-        </div>
-        <div data-ds="post-actions" class="post-actions">記事の操作</div>
-      </div>
-    `;
-    const main = document.querySelector("main.main-content") || document.body;
-    main.append(fixture);
-  });
-}
+const postId = "fictional-blog-design-contract";
+const title = "長い記事のタイトルを確認する架空の記事";
+const body =
+  "本文の始まり\n\n## 導入\n\n導入の本文\n\n### かなり長い見出しでも画面の外へはみ出さずに折り返して読みやすい状態を保つ\n\n見出しの後の本文\n\n#### 詳細\n\n本文の終わり";
+let dataDirectory: string;
+
+test.beforeAll(async () => {
+  dataDirectory = await findE2EDataDirectory();
+  const store = new Store(dataDirectory);
+  try {
+    store.save("posts", postId, {
+      kind: "blog",
+      title,
+      body,
+      date: "2026-11-01T12:00:00.000Z",
+      tags: [],
+      images: [],
+      likes: 0,
+      federationEnabled: false,
+    });
+  } finally {
+    store.close();
+  }
+});
+
+test.afterAll(() => removePostFixtures(dataDirectory, [postId]));
 
 for (const theme of ["light", "dark"] as const) {
   for (const width of [390, 1280]) {
@@ -33,8 +36,12 @@ for (const theme of ["light", "dark"] as const) {
     }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.emulateMedia({ colorScheme: theme });
-      await addBlogDetailFixture(page);
-
+      await page.goto(`/?post=${postId}`);
+      const reader = page.getByRole("dialog", { name: title, exact: true });
+      const toc = reader.getByRole("navigation", { name: "目次" });
+      await expect(reader).toBeVisible();
+      await expect(toc).toBeVisible();
+      await expect(toc.getByRole("link")).toHaveCount(3);
       const palette = await page.evaluate(() => {
         const probe = document.createElement("span");
         document.body.append(probe);
@@ -43,63 +50,106 @@ for (const theme of ["light", "dark"] as const) {
           return getComputedStyle(probe).backgroundColor;
         };
         const colors = {
-          muted: resolve("--ds-color-bg-muted"),
+          page: resolve("--ds-color-bg-page"),
           surface: resolve("--ds-color-bg-surface"),
-          primary: resolve("--ds-color-text-primary"),
         };
         probe.remove();
         return colors;
       });
-
-      const card = page.locator("#blog-detail-design-fixture > div");
-      const toc = page.getByRole("navigation", { name: "目次" });
-      await expect(toc).toBeVisible();
-      await expect(toc.getByRole("link")).toHaveCount(3);
-
-      // Regression: missing TOC CSS left an unstyled, oversized list. Surfaces
-      // now use the shared theme tokens; geometry and imported styles still apply.
-      expect(palette.muted).not.toBe(palette.surface);
-      await expect(toc).toHaveCSS("background-color", palette.muted);
+      // The real reader has a page-colored TOC on a raised article surface.
+      // Border and link-display checks still catch missing imported styles.
+      expect(palette.page).not.toBe(palette.surface);
+      await expect(toc).toHaveCSS("background-color", palette.page);
       await expect(toc).toHaveCSS("border-top-width", "1px");
-      await expect(toc.getByRole("link", { name: "導入" })).toHaveCSS(
-        "display",
-        "block",
+      await expect(
+        toc.getByRole("link", { name: "導入", exact: true }),
+      ).toHaveCSS("display", "block");
+      await expect(reader).toHaveCSS("background-color", palette.surface);
+      await expect(reader).toHaveCSS(
+        "border-top-width",
+        width === 390 ? "0px" : "1px",
       );
-      await expect(toc.getByRole("link", { name: "導入" })).toHaveCSS(
-        "color",
-        palette.primary,
-      );
-      await expect(card).toHaveCSS("background-color", palette.surface);
-      await expect(card).toHaveCSS("border-top-width", "1px");
 
-      const geometry = await page.evaluate(() => {
-        const card = document.querySelector<HTMLElement>(
-          "#blog-detail-design-fixture > div",
+      const result = await reader.evaluate((element) => {
+        const content = element.querySelector('[data-ds="reader-body"]');
+        const heading = element.querySelector('[data-ds="detail-markdown"] h1');
+        const metadata = element.querySelector(
+          '[data-ds="reader-article-header"] [data-ds="post-meta"]',
         );
-        const toc = document.querySelector<HTMLElement>(
-          "#blog-detail-design-fixture [data-kamelog-blog-toc]",
-        );
-        if (!card || !toc) return null;
-        const cardBounds = card.getBoundingClientRect();
-        const tocBounds = toc.getBoundingClientRect();
+        const toc = element.querySelector("[data-kamelog-blog-toc]");
+        const link = toc?.querySelector("a");
+        const paragraph = Array.from(
+          element.querySelectorAll('[data-ds="detail-markdown"] p'),
+        ).find((entry) => entry.textContent === "本文の始まり");
+        if (!content || !heading || !metadata || !toc || !link || !paragraph)
+          throw new Error("Article surfaces are incomplete");
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 1;
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Canvas color conversion is unavailable");
+        const luminance = (color: string) => {
+          context.clearRect(0, 0, 1, 1);
+          context.fillStyle = color;
+          context.fillRect(0, 0, 1, 1);
+          const channels = Array.from(context.getImageData(0, 0, 1, 1).data)
+            .slice(0, 3)
+            .map((value) => {
+              const channel = value / 255;
+              return channel <= 0.04045
+                ? channel / 12.92
+                : ((channel + 0.055) / 1.055) ** 2.4;
+            });
+          return (
+            channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722
+          );
+        };
+        const contrast = (foreground: string, background: string) => {
+          const a = luminance(foreground),
+            b = luminance(background);
+          return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+        };
+        const box = element.getBoundingClientRect();
+        const contentBox = content.getBoundingClientRect();
+        const tocBox = toc.getBoundingClientRect();
         return {
-          cardX: cardBounds.left,
-          cardRight: cardBounds.right,
-          tocX: tocBounds.left,
-          tocRight: tocBounds.right,
-          cardPadding: parseFloat(getComputedStyle(card).paddingLeft),
-          horizontalOverflow: toc.scrollWidth > toc.clientWidth + 1,
+          left: box.left,
+          right: box.right,
+          contentLeft: contentBox.left,
+          contentRight: contentBox.right,
+          padding: parseFloat(getComputedStyle(content).paddingLeft),
+          tocLeft: tocBox.left,
+          tocRight: tocBox.right,
+          overflow: toc.scrollWidth > toc.clientWidth + 1,
+          titleBottom: heading.getBoundingClientRect().bottom,
+          metadataTop: metadata.getBoundingClientRect().top,
+          metadataBottom: metadata.getBoundingClientRect().bottom,
+          tocTop: tocBox.top,
+          tocBottom: tocBox.bottom,
+          bodyTop: paragraph.getBoundingClientRect().top,
+          titleContrast: contrast(
+            getComputedStyle(heading).color,
+            getComputedStyle(element).backgroundColor,
+          ),
+          linkContrast: contrast(
+            getComputedStyle(link).color,
+            getComputedStyle(toc).backgroundColor,
+          ),
         };
       });
-      expect(geometry).not.toBeNull();
-      expect(geometry!.cardPadding).toBeGreaterThanOrEqual(18);
-      expect(geometry!.tocX).toBeGreaterThanOrEqual(geometry!.cardX);
-      expect(geometry!.tocRight).toBeLessThanOrEqual(geometry!.cardRight);
-      expect(geometry!.horizontalOverflow).toBe(false);
-      if (width === 390) {
-        expect(geometry!.cardX).toBeGreaterThanOrEqual(0);
-        expect(geometry!.cardRight).toBeLessThanOrEqual(width);
-      }
+      expect(result.padding).toBeGreaterThanOrEqual(18);
+      expect(result.tocLeft).toBeGreaterThanOrEqual(result.contentLeft);
+      expect(result.tocRight).toBeLessThanOrEqual(result.contentRight);
+      expect(result.overflow).toBe(false);
+      expect(result.titleBottom).toBeLessThanOrEqual(result.metadataTop + 1);
+      expect(result.metadataBottom).toBeLessThanOrEqual(result.tocTop + 1);
+      expect(result.tocBottom).toBeLessThanOrEqual(result.bodyTop + 1);
+      expect(result.titleContrast).toBeGreaterThanOrEqual(4.5);
+      expect(result.linkContrast).toBeGreaterThanOrEqual(4.5);
+      expect(result.left).toBeGreaterThanOrEqual(0);
+      expect(result.right).toBeLessThanOrEqual(width);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth),
+      ).toBeLessThanOrEqual(width);
     });
   }
 }

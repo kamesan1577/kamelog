@@ -145,7 +145,7 @@
   min-height: 100dvh;
 }
 .project-article > a {
-  color: var(--ds-color-text-primary);
+  color: var(--ds-color-accent);
   text-underline-offset: 4px;
 }
 .project-article h1 {

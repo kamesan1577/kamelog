@@ -23,9 +23,9 @@
 }
 
 .editor-view-modes button.active {
-  color: var(--ds-color-text-primary);
+  color: var(--ds-color-accent);
   background: var(--ds-color-bg-surface);
-  box-shadow: inset 0 -2px var(--ds-color-text-primary);
+  box-shadow: inset 0 -2px var(--ds-color-accent);
 }
 
 .full-page-toggle {
