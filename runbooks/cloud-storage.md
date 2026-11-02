@@ -1,15 +1,17 @@
 # Cloudflare保存先の運用
 
 Cloudflareへ移行する場合も、Next.jsとFFmpegは現在のサーバーで動かす。
-DBにはSQLite-backed Durable Objects、媒体にはR2 Standardを使用する。
+DBと媒体の両方にSQLite-backed Durable Objectsを使用する。
+Workers Freeだけを利用し、R2の従量課金契約とWorkers Paidを有効化しない。
 移行前のローカルDBと媒体は自動削除しない。
 
 ## 接続設定
 
-CloudflareのWorkers Freeと非公開のR2 Standard bucketを用意する。
+CloudflareアカウントがWorkers Freeであり、既存のDurable Objects使用量に余裕があることを確認する。
 `npm ci`で固定版Wranglerを導入し、`npx wrangler login --device`で本人認証する。
-設定ファイル`cloudflare/wrangler.jsonc`のbucket名を接続先と合わせ、同ファイルを指定してstorage Workerをデプロイする。
-公開bucketやR2の開発用公開URLを有効にしない。
+`cloudflare/wrangler.jsonc`を指定してstorage Workerをデプロイする。
+DB用のSTORAGEと媒体用のMEDIAはどちらも非公開のSQLite Durable Object bindingであり、bucketは作成しない。
+既存同名Workerがある場合は所有と用途を確認し、無条件で上書きしない。
 
 Workerのsecret `STORAGE_TOKEN`に32文字以上のランダムな値を設定する。
 同じ値をサーバー側の`KAMELOG_STORAGE_TOKEN`へ設定し、`KAMELOG_STORAGE_ENDPOINT`にデプロイしたWorkerのHTTPS originを設定する。
@@ -22,16 +24,21 @@ Workerのsecret `STORAGE_TOKEN`に32文字以上のランダムな値を設定�
 
 ## 無料枠と容量上限
 
-2026-11-02時点の[Durable Objectsの料金](https://developers.cloudflare.com/durable-objects/platform/pricing/)と[R2の料金](https://developers.cloudflare.com/r2/pricing/)を導入時に確認する。
-Workers FreeのSQLite保存はアカウント合計5GBで、日次の読み書き、リクエスト、実行時間にも制限がある。
-R2 Standardには月10GB-month、Class Aが100万回、Class Bが1,000万回の無料枠がある。
+2026-11-02時点の[Durable Objectsの料金](https://developers.cloudflare.com/durable-objects/platform/pricing/)、[DOの制限](https://developers.cloudflare.com/durable-objects/platform/limits/)、[Workersの制限](https://developers.cloudflare.com/workers/platform/limits/)を導入時に確認する。
+Workers FreeのSQLite保存はアカウント合計5GB、単体Objectは安全側に1GBを上限として設計する。
+日次のSQL読み取りは500万行、書き込みは10万行、DOのリクエストは10万回、実行時間は13,000 GB-sまでとし、Workers入口にも10万回/日の制限がある。
+超過した操作は失敗する。日次枠はUTC 00:00（日本時間09:00）にリセットする。
+有料プランへ変更せず、保存失敗の日本語メッセージと入力保持で対応する。
 
-Workerの`MAX_STORAGE_BYTES`は媒体の新規保存を止める容量上限で、初期値は9,000,000,000 bytesとする。
-このWorkerが追跡する全世代の媒体を合算するが、他のbucketや手動アップロードを含むアカウント全体の課金上限ではない。
-移行後に古い世代を残す場合や別サービスでもR2を利用する場合は、合計使用量を確認する。
+媒体は1ファイルにつき1つのObjectへ保存し、最大64MiBのファイルを1MiB以下のSQL BLOB行に分割する。
+元のファイル内容とURLを変えず、メタデータと全チャンクを原子的に確定する。
+`MAX_STORAGE_BYTES`は媒体の新規保存を止める容量上限で、初期値は3,000,000,000 bytesとする。
+このWorkerが追跡する全世代の媒体を合算するが、DBや他のWorker、SQLite管理領域の容量は含まない。
+アカウントの5GBにはそれらも含まれるため、実使用量を確認して余裕を確保する。
+古い世代と移行途中の予約も容量を消費し、原本を保持したまま安易に世代を作り直さない。
 クラウドの配送待機は15秒、Composeのhealth間隔は既定30秒とし、空のpollによる無料枠の消費を抑える。
-投稿一覧の取得は全件走査を含むため、大量投稿時は保存容量だけでなく読み取り行数も監視する。
-R2の無料枠を超えた利用には課金があるため、支払額0円を運用上の目標とする場合は保存量と操作回数を監視する。
+投稿一覧には全件走査が含まれるため、10万投稿でも無料枠内での継続利用を保証しない。
+初回移行が日次枠へ達した場合は切り替えず、停止と原本を保持したまま同じ移行IDで翌日以降に再開する。
 
 ## 既存データの一括移行
 

@@ -84,7 +84,7 @@ kamelog上のいいねもサーバーへ保存し、他のブラウザや再読�
 ## 技術構成と境界
 
 Next.js / React / TypeScript、Node.js 24、SQLite、FFmpeg。
-保存先は既定のローカルSQLiteと媒体ディレクトリ、またはCloudflareのSQLite-backed Durable ObjectsとR2を選べる。
+保存先は既定のローカルSQLiteと媒体ディレクトリ、またはCloudflareのSQLite-backed Durable Objectsを選べる。
 既存データを含めた検証付き一括移行、投稿時の上限通知、保存先の差し替えは[storage.md](storage.md)に従う。
 API契約: [api.md](api.md)。ActivityPub契約: [activitypub.md](activitypub.md)。検証: [development.md](development.md)。SEO / 検索公開仕様: [seo.md](seo.md)。
 パスキーの暗号検証は保守されたWebAuthnライブラリへ任せ、自作しない。

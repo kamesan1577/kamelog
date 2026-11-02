@@ -40,9 +40,8 @@ const options = {
 };
 const mediaId = randomUUID();
 const mediaKey = `media/${mediaId}.png`;
-const mediaBytes = Buffer.from(
-  "fictional image bytes for storage transport integrity",
-);
+// Cross multiple SQLite chunks during migration, verification and restoration.
+const mediaBytes = Buffer.alloc(2 * 1024 * 1024 + 31, 17);
 let store: Store | undefined = new Store(source);
 
 async function rpc(method: string, args: unknown[], requestId = randomUUID()) {
@@ -155,6 +154,28 @@ try {
   );
   const blobs = new GatewayMigrationTarget(options).blobs;
   assert.deepEqual(await blobs.get(mediaKey), mediaBytes);
+  // Exercise the existing 64 MiB media boundary on the real isolate. The private
+  // media object accepts streams and serves verified chunks without concatenation.
+  const boundaryBlobs = new GatewayMigrationTarget({
+    ...options,
+    generation: randomUUID(),
+  }).blobs;
+  const boundaryKey = `media/${randomUUID()}.mp4`;
+  const boundaryBytes = Buffer.alloc(64 * 1024 * 1024, 37);
+  boundaryBytes[boundaryBytes.length - 1] = 91;
+  await boundaryBlobs.put(boundaryKey, boundaryBytes, "video/mp4");
+  await boundaryBlobs.put(boundaryKey, boundaryBytes, "video/mp4");
+  assert.equal(
+    (await boundaryBlobs.get(boundaryKey)).equals(boundaryBytes),
+    true,
+  );
+  await boundaryBlobs.delete(boundaryKey);
+  await assert.rejects(boundaryBlobs.get(boundaryKey), {
+    code: "storage_integrity",
+  });
+  console.log(
+    "workerd: SQLite multipart media, 64 MiB boundary, immutable retry and deletion passed",
+  );
   assert.equal(await rpc("authenticated", [session]), true);
   await rpc("enqueueFederationActivity", [
     {

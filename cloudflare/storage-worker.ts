@@ -24,26 +24,6 @@ import {
   type TableDescription,
 } from "../server/storage/archive-format.ts";
 
-interface ObjectBody {
-  size: number;
-  customMetadata?: Record<string, string>;
-  httpMetadata?: { contentType?: string };
-  arrayBuffer(): Promise<ArrayBuffer>;
-}
-export interface PrivateBucket {
-  get(key: string): Promise<ObjectBody | null>;
-  head(key: string): Promise<Omit<ObjectBody, "arrayBuffer"> | null>;
-  put(
-    key: string,
-    value: ArrayBuffer,
-    options: {
-      customMetadata: Record<string, string>;
-      httpMetadata: { contentType: string };
-      sha256: string;
-    },
-  ): Promise<unknown>;
-  delete(key: string): Promise<void>;
-}
 export interface StorageState {
   storage: DurableSqlStorage & { sync(): Promise<void> };
   blockConcurrencyWhile<T>(operation: () => Promise<T>): Promise<T>;
@@ -51,13 +31,14 @@ export interface StorageState {
 interface ObjectStub {
   fetch(request: Request): Promise<Response>;
 }
+interface ObjectNamespace {
+  idFromName(name: string): unknown;
+  get(id: unknown): ObjectStub;
+}
 export interface StorageEnvironment {
   STORAGE_TOKEN: string;
-  STORAGE: {
-    idFromName(name: string): unknown;
-    get(id: unknown): ObjectStub;
-  };
-  MEDIA: PrivateBucket;
+  STORAGE: ObjectNamespace;
+  MEDIA: ObjectNamespace;
   MAX_STORAGE_BYTES?: string;
 }
 
@@ -65,6 +46,8 @@ const objectKey = /^media\/[a-f0-9-]{36}\.(mp4|png|jpg|webp|gif)$/;
 const identifier = /^[A-Za-z_][A-Za-z0-9_]*$/;
 const digestPattern = /^[a-f0-9]{64}$/;
 const exportLeaseMs = 5 * 60_000;
+const mediaChunkBytes = 1024 * 1024;
+const maximumMediaBytes = 64 * 1024 * 1024;
 const rpcSchema = z
   .object({
     requestId: z.uuid(),
@@ -326,24 +309,16 @@ export class StorageObject {
     if (!objectKey.test(key)) throw new StorageError("storage_integrity");
     const fullKey = `generations/${generation}/${key}`;
     if (request.method === "GET") {
-      const object = await this.env.MEDIA.get(fullKey);
-      if (!object) return json({ error: { code: "not_found" } }, 404);
-      const digest = object.customMetadata?.sha256;
-      if (!digest || !digestPattern.test(digest))
-        throw new StorageError("storage_integrity");
-      return new Response(await object.arrayBuffer(), {
-        headers: {
-          ...jsonHeaders,
-          "Content-Type":
-            object.httpMetadata?.contentType || "application/octet-stream",
-          "Content-Length": String(object.size),
-          "X-Content-SHA256": digest,
-        },
-      });
+      return this.env.MEDIA.get(this.env.MEDIA.idFromName(fullKey)).fetch(
+        request,
+      );
     }
     if (request.method === "DELETE") {
       return this.state.blockConcurrencyWhile(async () => {
-        await this.env.MEDIA.delete(fullKey);
+        const removed = await this.env.MEDIA.get(
+          this.env.MEDIA.idFromName(fullKey),
+        ).fetch(request);
+        if (!removed.ok) return removed;
         this.db.transaction(() => {
           const previous = this.db
             .prepare("SELECT size FROM _storage_blobs WHERE key=?")
@@ -369,18 +344,15 @@ export class StorageObject {
       !digestPattern.test(digest) ||
       !Number.isSafeInteger(declaredSize) ||
       declaredSize < 1 ||
-      declaredSize > 64 * 1024 * 1024
+      declaredSize > maximumMediaBytes
     )
       throw new StorageError("storage_integrity");
-    const bytes = await request.arrayBuffer();
-    if (bytes.byteLength !== declaredSize || sha256(bytes) !== digest)
-      throw new StorageError("storage_integrity");
     return this.state.blockConcurrencyWhile(async () => {
-      const maximum = Number(this.env.MAX_STORAGE_BYTES || "9000000000");
+      const maximum = Number(this.env.MAX_STORAGE_BYTES || "3000000000");
       if (
         !Number.isSafeInteger(maximum) ||
         maximum < 1 ||
-        maximum > 9_000_000_000
+        maximum > 3_000_000_000
       )
         throw new StorageError("storage_configuration");
       this.db.transaction(() => {
@@ -388,37 +360,30 @@ export class StorageObject {
           .prepare("SELECT size,sha256 FROM _storage_blobs WHERE key=?")
           .get(fullKey);
         if (previous) {
-          if (previous.size !== bytes.byteLength || previous.sha256 !== digest)
+          if (previous.size !== declaredSize || previous.sha256 !== digest)
             throw new StorageError("storage_conflict");
           return;
         }
         const total = this.db
           .prepare("SELECT size FROM _storage_blob_total WHERE id=1")
           .get()?.size;
-        if (typeof total !== "number" || total + bytes.byteLength > maximum)
+        if (typeof total !== "number" || total + declaredSize > maximum)
           throw new StorageError("storage_limit");
         this.db
           .prepare("INSERT INTO _storage_blobs VALUES(?,?,?)")
-          .run(fullKey, bytes.byteLength, digest);
+          .run(fullKey, declaredSize, digest);
         this.db
           .prepare("UPDATE _storage_blob_total SET size=size+? WHERE id=1")
-          .run(bytes.byteLength);
+          .run(declaredSize);
       });
       // Reserve first. An interrupted upload can over-count, never under-count.
       // Repeating the same immutable object finishes the reservation safely.
       await this.state.storage.sync();
-      await this.env.MEDIA.put(fullKey, bytes, {
-        customMetadata: { sha256: digest },
-        httpMetadata: {
-          contentType:
-            request.headers.get("Content-Type") || "application/octet-stream",
-        },
-        sha256: digest,
-      });
-      return new Response(null, {
-        status: 204,
-        headers: { ...jsonHeaders, "X-Content-SHA256": digest },
-      });
+      // Forward the body stream without making a second whole-file buffer.
+      // MediaObject verifies bytes before atomically publishing metadata/chunks.
+      return this.env.MEDIA.get(this.env.MEDIA.idFromName(fullKey)).fetch(
+        request,
+      );
     });
   }
 
@@ -540,9 +505,9 @@ export class StorageObject {
         sql: z.string().parse(row.sql),
       }));
     const blobMap = new Map<string, ArchiveMetadata["blobs"][number]>();
-    // Uploads are immutable and recorded after R2 validates their checksum.
+    // Uploads are immutable and recorded after MediaObject validates its checksum.
     // The portable exporter independently downloads and hashes every object.
-    // This avoids one R2 subrequest per object inside a single Worker invocation.
+    // Avoid one media-object subrequest per file inside this invocation.
     for (const row of this.db
       .prepare(
         "SELECT key,size,sha256,content_type FROM _storage_verified_blobs ORDER BY key",
@@ -900,6 +865,239 @@ export class StorageObject {
       return json({ ok: true });
     }
     return json({ error: { code: "not_found" } }, 404);
+  }
+}
+
+/** Private media lives in SQLite-backed objects; no paid object service is used. */
+export class MediaObject {
+  private readonly state: StorageState;
+  private readonly env: StorageEnvironment;
+
+  constructor(state: StorageState, env: StorageEnvironment) {
+    this.state = state;
+    this.env = env;
+    state.storage.sql.exec(`
+      CREATE TABLE IF NOT EXISTS media_metadata(
+        id INTEGER PRIMARY KEY CHECK(id=1),
+        generation TEXT NOT NULL,
+        key TEXT NOT NULL,
+        size INTEGER NOT NULL,
+        sha256 TEXT NOT NULL,
+        content_type TEXT NOT NULL,
+        chunk_count INTEGER NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS media_chunks(
+        position INTEGER PRIMARY KEY,
+        bytes BLOB NOT NULL CHECK(length(bytes)>0 AND length(bytes)<=1048576)
+      );
+    `);
+  }
+
+  async fetch(request: Request): Promise<Response> {
+    try {
+      if (!authorized(request, this.env.STORAGE_TOKEN))
+        return json({ error: { code: "unauthorized" } }, 401);
+      const generation = generationSchema.parse(
+        request.headers.get("X-Storage-Generation"),
+      );
+      const path = new URL(request.url).pathname;
+      if (!path.startsWith("/blobs/"))
+        return json({ error: { code: "not_found" } }, 404);
+      const key = decodeURIComponent(path.slice(7));
+      if (!objectKey.test(key)) throw new StorageError("storage_integrity");
+      const stored = [
+        ...this.state.storage.sql.exec(
+          "SELECT generation,key,size,sha256,content_type,chunk_count FROM media_metadata WHERE id=1",
+        ),
+      ][0];
+      if (stored && (stored.generation !== generation || stored.key !== key))
+        throw new StorageError("storage_conflict");
+      if (request.method === "GET") {
+        if (!stored) return json({ error: { code: "not_found" } }, 404);
+        const metadata = z
+          .object({
+            generation: z.string(),
+            key: z.string(),
+            size: z.number().int().min(1).max(maximumMediaBytes),
+            sha256: z.string().regex(digestPattern),
+            content_type: z.string().max(100),
+            chunk_count: z
+              .number()
+              .int()
+              .min(1)
+              .max(maximumMediaBytes / mediaChunkBytes),
+          })
+          .strict()
+          .parse(stored);
+        const digest = createHash("sha256");
+        let size = 0;
+        let count = 0;
+        for (const row of this.state.storage.sql.exec(
+          "SELECT position,bytes FROM media_chunks ORDER BY position",
+        )) {
+          if (
+            row.position !== count ||
+            !(row.bytes instanceof ArrayBuffer) ||
+            row.bytes.byteLength !==
+              Math.min(mediaChunkBytes, metadata.size - size)
+          )
+            throw new StorageError("storage_integrity");
+          count++;
+          digest.update(new Uint8Array(row.bytes));
+          size += row.bytes.byteLength;
+        }
+        if (
+          count !== metadata.chunk_count ||
+          size !== metadata.size ||
+          digest.digest("hex") !== metadata.sha256
+        )
+          throw new StorageError("storage_integrity");
+        // Verify the entire object before opening the response, then read one
+        // chunk per pull. Concurrent readers never each retain a whole 64 MiB file.
+        let index = 0;
+        const streamedDigest = createHash("sha256");
+        const storage = this.state.storage;
+        return new Response(
+          new ReadableStream<Uint8Array>({
+            pull(controller) {
+              if (index === metadata.chunk_count) {
+                if (streamedDigest.digest("hex") !== metadata.sha256)
+                  controller.error(new StorageError("storage_integrity"));
+                else controller.close();
+                return;
+              }
+              const chunk = [
+                ...storage.sql.exec(
+                  "SELECT bytes FROM media_chunks WHERE position=?",
+                  index,
+                ),
+              ][0]?.bytes;
+              if (
+                !(chunk instanceof ArrayBuffer) ||
+                chunk.byteLength !==
+                  Math.min(
+                    mediaChunkBytes,
+                    metadata.size - index * mediaChunkBytes,
+                  )
+              ) {
+                controller.error(new StorageError("storage_integrity"));
+                return;
+              }
+              const bytes = new Uint8Array(chunk);
+              streamedDigest.update(bytes);
+              index++;
+              controller.enqueue(bytes);
+            },
+          }),
+          {
+            headers: {
+              ...jsonHeaders,
+              "Content-Type": metadata.content_type,
+              "Content-Length": String(metadata.size),
+              "X-Content-SHA256": metadata.sha256,
+            },
+          },
+        );
+      }
+      if (request.method === "DELETE") {
+        this.state.storage.transactionSync(() => {
+          this.state.storage.sql.exec("DELETE FROM media_chunks");
+          this.state.storage.sql.exec("DELETE FROM media_metadata");
+        });
+        await this.state.storage.sync();
+        return json({ ok: true });
+      }
+      if (request.method !== "PUT")
+        return json({ error: { code: "not_found" } }, 404);
+      const size = Number(request.headers.get("Content-Length"));
+      const expected = request.headers.get("X-Content-SHA256") || "";
+      const contentType =
+        request.headers.get("Content-Type") || "application/octet-stream";
+      if (
+        !Number.isSafeInteger(size) ||
+        size < 1 ||
+        size > maximumMediaBytes ||
+        !digestPattern.test(expected) ||
+        contentType.length > 100 ||
+        !request.body
+      )
+        throw new StorageError("storage_integrity");
+      const chunks: ArrayBuffer[] = [];
+      const digest = createHash("sha256");
+      const reader = request.body.getReader();
+      let received = 0;
+      let pending: Uint8Array<ArrayBuffer> | undefined;
+      let filled = 0;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          received += value.byteLength;
+          if (received > size) throw new StorageError("storage_integrity");
+          digest.update(value);
+          for (let offset = 0; offset < value.byteLength;) {
+            pending ??= new Uint8Array(
+              Math.min(mediaChunkBytes, size - chunks.length * mediaChunkBytes),
+            );
+            const count = Math.min(
+              pending.byteLength - filled,
+              value.byteLength - offset,
+            );
+            pending.set(value.subarray(offset, offset + count), filled);
+            offset += count;
+            filled += count;
+            if (filled === pending.byteLength) {
+              chunks.push(pending.buffer);
+              pending = undefined;
+              filled = 0;
+            }
+          }
+        }
+        if (received !== size || pending || digest.digest("hex") !== expected)
+          throw new StorageError("storage_integrity");
+      } finally {
+        await reader.cancel();
+      }
+      this.state.storage.transactionSync(() => {
+        const previous = [
+          ...this.state.storage.sql.exec(
+            "SELECT generation,key,size,sha256 FROM media_metadata WHERE id=1",
+          ),
+        ][0];
+        if (previous) {
+          if (
+            previous.generation !== generation ||
+            previous.key !== key ||
+            previous.size !== size ||
+            previous.sha256 !== expected
+          )
+            throw new StorageError("storage_conflict");
+          return; // An acknowledged immutable upload never writes its chunks twice.
+        }
+        this.state.storage.sql.exec(
+          "INSERT INTO media_metadata VALUES(1,?,?,?,?,?,?)",
+          generation,
+          key,
+          size,
+          expected,
+          contentType,
+          chunks.length,
+        );
+        for (const [position, bytes] of chunks.entries())
+          this.state.storage.sql.exec(
+            "INSERT INTO media_chunks VALUES(?,?)",
+            position,
+            bytes,
+          );
+      });
+      await this.state.storage.sync();
+      return new Response(null, {
+        status: 204,
+        headers: { ...jsonHeaders, "X-Content-SHA256": expected },
+      });
+    } catch (error) {
+      return storageFailure(error);
+    }
   }
 }
 

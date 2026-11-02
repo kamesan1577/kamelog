@@ -14,9 +14,9 @@ import {
 } from "../../server/storage/migration.ts";
 import gateway, {
   StorageObject,
+  MediaObject,
   type StorageEnvironment,
   type StorageState,
-  type PrivateBucket,
 } from "../../cloudflare/storage-worker.ts";
 import { Store } from "../../server/store.mjs";
 import {
@@ -94,47 +94,31 @@ function sqlState(): StorageState & { database: DatabaseSync } {
   };
 }
 
-function harness(maximum = 9_000_000_000) {
-  const objects = new Map<
+function harness(maximum = 3_000_000_000) {
+  const mediaInstances = new Map<
     string,
-    { bytes: ArrayBuffer; sha256: string; contentType: string }
+    { state: ReturnType<typeof sqlState>; object: MediaObject }
   >();
-  const bucket: PrivateBucket = {
-    async get(key) {
-      const object = objects.get(key);
-      return object
-        ? {
-            size: object.bytes.byteLength,
-            customMetadata: { sha256: object.sha256 },
-            httpMetadata: { contentType: object.contentType },
-            async arrayBuffer() {
-              return object.bytes.slice(0);
-            },
-          }
-        : null;
-    },
-    async head(key) {
-      return this.get(key);
-    },
-    async put(key, bytes, options) {
-      assert.equal(digest(new Uint8Array(bytes)), options.sha256);
-      objects.set(key, {
-        bytes: bytes.slice(0),
-        sha256: options.sha256,
-        contentType: options.httpMetadata.contentType,
-      });
-    },
-    async delete(key) {
-      objects.delete(key);
-    },
-  };
   const instances = new Map<
     string,
     { state: ReturnType<typeof sqlState>; object: StorageObject }
   >();
   const environment: StorageEnvironment = {
     STORAGE_TOKEN: token,
-    MEDIA: bucket,
+    MEDIA: {
+      idFromName: (name) => name,
+      get(id) {
+        assert.equal(typeof id, "string");
+        const name = String(id);
+        let instance = mediaInstances.get(name);
+        if (!instance) {
+          const state = sqlState();
+          instance = { state, object: new MediaObject(state, environment) };
+          mediaInstances.set(name, instance);
+        }
+        return instance.object;
+      },
+    },
     MAX_STORAGE_BYTES: String(maximum),
     STORAGE: {
       idFromName: (name) => name,
@@ -172,9 +156,10 @@ function harness(maximum = 9_000_000_000) {
     );
   }
   function close() {
-    for (const instance of instances.values()) instance.state.database.close();
+    for (const instance of [...instances.values(), ...mediaInstances.values()])
+      instance.state.database.close();
   }
-  return { environment, instances, objects, request, close };
+  return { environment, instances, mediaInstances, request, close };
 }
 
 function fixtureArchive() {
@@ -462,6 +447,214 @@ test("gateway shares blob budget across generations and never replaces immutable
       404,
     );
     assert.equal((await put(randomUUID())).status, 204);
+  } finally {
+    system.close();
+  }
+});
+
+function mediaUpload(
+  system: ReturnType<typeof harness>,
+  generation: string,
+  key: string,
+  bytes: Uint8Array,
+) {
+  return gateway.fetch(
+    new Request(`https://storage.example/blobs/${key}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "X-Storage-Generation": generation,
+        "X-Content-SHA256": digest(bytes),
+        "Content-Length": String(bytes.length),
+        "Content-Type": "image/png",
+      },
+      body: Uint8Array.from(bytes),
+    }),
+    system.environment,
+  );
+}
+
+test("SQLite media chunks reopen byte-identically, immutable retries perform no media writes, and corruption is rejected", async () => {
+  const system = harness();
+  const generation = randomUUID();
+  const key = `media/${randomUUID()}.png`;
+  const bytes = new Uint8Array(2 * 1024 * 1024 + 19);
+  for (let index = 0; index < bytes.length; index++) bytes[index] = index % 251;
+  try {
+    assert.equal(
+      (await mediaUpload(system, generation, key, bytes)).status,
+      204,
+    );
+    const instance = system.mediaInstances.get(
+      `generations/${generation}/${key}`,
+    )!;
+    const database = instance.state.database;
+    const stored = database
+      .prepare(
+        "SELECT position,length(bytes) AS size FROM media_chunks ORDER BY position",
+      )
+      .all();
+    assert.deepEqual(
+      stored.map((row) => [row.position, row.size]),
+      [
+        [0, 1024 * 1024],
+        [1, 1024 * 1024],
+        [2, 19],
+      ],
+    );
+    instance.object = new MediaObject(instance.state, system.environment);
+    const changes = database
+      .prepare("SELECT total_changes() AS count")
+      .get()?.count;
+    assert.equal(
+      (await mediaUpload(system, generation, key, bytes)).status,
+      204,
+    );
+    assert.equal(
+      database.prepare("SELECT total_changes() AS count").get()?.count,
+      changes,
+    );
+    const read = await system.request(generation, `/blobs/${key}`);
+    assert.equal(read.status, 200);
+    assert.deepEqual(new Uint8Array(await read.arrayBuffer()), bytes);
+    database
+      .prepare("UPDATE media_chunks SET bytes=? WHERE position=1")
+      .run(new Uint8Array(1024 * 1024));
+    const corrupt = await system.request(generation, `/blobs/${key}`);
+    assert.equal(corrupt.status, 503);
+    assert.equal((await corrupt.json()).error.code, "storage_integrity");
+  } finally {
+    system.close();
+  }
+});
+
+test("SQLite media publication rolls back metadata and every chunk after a partial write failure, then retries safely", async () => {
+  const system = harness();
+  const generation = randomUUID();
+  const key = `media/${randomUUID()}.png`;
+  const bytes = new Uint8Array(1024 * 1024 + 7).fill(23);
+  try {
+    // Initialize a private object without publishing any content.
+    await system.request(generation, `/blobs/${key}`);
+    const database = system.mediaInstances.get(
+      `generations/${generation}/${key}`,
+    )!.state.database;
+    database.exec(
+      "CREATE TRIGGER fail_chunk BEFORE INSERT ON media_chunks WHEN NEW.position=1 BEGIN SELECT RAISE(ABORT, 'fictional interrupted write'); END",
+    );
+    assert.equal(
+      (await mediaUpload(system, generation, key, bytes)).status,
+      503,
+    );
+    assert.equal(
+      database.prepare("SELECT count(*) AS count FROM media_chunks").get()
+        ?.count,
+      0,
+    );
+    assert.equal(
+      database.prepare("SELECT count(*) AS count FROM media_metadata").get()
+        ?.count,
+      0,
+    );
+    assert.equal(
+      (await system.request(generation, `/blobs/${key}`)).status,
+      404,
+    );
+    database.exec("DROP TRIGGER fail_chunk");
+    assert.equal(
+      (await mediaUpload(system, generation, key, bytes)).status,
+      204,
+    );
+    assert.deepEqual(
+      new Uint8Array(
+        await (await system.request(generation, `/blobs/${key}`)).arrayBuffer(),
+      ),
+      bytes,
+    );
+    database.prepare("DELETE FROM media_chunks WHERE position=0").run();
+    assert.equal(
+      (await system.request(generation, `/blobs/${key}`)).status,
+      503,
+    );
+  } finally {
+    system.close();
+  }
+});
+
+test("SQLite media quota failures return storage_limit and DELETE rolls back both tables", async () => {
+  const system = harness();
+  const generation = randomUUID();
+  const key = `media/${randomUUID()}.png`;
+  const bytes = new Uint8Array(1024 * 1024 + 7).fill(11);
+  try {
+    await system.request(generation, `/blobs/${key}`);
+    const database = system.mediaInstances.get(
+      `generations/${generation}/${key}`,
+    )!.state.database;
+    database.exec(
+      "CREATE TRIGGER quota BEFORE INSERT ON media_chunks WHEN NEW.position=1 BEGIN SELECT RAISE(ABORT, 'SQLITE_FULL'); END",
+    );
+    const rejected = await mediaUpload(system, generation, key, bytes);
+    assert.equal(rejected.status, 507);
+    assert.equal((await rejected.json()).error.code, "storage_limit");
+    assert.equal(
+      database.prepare("SELECT count(*) AS count FROM media_chunks").get()
+        ?.count,
+      0,
+    );
+    assert.equal(
+      database.prepare("SELECT count(*) AS count FROM media_metadata").get()
+        ?.count,
+      0,
+    );
+    database.exec("DROP TRIGGER quota");
+    assert.equal(
+      (await mediaUpload(system, generation, key, bytes)).status,
+      204,
+    );
+    database.exec(
+      "CREATE TRIGGER fail_delete BEFORE DELETE ON media_metadata BEGIN SELECT RAISE(ABORT, 'fictional interruption'); END",
+    );
+    const remove = () =>
+      gateway.fetch(
+        new Request(`https://storage.example/blobs/${key}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "X-Storage-Generation": generation,
+          },
+        }),
+        system.environment,
+      );
+    assert.equal((await remove()).status, 503);
+    assert.equal(
+      database.prepare("SELECT count(*) AS count FROM media_chunks").get()
+        ?.count,
+      2,
+    );
+    assert.equal(
+      database.prepare("SELECT count(*) AS count FROM media_metadata").get()
+        ?.count,
+      1,
+    );
+    assert.deepEqual(
+      new Uint8Array(
+        await (await system.request(generation, `/blobs/${key}`)).arrayBuffer(),
+      ),
+      bytes,
+    );
+    database.exec("DROP TRIGGER fail_delete");
+    assert.equal((await remove()).status, 200);
+    assert.equal(
+      database.prepare("SELECT count(*) AS count FROM media_chunks").get()
+        ?.count,
+      0,
+    );
+    assert.equal(
+      database.prepare("SELECT count(*) AS count FROM media_metadata").get()
+        ?.count,
+      0,
+    );
   } finally {
     system.close();
   }
