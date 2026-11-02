@@ -1,4 +1,5 @@
 import * as React from "react";
+import "./ProfileCard.css";
 
 export interface ProfileCardProps extends React.HTMLAttributes<HTMLDivElement> {
   avatar: React.ReactNode;

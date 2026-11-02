@@ -12,7 +12,12 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 export const Primary: Story = {
   play: async ({ canvasElement }) => {
-    await expect(within(canvasElement).getByRole("button")).toBeVisible();
+    const button = within(canvasElement).getByRole("button");
+    await expect(button).toBeVisible();
+    // Visibility alone accepts white text on a transparent surface.
+    const style = getComputedStyle(button);
+    await expect(style.backgroundColor).toBe("rgb(40, 85, 66)");
+    await expect(style.color).toBe("rgb(255, 255, 255)");
   },
 };
 export const Secondary: Story = { args: { variant: "secondary" } };

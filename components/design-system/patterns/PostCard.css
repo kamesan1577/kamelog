@@ -1,13 +1,41 @@
 [data-ds="post-card"],
 [data-ds="thread-post"] {
-  padding: 23px 0 16px;
-  border-bottom: 1px solid #eeede9;
+  position: relative;
+  padding: 16px 0 12px;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
+}
+
+/* The avatar anchors a continuous feed column; every post uses the same rhythm. */
+[data-ds="post-card"]:has(> [data-ds="post-meta"]),
+[data-ds="thread-post"]:has(> [data-ds="post-meta"]) {
+  padding-inline-start: 52px;
+}
+
+[data-ds="post-card"] > [data-ds="post-meta"],
+[data-ds="thread-post"] > [data-ds="post-meta"] {
+  position: relative;
+  min-height: 24px;
+}
+
+[data-ds="post-card"] > [data-ds="post-meta"] > .avatar,
+[data-ds="thread-post"] > [data-ds="post-meta"] > .avatar {
+  position: absolute;
+  inset-inline-start: -52px;
+  top: 0;
+  width: 40px;
+  height: 40px;
+  font-size: 27px;
+}
+
+[data-ds="post-card"] > [data-ds="post-actions"].post-actions,
+[data-ds="thread-post"] > [data-ds="post-actions"].post-actions {
+  margin-top: 8px;
+  gap: 4px 20px;
 }
 
 /* A reply follows its parent's actions; separate the header from that boundary. */
 [data-ds="thread-post"] {
-  position: relative;
-  padding-top: 32px;
+  padding-top: 20px;
   border-bottom: 0;
   /* The timeline caps reply indentation at three levels. */
   --thread-divider-indent: 54px;
@@ -28,7 +56,7 @@
   inset-inline-end: 0;
   bottom: 0;
   height: 1px;
-  background: #e8e4dc;
+  background: var(--ds-color-border-subtle);
   content: "";
   pointer-events: none;
 }
@@ -36,18 +64,41 @@
 [data-ds="post-card"] > .pinned {
   display: flex;
   align-items: center;
-  gap: 6px;
-  color: #99968d;
+  gap: 8px;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 @media (max-width: 640px) {
-  [data-ds="post-card"].post {
-    padding-top: 20px;
+  [data-ds="post-card"]:has(> [data-ds="post-meta"]),
+  [data-ds="thread-post"]:has(> [data-ds="post-meta"]) {
+    padding-inline-start: 44px;
   }
 
-  [data-ds="thread-post"] {
-    padding-top: 28px;
+  [data-ds="post-card"] > [data-ds="post-meta"] > .avatar,
+  [data-ds="thread-post"] > [data-ds="post-meta"] > .avatar {
+    inset-inline-start: -44px;
+    width: 36px;
+    height: 36px;
+    font-size: 24px;
+  }
+
+  [data-ds="post-card"] > [data-ds="post-actions"].post-actions,
+  [data-ds="thread-post"] > [data-ds="post-actions"].post-actions {
+    gap: 4px 12px;
+  }
+}
+
+/* Keep the body readable when an avatar column would crowd a narrow screen. */
+@media (max-width: 360px) {
+  [data-ds="post-card"]:has(> [data-ds="post-meta"]),
+  [data-ds="thread-post"]:has(> [data-ds="post-meta"]) {
+    padding-inline-start: 0;
+  }
+
+  [data-ds="post-card"] > [data-ds="post-meta"] > .avatar,
+  [data-ds="thread-post"] > [data-ds="post-meta"] > .avatar {
+    position: static;
   }
 }

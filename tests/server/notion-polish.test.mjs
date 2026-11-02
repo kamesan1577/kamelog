@@ -9,12 +9,12 @@ const landing = readFileSync(
 const theme = readFileSync("styles/brand-theme.css", "utf8");
 const variants = readFileSync("components/notion/variants.ts", "utf8");
 
-test("keeps the landing polish restrained and stateful", () => {
-  assert.match(landing, /--landing-hover:\s*#f7f7f5/);
+test("keeps the social profile restrained and stateful", () => {
+  assert.match(landing, /--landing-hover:\s*#edf1e9/);
   assert.match(landing, /\.landing-actions button:active/);
   assert.match(landing, /\.content-cards > button:active/);
   assert.match(landing, /\.featured-post:active/);
-  assert.match(landing, /background:\s*var\(--landing-ink\)/);
+  assert.match(landing, /background:\s*var\(--ds-color-accent\)/);
   assert.doesNotMatch(landing, /border-left:/);
   assert.doesNotMatch(landing, /@keyframes/);
 });
@@ -28,9 +28,9 @@ test("gives shared buttons visible hover, active and focus states", () => {
   assert.doesNotMatch(variants, /bg-\[#2383e2\]/);
 });
 
-test("uses the original ink color across the site theme", () => {
+test("pairs the original ink with the social feed surface", () => {
   assert.match(theme, /--kamelog-ink:\s*#37352f/);
-  assert.match(theme, /--kamelog-paper:\s*#fbfbfa/);
+  assert.match(theme, /--kamelog-paper:\s*#f8f9f6/);
   assert.match(theme, /\[data-ds="public-sidebar"\] button\.active/);
   assert.match(theme, /\[data-ds="content-grid"\]:not\(\.landing-layout\)/);
   assert.doesNotMatch(theme, /#2383e2|#277dae|#337ea9/);

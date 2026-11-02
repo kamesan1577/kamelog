@@ -109,7 +109,11 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(
     page.getByRole("heading", { name: /かめさん.*Backend Engineer/ }),
   ).toBeVisible();
-  await expect(page.getByText("プロフィール", { exact: true })).toBeVisible();
+  const profile = page.locator('[data-ds="landing-profile"]');
+  await expect(
+    profile.getByText("@kamesan1577", { exact: true }),
+  ).toBeVisible();
+  await expect(profile.locator(".avatar")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Experience" })).toBeVisible();
   await expect(page.getByText(/東洋大学 情報連携学部/)).toBeVisible();
   await expect(
@@ -129,14 +133,19 @@ test("anonymous UI and passkey owner journey on desktop and mobile", async ({
   await expect(page.locator('[data-ds="side-search"]')).toBeVisible();
   await expect(
     page
-      .getByRole("navigation", { name: "サイドナビゲーション" })
+      .getByRole("navigation", { name: "メインナビゲーション" })
       .getByRole("button")
       .first(),
   ).toBeVisible();
   await expect(page.locator('[data-ds="preview-shell"]')).toHaveCount(0);
   expect((await page.request.get("/api/drafts")).status()).toBe(401);
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.locator('[data-ds="mobile-search"]')).toBeHidden();
+  await page.getByRole("button", { name: "検索とタグ", exact: true }).click();
   await expect(page.locator('[data-ds="mobile-search"]')).toBeVisible();
+  await expect(
+    page.locator('[data-ds="mobile-search"]').getByPlaceholder("投稿を検索"),
+  ).toBeFocused();
   await expect(page.locator('[data-ds="right-sidebar"]')).toBeHidden();
   const cdp = await context.newCDPSession(page);
   await cdp.send("WebAuthn.enable");

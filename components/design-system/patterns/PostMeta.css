@@ -2,22 +2,23 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  color: #717168;
+  gap: 6px;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
   line-height: 1.5;
   font-variant-numeric: tabular-nums;
 }
 [data-ds="post-meta"] .avatar {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  font-size: 22px;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 24px;
 }
 [data-ds="post-meta"] b {
-  color: #37352f;
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--ds-color-text-primary);
+  font-size: 14px;
+  font-weight: 650;
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -27,7 +28,7 @@
 }
 [data-ds="post-meta"] .type-label {
   margin-left: auto;
-  color: #717168;
-  font-size: 11px;
-  padding: 2px 0 2px 8px;
+  color: var(--ds-color-text-tertiary);
+  font-size: 12px;
+  padding: 2px 0 2px 4px;
 }

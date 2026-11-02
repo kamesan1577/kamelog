@@ -1,7 +1,7 @@
 :root {
   --kamelog-ink: #37352f;
   --kamelog-ink-hover: #292824;
-  --kamelog-paper: #fbfbfa;
+  --kamelog-paper: #f8f9f6;
   --kamelog-panel: #ffffff;
   --kamelog-soft: #f1f1ee;
   --kamelog-line: #e5e5df;
@@ -24,13 +24,13 @@ textarea:focus {
 
 [data-ds="public-sidebar"] {
   border-right-color: var(--kamelog-line);
-  background: #f3f3f0;
+  background: var(--kamelog-paper);
 }
 
 [data-ds="site-name"] {
   color: var(--kamelog-ink);
-  font-weight: 750;
-  letter-spacing: -0.03em;
+  font-weight: 500;
+  letter-spacing: normal;
 }
 
 [data-ds="public-sidebar"] nav button,
@@ -63,15 +63,9 @@ textarea:focus {
   color: #66665f;
 }
 
-[data-ds="content-grid"]:not(.landing-layout) > [data-ds="main-content"] {
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-}
 [data-ds="content-grid"]:not(.landing-layout) > [data-ds="right-sidebar"] {
   height: fit-content;
-  padding: 4px 0 0;
+  padding: 24px 0 0;
   border: 0;
   border-radius: 0;
   background: transparent;

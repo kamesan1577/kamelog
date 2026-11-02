@@ -6,6 +6,15 @@
   flex-wrap: wrap;
 }
 
+[data-ds="tag-list"] > button,
+[data-ds="tag-list"] [data-slot="badge"] {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  text-align: left;
+}
+
 [data-ds="tag-list"] [data-slot="badge"] {
   padding: 1px 6px;
   background: #f0efeb;

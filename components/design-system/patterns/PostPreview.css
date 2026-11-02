@@ -1,42 +1,37 @@
 [data-ds="post-preview"] {
   display: block;
   width: 100%;
-  border-radius: 3px;
+  border-radius: 4px;
   text-align: left;
   overflow-wrap: anywhere;
 }
 [data-ds="post-preview"] h2 {
-  margin: 14px 0 8px;
-  font-size: 20px;
+  margin: 6px 0;
+  font-family: inherit;
+  font-size: 19px;
   font-weight: 650;
-  line-height: 1.6;
+  line-height: 1.55;
   letter-spacing: normal;
 }
 [data-ds="post-preview"] > p:not([data-ds="tweet-body"]) {
   display: -webkit-box;
   margin: 0;
   overflow: hidden;
-  color: #66665f;
-  font-size: 15px;
-  line-height: 1.8;
+  color: var(--ds-color-text-secondary);
+  font-size: 16px;
+  line-height: 1.7;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
 }
 [data-ds="post-preview"] > [data-ds="tweet-body"] {
-  margin: 12px 0 8px;
-  color: #37352f;
-  font-size: 15px;
-  line-height: 1.8;
+  margin: 4px 0 0;
+  color: var(--ds-color-text-primary);
+  font-size: 16px;
+  line-height: 1.7;
   white-space: pre-wrap;
 }
 @media (max-width: 640px) {
   [data-ds="post-preview"] h2 {
     font-size: 18px;
-  }
-  [data-ds="post-preview"] > [data-ds="tweet-body"] {
-    font-size: 16px;
-  }
-  [data-ds="post-preview"] > p:not([data-ds="tweet-body"]) {
-    font-size: 14px;
   }
 }

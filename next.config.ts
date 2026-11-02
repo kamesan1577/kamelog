@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   serverExternalPackages: ["@simplewebauthn/server"],
   poweredByHeader: false,
+  agentRules: false,
   async headers() {
     return [
       {
