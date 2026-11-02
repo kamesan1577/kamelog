@@ -37,3 +37,7 @@ schema非互換時のデータrollbackは自動化せず、runbookに従い別vo
 Storybook commands: `npm run storybook`, `npm run storybook:build`, `npm run test:storybook`, and `npm run test:visual`. CI installs Node 24 and Playwright OS dependencies before running the Storybook and visual gates.
 
 Next.js lint の推移依存は [ADR 0022](../../adr/0022-remove-vulnerable-lint-dependency.md) に従い、バージョン限定の npm override を使う。現在の単一ルート構成では `settings.next.rootDir` を設定しない。独自ルートの追加、Next.js plugin の更新、glob の呼び出し箇所の変更は専用テストで検出し、互換性を再検証する。CI の依存監査は開発依存を含む `npm audit --audit-level=high` を維持する。
+
+画像比較ではStorybookのフォントをNoto Sans CJK JPに固定し、CIはfonts-noto-cjkを導入する。
+Chromiumは--disable-lcd-textを指定し、OSごとの既定フォントとLCDサブピクセル描画に比較結果が左右されないようにする。
+Linuxで基準画像を作成する場合は同じフォントを用意し、許容差やretryを増やして描画環境の差を隠さない。

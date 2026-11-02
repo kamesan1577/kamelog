@@ -4,7 +4,11 @@ export default defineConfig({
   testDir: "tests/visual",
   retries: 0,
   workers: 1,
-  use: { baseURL: "http://127.0.0.1:6006" },
+  use: {
+    baseURL: "http://127.0.0.1:6006",
+    // Use grayscale text antialiasing on both local Linux and CI runners.
+    launchOptions: { args: ["--disable-lcd-text"] },
+  },
   webServer: {
     command: "storybook dev --ci --port 6006",
     url: "http://127.0.0.1:6006",
