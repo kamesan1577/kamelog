@@ -19,6 +19,7 @@ check: public-repo-check
 	npm run lint
 	npm run format:check
 	npm test
+	npm run test:storage
 	npm run build
 	node --test tests/ui-components.test.mjs
 	npm run storybook:build

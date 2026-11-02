@@ -1,3 +1,4 @@
+import { executeCommand } from "./storage/commands.ts";
 import { lookup as dnsLookup } from "node:dns";
 import { request as httpsRequest } from "node:https";
 import { BlockList, isIP } from "node:net";
@@ -194,29 +195,27 @@ export function updateNotificationSettings(store, encryptionKey, input) {
     )
   )
     throw new TypeError("Configure a webhook before enabling notifications");
-  store.transaction(() => {
-    if (next.provider !== current.provider && !hasUrl)
-      store.remove("settings", CREDENTIAL_ID);
-    if (hasUrl)
-      store.save("settings", CREDENTIAL_ID, {
-        provider: next.provider,
-        encrypted,
-      });
-    store.save("settings", SETTINGS_ID, next);
-  });
+  executeCommand(store, "updateNotificationSettings", [
+    {
+      settings: next,
+      removeCredential: next.provider !== current.provider && !hasUrl,
+      credential: hasUrl ? { provider: next.provider, encrypted } : null,
+    },
+  ]);
   return notificationSettings(store, encryptionKey);
 }
 
 export function clearNotificationWebhook(store, encryptionKey) {
-  store.transaction(() => {
-    store.remove("settings", CREDENTIAL_ID);
-    store.save("settings", SETTINGS_ID, {
-      ...notificationSettings(store, encryptionKey),
-      enabled: false,
-      webhookConfigured: undefined,
-      encryptionAvailable: undefined,
-    });
-  });
+  const settings = notificationSettings(store, encryptionKey);
+  delete settings.webhookConfigured;
+  delete settings.encryptionAvailable;
+  executeCommand(store, "updateNotificationSettings", [
+    {
+      settings: { ...settings, enabled: false },
+      removeCredential: true,
+      credential: null,
+    },
+  ]);
   return notificationSettings(store, encryptionKey);
 }
 

@@ -7,7 +7,7 @@ import test from "node:test";
 import { setTimeout as sleep } from "node:timers/promises";
 import { inferenceSecretBox } from "../../server/inference/secret.mjs";
 import { saveJevCredential } from "../../server/inference/settings.mjs";
-import { Store } from "../../server/store.mjs";
+import { Store } from "../../server/storage/local-store.ts";
 import { recoverStaleThreadJobs } from "../../server/thread-recovery.ts";
 
 test("publishing responds before Jev completes and then links the post", async () => {

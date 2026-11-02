@@ -2,7 +2,7 @@ import { access, readdir, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test, expect, type Locator } from "@playwright/test";
-import { Store } from "../../server/store.mjs";
+import { Store } from "../../server/storage/local-store.ts";
 
 async function findE2EDataDirectory() {
   const candidates = await Promise.all(

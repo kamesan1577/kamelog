@@ -3,7 +3,11 @@ import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { Store, SESSION_TTL_SECONDS, hash } from "../../server/store.mjs";
+import {
+  Store,
+  SESSION_TTL_SECONDS,
+  hash,
+} from "../../server/storage/local-store.ts";
 
 test("owner session lasts 30 days and survives store reopen", async () => {
   const root = await mkdtemp(join(tmpdir(), "kamelog-session-"));

@@ -1,4 +1,5 @@
-import { Store } from "./store.mjs";
+import { storageErrorResponse } from "./storage/errors.ts";
+import { openStore } from "./storage/provider.ts";
 import { configuration, createAPI } from "./api.mjs";
 import { createActivityPubHandler } from "./activitypub.mjs";
 import { reportNotification } from "./notifications.mjs";
@@ -6,7 +7,7 @@ import { createThreadDispatcher } from "./thread-dispatcher.ts";
 let store;
 let threadDispatcher;
 export function getStore() {
-  return (store ??= new Store(process.env.KAMELOG_DATA_DIR || ".runtime"));
+  return (store ??= openStore(process.env.KAMELOG_DATA_DIR || ".runtime"));
 }
 
 async function monitored(request, service, handler, config) {
@@ -42,7 +43,7 @@ async function monitored(request, service, handler, config) {
   }
 }
 
-export async function handle(request) {
+async function handleRequest(request) {
   const config = configuration();
   const response = await monitored(
     request,
@@ -52,16 +53,21 @@ export async function handle(request) {
   );
   // The API has committed both post and durable inference job before returning.
   // Wake a per-process dispatcher without awaiting Jev or delaying the response.
-  if (
-    response.ok &&
-    (request.method === "POST" || request.method === "PUT") &&
-    /^\/api\/posts(?:\/[^/]+)?$/.test(new URL(request.url).pathname) &&
-    getStore().inferenceSettings()?.autoThreadEnabled
-  ) {
-    (threadDispatcher ??= createThreadDispatcher(
-      getStore(),
-      config.inferenceEncryptionKey,
-    ))();
+  try {
+    if (
+      response.ok &&
+      (request.method === "POST" || request.method === "PUT") &&
+      /^\/api\/posts(?:\/[^/]+)?$/.test(new URL(request.url).pathname) &&
+      getStore().inferenceSettings()?.autoThreadEnabled
+    ) {
+      (threadDispatcher ??= createThreadDispatcher(
+        getStore(),
+        config.inferenceEncryptionKey,
+      ))();
+    }
+  } catch {
+    // The post and durable job are already committed. A failed best-effort
+    // wakeup must not invite a duplicate publish; the timer recovers the job.
   }
   return response;
 }
@@ -73,4 +79,14 @@ export function handleActivityPub(request) {
     createActivityPubHandler(getStore(), config),
     config,
   );
+}
+
+export async function handle(request) {
+  try {
+    return await handleRequest(request);
+  } catch (error) {
+    const response = storageErrorResponse(error);
+    if (response) return response;
+    throw error;
+  }
 }

@@ -1,8 +1,16 @@
 import { spawn } from "node:child_process";
-import { mkdtemp, writeFile, mkdir, rename, rm, stat } from "node:fs/promises";
+import {
+  mkdtemp,
+  readFile,
+  writeFile,
+  mkdir,
+  rm,
+  stat,
+} from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { optimizeImage } from "./image-optimizer.mjs";
+import { getBlobStorage, metadataCommitMayBeUnknown } from "./storage/blobs.ts";
 
 const imageTypes = {
   "image/png": {
@@ -107,7 +115,8 @@ export async function saveImage(store, bytes, declaredType) {
   const root = join(store.directory, "media");
   await mkdir(root, { recursive: true, mode: 0o700 });
   const temporary = await mkdtemp(join(root, ".image-"));
-  let destination;
+  const blobs = getBlobStorage(store);
+  let uploaded;
   try {
     const image = await optimizeImage(
       bytes,
@@ -127,15 +136,15 @@ export async function saveImage(store, bytes, declaredType) {
       height: image.height,
       createdAt: new Date().toISOString(),
     };
-    const prepared = join(temporary, `prepared.${image.extension}`);
-    destination = join(root, `${id}.${image.extension}`);
-    await writeFile(prepared, image.bytes, { mode: 0o600 });
-    await rename(prepared, destination);
-    store.save("media", id, metadata);
-    destination = undefined;
+    const key = `media/${id}.${image.extension}`;
+    await blobs.put(key, image.bytes, image.type);
+    uploaded = key;
+    await store.save("media", id, metadata);
+    uploaded = undefined;
     return { id, url: "/api/media/" + id, ...metadata };
   } catch (error) {
-    if (destination) await rm(destination, { force: true });
+    if (uploaded && !metadataCommitMayBeUnknown(error))
+      await blobs.delete(uploaded).catch(() => {});
     throw error;
   } finally {
     await rm(temporary, { recursive: true, force: true });
@@ -170,6 +179,8 @@ export async function convertVideo(store, bytes, seconds) {
   const root = join(store.directory, "media");
   await mkdir(root, { recursive: true, mode: 0o700 });
   let temp;
+  let uploaded;
+  const blobs = getBlobStorage(store);
   try {
     temp = await mkdtemp(join(root, ".processing-"));
     const source = join(temp, "input");
@@ -251,9 +262,16 @@ export async function convertVideo(store, bytes, seconds) {
       seconds: Math.min(seconds, duration),
       createdAt: new Date().toISOString(),
     };
-    await rename(output, join(root, id + ".mp4"));
-    store.save("media", id, metadata);
+    const key = `media/${id}.mp4`;
+    await blobs.put(key, await readFile(output), metadata.type);
+    uploaded = key;
+    await store.save("media", id, metadata);
+    uploaded = undefined;
     return { id, video: "/api/media/" + id, ...metadata };
+  } catch (error) {
+    if (uploaded && !metadataCommitMayBeUnknown(error))
+      await blobs.delete(uploaded).catch(() => {});
+    throw error;
   } finally {
     if (temp) await rm(temp, { recursive: true, force: true });
     active = false;

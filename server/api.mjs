@@ -1,3 +1,6 @@
+import { getBlobStorage } from "./storage/blobs.ts";
+import { storageErrorResponse } from "./storage/errors.ts";
+import { executeCommand } from "./storage/commands.ts";
 import { setLocalLike } from "./local-likes.ts";
 import {
   generateRegistrationOptions,
@@ -6,8 +9,6 @@ import {
   verifyAuthenticationResponse,
 } from "@simplewebauthn/server";
 import { randomUUID, timingSafeEqual, createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
 import {
   postSchema,
   draftSchema,
@@ -22,10 +23,6 @@ import {
   federationStatus,
   InvalidFederationUsername,
 } from "./activitypub.mjs";
-import {
-  enqueuePostFederationDelete,
-  enqueuePostFederationTransition,
-} from "./federation-outbound.mjs";
 import {
   followRemoteActor,
   InvalidFederationHandle,
@@ -216,16 +213,17 @@ export function createAPI(store, config, options = {}) {
             return json({ error: "Authentication failed" }, 401);
           const credential = result.registrationInfo.credential;
           // Recheck after asynchronous crypto: only one first registration may win.
-          store.transaction(() => {
-            if (ceremony.bootstrap && store.credentials().length)
-              throw new Error("Already registered");
-            store.save("credentials", credential.id, {
-              ...credential,
-              publicKey: Buffer.from(credential.publicKey).toString(
-                "base64url",
-              ),
-            });
-          });
+          executeCommand(store, "registerCredential", [
+            {
+              bootstrap: ceremony.bootstrap === true,
+              credential: {
+                ...credential,
+                publicKey: Buffer.from(credential.publicKey).toString(
+                  "base64url",
+                ),
+              },
+            },
+          ]);
         } else if (path[1] === "login" && path[2] === "verify") {
           const credential = store.get("credentials", String(input.id));
           if (!credential) return json({ error: "Authentication failed" }, 401);
@@ -311,12 +309,8 @@ export function createAPI(store, config, options = {}) {
           return json({ error: "Not found" }, 404);
         const metadata = store.get("media", id);
         if (!metadata) return json({ error: "Not found" }, 404);
-        const bytes = await readFile(
-          join(
-            store.directory,
-            "media",
-            id + "." + (metadata.extension || "mp4"),
-          ),
+        const bytes = await getBlobStorage(store).get(
+          `media/${id}.${metadata.extension || "mp4"}`,
         );
         const headers = {
           "Content-Type": metadata.type || "video/mp4",
@@ -535,14 +529,14 @@ export function createAPI(store, config, options = {}) {
       if (["posts", "drafts"].includes(path[0])) {
         const table = path[0];
         if (method === "DELETE") {
-          store.remove(
-            table,
-            path[1],
-            Number(req.headers.get("if-match")),
-            table === "posts"
-              ? (post) => enqueuePostFederationDelete(store, config, post)
-              : undefined,
-          );
+          executeCommand(store, "removeContent", [
+            {
+              table,
+              id: path[1],
+              revision: Number(req.headers.get("if-match")),
+              config: { origin: config.origin },
+            },
+          ]);
           return json({ ok: true });
         }
         if (method === "POST" || method === "PUT") {
@@ -606,56 +600,37 @@ export function createAPI(store, config, options = {}) {
               : old.federationUpdatedAt || old.updatedAt || old.date
             : old?.federationUpdatedAt;
           return json(
-            store.save(
-              table,
-              id,
+            executeCommand(store, "saveContent", [
               {
-                ...input,
-                ...(parentId ? { parentId } : {}),
-                ...(table === "posts"
-                  ? { tags: extractHashtags(input.title, input.body) }
-                  : {}),
-                ...(table === "posts"
-                  ? {
-                      date: old?.date || now,
-                      likes: old ? store.localPostLikes(id) : 0,
-                      federationEnabled,
-                      ...(federationUpdatedAt ? { federationUpdatedAt } : {}),
-                    }
-                  : { savedAt: now }),
+                table,
+                id,
+                value: {
+                  ...input,
+                  ...(parentId ? { parentId } : {}),
+                  ...(table === "posts"
+                    ? { tags: extractHashtags(input.title, input.body) }
+                    : {}),
+                  ...(table === "posts"
+                    ? {
+                        date: old?.date || now,
+                        likes: old ? store.localPostLikes(id) : 0,
+                        federationEnabled,
+                        ...(federationUpdatedAt ? { federationUpdatedAt } : {}),
+                      }
+                    : { savedAt: now }),
+                },
+                revision: input.revision,
+                config: { origin: config.origin },
               },
-              input.revision,
-              table === "posts"
-                ? (saved, previous) => {
-                    enqueuePostFederationTransition(
-                      store,
-                      config,
-                      saved,
-                      previous,
-                    );
-                    const inference = store.inferenceSettings();
-                    if (
-                      inference?.autoThreadEnabled &&
-                      saved.kind === "tweet" &&
-                      !saved.parentId
-                    )
-                      store.enqueueInferenceJob({
-                        task: "thread",
-                        postId: saved.id,
-                        inputHash: createHash("sha256")
-                          .update(`${saved.id}:${saved.revision}`)
-                          .digest("hex"),
-                        engineId: "jev-thread-v1",
-                      });
-                  }
-                : undefined,
-            ),
+            ]),
             method === "POST" ? 201 : 200,
           );
         }
       }
       return json({ error: "Not found" }, 404);
     } catch (error) {
+      const storageResponse = storageErrorResponse(error);
+      if (storageResponse) return storageResponse;
       if (error instanceof Conflict)
         return json(
           { error: "別の操作で変更されました。再読み込みしてください。" },
