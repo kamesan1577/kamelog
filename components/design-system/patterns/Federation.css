@@ -1,7 +1,7 @@
 .federation-settings {
   margin-top: 42px;
   padding-top: 28px;
-  border-top: 1px solid #e7e5df;
+  border-top: 1px solid var(--ds-color-border-subtle);
 }
 
 :is([data-ds="owner-federation"], [data-ds="owner-inference"]) > header {
@@ -12,7 +12,7 @@
 
 :is([data-ds="owner-federation"], [data-ds="owner-inference"]) > header > svg {
   margin-top: 3px;
-  color: #858077;
+  color: var(--ds-color-text-tertiary);
 }
 
 .federation-settings h2 {
@@ -25,7 +25,7 @@
 :is([data-ds="owner-federation"], [data-ds="owner-inference"]) > header p {
   max-width: 520px;
   margin: 6px 0 0;
-  color: #827d73;
+  color: var(--ds-color-text-tertiary);
   font-size: 13px;
   line-height: 1.8;
 }
@@ -35,7 +35,7 @@
   align-items: center;
   gap: 7px;
   margin: 24px 0 0;
-  color: #69655d;
+  color: var(--ds-color-text-secondary);
   font-size: 13px;
 }
 
@@ -48,7 +48,7 @@
 
 .federation-load-error p {
   margin: 0;
-  color: #934747;
+  color: var(--ds-color-danger);
   font-size: 13px;
 }
 
@@ -72,7 +72,7 @@
 
 .federation-hint {
   margin: 6px 0 10px;
-  color: #8c877d;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
 }
 
@@ -80,20 +80,21 @@
   width: 100%;
   min-height: 44px;
   padding: 9px 11px;
-  border: 1px solid #d8d5ce;
+  border: 1px solid var(--ds-color-control-border);
   border-radius: 5px;
-  background: #fff;
+  background: var(--ds-color-bg-surface);
+  color: var(--ds-color-text-primary);
   font-size: 15px;
 }
 
 .federation-setup > input:focus-visible {
-  border-color: #37352f;
-  outline: 2px solid #37352f;
+  border-color: var(--ds-color-text-primary);
+  outline: 2px solid var(--ds-color-focus);
   outline-offset: 2px;
 }
 
 .federation-setup > input[aria-invalid="true"] {
-  border-color: #9a4f4f;
+  border-color: var(--ds-color-danger);
 }
 
 .federation-handle-preview {
@@ -104,13 +105,13 @@
   gap: 5px;
   margin: 16px 0 20px;
   padding: 13px 14px;
-  border: 1px solid #e8e6e0;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 6px;
-  background: #f7f7f5;
+  background: var(--ds-color-bg-muted);
 }
 
 .federation-handle-preview span {
-  color: #8c877d;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
 }
 
@@ -124,7 +125,7 @@
 
 .federation-error {
   margin: -8px 0 16px;
-  color: #934747;
+  color: var(--ds-color-danger);
   font-size: 13px;
   line-height: 1.6;
 }
@@ -145,7 +146,7 @@
   width: 100%;
   margin-top: 30px;
   padding-top: 24px;
-  border-top: 1px solid #e7e5df;
+  border-top: 1px solid var(--ds-color-border-subtle);
 }
 
 .federation-following h3 {
@@ -156,7 +157,7 @@
 
 .federation-following > div > p {
   margin: 6px 0 0;
-  color: #827d73;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
   line-height: 1.7;
 }
@@ -182,20 +183,21 @@
   width: 100%;
   min-height: 44px;
   padding: 9px 11px;
-  border: 1px solid #d8d5ce;
+  border: 1px solid var(--ds-color-control-border);
   border-radius: 5px;
-  background: #fff;
+  background: var(--ds-color-bg-surface);
+  color: var(--ds-color-text-primary);
   font-size: 15px;
 }
 
 .federation-follow-form input:focus-visible {
-  border-color: #37352f;
-  outline: 2px solid #37352f;
+  border-color: var(--ds-color-text-primary);
+  outline: 2px solid var(--ds-color-focus);
   outline-offset: 2px;
 }
 
 .federation-follow-form input[aria-invalid="true"] {
-  border-color: #9a4f4f;
+  border-color: var(--ds-color-danger);
 }
 
 .federation-following > .federation-error {
@@ -214,7 +216,7 @@
   align-items: center;
   gap: 12px;
   padding: 13px 0;
-  border-top: 1px solid #eeece7;
+  border-top: 1px solid var(--ds-color-border-subtle);
 }
 
 .federation-follow-list li > div {
@@ -238,28 +240,28 @@
 
 .federation-follow-list li > div > span,
 .federation-follow-empty {
-  color: #8c877d;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
 }
 
 .federation-follow-state {
   padding: 3px 7px;
   border-radius: 999px;
-  background: #efeee9;
-  color: #69655d;
+  background: var(--ds-color-bg-muted);
+  color: var(--ds-color-text-secondary);
   font-size: 11px;
   white-space: nowrap;
 }
 
 .federation-follow-state.is-accepted {
-  background: #e9f0e7;
-  color: #4e684b;
+  background: var(--ds-color-success-bg);
+  color: var(--ds-color-success);
 }
 
 .federation-follow-state.is-rejected,
 .federation-follow-state.is-failed {
-  background: #f4e9e7;
-  color: #934747;
+  background: var(--ds-color-danger-bg);
+  color: var(--ds-color-danger);
 }
 
 .federation-follow-empty {
@@ -273,22 +275,22 @@
   grid-template-columns: 1fr 1fr;
   margin: 0 0 22px;
   padding: 3px;
-  border: 1px solid #e1dfd9;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 6px;
-  background: #f3f2ef;
+  background: var(--ds-color-bg-muted);
 }
 
 .fediverse-mode-switch [data-slot="tabs-trigger"] {
   min-width: 0;
   border-radius: 4px;
-  color: #77736b;
+  color: var(--ds-color-text-secondary);
   font-size: 13px;
 }
 
 .fediverse-mode-switch [data-slot="tabs-trigger"][data-state="active"] {
-  background: #fff;
-  color: #37352f;
-  box-shadow: 0 1px 2px rgb(55 53 47 / 8%);
+  background: var(--ds-color-bg-surface);
+  color: var(--ds-color-text-primary);
+  box-shadow: 0 1px 2px var(--ds-color-shadow);
 }
 
 .fediverse-timeline-heading {
@@ -296,7 +298,7 @@
   align-items: center;
   justify-content: space-between;
   min-height: 52px;
-  border-bottom: 1px solid #37352f;
+  border-bottom: 1px solid var(--ds-color-text-primary);
 }
 
 .fediverse-timeline-heading h2 {
@@ -307,7 +309,7 @@
 
 .fediverse-timeline-heading p {
   margin: 4px 0 0;
-  color: #8c877d;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
 }
 
@@ -318,12 +320,12 @@
   align-items: center;
   justify-content: center;
   border-radius: 5px;
-  color: #77736b;
+  color: var(--ds-color-text-secondary);
 }
 
 .fediverse-timeline-heading > button:hover {
-  background: #f3f2ef;
-  color: #37352f;
+  background: var(--ds-color-bg-muted);
+  color: var(--ds-color-text-primary);
 }
 
 .fediverse-timeline-heading .is-spinning {
@@ -342,23 +344,23 @@
   justify-content: space-between;
   gap: 12px;
   padding: 18px 0;
-  border-bottom: 1px solid #eeece7;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
 }
 
 .fediverse-timeline-error p {
   margin: 0;
-  color: #934747;
+  color: var(--ds-color-danger);
   font-size: 13px;
 }
 
 .fediverse-post {
   padding: 22px 0 18px;
-  border-bottom: 1px solid #eeede9;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
 }
 
 .fediverse-announced {
   margin: 0 0 10px 39px;
-  color: #8c877d;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
 }
 
@@ -398,14 +400,14 @@
 
 .fediverse-post-meta span,
 .fediverse-post-meta time {
-  color: #979289;
+  color: var(--ds-color-text-tertiary);
   font-size: 11px;
 }
 
 .fediverse-content {
   margin: 13px 0 0 39px;
   overflow-wrap: anywhere;
-  color: #625e54;
+  color: var(--ds-color-text-primary);
   font-size: 14px;
   line-height: 1.85;
 }
@@ -419,7 +421,7 @@
 }
 
 .fediverse-content a {
-  color: #37352f;
+  color: var(--ds-color-text-primary);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -427,9 +429,9 @@
 .fediverse-content pre {
   overflow-x: auto;
   padding: 10px;
-  border: 1px solid #e8e5de;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 5px;
-  background: #f7f6f3;
+  background: var(--ds-color-bg-muted);
 }
 
 .fediverse-attachments {
@@ -445,9 +447,9 @@
   width: 100%;
   max-height: 320px;
   aspect-ratio: 16 / 10;
-  border: 1px solid #e8e5de;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 5px;
-  background: #f3f2ef;
+  background: var(--ds-color-bg-muted);
   object-fit: cover;
 }
 
@@ -471,7 +473,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #77736b;
+  color: var(--ds-color-text-secondary);
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -480,7 +482,7 @@
 .fediverse-post-actions a:hover,
 .fediverse-post-actions button:hover,
 .fediverse-post-actions button.is-reposted {
-  color: #37352f;
+  color: var(--ds-color-text-primary);
 }
 
 .fediverse-post-actions button:disabled {
@@ -490,7 +492,7 @@
 
 .public-repost-label {
   margin: 0 0 10px 39px;
-  color: #77736b;
+  color: var(--ds-color-text-secondary);
   font-size: 12px;
   font-weight: 600;
 }
@@ -578,7 +580,8 @@
 [data-ds="owner-inference"] .field input {
   min-height: 44px;
   padding: 9px 11px;
-  border: 1px solid #d8d5ce;
+  border: 1px solid var(--ds-color-control-border);
   border-radius: 5px;
-  background: #fff;
+  background: var(--ds-color-bg-surface);
+  color: var(--ds-color-text-primary);
 }

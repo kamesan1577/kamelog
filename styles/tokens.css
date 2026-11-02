@@ -1,16 +1,60 @@
 @import "tailwindcss";
+
+/* Tailwind dark utilities must respect a manual choice, including light on a dark OS. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(
+      :root:not([data-theme="light"]):not([data-theme="dark"]),
+      :root:not([data-theme="light"]):not([data-theme="dark"]) *
+    ) {
+      @slot;
+    }
+  }
+}
+
 :root {
-  --ds-color-bg-page: #f8f9f6;
-  --ds-color-bg-surface: #ffffff;
-  --ds-color-bg-hover: #edf1e9;
-  --ds-color-text-primary: #37352f;
-  --ds-color-text-secondary: #66665f;
-  --ds-color-text-tertiary: #717168;
-  --ds-color-border-subtle: #e5e3df;
-  --ds-color-border-strong: #c9c6bd;
-  --ds-color-accent: #285542;
-  --ds-color-accent-hover: #1d4032;
-  --ds-color-danger: #c93f46;
+  /* The browser chooses the system scheme until an explicit preference is set. */
+  color-scheme: light dark;
+  --ds-color-bg-page: light-dark(#f8f9f6, #171917);
+  --ds-color-bg-surface: light-dark(#ffffff, #20231f);
+  --ds-color-bg-hover: light-dark(#edf1e9, #2b302a);
+  --ds-color-bg-muted: light-dark(#f1f1ee, #272a26);
+  --ds-color-bg-active: light-dark(#e8eee5, #353c33);
+  --ds-color-bg-active-hover: light-dark(#dce6d9, #40493d);
+  --ds-color-text-primary: light-dark(#37352f, #e7e6e2);
+  --ds-color-text-secondary: light-dark(#66665f, #b8b8b0);
+  --ds-color-text-tertiary: light-dark(#68685f, #a5a59d);
+  --ds-color-border-subtle: light-dark(#e5e3df, #383c36);
+  --ds-color-border-strong: light-dark(#c9c6bd, #5c6258);
+  --ds-color-control-border: light-dark(#8a897f, #858c7e);
+  --ds-color-accent: light-dark(#285542, #b7ccbc);
+  --ds-color-accent-hover: light-dark(#1d4032, #d2dfd5);
+  --ds-color-accent-foreground: light-dark(#ffffff, #202b22);
+  --ds-color-action: var(--ds-color-text-primary);
+  --ds-color-action-hover: light-dark(#292824, #ffffff);
+  --ds-color-action-foreground: light-dark(#ffffff, #20231f);
+  --ds-color-text-inverse: var(--ds-color-action-foreground);
+  --ds-color-danger: light-dark(#b9303c, #ff9da5);
+  --ds-color-danger-bg: light-dark(#f9e9e9, #442a2d);
+  --ds-color-danger-fill: light-dark(#b9303c, #a82635);
+  --ds-color-danger-foreground: #ffffff;
+  --ds-color-success: light-dark(#35633e, #accdb1);
+  --ds-color-success-bg: light-dark(#edf5ed, #293c2e);
+  --ds-color-warning: light-dark(#805b17, #dfc486);
+  --ds-color-warning-bg: light-dark(#f8efd9, #3c3421);
+  --ds-color-focus: var(--ds-color-accent);
+  --ds-color-overlay: light-dark(rgb(30 30 27 / 35%), rgb(0 0 0 / 60%));
+  --ds-color-shadow: light-dark(rgb(30 30 27 / 12%), rgb(0 0 0 / 24%));
+  --ds-color-code-bg: light-dark(#f6f5f2, #191c19);
+  --ds-color-syntax-comment: var(--ds-color-text-tertiary);
+  --ds-color-syntax-keyword: light-dark(#a32e45, #f0a3ad);
+  --ds-color-syntax-title: light-dark(#6446a0, #cdb7f2);
+  --ds-color-syntax-literal: light-dark(#1e6587, #9ecbdf);
+  --ds-color-syntax-string: light-dark(#35633e, #accdb1);
+  --ds-color-syntax-variable: light-dark(#85551c, #dfc486);
   --ds-space-1: 0.25rem;
   --ds-space-2: 0.5rem;
   --ds-space-3: 0.75rem;
@@ -31,6 +75,14 @@
   --ds-sidebar-width: 13.5rem;
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
 @theme inline {
   --color-ds-page: var(--ds-color-bg-page);
   --color-ds-surface: var(--ds-color-bg-surface);
@@ -42,6 +94,20 @@
   --color-ds-border-strong: var(--ds-color-border-strong);
   --color-ds-accent: var(--ds-color-accent);
   --color-ds-accent-hover: var(--ds-color-accent-hover);
+  --color-ds-accent-foreground: var(--ds-color-accent-foreground);
+  --color-ds-action: var(--ds-color-action);
+  --color-ds-action-hover: var(--ds-color-action-hover);
+  --color-ds-action-foreground: var(--ds-color-action-foreground);
+  --color-ds-control-border: var(--ds-color-control-border);
+  --color-ds-muted: var(--ds-color-bg-muted);
+  --color-ds-active: var(--ds-color-bg-active);
+  --color-ds-danger-bg: var(--ds-color-danger-bg);
+  --color-ds-danger-fill: var(--ds-color-danger-fill);
+  --color-ds-danger-foreground: var(--ds-color-danger-foreground);
+  --color-ds-success: var(--ds-color-success);
+  --color-ds-success-bg: var(--ds-color-success-bg);
+  --color-ds-warning: var(--ds-color-warning);
+  --color-ds-warning-bg: var(--ds-color-warning-bg);
   --color-ds-danger: var(--ds-color-danger);
   --spacing-ds-1: var(--ds-space-1);
   --spacing-ds-2: var(--ds-space-2);

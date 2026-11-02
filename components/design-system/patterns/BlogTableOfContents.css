@@ -8,7 +8,7 @@
   padding: 16px 18px;
   border: 1px solid var(--ds-color-border-subtle);
   border-radius: 8px;
-  background: #f7f6f3;
+  background: var(--ds-color-bg-muted);
 }
 
 [data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-title"] {
@@ -36,7 +36,7 @@
   min-height: 32px;
   padding: 5px 8px;
   border-radius: 5px;
-  color: #57534c;
+  color: var(--ds-color-text-primary);
   font-size: 14px;
   line-height: 1.6;
   overflow-wrap: anywhere;
@@ -44,7 +44,7 @@
 }
 
 [data-ds="blog-table-of-contents"] a:hover {
-  background: #eae8e3;
+  background: var(--ds-color-bg-hover);
   color: var(--ds-color-text-primary);
 }
 
@@ -53,23 +53,33 @@
   outline-offset: 1px;
 }
 
-[data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-level-3"] a {
+[data-ds="blog-table-of-contents"]
+  [data-ds="blog-table-of-contents-level-3"]
+  a {
   padding-inline-start: 20px;
 }
 
-[data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-level-4"] a {
+[data-ds="blog-table-of-contents"]
+  [data-ds="blog-table-of-contents-level-4"]
+  a {
   padding-inline-start: 32px;
 }
 
-[data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-level-5"] a {
+[data-ds="blog-table-of-contents"]
+  [data-ds="blog-table-of-contents-level-5"]
+  a {
   padding-inline-start: 44px;
 }
 
-[data-ds="blog-table-of-contents"] [data-ds="blog-table-of-contents-level-6"] a {
+[data-ds="blog-table-of-contents"]
+  [data-ds="blog-table-of-contents-level-6"]
+  a {
   padding-inline-start: 56px;
 }
 
-[data-ds="detail-page"] [data-ds="detail-markdown"] [data-kamelog-toc-generated="true"] {
+[data-ds="detail-page"]
+  [data-ds="detail-markdown"]
+  [data-kamelog-toc-generated="true"] {
   scroll-margin-top: 20px;
 }
 

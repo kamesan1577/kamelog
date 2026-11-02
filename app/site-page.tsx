@@ -24,10 +24,12 @@ function SourceFooter() {
     <footer
       aria-label="kamelogの開発情報"
       data-ds="site-source-footer"
-      className="site-source-footer border-t border-[#eceae5] px-5 pt-5 pb-24 text-xs text-[#858078] md:px-10 md:pb-6"
+      className="site-source-footer border-t border-ds-border px-5 pt-5 pb-24 text-xs text-ds-tertiary md:px-10 md:pb-6"
     >
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-3 gap-y-2">
-        <span className="font-medium text-[#625e56]">kamelog の開発情報</span>
+        <span className="font-medium text-ds-secondary">
+          kamelog の開発情報
+        </span>
         <a
           className="underline underline-offset-4"
           href="https://github.com/kamesan1577/kamelog"
@@ -50,8 +52,8 @@ function SourceFooter() {
           ActivityPub対応
         </a>
       </div>
-      <div className="mx-auto mt-5 max-w-5xl border-t border-[#eceae5] pt-4">
-        <p className="mb-2 font-medium text-[#625e56]">相互リンク</p>
+      <div className="mx-auto mt-5 max-w-5xl border-t border-ds-border pt-4">
+        <p className="mb-2 font-medium text-ds-secondary">相互リンク</p>
         <a
           href="https://shiryu.win/"
           target="_blank"
@@ -72,10 +74,10 @@ function SourceFooter() {
         </a>
       </div>
       {revision && (
-        <div className="mx-auto mt-3 flex max-w-5xl justify-end text-[10px] text-[#858078]">
+        <div className="mx-auto mt-3 flex max-w-5xl justify-end text-[10px] text-ds-tertiary">
           <span>Build · </span>
           <a
-            className="ml-1 font-mono underline underline-offset-2 hover:text-[#625e56] focus-visible:text-[#625e56]"
+            className="ml-1 font-mono underline underline-offset-2 hover:text-ds-secondary focus-visible:text-ds-secondary"
             href={revision.url}
             target="_blank"
             rel="noopener noreferrer"

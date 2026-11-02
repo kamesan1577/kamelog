@@ -4,12 +4,12 @@
   flex-direction: column;
   gap: 13px;
   padding: 45px;
-  color: #999;
+  color: var(--ds-color-text-tertiary);
   text-align: center;
 }
 
 [data-ds="empty-state"] h2 {
-  color: #555;
+  color: var(--ds-color-text-primary);
   font-size: 17px;
 }
 

@@ -6,11 +6,6 @@ import type { TooltipValueType } from "recharts"
 
 import { cn } from "@/lib/utils"
 
-const THEMES = {
-  light: null,
-  dark: "(prefers-color-scheme: dark)",
-} as const
-
 const INITIAL_DIMENSION = { width: 320, height: 200 } as const
 type TooltipNameType = number | string
 
@@ -21,7 +16,7 @@ export type ChartConfig = Record<
     icon?: React.ComponentType
   } & (
     | { color?: string; theme?: never }
-    | { color?: never; theme: Record<keyof typeof THEMES, string> }
+    | { color?: never; theme: Record<"light" | "dark", string> }
   )
 >
 
@@ -95,23 +90,20 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(([theme, media]) => {
-            const rule = `
+        // CSS resolves both system and explicit preferences, including before
+        // hydration. Charts must not independently override the site's theme.
+        __html: `
 [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ??
-      itemConfig.color
+    const color = itemConfig.theme
+      ? `light-dark(${itemConfig.theme.light}, ${itemConfig.theme.dark})`
+      : itemConfig.color
     return color ? `  --color-${key}: ${color};` : null
   })
   .join("\n")}
 }
-`
-            return media ? `@media ${media} {\n${rule}}\n` : rule
-          })
-          .join("\n"),
+`,
       }}
     />
   )

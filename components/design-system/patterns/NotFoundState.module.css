@@ -1,8 +1,8 @@
 .page {
   min-height: 100vh;
   min-height: 100dvh;
-  background: var(--kamelog-paper, #f6f5f4);
-  color: var(--kamelog-ink, #37352f);
+  background: var(--kamelog-paper);
+  color: var(--kamelog-ink);
 }
 
 .shell {
@@ -52,11 +52,11 @@
 .misplacedZero {
   display: inline-block;
   padding: 0.005em 0.035em 0.045em;
-  border: 1.5px dashed #bcb8b0;
+  border: 1.5px dashed var(--ds-color-border-strong);
   border-radius: 7px;
-  background: #fff;
-  box-shadow: 4px 5px 0 #e8e6e0;
-  color: #aaa59c;
+  background: var(--ds-color-bg-surface);
+  box-shadow: 4px 5px 0 var(--ds-color-border-subtle);
+  color: var(--ds-color-text-tertiary);
   transform: translateY(-5px) rotate(-5deg);
   transition: transform 180ms ease;
 }
@@ -76,7 +76,7 @@
 .description {
   max-width: 480px;
   margin: 14px 0 0;
-  color: #726e66;
+  color: var(--ds-color-text-secondary);
   font-size: 14px;
   line-height: 1.9;
 }
@@ -96,7 +96,7 @@
   justify-content: center;
   gap: 9px;
   padding: 11px 16px;
-  border: 1px solid var(--kamelog-ink, #37352f);
+  border: 1px solid var(--kamelog-ink);
   border-radius: 6px;
   font-size: 13px;
   font-weight: 650;
@@ -106,21 +106,21 @@
 }
 
 .primaryLink {
-  background: var(--kamelog-ink, #37352f);
-  color: #fff;
+  background: var(--kamelog-ink);
+  color: var(--ds-color-action-foreground);
 }
 
 .primaryLink:hover {
-  background: var(--kamelog-ink-hover, #292824);
+  background: var(--kamelog-ink-hover);
 }
 
 .secondaryLink {
-  border-color: var(--kamelog-line, #dededb);
-  background: #fff;
+  border-color: var(--kamelog-line);
+  background: var(--ds-color-bg-surface);
 }
 
 .secondaryLink:hover {
-  background: var(--kamelog-soft, #efefed);
+  background: var(--kamelog-soft);
 }
 
 @media (max-width: 640px) {

@@ -1,24 +1,21 @@
 # kamelog Design System
 
-The design system is the executable contract for new UI. It follows the
-dependency direction `Feature → Patterns → Primitives/Layout → Tokens`.
+Design Systemは新しいUIの実装契約とし、依存方向を`Feature → Patterns → Primitives/Layout → Tokens`に揃える。
+共有UIは`components/design-system/`へ置き、同じ場所にStorybook storyを追加する。
+Featureは既存のvariantとlayoutを使い、独自の見た目の値や第三者primitiveを直接持ち込まない。
 
-The visual baseline is quiet, content-first, and neutral: surfaces are white,
-borders and shadows are restrained, and the ink accent is used for primary
-actions and selected/focus states. Timeline and composer interactions should
-follow familiar X patterns, including reachable mobile actions and predictable
-back navigation.
+画面構成は[ADR 0027](../../adr/0027-twitter-style-feed.md)、分類と検索の操作は[ADR 0028](../../adr/0028-feed-navigation-and-search.md)に従う。
+216pxの左ナビゲーション、56pxのヘッダー、細い罫線で区切る連続したフィードを使う。
+1240px未満では検索とタグをタイムライン内のパネルへまとめ、641〜900pxの本文左右の余白は20pxとする。
+タイムライン、投稿、媒体、ナビゲーションでは、スマホから操作へ到達できることと戻る操作の予測しやすさを保つ。
 
-New shared UI belongs under `components/design-system/` and requires a colocated
-Storybook story. Feature code should consume variants and layout primitives;
-it should not invent visual values or import third-party primitives directly.
+配色は[ADR 0030](../../adr/0030-system-appearance.md)に従い、`styles/tokens.css`を共通の正本とする。
+初期値はシステム追従とし、ライトとダークの両方で本文、補助文字、フォーカスを識別できるようにする。
+ライトの紙と墨色、ダークの炭色と明るい文字を基調に、背景と面の明度差で階層を示す。
+操作の差し色は既存の緑を引き継ぎ、通知などの意味がある場合に状態色を使う。
+各画面は役割を表すトークンを参照し、ライト専用の色を個別に追加しない。
+`color-scheme`を使ってネイティブフォームとスクロールバーも表示テーマに合わせる。
 
-`styles/tokens.css` is the shared token source. ADR 0021 records the authorized
-publication redesign: a 216px navigation column, 56px header, fine dividers,
-and a paper background of #fbfbfa. Below 1240px, search and tag filtering stay
-reachable inside the timeline; from 641px to 900px, content has 24px side padding.
-
-Use typography, whitespace, and restrained rules to distinguish content rather
-than enclosing every section in a rounded panel. Japanese headings retain normal
-letter spacing. Preserve familiar timeline, composer, media, and navigation
-behavior, and use only supported facts in profile copy.
+unslopは既存の構成と内容を保つpolishとして適用する。
+文字の階層、余白、控えめな罫線で内容を分け、日本語の見出しは通常の字間を保つ。
+画像や動画の色は変更せず、プロフィールの説明には確認できる事実だけを使う。

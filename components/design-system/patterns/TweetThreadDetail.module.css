@@ -10,32 +10,32 @@
   gap: 16px;
   margin: 4px 0 24px;
   padding-bottom: 15px;
-  border-bottom: 1px solid #dedbd4;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
 }
 
 .header h1 {
   margin: 2px 0 0;
-  color: #37352f;
+  color: var(--ds-color-text-primary);
   font-size: 24px;
   font-weight: 720;
   letter-spacing: -0.03em;
 }
 
 .eyebrow {
-  color: #9b968c;
+  color: var(--ds-color-text-tertiary);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.16em;
 }
 
 .count {
-  color: #8b867e;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
 }
 
 .parentMissing {
   margin: 8px 0 12px;
-  color: #827d74;
+  color: var(--ds-color-text-secondary);
   font-size: 12px;
 }
 
@@ -51,16 +51,16 @@
 
 .current {
   padding: 18px 18px 16px;
-  border: 1px solid #d7d2c9;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 1px 0 rgba(55, 53, 47, 0.04);
+  background: var(--ds-color-bg-surface);
+  box-shadow: 0 1px 0 var(--ds-color-shadow);
 }
 
 .currentLabel {
   display: block;
   margin-bottom: 14px;
-  color: #777168;
+  color: var(--ds-color-text-secondary);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -81,20 +81,20 @@
   padding: 14px 42px 14px 16px;
   border: 1px solid transparent;
   border-radius: 8px;
-  background: #f3f1ed;
+  background: var(--ds-color-bg-muted);
   color: inherit;
   text-align: left;
   cursor: pointer;
 }
 
 .card:hover {
-  border-color: #ded9d0;
-  background: #eeece7;
+  border-color: var(--ds-color-border-subtle);
+  background: var(--ds-color-bg-hover);
 }
 
 .timelineThread {
   position: relative;
-  border-color: #e8e4dc;
+  border-color: var(--ds-color-border-subtle);
 }
 
 .timelineThread::before {
@@ -102,7 +102,7 @@
   inset-block: 0;
   left: -7px;
   width: 1px;
-  background: #ded9d0;
+  background: var(--ds-color-border-subtle);
   content: "";
 }
 
@@ -111,7 +111,7 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 6px;
-  color: #8b867e;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
 }
 
@@ -130,7 +130,7 @@
   align-items: center;
   overflow: hidden;
   width: 15px;
-  color: #918b81;
+  color: var(--ds-color-text-tertiary);
   font-size: 11px;
   white-space: nowrap;
   opacity: 0.72;
@@ -163,12 +163,12 @@
 .children {
   margin-top: 12px;
   padding-top: 24px;
-  border-top: 1px solid #ebe8e2;
+  border-top: 1px solid var(--ds-color-border-subtle);
 }
 
 .sectionLabel {
   margin-bottom: 2px;
-  color: #827d74;
+  color: var(--ds-color-text-secondary);
   font-size: 12px;
   font-weight: 650;
 }
@@ -183,24 +183,24 @@
   gap: 7px;
   min-height: 36px;
   padding: 0 12px;
-  border: 1px solid #dedbd4;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 8px;
-  background: #fff;
-  color: #4f4b45;
+  background: var(--ds-color-bg-surface);
+  color: var(--ds-color-text-primary);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .appendButton:hover {
-  background: #f7f6f3;
+  background: var(--ds-color-bg-muted);
 }
 
 .composer {
   padding: 12px;
-  border: 1px solid #dedbd4;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 10px;
-  background: #faf9f7;
+  background: var(--ds-color-bg-muted);
 }
 
 .composer .image-upload-button input {
@@ -209,7 +209,7 @@
 
 .replyTarget {
   margin: 0 0 8px;
-  color: #777168;
+  color: var(--ds-color-text-secondary);
   font-size: 12px;
 }
 
@@ -254,7 +254,7 @@
   gap: 10px;
   align-items: center;
   margin-top: 8px;
-  color: #777168;
+  color: var(--ds-color-text-secondary);
   font-size: 12px;
 }
 
@@ -273,26 +273,26 @@
   gap: 8px;
   align-items: center;
   padding: 12px;
-  border: 1px solid #d7d2c9;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 10px;
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(55, 53, 47, 0.16);
+  background: var(--ds-color-bg-surface);
+  box-shadow: 0 8px 24px var(--ds-color-shadow);
 }
 
 .closeDialog p {
   flex-basis: 100%;
   margin: 0;
-  color: #4f4b45;
+  color: var(--ds-color-text-primary);
   font-size: 13px;
 }
 
 .closeDialog button,
 .xFallback {
   padding: 6px 9px;
-  border: 1px solid #dedbd4;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 6px;
-  background: #fff;
-  color: #4f4b45;
+  background: var(--ds-color-bg-surface);
+  color: var(--ds-color-text-primary);
   font-size: 12px;
 }
 
@@ -328,7 +328,7 @@
 }
 
 .composerHeader button:hover {
-  background: #eeece8;
+  background: var(--ds-color-bg-hover);
 }
 
 .composer textarea {
@@ -336,9 +336,10 @@
   min-height: 112px;
   resize: vertical;
   padding: 10px 11px;
-  border: 1px solid #d8d5cf;
+  border: 1px solid var(--ds-color-control-border);
   border-radius: 8px;
-  background: #fff;
+  background: var(--ds-color-bg-surface);
+  color: var(--ds-color-text-primary);
   font: inherit;
   font-size: 16px;
   line-height: 1.55;
@@ -346,8 +347,9 @@
 }
 
 .composer textarea:focus {
-  border-color: #aaa59c;
-  box-shadow: 0 0 0 2px rgba(80, 76, 70, 0.08);
+  border-color: var(--ds-color-focus);
+  outline: 2px solid var(--ds-color-focus);
+  outline-offset: 2px;
 }
 
 .composerActions {
@@ -355,25 +357,26 @@
 }
 
 .composerActions span {
-  color: #8b867e;
+  color: var(--ds-color-text-tertiary);
   font-size: 11px;
 }
 
 .composerActions button {
   min-height: 34px;
   padding: 0 13px;
-  border: 1px solid #2f2d2a;
+  border: 1px solid var(--ds-color-action);
   border-radius: 8px;
-  background: #2f2d2a;
-  color: #fff;
+  background: var(--ds-color-action);
+  color: var(--ds-color-action-foreground);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
 }
 
 .composerActions button:disabled {
-  border-color: #d2cfc9;
-  background: #d2cfc9;
+  border-color: var(--ds-color-border-subtle);
+  background: var(--ds-color-bg-muted);
+  color: var(--ds-color-text-tertiary);
   cursor: default;
 }
 

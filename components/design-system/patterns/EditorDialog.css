@@ -171,8 +171,8 @@
 }
 [data-ds="editor-dialog"] .editor-tool-list button:hover,
 [data-ds="editor-dialog"] .markdown-help-link:hover {
-  background: #f1f0ed;
-  color: #625e54;
+  background: var(--ds-color-bg-hover);
+  color: var(--ds-color-text-primary);
 }
 @media (max-width: 640px) {
   [data-ds="editor-dialog"] [data-slot="dialog-title"] {
@@ -217,7 +217,7 @@
   min-width: 24px;
   padding: 1px 6px;
   border-radius: 10px;
-  background: #f0efeb;
+  background: var(--ds-color-bg-muted);
   color: var(--ds-color-text-secondary);
   text-align: center;
 }
@@ -264,6 +264,6 @@
 [data-ds="editor-dialog"]
   .vlog-tabs
   [data-slot="tabs-trigger"][data-state="active"] {
-  background: #37352f;
-  color: #fff;
+  background: var(--ds-color-action);
+  color: var(--ds-color-action-foreground);
 }

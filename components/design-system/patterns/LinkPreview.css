@@ -1,6 +1,6 @@
 [data-ds="tweet-body"] {
   margin: 14px 0 8px;
-  color: #625e54;
+  color: var(--ds-color-text-primary);
   font-size: 15px;
   line-height: 1.95;
   white-space: pre-wrap;
@@ -9,7 +9,7 @@
 }
 
 [data-ds="tweet-inline-link"] {
-  color: #37352f;
+  color: var(--ds-color-text-primary);
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
@@ -27,10 +27,10 @@
   width: 100%;
   margin: 10px 0 4px;
   overflow: hidden;
-  border: 1px solid #dedbd4;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 7px;
-  background: #fff;
-  color: #37352f;
+  background: var(--ds-color-bg-surface);
+  color: var(--ds-color-text-primary);
 }
 
 [data-ds="tweet-link-card"][data-ds-variant="has-image"] {
@@ -43,7 +43,7 @@
   height: 100%;
   min-height: 92px;
   object-fit: cover;
-  background: #f2f1ee;
+  background: var(--ds-color-bg-muted);
 }
 
 [data-ds="tweet-link-card-copy"] {
@@ -57,7 +57,7 @@
 
 [data-ds="tweet-link-card-copy"] small {
   overflow: hidden;
-  color: #98948b;
+  color: var(--ds-color-text-tertiary);
   font-size: 11px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -76,7 +76,7 @@
 [data-ds="tweet-link-card-description"] {
   display: -webkit-box;
   overflow: hidden;
-  color: #817c72;
+  color: var(--ds-color-text-secondary);
   font-size: 12px;
   line-height: 1.5;
   -webkit-box-orient: vertical;
@@ -84,7 +84,7 @@
 }
 
 [data-ds="tweet-link-card"]:hover {
-  background: #faf9f7;
+  background: var(--ds-color-bg-muted);
 }
 
 @media (max-width: 640px) {

@@ -2,7 +2,7 @@
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: color-mix(in srgb, var(--ds-color-text-primary) 8%, transparent);
+  background: var(--ds-color-overlay);
   backdrop-filter: blur(3px);
 }
 
@@ -38,8 +38,7 @@
   border-radius: 8px;
   background: var(--ds-color-bg-surface);
   color: var(--ds-color-text-primary);
-  box-shadow: 0 24px 80px
-    color-mix(in srgb, var(--ds-color-text-primary) 15%, transparent);
+  box-shadow: 0 24px 80px var(--ds-color-shadow);
   outline: none;
   font-family: var(--ds-font-family-body, inherit);
 }

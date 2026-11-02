@@ -3,7 +3,7 @@
   align-items: center;
   gap: 23px;
   margin-top: 10px;
-  color: #717168;
+  color: var(--ds-color-text-tertiary);
 }
 
 [data-ds="post-actions"] button {
@@ -15,11 +15,11 @@
 }
 
 [data-ds="post-actions"] button:hover {
-  color: #686157;
+  color: var(--ds-color-text-primary);
 }
 
 [data-ds="post-actions"] .liked {
-  color: #db6974;
+  color: var(--ds-color-danger);
 }
 
 [data-ds="post-actions"] .more {

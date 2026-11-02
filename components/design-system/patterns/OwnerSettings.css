@@ -52,11 +52,11 @@
 [data-ds="owner-settings-field"] input,
 [data-ds="owner-settings-field"] textarea {
   padding: 12px;
-  border: 1px solid var(--ds-color-border-strong);
+  border: 1px solid var(--ds-color-control-border);
   border-radius: 4px;
   font-size: 15px;
   line-height: 1.7;
-  background: #fff;
+  background: var(--ds-color-bg-surface);
 }
 [data-ds="owner-settings-field"] textarea {
   height: 112px;

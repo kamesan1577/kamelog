@@ -8,8 +8,7 @@ import { X } from "lucide-react";
 import { buttonVariants, type ButtonVariants } from "./variants";
 
 export interface ButtonProps
-  extends useRender.ComponentProps<"button">,
-    ButtonVariants {}
+  extends useRender.ComponentProps<"button">, ButtonVariants {}
 
 function Button({ className, variant, size, render, ...props }: ButtonProps) {
   return useRender({
@@ -28,7 +27,7 @@ function Button({ className, variant, size, render, ...props }: ButtonProps) {
 function CloseButton() {
   return (
     <Button type="button" variant="close" size="circle" aria-label="Close">
-      <X className="h-full w-3.5 fill-secondary dark:fill-default/45" />
+      <X className="h-full w-3.5 fill-current" />
       <span className="sr-only">Close</span>
     </Button>
   );

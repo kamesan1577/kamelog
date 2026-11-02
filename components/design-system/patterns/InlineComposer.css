@@ -1,5 +1,5 @@
 [data-ds="inline-composer"] {
-  border: 1px solid #e8e7e3;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 5px;
   margin-bottom: 27px;
   background: var(--ds-color-bg-surface);
@@ -15,15 +15,15 @@
 [data-ds="inline-composer"] > .composer-start > button:not(.compose-plus) {
   flex: 1;
   text-align: left;
-  color: #797970;
+  color: var(--ds-color-text-tertiary);
   font-size: 14px;
 }
 
 [data-ds="inline-composer"] .compose-plus {
   width: 26px;
   height: 26px;
-  color: #7b7970;
-  border: 1px solid #eee;
+  color: var(--ds-color-text-tertiary);
+  border: 1px solid var(--ds-color-border-subtle);
 }
 
 [data-ds="inline-composer"] .composer-kinds {
@@ -31,19 +31,19 @@
   gap: 23px;
   margin: 0 16px;
   padding: 11px 0;
-  border-top: 1px solid #f0efec;
+  border-top: 1px solid var(--ds-color-border-subtle);
 }
 
 [data-ds="inline-composer"] .composer-kinds button {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #87837a;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
 }
 
 [data-ds="inline-composer"] .composer-kinds button:hover {
-  color: #37352f;
+  color: var(--ds-color-text-primary);
 }
 [data-ds="inline-composer"] .inline-tweet {
   flex: 1;
@@ -58,11 +58,11 @@
   background: transparent;
 }
 [data-ds="inline-composer"] .inline-tweet::placeholder {
-  color: #797970;
+  color: var(--ds-color-text-tertiary);
 }
 [data-ds="inline-composer"] .draft-button {
   margin-left: auto;
-  color: #2383e2;
+  color: var(--ds-color-accent);
   font-size: 13px;
   padding: 6px;
 }
@@ -101,5 +101,5 @@
   flex: 0 0 auto;
   align-self: flex-end;
   text-align: center;
-  color: #fff;
+  color: var(--ds-color-action-foreground);
 }

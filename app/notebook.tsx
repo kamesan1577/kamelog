@@ -86,6 +86,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Toaster } from "@/components/ui/sonner";
+import { useTheme } from "@/components/theme-provider";
+import { ThemeControl } from "@/components/design-system/patterns/ThemeControl";
 import { toast } from "sonner";
 import { api, signIn } from "@/lib/api";
 import ReactMarkdown from "react-markdown";
@@ -275,30 +277,57 @@ function Avatar({
     </span>
   );
 }
+// Mermaid's configuration is global. Keep configuration and rendering together
+// so a newer theme cannot change a diagram that is still being rendered.
+let mermaidRenderQueue: Promise<void> = Promise.resolve();
+
 function MermaidDiagram({ chart }: { chart: string }) {
   const id = useId().replaceAll(":", "");
-  const [svg, setSvg] = useState("");
-  const [error, setError] = useState(false);
+  const generation = useRef(0);
+  const { resolvedTheme, ready } = useTheme();
+  const [rendered, setRendered] = useState<{
+    chart: string;
+    theme: string;
+    svg: string;
+    error: boolean;
+  } | null>(null);
   useEffect(() => {
+    if (!ready) return;
     let active = true;
-    import("mermaid").then(async ({ default: mermaid }) => {
-      mermaid.initialize({
-        startOnLoad: false,
-        securityLevel: "strict",
-        theme: "neutral",
-      });
+    const renderId = `mermaid-${id}-${++generation.current}`;
+    mermaidRenderQueue = mermaidRenderQueue.then(async () => {
+      if (!active) return;
       try {
-        const result = await mermaid.render("mermaid-" + id, chart);
-        if (active) setSvg(result.svg);
+        const { default: mermaid } = await import("mermaid");
+        if (!active) return;
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: "strict",
+          suppressErrorRendering: true,
+          theme: resolvedTheme === "dark" ? "dark" : "neutral",
+        });
+        const result = await mermaid.render(renderId, chart);
+        if (active)
+          setRendered({
+            chart,
+            theme: resolvedTheme,
+            svg: result.svg,
+            error: false,
+          });
       } catch {
-        if (active) setError(true);
+        if (active)
+          setRendered({ chart, theme: resolvedTheme, svg: "", error: true });
       }
     });
     return () => {
       active = false;
     };
-  }, [chart, id]);
-  if (error)
+  }, [chart, id, resolvedTheme, ready]);
+  const current =
+    rendered?.chart === chart && rendered.theme === resolvedTheme
+      ? rendered
+      : null;
+  if (current?.error)
     return (
       <pre className="mermaid-error">Mermaidの記法を確認してください。</pre>
     );
@@ -306,13 +335,16 @@ function MermaidDiagram({ chart }: { chart: string }) {
     <div
       data-ds="mermaid-diagram"
       className="mermaid-diagram"
+      role="img"
       aria-label="Mermaid図"
-      dangerouslySetInnerHTML={{ __html: svg }}
+      aria-busy={!current}
+      dangerouslySetInnerHTML={{ __html: current?.svg ?? "" }}
     />
   );
 }
 
 function EmbeddedLink({ href }: { href: string }) {
+  const { resolvedTheme, ready } = useTheme();
   let url: URL;
   try {
     url = new URL(href);
@@ -340,11 +372,12 @@ function EmbeddedLink({ href }: { href: string }) {
   const tweet = /^(www\.)?(x\.com|twitter\.com)$/.test(url.hostname)
     ? url.pathname.match(/^\/[^/]+\/status\/(\d+)/)?.[1]
     : null;
+  if (tweet && !ready) return <a href={href}>Xで投稿を見る</a>;
   if (tweet)
     return (
       <div className="social-embed x-embed">
         <iframe
-          src={`https://platform.twitter.com/embed/Tweet.html?id=${tweet}&theme=light`}
+          src={`https://platform.twitter.com/embed/Tweet.html?id=${tweet}&theme=${resolvedTheme}`}
           title="Xの投稿"
           loading="lazy"
         />
@@ -549,6 +582,7 @@ export default function Notebook({
   initialProfile?: { name: string; icon: string; bio: string };
   initialSelected?: string | null;
 }) {
+  const { resolvedTheme } = useTheme();
   const inFlight = useRef(false);
   const refreshFlight = useRef<Promise<boolean> | null>(null);
   const federationRequest = useRef(0);
@@ -1798,7 +1832,7 @@ export default function Notebook({
               固定
             </DropdownMenuItem>
             <DropdownMenuItem
-              className="text-red-600"
+              className="text-destructive"
               onClick={() => setRemove(p.id)}
             >
               <Trash2 />
@@ -1811,7 +1845,7 @@ export default function Notebook({
   );
   return (
     <div className="notebook">
-      <Toaster position="bottom-center" theme="light" />
+      <Toaster position="bottom-center" theme={resolvedTheme} />
       {xFallbackAction}
       <div data-ds="site-layout" className="site-layout">
         <aside data-ds="public-sidebar" className="public-sidebar">
@@ -1884,15 +1918,18 @@ export default function Notebook({
             </div>
           )}
           <div data-ds="sidebar-foot" className="sidebar-foot">
-            {!login ? (
-              <details data-ds="admin-access" className="admin-access">
-                <summary>•••</summary>
-                <button onClick={logIn}>ログイン</button>
-              </details>
-            ) : (
-              <span>ログイン中</span>
-            )}
-            <small>© 2026 {profile.name}</small>
+            <ThemeControl />
+            <div data-ds="sidebar-identity">
+              {!login ? (
+                <details data-ds="admin-access" className="admin-access">
+                  <summary>•••</summary>
+                  <button onClick={logIn}>ログイン</button>
+                </details>
+              ) : (
+                <span>ログイン中</span>
+              )}
+              <small>© 2026 {profile.name}</small>
+            </div>
           </div>
         </aside>
         <div data-ds="workspace" className="workspace">
@@ -1915,6 +1952,7 @@ export default function Notebook({
                       ? "アカウント"
                       : "ホーム"}
             </span>
+            <ThemeControl />
             {!login ? (
               <details data-ds="mobile-login" className="mobile-login">
                 <summary>•••</summary>

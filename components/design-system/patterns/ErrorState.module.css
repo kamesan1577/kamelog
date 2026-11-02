@@ -4,8 +4,8 @@
   align-items: center;
   justify-content: center;
   padding: 48px 24px;
-  background: var(--kamelog-paper, #f6f5f4);
-  color: var(--kamelog-ink, #37352f);
+  background: var(--kamelog-paper);
+  color: var(--kamelog-ink);
 }
 
 .content {
@@ -13,7 +13,7 @@
 }
 
 .icon {
-  color: #80796e;
+  color: var(--ds-color-text-secondary);
 }
 
 .title {
@@ -28,7 +28,7 @@
   margin: 12px 0 0;
   font-size: 14px;
   line-height: 1.9;
-  color: #726e66;
+  color: var(--ds-color-text-secondary);
 }
 
 .actions {
@@ -46,7 +46,7 @@
   justify-content: center;
   gap: 9px;
   padding: 11px 16px;
-  border: 1px solid var(--kamelog-ink, #37352f);
+  border: 1px solid var(--kamelog-ink);
   border-radius: 6px;
   font: inherit;
   font-size: 13px;
@@ -57,34 +57,34 @@
 }
 
 .primary {
-  background: var(--kamelog-ink, #37352f);
-  color: white;
+  background: var(--kamelog-ink);
+  color: var(--ds-color-action-foreground);
 }
 
 .primary:hover {
-  background: #292824;
+  background: var(--ds-color-action-hover);
 }
 
 .secondary {
-  border-color: var(--kamelog-line, #dededb);
-  background: white;
-  color: var(--kamelog-ink, #37352f);
+  border-color: var(--kamelog-line);
+  background: var(--ds-color-bg-surface);
+  color: var(--kamelog-ink);
 }
 
 .secondary:hover {
-  background: var(--kamelog-soft, #efefed);
+  background: var(--kamelog-soft);
 }
 
 .primary:focus-visible,
 .secondary:focus-visible {
-  outline: 2px solid currentColor;
+  outline: 2px solid var(--ds-color-focus);
   outline-offset: 3px;
 }
 
 .compact {
   min-height: 0;
   padding: 32px 20px;
-  border: 1px solid var(--kamelog-line, #dededb);
+  border: 1px solid var(--kamelog-line);
   border-radius: 10px;
 }
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AlertCircle, ArrowLeft, RotateCcw } from "lucide-react";
 import styles from "./ErrorState.module.css";
+import { ThemeControl } from "./ThemeControl";
 
 export type ErrorStateProps = {
   title?: string;
@@ -35,11 +36,19 @@ export function ErrorState({
               もう一度試す
             </button>
           )}
-          <Link href="/" className={onRetry ? styles.secondary : styles.primary}>
+          <Link
+            href="/"
+            className={onRetry ? styles.secondary : styles.primary}
+          >
             <ArrowLeft size={16} aria-hidden="true" />
             ホームへ戻る
           </Link>
         </div>
+        {!compact && (
+          <div className="mt-8">
+            <ThemeControl />
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import Link from "next/link";
 import { Bell, Check, ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api";
 import { Button } from "@/components/notion/button";
+import { ThemeControl } from "@/components/design-system/patterns/ThemeControl";
 
 type Service = "api" | "activitypub" | "process";
 type Level = "debug" | "info" | "warn" | "error" | "critical";
@@ -135,27 +137,30 @@ export function NotificationSettings() {
   }
 
   const field =
-    "mt-2 w-full rounded-md border border-[#dcd9d2] bg-white px-3 py-2.5 text-base text-[#37352f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#827c70]";
+    "mt-2 w-full rounded-md border border-ds-control-border bg-ds-surface px-3 py-2.5 text-base text-ds-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ds-accent";
   return (
     <main
       data-ds="owner-notifications"
-      className="mx-auto min-h-screen max-w-2xl px-5 py-10 text-[#37352f] sm:px-8 sm:py-16"
+      className="mx-auto min-h-screen max-w-2xl px-5 py-10 text-ds-primary sm:px-8 sm:py-16"
     >
-      <a
-        href="/?view=account"
-        className="mb-8 inline-flex items-center gap-2 text-sm text-[#787774] hover:underline"
-      >
-        <ArrowLeft size={16} /> サイトへ戻る
-      </a>
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <Link
+          href="/?view=account"
+          className="inline-flex min-h-11 items-center gap-2 text-sm text-ds-secondary hover:underline"
+        >
+          <ArrowLeft size={16} aria-hidden="true" /> サイトへ戻る
+        </Link>
+        <ThemeControl />
+      </div>
       <header className="mb-8 flex items-start gap-3">
         <Bell
           aria-hidden="true"
-          className="mt-1 shrink-0 text-[#787774]"
+          className="mt-1 shrink-0 text-ds-secondary"
           size={25}
         />
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">サーバー通知</h1>
-          <p className="mt-2 text-sm leading-6 text-[#787774]">
+          <h1 className="text-2xl font-semibold">サーバー通知</h1>
+          <p className="mt-2 text-sm leading-6 text-ds-secondary">
             通知先と対象サービスを設定します。Webhook
             URLは保存後に再表示されません。
           </p>
@@ -164,19 +169,19 @@ export function NotificationSettings() {
       {!draft ? (
         <div
           role="status"
-          className="rounded-lg border border-[#e9e9e7] p-6 text-sm"
+          className="rounded-lg border border-ds-border p-6 text-sm"
         >
           {error || "設定を読み込んでいます…"}
         </div>
       ) : (
         <form
           onSubmit={(event) => void save(event)}
-          className="space-y-7 rounded-xl border border-[#e9e9e7] bg-white p-5 shadow-sm sm:p-7"
+          className="space-y-7 rounded-xl border border-ds-border bg-ds-surface p-5 shadow-sm sm:p-7"
         >
           <label className="flex items-center justify-between gap-3">
             <span>
               <strong className="block text-sm">通知を有効にする</strong>
-              <span className="mt-1 block text-xs text-[#787774]">
+              <span className="mt-1 block text-xs text-ds-secondary">
                 初期状態では無効です。
               </span>
             </span>
@@ -189,10 +194,10 @@ export function NotificationSettings() {
               onChange={(event) =>
                 setDraft({ ...draft, enabled: event.target.checked })
               }
-              className="h-5 w-5 accent-[#555149]"
+              className="h-5 w-5 accent-ds-accent"
             />
           </label>
-          <div className="border-t border-[#e9e9e7] pt-6">
+          <div className="border-t border-ds-border pt-6">
             <label
               htmlFor="notification-provider"
               className="block text-sm font-semibold"
@@ -240,7 +245,7 @@ export function NotificationSettings() {
             />
             <p
               id="notification-secret-help"
-              className="mt-2 text-xs leading-5 text-[#787774]"
+              className="mt-2 text-xs leading-5 text-ds-secondary"
             >
               {draft.provider === original?.provider && draft.webhookConfigured
                 ? "Webhookは設定済みです。空欄なら既存のURLを維持します。"
@@ -248,12 +253,12 @@ export function NotificationSettings() {
               暗号化してサーバー内に保存し、APIからは返しません。
             </p>
             {!draft.encryptionAvailable && (
-              <p role="alert" className="mt-2 text-sm text-red-700">
+              <p role="alert" className="mt-2 text-sm text-ds-danger">
                 暗号化鍵が使えません。ホストの暗号化鍵を確認してください。
               </p>
             )}
           </div>
-          <div className="border-t border-[#e9e9e7] pt-6">
+          <div className="border-t border-ds-border pt-6">
             <label
               htmlFor="notification-level"
               className="block text-sm font-semibold"
@@ -279,7 +284,7 @@ export function NotificationSettings() {
               ))}
             </select>
           </div>
-          <fieldset className="border-t border-[#e9e9e7] pt-6">
+          <fieldset className="border-t border-ds-border pt-6">
             <legend className="text-sm font-semibold">通知対象サービス</legend>
             <div className="mt-3 space-y-3">
               {(Object.keys(serviceLabels) as Service[]).map((service) => (
@@ -299,20 +304,20 @@ export function NotificationSettings() {
                           : draft.services.filter((item) => item !== service),
                       })
                     }
-                    className="h-4 w-4 accent-[#555149]"
+                    className="h-4 w-4 accent-ds-accent"
                   />
                   {serviceLabels[service]}
                 </label>
               ))}
             </div>
-            <p className="mt-2 text-xs text-[#787774]">
+            <p className="mt-2 text-xs text-ds-secondary">
               対象はアプリ内のAPI・ActivityPub処理とNode.jsの未処理例外です。systemdなどホスト側のログは対象外です。
             </p>
           </fieldset>
           {error && (
             <p
               role="alert"
-              className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700"
+              className="rounded-md bg-ds-danger-bg px-3 py-2 text-sm text-ds-danger"
             >
               {error}
             </p>
@@ -320,13 +325,13 @@ export function NotificationSettings() {
           {message && (
             <p
               role="status"
-              className="flex items-center gap-2 rounded-md bg-[#edf5ed] px-3 py-2 text-sm text-[#30613c]"
+              className="flex items-center gap-2 rounded-md bg-ds-success-bg px-3 py-2 text-sm text-ds-success"
             >
               <Check size={16} />
               {message}
             </p>
           )}
-          <div className="flex flex-wrap items-center gap-3 border-t border-[#e9e9e7] pt-6">
+          <div className="flex flex-wrap items-center gap-3 border-t border-ds-border pt-6">
             <Button
               type="submit"
               variant="solid"
@@ -351,7 +356,7 @@ export function NotificationSettings() {
               </Button>
             )}
           </div>
-          <p className="text-xs leading-5 text-[#787774]">
+          <p className="text-xs leading-5 text-ds-secondary">
             テスト送信は保存済みのWebhookに送ります。URLを変更した場合は、先に「設定を保存」を押してください。
           </p>
         </form>

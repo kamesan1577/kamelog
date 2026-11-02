@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "highlight.js/styles/github.css";
+import "../styles/syntax-highlight.css";
 import "../styles/globals.css";
 import "../components/design-system/patterns/ProfileCard.css";
 import "../components/design-system/patterns/PostActions.css";
@@ -21,7 +21,6 @@ import "../components/design-system/patterns/MarkdownContent.css";
 import "../components/design-system/patterns/DetailPage.css";
 import "../components/design-system/patterns/BlogTableOfContents.css";
 import "../components/design-system/patterns/MarkdownHelp.css";
-import "../styles/tokens.css";
 import "../components/design-system/patterns/MobileBlogEditor.css";
 import "../components/design-system/patterns/ComposerLayout.css";
 import "../components/design-system/patterns/MobileComposer.css";
@@ -44,6 +43,8 @@ import { NavigationUrlBridge } from "@/components/navigation-url-bridge";
 import { ProfileSocialLinksBridge } from "@/components/profile-social-links-bridge";
 import { TweetLinkPreviewBridge } from "@/components/tweet-link-preview-bridge";
 import { NotificationSettingsLink } from "@/components/notification-settings-link";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeHead } from "@/components/theme-head";
 import {
   homeUrl,
   ogImageUrl,
@@ -87,15 +88,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html lang="ja" data-theme="system" suppressHydrationWarning>
+      <head>
+        <ThemeHead />
+      </head>
       <body className="antialiased">
-        <NavigationUrlBridge />
-        <ImageUploadBridge />
-        <BlogTableOfContentsBridge />
-        <TweetLinkPreviewBridge />
-        <ProfileSocialLinksBridge />
-        <NotificationSettingsLink />
-        {children}
+        <ThemeProvider>
+          <NavigationUrlBridge />
+          <ImageUploadBridge />
+          <BlogTableOfContentsBridge />
+          <TweetLinkPreviewBridge />
+          <ProfileSocialLinksBridge />
+          <NotificationSettingsLink />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
