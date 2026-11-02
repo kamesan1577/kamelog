@@ -25,7 +25,7 @@ export function NotificationSettingsLink() {
         <a
           href="/settings/notifications"
           data-ds="owner-notification-link"
-          className="mt-6 inline-flex items-center gap-2 rounded-md border border-[#e9e9e7] px-3 py-2 text-sm text-[#555149] hover:bg-[#f7f6f3] focus-visible:outline-2 focus-visible:outline-offset-2"
+          className="mt-6 inline-flex items-center gap-2 rounded-md border border-ds-border px-3 py-2 text-sm text-ds-secondary hover:bg-ds-hover focus-visible:outline-2 focus-visible:outline-offset-2"
         >
           <Bell size={16} aria-hidden="true" /> サーバーエラーの通知設定{" "}
           <ArrowUpRight size={14} aria-hidden="true" />

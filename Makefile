@@ -21,7 +21,7 @@ check: public-repo-check
 	npm test
 	npm run test:storage
 	npm run build
-	node --test tests/ui-components.test.mjs
+	node --test tests/ui-components.test.ts
 	npm run storybook:build
 	npm run test:storybook
 e2e:

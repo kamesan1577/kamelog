@@ -26,24 +26,24 @@
 
 [data-ds="detail-markdown"] p {
   margin: 14px 0;
-  color: #655f54;
+  color: var(--ds-color-text-primary);
 }
 
 [data-ds="detail-markdown"] blockquote {
   margin: 22px 0;
   padding: 6px 17px;
-  border-left: 3px solid #37352f;
-  background: #f8f8f5;
-  color: #827969;
+  border-left: 3px solid var(--ds-color-text-primary);
+  background: var(--ds-color-bg-muted);
+  color: var(--ds-color-text-secondary);
 }
 
 [data-ds="detail-markdown"] pre {
   overflow: auto;
   margin: 0;
   padding: 20px;
-  border: 1px solid #eeeae2;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 5px;
-  background: #f6f5f2;
+  background: var(--ds-color-code-bg);
   font-size: 13px;
   line-height: 1.8;
 }
@@ -55,25 +55,25 @@
 [data-ds="detail-markdown"] p code {
   padding: 2px 4px;
   border-radius: 3px;
-  background: #f1eeea;
-  color: #c25850;
+  background: var(--ds-color-bg-muted);
+  color: var(--ds-color-text-primary);
 }
 
 [data-ds="detail-markdown"] a {
-  color: #2383e2;
+  color: var(--ds-color-accent);
   text-decoration: underline;
 }
 
 [data-ds="detail-markdown"] .md-list {
   margin: 8px 0;
-  color: #655f54;
+  color: var(--ds-color-text-primary);
 }
 
 [data-ds="detail-markdown"] ul,
 [data-ds="detail-markdown"] ol {
   margin: 12px 0;
   padding-left: 1.65em;
-  color: #655f54;
+  color: var(--ds-color-text-primary);
 }
 
 [data-ds="detail-markdown"] ul {
@@ -110,7 +110,7 @@
 
 [data-ds="detail-markdown"] .task-list-item input {
   margin-top: 0.55em;
-  accent-color: #2383e2;
+  accent-color: var(--ds-color-accent);
 }
 
 [data-ds="detail-markdown"] table {
@@ -125,19 +125,19 @@
 [data-ds="detail-markdown"] td {
   min-width: 110px;
   padding: 7px 10px;
-  border: 1px solid #dedbd4;
+  border: 1px solid var(--ds-color-border-subtle);
   text-align: left;
 }
 
 [data-ds="detail-markdown"] th {
-  background: #f6f5f2;
+  background: var(--ds-color-bg-muted);
   font-weight: 650;
 }
 
 [data-ds="detail-markdown"] hr {
   margin: 30px 0;
   border: 0;
-  border-top: 1px solid #dedbd4;
+  border-top: 1px solid var(--ds-color-border-subtle);
 }
 
 [data-ds="detail-markdown"] img {
@@ -172,7 +172,7 @@
 }
 
 [data-ds="detail-markdown"] .mermaid-error {
-  color: #a35f5f;
+  color: var(--ds-color-danger);
 }
 
 [data-ds="detail-markdown"] .social-embed {
@@ -181,9 +181,9 @@
   aspect-ratio: 16/9;
   margin: 22px 0;
   overflow: hidden;
-  border: 1px solid #e4e1da;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 8px;
-  background: #f6f5f2;
+  background: var(--ds-color-bg-muted);
 }
 
 [data-ds="detail-markdown"] .social-embed iframe {
@@ -207,7 +207,13 @@
 }
 
 @media (max-width: 640px) {
-  [data-ds="detail-markdown"] { font-size: 15px; }
-  [data-ds="detail-markdown"] h1 { font-size: 25px; }
-  [data-ds="detail-markdown"] h2 { font-size: 20px; }
+  [data-ds="detail-markdown"] {
+    font-size: 15px;
+  }
+  [data-ds="detail-markdown"] h1 {
+    font-size: 25px;
+  }
+  [data-ds="detail-markdown"] h2 {
+    font-size: 20px;
+  }
 }

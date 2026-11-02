@@ -12,7 +12,7 @@
   overflow: hidden;
   border-radius: 7px;
   background: #1b1b1b;
-  color: white;
+  color: #fff;
 }
 .vlog-frame video,
 .vlog-stage video {
@@ -27,12 +27,12 @@
   align-items: baseline;
   gap: 4px 12px;
   padding: 10px 0 0;
-  color: #37352f;
+  color: var(--ds-color-text-primary);
   text-align: left;
   pointer-events: none;
 }
 .vlog-overlay time {
-  color: #66665f;
+  color: var(--ds-color-text-secondary);
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
@@ -125,16 +125,16 @@
   gap: 7px;
 }
 .duration-picker button {
-  border: 1px solid #dfdcd5;
+  border: 1px solid var(--ds-color-control-border);
   border-radius: 20px;
   padding: 6px 12px;
-  color: #7f7b72;
+  color: var(--ds-color-text-secondary);
   font-size: 13px;
 }
 .duration-picker button.active {
-  background: #37352f;
-  border-color: #37352f;
-  color: #fff;
+  background: var(--ds-color-action);
+  border-color: var(--ds-color-text-primary);
+  color: var(--ds-color-action-foreground);
 }
 .record-button {
   display: flex;
@@ -143,7 +143,7 @@
   width: 64px;
   height: 64px;
   margin: 0 auto;
-  border: 3px solid #37352f;
+  border: 3px solid var(--ds-color-text-primary);
   border-radius: 50%;
   padding: 5px;
 }
@@ -151,7 +151,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #e34d55;
+  background: var(--ds-color-danger);
 }
 .record-button:disabled {
   opacity: 0.35;
@@ -161,7 +161,7 @@
   margin: 0;
   text-align: center;
   font-size: 12px;
-  color: #a35f5f;
+  color: var(--ds-color-danger);
 }
 .caption-field {
   display: flex;
@@ -171,7 +171,9 @@
 }
 .caption-field input {
   flex: 1;
-  border: 1px solid #dedbd4;
+  border: 1px solid var(--ds-color-control-border);
+  background: var(--ds-color-bg-surface);
+  color: var(--ds-color-text-primary);
   border-radius: 5px;
   padding: 9px 10px;
 }

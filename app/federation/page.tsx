@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ThemeControl } from "@/components/design-system/patterns/ThemeControl";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { getStore } from "@/server/runtime.mjs";
 import { siteOrigin } from "@/server/seo.mjs";
@@ -44,10 +45,13 @@ export default function FederationGuidePage() {
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
-        <Link className={styles.back} href="/">
-          <ArrowLeft size={16} />
-          kamelogへ戻る
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <Link className={styles.back} href="/">
+            <ArrowLeft size={16} aria-hidden="true" />
+            kamelogへ戻る
+          </Link>
+          <ThemeControl />
+        </div>
 
         <header className={styles.hero}>
           <p className={styles.eyebrow}>Fediverse</p>

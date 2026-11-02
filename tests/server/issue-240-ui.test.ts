@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const read = (path) =>
+const read = (path: string) =>
   readFile(new URL(`../../${path}`, import.meta.url), "utf8");
 
 test("restores the Issue 240 composer visual contracts", async () => {
@@ -11,20 +11,23 @@ test("restores the Issue 240 composer visual contracts", async () => {
     read("components/design-system/patterns/EditorDialog.css"),
   ]);
 
-  assert.ok(
-    composer.includes(".desktop-composer .image-upload-button input") &&
-      composer.includes("display: none"),
+  assert.match(
+    composer,
+    /\.desktop-composer \.image-upload-button input\s*\{[^}]*display:\s*none;/,
   );
-  assert.ok(
-    composer.includes(":disabled") &&
-      composer.includes("background: #37352f66") &&
-      composer.includes("color: #fff"),
+  assert.match(
+    composer,
+    /\.desktop-composer \.composer-start > \[data-slot="button"\]:disabled\s*\{[^}]*background:\s*color-mix\(in srgb, var\(--ds-color-action\) 40%, transparent\);[^}]*color:\s*var\(--ds-color-action-foreground\);[^}]*opacity:\s*1;/,
   );
-  assert.ok(
-    editor.includes(".editor-kinds") &&
-      editor.includes('data-state="active"') &&
-      editor.includes("background: #37352f"),
-  );
+  for (const tabs of ["editor-kinds", "vlog-tabs"]) {
+    assert.match(
+      editor,
+      new RegExp(
+        `\\.${tabs}\\s+\\[data-slot="tabs-trigger"\\]\\[data-state="active"\\][^{]*\\{[^}]*background:\\s*var\\(--ds-color-action\\);[^}]*color:\\s*var\\(--ds-color-action-foreground\\);`,
+        "s",
+      ),
+    );
+  }
 });
 
 test("stops a vlog stream that resolves after the composer was closed", async () => {

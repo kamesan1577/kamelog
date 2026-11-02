@@ -3,8 +3,8 @@
   --landing-text: var(--ds-color-text-secondary);
   --landing-muted: var(--ds-color-text-tertiary);
   --landing-line: var(--ds-color-border-subtle);
-  --landing-hover: #edf1e9;
-  --landing-pressed: #dce6d9;
+  --landing-hover: var(--ds-color-bg-hover);
+  --landing-pressed: var(--ds-color-bg-active-hover);
   min-width: 0;
   padding-bottom: 24px;
 }
@@ -115,14 +115,14 @@
 .landing-actions .landing-primary {
   background: var(--ds-color-accent);
   border-color: var(--ds-color-accent);
-  color: white;
+  color: var(--ds-color-accent-foreground);
 }
 .landing-actions .landing-primary:hover {
   background: var(--ds-color-accent-hover);
   border-color: var(--ds-color-accent-hover);
 }
 .landing-actions .landing-primary:active {
-  background: #173729;
+  background: var(--ds-color-accent-hover);
 }
 .landing-lower {
   display: grid;

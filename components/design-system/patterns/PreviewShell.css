@@ -1,12 +1,12 @@
 [data-ds="preview-shell"] {
   height: 100dvh;
   overflow: hidden;
-  background: #efefed;
+  background: var(--ds-color-bg-muted);
 }
 [data-ds="preview-shell"] .preview-toolbar {
   height: 57px;
-  background: #fff;
-  border-bottom: 1px solid #dededb;
+  background: var(--ds-color-bg-surface);
+  border-bottom: 1px solid var(--ds-color-border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -25,26 +25,26 @@
   justify-content: center;
   width: 25px;
   height: 27px;
-  border: 1.5px solid #37352f;
+  border: 1.5px solid var(--ds-color-text-primary);
   border-radius: 3px;
   font-family: Georgia, serif;
   font-weight: 800;
   font-size: 23px;
   line-height: 1;
-  color: #37352f;
-  background: #fff;
-  box-shadow: 1.5px 1.5px 0 #37352f;
+  color: var(--ds-color-text-primary);
+  background: var(--ds-color-bg-surface);
+  box-shadow: 1.5px 1.5px 0 var(--ds-color-text-primary);
 }
 [data-ds="preview-shell"] .mock-label {
   font-size: 12px;
-  color: #88877f;
-  border-left: 1px solid #ddd;
+  color: var(--ds-color-text-tertiary);
+  border-left: 1px solid var(--ds-color-border-subtle);
   padding-left: 10px;
 }
 [data-ds="preview-shell"] .preview-toolbar [data-slot="tabs-list"] {
   height: 34px;
-  background: #f2f2f0;
-  border: 1px solid #e8e8e5;
+  background: var(--ds-color-bg-muted);
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 6px;
 }
 [data-ds="preview-shell"] .preview-toolbar [data-slot="tabs-trigger"] {
@@ -56,7 +56,7 @@
 }
 [data-ds="preview-shell"] .preview-size {
   font-size: 12px;
-  color: #8e8c86;
+  color: var(--ds-color-text-tertiary);
   width: 160px;
   text-align: right;
 }
@@ -71,32 +71,57 @@
   padding: 24px 0;
 }
 [data-ds="preview-shell"] .preview-device {
-  background: white;
-  box-shadow: 0 2px 15px #0000000b;
+  background: var(--ds-color-bg-surface);
+  box-shadow: 0 2px 15px var(--ds-color-shadow);
   overflow: hidden;
 }
 [data-ds="preview-shell"] .preview-stage.mobile .preview-device {
-  border: 1px solid #dededb;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 22px;
-  box-shadow: 0 8px 40px #00000015;
+  box-shadow: 0 8px 40px var(--ds-color-shadow);
 }
 [data-ds="preview-shell"] .preview-device iframe {
   border: none;
   display: block;
-  background: white;
+  background: var(--ds-color-bg-surface);
 }
 
 @media (max-width: 640px) {
-  [data-ds="preview-shell"] .preview-toolbar { padding: 0 10px; gap: 8px; height: 53px; }
+  [data-ds="preview-shell"] .preview-toolbar {
+    padding: 0 10px;
+    gap: 8px;
+    height: 53px;
+  }
   [data-ds="preview-shell"] .preview-brand b,
   [data-ds="preview-shell"] .preview-size,
-  [data-ds="preview-shell"] .mock-label { display: none; }
-  [data-ds="preview-shell"] .preview-brand .mini-logo { width: 22px; height: 24px; font-size: 20px; }
-  [data-ds="preview-shell"] .preview-toolbar [data-slot="tabs-trigger"] { padding: 3px 13px; font-size: 12px; }
-  [data-ds="preview-shell"] .preview-stage { height: calc(100dvh - 53px); padding: 0; }
-  [data-ds="preview-shell"] .preview-stage.mobile { padding: 8px 0; }
-  [data-ds="preview-shell"] .preview-stage.mobile .preview-device { border-radius: 0; border: 0; }
+  [data-ds="preview-shell"] .mock-label {
+    display: none;
+  }
+  [data-ds="preview-shell"] .preview-brand .mini-logo {
+    width: 22px;
+    height: 24px;
+    font-size: 20px;
+  }
+  [data-ds="preview-shell"] .preview-toolbar [data-slot="tabs-trigger"] {
+    padding: 3px 13px;
+    font-size: 12px;
+  }
+  [data-ds="preview-shell"] .preview-stage {
+    height: calc(100dvh - 53px);
+    padding: 0;
+  }
+  [data-ds="preview-shell"] .preview-stage.mobile {
+    padding: 8px 0;
+  }
+  [data-ds="preview-shell"] .preview-stage.mobile .preview-device {
+    border-radius: 0;
+    border: 0;
+  }
   [data-ds="preview-shell"] .preview-stage.auto .preview-device,
-  [data-ds="preview-shell"] .preview-stage.auto iframe { height: calc(100dvh - 53px) !important; }
-  [data-ds="preview-shell"] .preview-stage.desktop .preview-device { align-self: flex-start; }
+  [data-ds="preview-shell"] .preview-stage.auto iframe {
+    height: calc(100dvh - 53px) !important;
+  }
+  [data-ds="preview-shell"] .preview-stage.desktop .preview-device {
+    align-self: flex-start;
+  }
 }

@@ -22,8 +22,8 @@
     min-height: 58px;
     margin: -20px -20px 0;
     padding: 8px 12px;
-    border-bottom: 1px solid #ebe9e3;
-    background: #fff;
+    border-bottom: 1px solid var(--ds-color-border-subtle);
+    background: var(--ds-color-bg-surface);
   }
 
   .mobile-editor-header > strong {
@@ -42,7 +42,7 @@
     height: 40px;
     margin-left: -8px;
     border-radius: 50%;
-    color: #625e54;
+    color: var(--ds-color-text-primary);
   }
 
   .mobile-editor-actions {
@@ -54,7 +54,7 @@
   .mobile-editor-actions > button:not([data-slot="button"]) {
     min-height: 40px;
     padding: 0 7px;
-    color: #625e54;
+    color: var(--ds-color-text-primary);
     font-size: 12px;
   }
 

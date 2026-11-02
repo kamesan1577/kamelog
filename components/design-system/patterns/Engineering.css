@@ -34,7 +34,7 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
   padding: 24px 0;
-  border-bottom: 1px solid #e5e5df;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
 }
 .engineering-profile section:last-child {
   border-bottom: 0;
@@ -90,7 +90,7 @@
   display: grid;
   grid-template-columns: 136px minmax(0, 1fr);
   padding: 12px 0;
-  border-bottom: 1px solid #eeeee8;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
   gap: 16px;
 }
 .engineering-skills > div:first-child {
@@ -141,21 +141,21 @@
   padding: 60px 28px 100px;
   color: var(--ds-color-text-secondary);
   line-height: 1.8;
-  background: #fff;
+  background: var(--ds-color-bg-surface);
   min-height: 100dvh;
 }
 .project-article > a {
-  color: #37352f;
+  color: var(--ds-color-text-primary);
   text-underline-offset: 4px;
 }
 .project-article h1 {
   font-size: 32px;
   font-weight: 500;
-  color: #37352f;
+  color: var(--ds-color-text-primary);
   margin: 24px 0 4px;
 }
 .project-article h2 {
-  color: #37352f;
+  color: var(--ds-color-text-primary);
   font-size: 18px;
   font-weight: 500;
   margin: 0 0 12px;
@@ -171,7 +171,7 @@
   display: grid;
   grid-template-columns: 160px 1fr;
   padding: 12px 0;
-  border-bottom: 1px solid #eeede9;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
   gap: 12px;
 }
 .project-article dt {
@@ -181,7 +181,7 @@
   margin: 0;
 }
 .project-article section {
-  border-top: 1px solid #dededb;
+  border-top: 1px solid var(--ds-color-border-subtle);
   padding-top: 24px;
   margin-top: 32px;
 }
@@ -190,7 +190,7 @@
 }
 .project-architecture {
   padding: 16px;
-  background: #f7f7f5;
+  background: var(--ds-color-bg-muted);
   overflow-wrap: anywhere;
 }
 @media (max-width: 760px) {

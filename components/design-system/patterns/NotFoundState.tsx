@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import styles from "./NotFoundState.module.css";
+import { ThemeControl } from "./ThemeControl";
 
 export function NotFoundState() {
   return (
     <main data-ds="not-found-state" className={styles.page}>
       <div className={styles.shell}>
-        <Link className={styles.brand} href="/">
-          kamelog
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <Link className={styles.brand} href="/">
+            kamelog
+          </Link>
+          <ThemeControl />
+        </div>
         <section className={styles.content} aria-labelledby="not-found-title">
           <div className={styles.errorCode} aria-hidden="true">
             <span>4</span>

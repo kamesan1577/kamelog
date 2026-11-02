@@ -13,7 +13,7 @@
     height: 65px;
     padding-bottom: env(safe-area-inset-bottom, 0);
     background: var(--ds-color-bg-page);
-    border-top: 1px solid #eae8e2;
+    border-top: 1px solid var(--ds-color-border-subtle);
     align-items: center;
     justify-content: space-around;
     z-index: 20;
@@ -45,10 +45,10 @@
     right: 18px;
     width: 56px;
     height: 56px;
-    color: white;
-    background: var(--ds-color-accent);
+    color: var(--ds-color-action-foreground);
+    background: var(--ds-color-action);
     border-radius: 50%;
-    box-shadow: 0 3px 12px #0003;
+    box-shadow: 0 3px 12px var(--ds-color-shadow);
     z-index: 20;
   }
 

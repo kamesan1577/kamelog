@@ -64,21 +64,21 @@
 [data-ds="public-sidebar"]
   [data-ds="side-navigation"]
   button[aria-current="page"] {
-  background: #e8eee5;
+  background: var(--ds-color-bg-active);
   border-color: transparent;
-  color: #285542;
+  color: var(--ds-color-accent);
 }
 [data-ds="public-sidebar"]
   [data-ds="side-navigation"]
   button[aria-current="page"]:hover {
-  background: #dce6d9;
-  color: #285542;
+  background: var(--ds-color-bg-active-hover);
+  color: var(--ds-color-accent);
 }
 [data-ds="public-sidebar"]
   [data-ds="side-navigation"]
   button[aria-current="page"]
   span.ds-text-xs {
-  color: #285542;
+  color: var(--ds-color-accent);
 }
 [data-ds="public-sidebar"] .side-link {
   display: flex;
@@ -131,7 +131,7 @@
   border: 1px solid var(--ds-color-border-subtle);
   border-radius: 6px;
   background: var(--ds-color-bg-surface);
-  box-shadow: 0 8px 24px #0001;
+  box-shadow: 0 8px 24px var(--ds-color-shadow);
   white-space: nowrap;
 }
 [data-ds="admin-nav"] {
@@ -148,7 +148,7 @@
 [data-ds="admin-nav"] > button[data-slot="button"] {
   justify-content: center;
   background: var(--ds-color-accent);
-  color: white;
+  color: var(--ds-color-accent-foreground);
 }
 [data-ds="admin-nav"] > button[data-slot="button"]:hover {
   background: var(--ds-color-accent-hover);

@@ -21,7 +21,7 @@ after(async () => {
   await vite.close();
 });
 
-async function readCssTree(directory) {
+async function readCssTree(directory: string): Promise<string> {
   const entries = await readdir(directory, { withFileTypes: true });
   const contents = await Promise.all(
     entries.map(async (entry) => {
@@ -54,8 +54,8 @@ test("keeps destructive action buttons visibly filled", async () => {
   );
   const classes = buttonVariants({ variant: "red-fill", size: "md" });
 
-  assert.match(classes, /bg-\[#e5484d\]/);
-  assert.match(classes, /text-white/);
+  assert.match(classes, /(?:^|\s)bg-ds-danger-fill(?:\s|$)/);
+  assert.match(classes, /(?:^|\s)text-ds-danger-foreground(?:\s|$)/);
   assert.doesNotMatch(classes, /(?:^|\s)bg-red(?:\s|$)/);
 });
 
@@ -70,7 +70,7 @@ test("forwards progress semantics to the primitive", async () => {
   assert.match(html, /data-state="loading"/);
 });
 
-test("emits chart themes for the starter's media dark mode", async () => {
+test("emits chart colors that follow the document color scheme", async () => {
   const { ChartStyle } = await vite.ssrLoadModule("/components/ui/chart.tsx");
   const html = renderToStaticMarkup(
     React.createElement(ChartStyle, {
@@ -82,7 +82,8 @@ test("emits chart themes for the starter's media dark mode", async () => {
   );
 
   assert.match(html, /\[data-chart=contract\]/);
-  assert.match(html, /@media \(prefers-color-scheme: dark\)/);
+  assert.match(html, /--color-latency: light-dark\(#ffffff, #000000\)/);
+  assert.doesNotMatch(html, /@media \(prefers-color-scheme: dark\)/);
   assert.doesNotMatch(html, /\.dark/);
 });
 
@@ -143,7 +144,7 @@ test("recognizes safe Mermaid, YouTube and X embeds", async () => {
   assert.match(html, /youtube-nocookie\.com\/embed\/dQw4w9WgXcQ/);
   assert.match(
     html,
-    /platform\.twitter\.com\/embed\/Tweet\.html\?id=1234567890123456789/,
+    /<a href="https:\/\/x\.com\/example\/status\/1234567890123456789">Xで投稿を見る<\/a>/,
   );
 });
 

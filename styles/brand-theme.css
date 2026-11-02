@@ -1,10 +1,10 @@
 :root {
-  --kamelog-ink: #37352f;
-  --kamelog-ink-hover: #292824;
-  --kamelog-paper: #f8f9f6;
-  --kamelog-panel: #ffffff;
-  --kamelog-soft: #f1f1ee;
-  --kamelog-line: #e5e5df;
+  --kamelog-ink: var(--ds-color-text-primary);
+  --kamelog-ink-hover: var(--ds-color-action-hover);
+  --kamelog-paper: var(--ds-color-bg-page);
+  --kamelog-panel: var(--ds-color-bg-surface);
+  --kamelog-soft: var(--ds-color-bg-muted);
+  --kamelog-line: var(--ds-color-border-subtle);
 }
 
 body,
@@ -44,23 +44,23 @@ textarea:focus {
 [data-ds="public-sidebar"] nav button:hover,
 [data-ds="aside-section"] button:hover,
 [data-ds="admin-nav"] > button:hover {
-  background: #eaeae5;
+  background: var(--ds-color-bg-hover);
   color: var(--kamelog-ink);
 }
 
 [data-ds="public-sidebar"] button.active {
-  background: #e5e5df;
+  background: var(--ds-color-bg-active);
   color: var(--kamelog-ink);
 }
 
 [data-ds="public-sidebar"] button.active small {
-  color: #66665f;
+  color: var(--ds-color-text-secondary);
 }
 
 [data-ds="public-header"] {
   border-bottom-color: var(--kamelog-line);
   background: var(--kamelog-paper);
-  color: #66665f;
+  color: var(--ds-color-text-secondary);
 }
 
 [data-ds="content-grid"]:not(.landing-layout) > [data-ds="right-sidebar"] {
@@ -74,7 +74,8 @@ textarea:focus {
 [data-ds="mobile-search"]:focus-within,
 [data-ds="side-search"]:focus-within {
   border-color: var(--kamelog-ink);
-  box-shadow: 0 0 0 2px rgb(55 53 47 / 10%);
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--ds-color-focus) 15%, transparent);
 }
 
 [data-ds="profile-card"] a,

@@ -55,10 +55,10 @@
     gap: 12px;
     margin: 0;
     padding: 8px 4px;
-    border: 1px solid #e8e7e3;
+    border: 1px solid var(--ds-color-border-subtle);
     border-radius: 10px;
-    background: rgb(255 255 255 / 94%);
-    box-shadow: 0 3px 14px rgb(55 53 47 / 8%);
+    background: color-mix(in srgb, var(--ds-color-bg-surface) 94%, transparent);
+    box-shadow: 0 3px 14px var(--ds-color-shadow);
     backdrop-filter: blur(10px);
   }
 
@@ -106,10 +106,10 @@
     margin: 0;
     padding: 7px 10px;
     transform: translateX(-50%);
-    border: 1px solid #e3e1dc;
+    border: 1px solid var(--ds-color-border-subtle);
     border-radius: 14px;
-    background: rgb(255 255 255 / 94%);
-    box-shadow: 0 5px 20px rgb(55 53 47 / 16%);
+    background: color-mix(in srgb, var(--ds-color-bg-surface) 94%, transparent);
+    box-shadow: 0 5px 20px var(--ds-color-shadow);
     backdrop-filter: blur(12px);
   }
 

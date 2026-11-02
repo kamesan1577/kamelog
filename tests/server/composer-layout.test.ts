@@ -24,11 +24,11 @@ test("keeps the inline image attachment separate from post-type actions", async 
   );
   assert.match(
     css,
-    /\.desktop-composer \.composer-kinds\s*\{[^}]*display:\s*grid;/s,
+    /\.desktop-composer \.composer-kinds\s*\{[^}]*display:\s*grid;/,
   );
   assert.match(
     css,
-    /\.desktop-composer \.composer-kinds > \.image-upload-button\s*\{[^}]*grid-column:\s*1\s*\/\s*-1;[^}]*border-bottom:/s,
+    /\.desktop-composer \.composer-kinds > \.image-upload-button\s*\{[^}]*grid-column:\s*1\s*\/\s*-1;[^}]*border-bottom:/,
   );
 });
 
@@ -42,14 +42,14 @@ test("keeps publish actions visible above the mobile keyboard only", async () =>
     layout,
     /import "\.\.\/components\/design-system\/patterns\/MobileComposer.css";/,
   );
-  assert.match(css, /\.mobile-editor-header\s*\{[^}]*display:\s*none;/s);
+  assert.match(css, /\.mobile-editor-header\s*\{[^}]*display:\s*none;/);
   assert.match(
     css,
-    /@media \(max-width:\s*640px\)[\s\S]*\.mobile-editor-header\s*\{[^}]*position:\s*sticky;[^}]*display:\s*grid;/s,
+    /@media \(max-width:\s*640px\)[\s\S]*\.mobile-editor-header\s*\{[^}]*position:\s*sticky;[^}]*display:\s*grid;/,
   );
   assert.match(
     css,
-    /\.editor-footer > \[data-slot="button"\]\s*\{[^}]*display:\s*none;/s,
+    /\.editor-footer > \[data-slot="button"\]\s*\{[^}]*display:\s*none;/,
   );
 });
 
@@ -58,6 +58,6 @@ test("keeps the inline publish button compact when disabled", async () => {
 
   assert.match(
     css,
-    /\.desktop-composer \.composer-start > \[data-slot="button"\]\s*\{[^}]*flex:\s*0\s+0\s+auto;[^}]*text-align:\s*center;[^}]*color:\s*#fff;/s,
+    /\.desktop-composer \.composer-start > \[data-slot="button"\]\s*\{[^}]*flex:\s*0\s+0\s+auto;[^}]*text-align:\s*center;[^}]*color:\s*var\(--ds-color-action-foreground\);/,
   );
 });

@@ -7,7 +7,7 @@
 }
 [data-ds="mobile-navigation"] button[aria-current="page"] {
   border-top-color: var(--ds-color-accent);
-  background: #e8eee5;
+  background: var(--ds-color-bg-active);
   color: var(--ds-color-accent);
   font-weight: 500;
 }

@@ -1,7 +1,7 @@
 .page {
   min-height: 100vh;
-  background: #fbfbfa;
-  color: #37352f;
+  background: var(--ds-color-bg-page);
+  color: var(--ds-color-text-primary);
 }
 
 .shell {
@@ -16,24 +16,24 @@
   min-height: 40px;
   align-items: center;
   gap: 7px;
-  color: #625e56;
+  color: var(--ds-color-text-secondary);
   font-size: 13px;
   font-weight: 550;
 }
 
 .back:hover,
 .footer a:hover {
-  color: #171613;
+  color: var(--ds-color-text-primary);
 }
 
 .hero {
   padding: 72px 0 62px;
-  border-bottom: 1px solid #dedbd4;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
 }
 
 .eyebrow {
   margin: 0 0 14px;
-  color: #8b867c;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
   font-weight: 650;
   letter-spacing: 0.08em;
@@ -53,7 +53,7 @@
 .hero > p:not(.eyebrow) {
   max-width: 660px;
   margin: 24px 0 0;
-  color: #625e56;
+  color: var(--ds-color-text-secondary);
   font-size: 16px;
   line-height: 1.95;
 }
@@ -64,13 +64,13 @@
   gap: 5px;
   margin-top: 30px;
   padding: 13px 16px;
-  border: 1px solid #d8d4cc;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 7px;
-  background: #fff;
+  background: var(--ds-color-bg-surface);
 }
 
 .handle span {
-  color: #918c82;
+  color: var(--ds-color-text-tertiary);
   font-size: 11px;
 }
 
@@ -82,7 +82,7 @@
 
 .section {
   padding: 50px 0;
-  border-bottom: 1px solid #dedbd4;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
 }
 
 .section h2 {
@@ -95,7 +95,7 @@
 .section > p {
   max-width: 690px;
   margin: 0;
-  color: #6e695f;
+  color: var(--ds-color-text-secondary);
   font-size: 14px;
   line-height: 1.9;
 }
@@ -113,9 +113,9 @@
   display: flex;
   gap: 12px;
   padding: 18px;
-  border: 1px solid #dedbd4;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 7px;
-  background: #fbfaf8;
+  background: var(--ds-color-bg-muted);
 }
 
 .steps li > span {
@@ -125,8 +125,8 @@
   flex: 0 0 auto;
   place-items: center;
   border-radius: 50%;
-  background: #37352f;
-  color: #fff;
+  background: var(--ds-color-action);
+  color: var(--ds-color-action-foreground);
   font-size: 11px;
   font-weight: 700;
 }
@@ -137,7 +137,7 @@
 
 .steps p {
   margin: 8px 0 0;
-  color: #7f796f;
+  color: var(--ds-color-text-secondary);
   font-size: 12px;
   line-height: 1.75;
 }
@@ -150,15 +150,15 @@
 
 .matrix {
   overflow: hidden;
-  border: 1px solid #dedbd4;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 7px;
-  background: #fbfaf8;
+  background: var(--ds-color-bg-muted);
 }
 
 .matrix h3 {
   margin: 0;
   padding: 14px 16px;
-  border-bottom: 1px solid #dedbd4;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
   font-size: 13px;
   font-weight: 680;
 }
@@ -172,7 +172,7 @@
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
   padding: 12px 16px;
-  border-bottom: 1px solid #ebe8e2;
+  border-bottom: 1px solid var(--ds-color-border-subtle);
   font-size: 12px;
 }
 
@@ -186,13 +186,13 @@
 
 .matrix dd {
   margin: 0;
-  color: #807a70;
+  color: var(--ds-color-text-secondary);
   text-align: right;
 }
 
 .section .note {
   margin-top: 18px;
-  color: #807a70;
+  color: var(--ds-color-text-secondary);
   font-size: 12px;
 }
 
@@ -204,10 +204,10 @@
 
 .endpoints code {
   padding: 12px 14px;
-  border: 1px solid #dedbd4;
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 5px;
-  background: #fbfaf8;
-  color: #514d45;
+  background: var(--ds-color-bg-muted);
+  color: var(--ds-color-text-primary);
   font-size: 12px;
   overflow-wrap: anywhere;
 }

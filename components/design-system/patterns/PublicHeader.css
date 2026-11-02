@@ -20,7 +20,7 @@
   border: 1px solid var(--ds-color-border-subtle);
   border-radius: 6px;
   padding: 8px 12px;
-  box-shadow: 0 4px 16px #0001;
+  box-shadow: 0 4px 16px var(--ds-color-shadow);
   white-space: nowrap;
   z-index: 10;
 }

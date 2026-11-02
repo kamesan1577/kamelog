@@ -17,20 +17,16 @@
 
 [data-ds="tag-list"] [data-slot="badge"] {
   padding: 1px 6px;
-  background: #f0efeb;
-  color: #888174;
+  background: var(--ds-color-bg-muted);
+  color: var(--ds-color-text-tertiary);
   border: none;
   border-radius: 3px;
   font-size: 12px;
 }
 
-[data-ds="tag-list"] [data-slot="badge"].bg-\[\#e7f3f8\] {
-  background: #edf4f7;
-  color: #397392;
-}
-
 [data-ds="tag-list"] button:hover {
-  opacity: 0.7;
+  background: var(--ds-color-bg-hover);
+  color: var(--ds-color-text-primary);
 }
 @media (max-width: 640px) {
   [data-ds="tag-list"] {
@@ -40,9 +36,9 @@
 
 [data-ds="tag-load-more"] {
   margin-top: 12px;
-  color: #8a857b;
+  color: var(--ds-color-text-tertiary);
   font-size: 12px;
 }
 [data-ds="tag-load-more"]:hover {
-  color: #2383e2;
+  color: var(--ds-color-accent);
 }

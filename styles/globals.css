@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "./tokens.css";
 @import "tw-animate-css";
 @import "../vendor/shadcn-tailwind-4.13.0.css";
 
@@ -19,38 +19,38 @@
 }
 
 :root {
-  --background: #ffffff;
-  --foreground: #37352f;
-  --card: #ffffff;
-  --card-foreground: #171717;
-  --popover: #ffffff;
-  --popover-foreground: #171717;
-  --primary: #37352f;
-  --primary-foreground: #fafafa;
-  --secondary: #f5f5f5;
-  --secondary-foreground: #171717;
-  --muted: #f5f5f5;
-  --muted-foreground: #737373;
-  --accent: #f5f5f5;
-  --accent-foreground: #171717;
-  --destructive: #e7000b;
-  --border: #e5e5e5;
-  --input: #e5e5e5;
-  --ring: #a1a1a1;
-  --chart-1: #f54900;
-  --chart-2: #009689;
-  --chart-3: #104e64;
-  --chart-4: #ffb900;
-  --chart-5: #fe9a00;
+  --background: var(--ds-color-bg-surface);
+  --foreground: var(--ds-color-text-primary);
+  --card: var(--ds-color-bg-surface);
+  --card-foreground: var(--ds-color-text-primary);
+  --popover: var(--ds-color-bg-surface);
+  --popover-foreground: var(--ds-color-text-primary);
+  --primary: var(--ds-color-action);
+  --primary-foreground: var(--ds-color-action-foreground);
+  --secondary: var(--ds-color-bg-muted);
+  --secondary-foreground: var(--ds-color-text-primary);
+  --muted: var(--ds-color-bg-muted);
+  --muted-foreground: var(--ds-color-text-secondary);
+  --accent: var(--ds-color-bg-hover);
+  --accent-foreground: var(--ds-color-text-primary);
+  --destructive: var(--ds-color-danger);
+  --border: var(--ds-color-border-subtle);
+  --input: var(--ds-color-control-border);
+  --ring: var(--ds-color-focus);
+  --chart-1: light-dark(#9a571a, #dfb37e);
+  --chart-2: light-dark(#287664, #8bc5b3);
+  --chart-3: light-dark(#366781, #9ecbdf);
+  --chart-4: light-dark(#805b17, #dfc486);
+  --chart-5: light-dark(#86508f, #d4acd8);
   --radius: 0.3rem;
-  --sidebar: #f7f7f5;
-  --sidebar-foreground: #171717;
-  --sidebar-primary: #171717;
-  --sidebar-primary-foreground: #fafafa;
-  --sidebar-accent: #f5f5f5;
-  --sidebar-accent-foreground: #171717;
-  --sidebar-border: #e5e5e5;
-  --sidebar-ring: #a1a1a1;
+  --sidebar: var(--ds-color-bg-page);
+  --sidebar-foreground: var(--ds-color-text-primary);
+  --sidebar-primary: var(--ds-color-action);
+  --sidebar-primary-foreground: var(--ds-color-action-foreground);
+  --sidebar-accent: var(--ds-color-bg-hover);
+  --sidebar-accent-foreground: var(--ds-color-text-primary);
+  --sidebar-border: var(--ds-color-border-subtle);
+  --sidebar-ring: var(--ds-color-focus);
 }
 
 @theme inline {
@@ -106,7 +106,7 @@ body {
 }
 body {
   margin: 0;
-  color: #37352f;
+  color: var(--ds-color-text-primary);
   font-family:
     Inter,
     -apple-system,
@@ -131,12 +131,17 @@ button:disabled {
 }
 button,
 input,
-textarea {
+textarea,
+select {
   font: inherit;
 }
 button:focus-visible,
-a:focus-visible {
-  outline: 2px solid #2383e2;
+a:focus-visible,
+summary:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--ds-color-focus);
   outline-offset: 3px;
 }
 a {
@@ -149,8 +154,8 @@ svg {
 kbd {
   font-family: inherit;
   font-size: 12px;
-  color: #92918e;
-  border: 1px solid #e9e9e7;
+  color: var(--ds-color-text-tertiary);
+  border: 1px solid var(--ds-color-border-subtle);
   border-radius: 3px;
   padding: 0 5px;
 }
@@ -160,14 +165,14 @@ textarea {
 }
 input:focus,
 textarea:focus {
-  border-color: #2383e2;
+  border-color: var(--ds-color-focus);
 }
 .avatar {
   width: 31px;
   height: 31px;
   flex-shrink: 0;
   border-radius: 6px;
-  background: #eeeee9;
+  background: var(--ds-color-bg-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -191,5 +196,47 @@ textarea:focus {
     scroll-behavior: auto !important;
     transition: none !important;
     animation: none !important;
+  }
+}
+
+/* Native controls inherit both the selected scheme and the application's surfaces. */
+input,
+textarea,
+select {
+  color: var(--ds-color-text-primary);
+  accent-color: var(--ds-color-accent);
+}
+
+:where(
+  textarea,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+      [type="file"]
+    )
+) {
+  background-color: transparent;
+}
+
+select {
+  background-color: var(--ds-color-bg-surface);
+}
+
+select option {
+  background-color: var(--ds-color-bg-surface);
+  color: var(--ds-color-text-primary);
+}
+
+::placeholder {
+  color: var(--ds-color-text-tertiary);
+  opacity: 1;
+}
+
+::selection {
+  background: var(--ds-color-accent);
+  color: var(--ds-color-accent-foreground);
+}
+
+@media (forced-colors: active) {
+  :focus-visible {
+    outline-color: Highlight;
   }
 }
