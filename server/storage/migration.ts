@@ -781,7 +781,21 @@ export async function restoreStorageArchive(
 }
 
 function normalizedSql(sql: string): string {
-  return sql.replace(/\s+/g, " ").trim().replace(/;$/, "");
+  // Ignore formatting between SQL tokens, while preserving quoted contents.
+  return sql
+    .replace(
+      /'(?:''|[^'])*'|"(?:""|[^"])*"|`(?:``|[^`])*`|\[[^\]]*\]|\s+/g,
+      (token) => (/^\s+$/.test(token) ? " " : token),
+    )
+    .trim()
+    .replace(/;$/, "");
+}
+
+function normalizedTables(tables: TableDescription[]): TableDescription[] {
+  return tables.map((table) => ({
+    ...table,
+    createSql: normalizedSql(table.createSql),
+  }));
 }
 
 /** Exports current cloud state under a server-side write fence to portable SQLite. */
@@ -859,8 +873,20 @@ export async function exportCloudDatabase(
         }
         validateDatabase(native);
         if (
-          JSON.stringify(describeTables(native)) !==
-          JSON.stringify(frozen.metadata.tables)
+          JSON.stringify(normalizedTables(describeTables(native))) !==
+            JSON.stringify(normalizedTables(frozen.metadata.tables)) ||
+          JSON.stringify(
+            describeIndexes(native).map((index) => ({
+              ...index,
+              sql: normalizedSql(index.sql),
+            })),
+          ) !==
+            JSON.stringify(
+              frozen.metadata.indexes.map((index) => ({
+                ...index,
+                sql: normalizedSql(index.sql),
+              })),
+            )
         )
           throw new StorageError("storage_integrity");
         native.exec("COMMIT");

@@ -583,3 +583,113 @@ test("an expired export lease cannot produce a successful local database", async
     await rm(root, { recursive: true, force: true });
   }
 });
+
+test("historical schema indentation exports all rows and indexes while changed row content is rejected", async () => {
+  const root = await mkdtemp(join(tmpdir(), "kamelog-historical-export-"));
+  let sourceDatabase: DatabaseSync | undefined;
+  try {
+    const source = join(root, "source");
+    await fixture(source);
+    sourceDatabase = new DatabaseSync(join(source, "kamelog.sqlite"));
+    // Migration 10 recreated post_tags with this indentation. A fresh schema 12
+    // has identical columns/constraints, but its sqlite_schema SQL text differs.
+    sourceDatabase.exec(`DROP TABLE post_tags;
+            CREATE TABLE post_tags(
+              post_id TEXT NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+              tag TEXT NOT NULL,
+              source TEXT NOT NULL CHECK(source IN ('manual', 'auto')),
+              confidence REAL CHECK(confidence >= 0 AND confidence <= 1),
+              model_version TEXT NOT NULL,
+              content_hash TEXT NOT NULL,
+              training_hash TEXT NOT NULL,
+              PRIMARY KEY(post_id, tag, source)
+            );
+            INSERT INTO post_tags VALUES('post-fixture','fictional-tag','manual',1,'manual','','');`);
+    const metadata = await createLocalArchive(source, join(root, "archive"));
+    let corruptRows = false;
+    let lease: string | undefined;
+    const options = {
+      endpoint: "https://storage.example",
+      token: "fixture-token-with-at-least-thirty-two-characters",
+      generation: mediaId,
+      fetch: (async (input, init) => {
+        const path = new URL(String(input)).pathname;
+        const body = JSON.parse(String(init?.body));
+        if (path === "/migration/freeze") {
+          lease = body.migrationId;
+          return Response.json({
+            ...metadata,
+            manifestHash: archiveManifestHash(metadata),
+            migrationId: lease,
+          });
+        }
+        assert.equal(body.migrationId, lease);
+        if (path === "/migration/unfreeze") return Response.json({ ok: true });
+        assert.equal(path, "/migration/export");
+        const table = metadata.tables.find(
+          (entry) => entry.name === body.table,
+        );
+        assert.ok(table);
+        const order = table.primaryKey.length
+          ? table.primaryKey
+          : table.columns;
+        const rows = sourceDatabase!
+          .prepare(
+            `SELECT * FROM "${table.name}" ORDER BY ${order.map((column) => `"${column}"`).join(",")} LIMIT ? OFFSET ?`,
+          )
+          .all(body.limit, body.offset);
+        if (corruptRows && table.name === "posts" && rows.length)
+          rows[0].data = "fictional altered row";
+        return Response.json({ rows });
+      }) satisfies typeof fetch,
+    };
+    const exported = join(root, "snapshot.sqlite");
+    assert.deepEqual(await exportCloudDatabase(options, exported), metadata);
+    const restored = new DatabaseSync(exported, { readOnly: true });
+    try {
+      assert.equal(
+        restored.prepare("PRAGMA integrity_check").get()?.integrity_check,
+        "ok",
+      );
+      assert.equal(
+        restored
+          .prepare(
+            "SELECT count(*) AS count FROM post_tags WHERE tag='fictional-tag'",
+          )
+          .get()?.count,
+        1,
+      );
+      assert.equal(
+        restored.prepare("SELECT count(*) AS count FROM credentials").get()
+          ?.count,
+        1,
+      );
+      assert.equal(
+        restored
+          .prepare("SELECT count(*) AS count FROM federation_deliveries")
+          .get()?.count,
+        1,
+      );
+      for (const index of metadata.indexes)
+        assert.equal(
+          restored
+            .prepare(
+              "SELECT count(*) AS count FROM sqlite_schema WHERE type='index' AND name=?",
+            )
+            .get(index.name)?.count,
+          1,
+        );
+    } finally {
+      restored.close();
+    }
+    corruptRows = true;
+    await assert.rejects(
+      exportCloudDatabase(options, join(root, "corrupt.sqlite")),
+      { code: "storage_integrity" },
+    );
+    assert.ok(!(await readdir(root)).includes("corrupt.sqlite"));
+  } finally {
+    sourceDatabase?.close();
+    await rm(root, { recursive: true, force: true });
+  }
+});
