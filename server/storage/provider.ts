@@ -10,6 +10,7 @@ import {
 import { z } from "zod";
 import { Store, Conflict } from "./local-store.ts";
 import { GatewayBlobStorage } from "./blobs.ts";
+import { rollingReadModelCall } from "./rolling-read-model.ts";
 import { StorageError, storageErrorCodes } from "./errors.ts";
 import {
   decodeWire,
@@ -135,12 +136,14 @@ export function openStore(
     }
     return decodeWire(response.data.result);
   };
+  const compatibleCall = rollingReadModelCall(call);
   const methods = new Set<string>(PUBLIC_METHODS);
   const target = {
     provider: "cloudflare",
     directory: cache,
     blobs,
-    command: (name: string, args: unknown[]) => call("$command", [name, args]),
+    command: (name: string, args: unknown[]) =>
+      compatibleCall("$command", [name, args]),
     close: () => {
       channel.port1.close();
       void worker.terminate();
@@ -156,7 +159,7 @@ export function openStore(
   return new Proxy(target, {
     get(object, property, receiver) {
       if (typeof property === "string" && methods.has(property))
-        return (...args: unknown[]) => call(property, args);
+        return (...args: unknown[]) => compatibleCall(property, args);
       return Reflect.get(object, property, receiver);
     },
   }) as unknown as Store;

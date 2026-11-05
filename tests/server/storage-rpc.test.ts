@@ -71,6 +71,22 @@ test("real TLS RPC preserves values, retries unknown acknowledgements once and f
         const success = (result: unknown) =>
           res.end(JSON.stringify({ ok: true, result: encodeWire(result) }));
         if (input.method === "schemaVersion") return success(12);
+        if (input.method === "list") {
+          assert.deepEqual(input.args, ["posts"]);
+          return success([
+            {
+              id: "fixture-blog",
+              kind: "blog",
+              body: "![fixture](/api/media/11111111-1111-4111-8111-111111111111)",
+              date: "2026-01-01T00:00:00.000Z",
+            },
+          ]);
+        }
+        if (
+          input.method === "heartbeatFederationWorker" ||
+          input.method === "claimFederationDelivery"
+        )
+          return success(null);
         if (input.method === "get")
           return success({
             name: "架空のプロフィール",
@@ -177,6 +193,12 @@ test("real TLS RPC preserves values, retries unknown acknowledgements once and f
     assert.deepEqual(received, [
       "schemaVersion",
       "get",
+      "list",
+      "list",
+      "list",
+      "list",
+      "heartbeatFederationWorker",
+      "claimFederationDelivery",
       "createSession",
       "createSession",
       "save",
