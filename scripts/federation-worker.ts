@@ -1,3 +1,4 @@
+import { writeWorkerHeartbeat } from "../server/federation-worker-liveness.ts";
 import { configuration } from "../server/api.mjs";
 import { runFederationWorker } from "../server/federation-worker.mjs";
 import { reportNotification } from "../server/notifications.mjs";
@@ -30,6 +31,7 @@ const config = configuration();
 try {
   await runFederationWorker(store, config, {
     signal: controller.signal,
+    onHeartbeat: writeWorkerHeartbeat,
     log: (entry: unknown) => {
       console.log(JSON.stringify(entry));
       const status =

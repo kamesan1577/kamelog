@@ -44,6 +44,19 @@ async function monitored(request, service, handler, config) {
 }
 
 async function handleRequest(request) {
+  if (
+    request.method === "GET" &&
+    new URL(request.url).pathname === "/api/health"
+  )
+    return Response.json(
+      { status: "ok" },
+      {
+        headers: {
+          "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
+        },
+      },
+    );
   const config = configuration();
   const response = await monitored(
     request,

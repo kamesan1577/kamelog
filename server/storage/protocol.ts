@@ -3,6 +3,8 @@ import { StorageError } from "./errors.ts";
 
 export const PUBLIC_METHODS = [
   "list",
+  "publicMediaReference",
+  "sitemapPosts",
   "get",
   "localPostLikes",
   "save",
@@ -46,6 +48,7 @@ export const PUBLIC_METHODS = [
   "deleteFederationRemoteObject",
   "saveFederationTimelineEntry",
   "federationTimeline",
+  "federationLocalPosts",
   "registerFederationRemoteMedia",
   "invalidateFederationRemoteMedia",
   "federationRemoteMedia",
@@ -77,6 +80,8 @@ export const PUBLIC_METHODS = [
 ] as const;
 export const READ_METHODS = new Set<string>([
   "list",
+  "publicMediaReference",
+  "sitemapPosts",
   "get",
   "localPostLikes",
   "autoTagState",
@@ -96,6 +101,7 @@ export const READ_METHODS = new Set<string>([
   "federationFollowingList",
   "federationRemoteObject",
   "federationTimeline",
+  "federationLocalPosts",
   "federationRemoteMedia",
   "federationRemoteMediaIsPublic",
   "canRepostFederationObject",

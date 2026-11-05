@@ -1,4 +1,5 @@
 // Run against `wrangler dev --local` only. Never accepts a production origin.
+import { verifyStorageReadBudget } from "./storage-read-budget.ts";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
@@ -254,6 +255,39 @@ try {
     "workerd: nested transaction, durable queue and receipt replay passed",
   );
 
+  assert.equal(await rpc("publicMediaReference", [mediaId]), true);
+  const privateOnly = "22222222-2222-4222-8222-222222222222";
+  await rpc("save", [
+    "drafts",
+    "private-media-fixture",
+    { kind: "tweet", images: [`/api/media/${privateOnly}`] },
+  ]);
+  assert.equal(await rpc("publicMediaReference", [privateOnly]), false);
+  await rpc("remove", ["drafts", "private-media-fixture", 1]);
+  const mediaPost = {
+    kind: "tweet",
+    body: "media authorization fixture",
+    images: [`/api/media/${mediaId}`],
+    tags: [],
+  };
+  await rpc("save", ["posts", "media-reference-fixture", mediaPost]);
+  await rpc("save", ["posts", "fixture-post", { ...mediaPost, images: [] }, 1]);
+  assert.equal(await rpc("publicMediaReference", [mediaId]), true);
+  await rpc("save", [
+    "posts",
+    "media-reference-fixture",
+    { ...mediaPost, images: [] },
+    1,
+  ]);
+  assert.equal(await rpc("publicMediaReference", [mediaId]), false);
+  await rpc("save", ["posts", "media-reference-fixture", mediaPost, 2]);
+  assert.equal(await rpc("publicMediaReference", [mediaId]), true);
+  await rpc("remove", ["posts", "media-reference-fixture", 3]);
+  assert.equal(await rpc("publicMediaReference", [mediaId]), false);
+  console.log(
+    "workerd: draft isolation, shared references, edit revocation and delete cascade passed",
+  );
+
   await exportCloudArchive(options, join(directory, "cloud-backup"));
   await restoreStorageArchive(
     join(directory, "cloud-backup"),
@@ -277,6 +311,7 @@ try {
   console.log(
     "workerd: current cloud state exported and restored to local SQLite/media",
   );
+  await verifyStorageReadBudget(directory, request);
 } finally {
   store?.close();
   await rm(directory, { recursive: true, force: true });

@@ -104,6 +104,8 @@ try {
       join(directory, "state"),
       "--var",
       "STORAGE_TOKEN:fictional-storage-test-token-00000000000000",
+      "--var",
+      "STORAGE_DIAGNOSTICS:true",
       "--log-level",
       "warn",
     ],

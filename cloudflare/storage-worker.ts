@@ -40,6 +40,7 @@ export interface StorageEnvironment {
   STORAGE: ObjectNamespace;
   MEDIA: ObjectNamespace;
   MAX_STORAGE_BYTES?: string;
+  STORAGE_DIAGNOSTICS?: string;
 }
 
 const objectKey = /^media\/[a-f0-9-]{36}\.(mp4|png|jpg|webp|gif)$/;
@@ -209,6 +210,13 @@ export class StorageObject {
 
   private domainStore(): Store {
     if (!this.meta("sealed")) throw new StorageError("storage_migrating");
+    if (
+      !this.store &&
+      this.exportLeaseOwner() &&
+      this.db.prepare("SELECT MAX(version) AS version FROM migrations").get()
+        ?.version === 12
+    )
+      throw new StorageError("storage_migrating");
     return (this.store ??= new Store("cloudflare", this.db, {
       initialize: false,
     }));
@@ -241,6 +249,59 @@ export class StorageObject {
 
   private async rpc(request: Request): Promise<Response> {
     const input = rpcSchema.parse(await boundedJSON(request));
+    const before = this.db.metrics();
+    // All SQL is synchronous. Capture before awaiting the durability flush so
+    // another request cannot contaminate this operation's counters.
+    let result: ReturnType<StorageObject["rpcResult"]>;
+    try {
+      result = this.rpcResult(input);
+    } catch (error) {
+      if (this.env.STORAGE_DIAGNOSTICS === "true") {
+        const after = this.db.metrics();
+        console.log(
+          JSON.stringify({
+            event: "storage_sql",
+            operation: PUBLIC_METHODS.some((name) => name === input.method)
+              ? input.method
+              : "command_or_invalid",
+            outcome: "error",
+            sqlCount: after.sqlCount - before.sqlCount,
+            rowsRead: after.rowsRead - before.rowsRead,
+            rowsWritten: after.rowsWritten - before.rowsWritten,
+          }),
+        );
+      }
+      throw error;
+    }
+    const after = this.db.metrics();
+    const headers: Record<string, string> = {
+      ...jsonHeaders,
+      "Content-Type": "application/json",
+    };
+    if (this.env.STORAGE_DIAGNOSTICS === "true") {
+      headers["X-Storage-Sql-Count"] = String(after.sqlCount - before.sqlCount);
+      headers["X-Storage-Rows-Read"] = String(after.rowsRead - before.rowsRead);
+      headers["X-Storage-Rows-Written"] = String(
+        after.rowsWritten - before.rowsWritten,
+      );
+      // Only allowlisted operation names and numeric counters. No SQL, IDs,
+      // arguments, user content, paths or provider exception messages.
+      console.log(
+        JSON.stringify({
+          event: "storage_sql",
+          operation: result.operation,
+          sqlCount: after.sqlCount - before.sqlCount,
+          rowsRead: after.rowsRead - before.rowsRead,
+          rowsWritten: after.rowsWritten - before.rowsWritten,
+        }),
+      );
+    }
+    if (result.write || after.rowsWritten > before.rowsWritten)
+      await this.state.storage.sync();
+    return new Response(result.body, { headers });
+  }
+
+  private rpcResult(input: z.infer<typeof rpcSchema>) {
     if (
       input.issuedAt < Date.now() - 300_000 ||
       input.issuedAt > Date.now() + 30_000
@@ -267,7 +328,13 @@ export class StorageObject {
       // No RPC argument can contain a function: callback parameters stay unavailable.
       return Reflect.apply(method, store, args);
     };
-    if (readOnly) return json({ ok: true, result: encodeWire(invoke()) });
+    const operation = command ? `command:${commandName}` : input.method;
+    if (readOnly)
+      return {
+        body: JSON.stringify({ ok: true, result: encodeWire(invoke()) }),
+        write: false,
+        operation,
+      };
     const requestHash = sha256(
       JSON.stringify({ method: input.method, args: input.args }),
     );
@@ -294,10 +361,7 @@ export class StorageObject {
         .run(Date.now() - 600_000);
       return result;
     });
-    await this.state.storage.sync();
-    return new Response(response, {
-      headers: { ...jsonHeaders, "Content-Type": "application/json" },
-    });
+    return { body: response, write: true, operation };
   }
 
   private async blob(
@@ -627,7 +691,7 @@ export class StorageObject {
         return json({ ok: true });
       }
       if (
-        metadata.schemaVersion !== 12 ||
+        ![12, 13].includes(metadata.schemaVersion) ||
         !metadata.tables.some((table) => table.name === "migrations")
       )
         throw new StorageError("storage_integrity");

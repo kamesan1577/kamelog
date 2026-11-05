@@ -1,3 +1,11 @@
+2026-11-05 Issue #308の読み取り増幅を修正。投稿一覧のタグ・推論リンクを3 SQLで一括取得し、投稿詳細は主キー、媒体認可はスキーマ13の参照索引で検索する。下書きは公開参照へ含めず、投稿の保存と参照更新を同じtransactionで確定し、削除はCASCADEで失効させる。既存スキーマ12からの初回backfill・更新中のrollback・export lease中の更新拒否・旧版の出力と復元を検証した。sitemapはブログのIDと日時だけを取得し、Fediverse一覧は日時とIDの複合カーソルでページを取得する。公開ホーム・Timelineと投稿一覧APIは既存のクライアント検索とスレッド契約のため全件取得を続ける。
+
+アプリの`/api/health`と配送workerの死活確認はDBを読まない。保存先の確認は`/api/ready`と配送診断を使い、更新scriptの確認先もreadinessへ変更した。配送heartbeatとclaimを1 RPCへまとめ、15秒間隔と配送リトライを維持する。保存先障害は15秒〜5分の指数待機とし、待機中のローカルheartbeatで再起動による増幅を防ぐ。診断モードだけで、消費済みcursorのSQL数・rowsRead・rowsWrittenを記録する。
+
+Node 24で`PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright make check`が成功（server 236件、実workerdの移行・64MiB媒体・復元・読み取り予算、UI8件、本番/Storybook build、Storybook 54件）。追加の実workerd検証では媒体の下書き非公開・共有参照・編集時失効・削除CASCADEも成功。投稿0/10/100/1000件と同数の完了済み配送履歴で、一覧はgateway確認を含め4 SQL、詳細は最大5 rowsRead、媒体認可は最大2 rowsRead、空の配送pollは6 rowsReadだった。標準ポート3000で全E2E117件が成功（retry追加・skipなし）。ローカルの標準相当Docker buildは作業環境のディスク上限で停止し、その作業で生じた未使用build cacheを削除して復旧した。GitHubへのpushは自動承認レビューに拒否され、明示承認待ち。リモートCI check/e2e/containerは未実行。
+
+当日の500万rowsReadのnamespace別内訳、本番24時間の無操作時実測、実サーバーへの反映、実データ更新は未実施。コード上の増幅要因と本番の消費内訳を同一視しない。本番反映前には整合backupと無料枠の余裕を確認し、対応するアプリ/storage Workerと固定deploy scriptを揃える。スキーマ13への更新後はアプリをrollbackしてもstorage Workerをスキーマ13対応版に保つ。runbookに計測と上限到達時の手順を追加した。
+
 2026-11-02 ブログのページ閲覧と緑の操作色を実装。ADR 0031に基づき、既定のポップアップを保ち、「ページで読む」から通常リンクで `/?post=<id>&reader=page` を開ける。ページは単一main内のarticleとして初期HTMLにも描画し、文書スクロール、目次、読書進捗、共有、オーナー操作を共用する。「ポップアップで読む」で既定表示へ戻り、通常の投稿入口と詳細外への移動ではreader指定を除く。表示方法を端末に保存せず、再読み込みと戻る／進むでURLに追従する。共有URLとcanonicalは従来の投稿URLを維持。主要ボタン、選択状態、リンク、フォーカスを共通の緑へ統一し、本文の中立色と削除・エラー・いいね等の状態色は維持した。
 
 記事から別画面へ移動した際の読書位置消失を回帰テストで再現し、履歴を追加した後に移動先を先頭へ戻すよう修正した。さらにBackで800pxを復元した直後に目次の後付けで987pxへずれることを再現したため、見出しIDと目次をMarkdownの描画時に生成する方式へ変更し、文書全体を監視するbridgeを廃止した。目次は初期HTMLに含まれ、JavaScript無効時も通常のページ内リンクとして使える。重複・日本語・装飾付き見出しと既存IDを含むSSR回帰4件を追加し、旧DOM挿入型の閲覧テストは実記事を使う検証へ移行した。

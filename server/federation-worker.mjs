@@ -1,8 +1,7 @@
+import { executeCommand } from "./storage/commands.ts";
+import { runDeliveryLoop } from "./federation-worker-loop.ts";
 import { signFederationRequest } from "./activitypub.mjs";
 import { postFederationActivity } from "./federation-fetch.mjs";
-
-const sleep = (milliseconds) =>
-  new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 function logDelivery(log, delivery, status) {
   if (!log) return;
@@ -24,10 +23,10 @@ export async function processNextFederationDelivery(
   options = {},
 ) {
   const now = options.now || new Date();
-  store.heartbeatFederationWorker(now);
-  const delivery = store.claimFederationDelivery(now.getTime());
+  const { delivery, identity } = executeCommand(store, "pollFederation", [
+    now.getTime(),
+  ]);
   if (!delivery) return null;
-  const identity = store.federationIdentity();
   if (!identity) {
     const result = store.failFederationDelivery(delivery.id, {
       error: "federation identity is unavailable",
@@ -80,16 +79,17 @@ export async function processNextFederationDelivery(
 /**
  * @param {unknown} store
  * @param {{ origin: string }} config
- * @param {{ signal?: AbortSignal; pollMs?: number; log?: (entry: unknown) => void }} [workerOptions]
+ * @param {{ signal?: AbortSignal; pollMs?: number; log?: (entry: unknown) => void; onHeartbeat?: () => void }} [workerOptions]
  */
 export async function runFederationWorker(store, config, workerOptions = {}) {
   const {
     signal,
     pollMs = store?.provider === "cloudflare" ? 15_000 : 1_000,
+    onHeartbeat,
     ...options
   } = workerOptions;
-  while (!signal?.aborted) {
-    const result = await processNextFederationDelivery(store, config, options);
-    if (!result) await sleep(pollMs);
-  }
+  return runDeliveryLoop(
+    () => processNextFederationDelivery(store, config, options),
+    { signal, pollMs, onHeartbeat },
+  );
 }

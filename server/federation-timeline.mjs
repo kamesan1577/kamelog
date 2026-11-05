@@ -95,12 +95,12 @@ export function ownerFederationTimeline(
   const identity = store.federationIdentity();
   if (!identity) return { items: [], nextCursor: null };
   const profile = store.get("settings", "profile");
-  const remote = store.federationTimeline(5_000).map(remoteItem);
-  const own = store
-    .list("posts")
-    .filter((post) => post.federationEnabled === true && post.kind !== "vlog")
-    .map((post) => selfItem(store, config, identity, profile, post));
   const cursor = parseCursor(cursorValue);
+  const size = Math.max(1, Math.min(50, Number(limit) || 30));
+  const remote = store.federationTimeline(size + 1, cursor).map(remoteItem);
+  const own = store
+    .federationLocalPosts(cursor, size + 1)
+    .map((post) => selfItem(store, config, identity, profile, post));
   const visible = [...remote, ...own]
     .sort(
       (left, right) =>
@@ -108,7 +108,6 @@ export function ownerFederationTimeline(
         right.id.localeCompare(left.id),
     )
     .filter((item) => afterCursor(item, cursor));
-  const size = Math.max(1, Math.min(50, Number(limit) || 30));
   const items = visible.slice(0, size);
   const last = items.at(-1);
   return {

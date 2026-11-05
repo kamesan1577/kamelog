@@ -55,6 +55,7 @@ function fixtureStorage() {
           .prepare("SELECT changes() AS changes")
           .get()?.changes;
         return {
+          rowsRead: values.length,
           rowsWritten: Number(changes),
           [Symbol.iterator]: () => values[Symbol.iterator](),
         };
@@ -144,4 +145,32 @@ test("Durable SQL adapter preserves write counts and binary values", () => {
   } finally {
     fixture.close();
   }
+});
+
+test("SQL counters are read only after fully consuming a lazy Durable cursor", () => {
+  let exhausted = false;
+  const db = new DurableSqlDatabase({
+    sql: {
+      exec() {
+        return {
+          get rowsRead() {
+            assert.equal(exhausted, true);
+            return 17;
+          },
+          get rowsWritten() {
+            assert.equal(exhausted, true);
+            return 3;
+          },
+          *[Symbol.iterator]() {
+            yield { value: 1 };
+            yield { value: 2 };
+            exhausted = true;
+          },
+        };
+      },
+    },
+    transactionSync: (fn) => fn(),
+  });
+  assert.deepEqual(db.prepare("fixture").get(), { value: 1 });
+  assert.deepEqual(db.metrics(), { sqlCount: 1, rowsRead: 17, rowsWritten: 3 });
 });

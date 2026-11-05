@@ -98,6 +98,10 @@ export function createAPI(store, config, options = {}) {
       const url = new URL(req.url),
         path = url.pathname.replace(/^\/api\/?/, "").split("/"),
         method = req.method;
+      if (path[0] === "health" && method === "GET")
+        return json({ status: "ok" });
+      if (path[0] === "ready" && method === "GET")
+        return json({ status: "ok", schema: store.schemaVersion() });
       const jar = cookies(req),
         owner = store.authenticated(jar[sessionName]);
       const publicView =
@@ -127,8 +131,6 @@ export function createAPI(store, config, options = {}) {
           return json({ error: "Try later" }, 429);
       }
       const body = async () => JSON.parse((await readBounded(req)).toString());
-      if (path[0] === "health")
-        return json({ status: "ok", schema: store.schemaVersion() });
       if (path[0] === "auth") {
         if (path[1] === "session" && method === "GET")
           return json({ authenticated: owner });
@@ -255,11 +257,11 @@ export function createAPI(store, config, options = {}) {
         });
       }
       if (path[0] === "posts" && method === "GET") {
-        const posts = store.list("posts");
         if (path[1]) {
-          const post = posts.find((p) => p.id === path[1]);
+          const post = store.get("posts", path[1]);
           return post ? json(post) : json({ error: "Not found" }, 404);
         }
+        const posts = store.list("posts");
         const q = (url.searchParams.get("q") || "").slice(0, 200).toLowerCase(),
           kind = url.searchParams.get("kind");
         return json(
@@ -294,18 +296,7 @@ export function createAPI(store, config, options = {}) {
         const id = path[1];
         if (!/^[a-f0-9-]{36}$/.test(id))
           return json({ error: "Not found" }, 404);
-        const mediaPath = "/api/media/" + id;
-        if (
-          !owner &&
-          !store
-            .list("posts")
-            .some(
-              (p) =>
-                p.video === mediaPath ||
-                p.images?.includes(mediaPath) ||
-                (p.kind === "blog" && p.body.includes(mediaPath)),
-            )
-        )
+        if (!owner && !store.publicMediaReference(id))
           return json({ error: "Not found" }, 404);
         const metadata = store.get("media", id);
         if (!metadata) return json({ error: "Not found" }, 404);

@@ -208,7 +208,7 @@ test("existing databases gain local likes without changing legacy counts", async
     );
     store.close();
     store = new Store(root);
-    assert.equal(store.schemaVersion(), 12);
+    assert.equal(store.schemaVersion(), 13);
     assert.equal(store.get("posts", "legacy").likes, 4);
     const api = createAPI(
       store,
