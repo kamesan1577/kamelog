@@ -2,7 +2,7 @@
 
 アプリの`/api/health`と配送workerの死活確認はDBを読まない。保存先の確認は`/api/ready`と配送診断を使い、更新scriptの確認先もreadinessへ変更した。配送heartbeatとclaimを1 RPCへまとめ、15秒間隔と配送リトライを維持する。保存先障害は15秒〜5分の指数待機とし、待機中のローカルheartbeatで再起動による増幅を防ぐ。診断モードだけで、消費済みcursorのSQL数・rowsRead・rowsWrittenを記録する。
 
-Node 24で`PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright make check`が成功（server 236件、実workerdの移行・64MiB媒体・復元・読み取り予算、UI8件、本番/Storybook build、Storybook 54件）。追加の実workerd検証では媒体の下書き非公開・共有参照・編集時失効・削除CASCADEも成功。投稿0/10/100/1000件と同数の完了済み配送履歴で、一覧はgateway確認を含め4 SQL、詳細は最大5 rowsRead、媒体認可は最大2 rowsRead、空の配送pollは6 rowsReadだった。標準ポート3000で全E2E117件が成功（retry追加・skipなし）。ローカルの標準相当Docker buildは作業環境のディスク上限で停止し、その作業で生じた未使用build cacheを削除して復旧した。GitHubへのpushは自動承認レビューに拒否され、明示承認待ち。リモートCI check/e2e/containerは未実行。
+Node 24で`PLAYWRIGHT_BROWSERS_PATH=/workspace/.cache/ms-playwright make check`が成功（server 236件、実workerdの移行・64MiB媒体・復元・読み取り予算、UI8件、本番/Storybook build、Storybook 54件）。追加の実workerd検証では媒体の下書き非公開・共有参照・編集時失効・削除CASCADEも成功。投稿0/10/100/1000件と同数の完了済み配送履歴で、一覧はgateway確認を含め4 SQL、詳細は最大5 rowsRead、媒体認可は最大2 rowsRead、空の配送pollは6 rowsReadだった。標準ポート3000で全E2E117件が成功（retry追加・skipなし）。ローカルの標準相当Docker buildは作業環境のディスク上限で停止し、その作業で生じた未使用build cacheを削除して復旧した。リモートCI check/e2e/containerの全成功をマージ条件とする。
 
 当日の500万rowsReadのnamespace別内訳、本番24時間の無操作時実測、実サーバーへの反映、実データ更新は未実施。コード上の増幅要因と本番の消費内訳を同一視しない。本番反映前には整合backupと無料枠の余裕を確認し、対応するアプリ/storage Workerと固定deploy scriptを揃える。スキーマ13への更新後はアプリをrollbackしてもstorage Workerをスキーマ13対応版に保つ。runbookに計測と上限到達時の手順を追加した。
 
