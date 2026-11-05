@@ -48,7 +48,7 @@ function sqlState(): StorageState & { database: DatabaseSync } {
           );
           if (!parameters.length && sql.includes(";")) {
             database.exec(sql);
-            return Object.assign([], { rowsWritten: 0 });
+            return Object.assign([], { rowsRead: 0, rowsWritten: 0 });
           }
           const rows = database
             .prepare(sql)
@@ -66,6 +66,7 @@ function sqlState(): StorageState & { database: DatabaseSync } {
               ),
             );
           return Object.assign(rows, {
+            rowsRead: rows.length,
             rowsWritten: Number(
               database.prepare("SELECT changes() AS n").get()?.n || 0,
             ),
@@ -162,7 +163,7 @@ function harness(maximum = 3_000_000_000) {
   return { environment, instances, mediaInstances, request, close };
 }
 
-function fixtureArchive() {
+function fixtureArchive(legacy = false) {
   const state = sqlState();
   const store = new Store("fixture", new DurableSqlDatabase(state.storage));
   store.save(
@@ -179,6 +180,10 @@ function fixtureArchive() {
     undefined,
     undefined,
   );
+  if (legacy)
+    state.database.exec(`DROP TABLE post_media_refs;
+    DROP INDEX federation_deliveries_processing; DROP INDEX posts_blogs;
+    DROP INDEX posts_federation_order; DELETE FROM migrations WHERE version=13;`);
   const tables: ArchiveMetadata["tables"] = [];
   const rows = new Map<string, Record<string, string | number | null>[]>();
   for (const entry of state.database
@@ -218,7 +223,7 @@ function fixtureArchive() {
     .map((row) => ({ name: String(row.name), sql: String(row.sql) }));
   state.database.close();
   const metadata: ArchiveMetadata = {
-    schemaVersion: 12,
+    schemaVersion: legacy ? 12 : 13,
     tables,
     indexes,
     blobs: [],
@@ -1002,5 +1007,46 @@ test("real migration client cuts over once and exports current cloud data back t
   } finally {
     system.close();
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("sealed schema 12 remains exportable, upgrades on first RPC, and survives reopen", async () => {
+  const system = harness();
+  const generation = randomUUID();
+  try {
+    const fixture = await importFixture(
+      system,
+      generation,
+      fixtureArchive(true),
+    );
+    const seal = await system.request(generation, "/migration/seal", {
+      migrationId: fixture.migrationId,
+      manifestHash: fixture.manifestHash,
+    });
+    assert.equal(seal.status, 200);
+    const lease = randomUUID();
+    const frozen = await system.request(generation, "/migration/freeze", {
+      migrationId: lease,
+    });
+    assert.equal(frozen.status, 200);
+    const before = await frozen.json();
+    assert.equal(before.schemaVersion, 12);
+    const rpc = () =>
+      system.request(generation, "/rpc", {
+        requestId: randomUUID(),
+        issuedAt: Date.now(),
+        method: "schemaVersion",
+        args: [],
+      });
+    assert.equal((await rpc()).status, 423); // Upgrade must not mutate a frozen export.
+    await system.request(generation, "/migration/unfreeze", {
+      migrationId: lease,
+    });
+    assert.equal((await (await rpc()).json()).result, 13);
+    const instance = system.instances.get(generation)!;
+    instance.object = new StorageObject(instance.state, system.environment);
+    assert.equal((await (await rpc()).json()).result, 13);
+  } finally {
+    system.close();
   }
 });

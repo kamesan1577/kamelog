@@ -1,8 +1,3 @@
-import { openStore } from "../server/storage/provider.ts";
+import { workerIsLive } from "../server/federation-worker-liveness.ts";
 
-const store = openStore(process.env.KAMELOG_DATA_DIR || ".runtime");
-try {
-  process.exitCode = store.federationDiagnostics().worker.healthy ? 0 : 1;
-} finally {
-  store.close();
-}
+process.exitCode = workerIsLive() ? 0 : 1;

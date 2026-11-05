@@ -4,7 +4,7 @@ APP_DIR="${KAMELOG_APP_DIR:-/srv/kamelog}"
 ENV_FILE="${KAMELOG_ENV_FILE:-/etc/kamelog/env}"
 BACKUP_ROOT="${KAMELOG_BACKUP_ROOT:-/var/backups/kamelog}"
 STATE_DIR="${KAMELOG_DEPLOY_STATE_DIR:-/var/lib/kamelog-deploy}"
-HEALTH_URL="${KAMELOG_HEALTH_URL:-http://127.0.0.1:3000/api/health}"
+HEALTH_URL="${KAMELOG_HEALTH_URL:-http://127.0.0.1:3000/api/ready}"
 REPOSITORY="${KAMELOG_GITHUB_REPOSITORY:-kamesan1577/kamelog}"
 BRANCH="${KAMELOG_DEPLOY_BRANCH:-main}"
 WORKFLOW="${KAMELOG_DEPLOY_WORKFLOW:-ci.yml}"
@@ -65,7 +65,7 @@ test "$previous_image" || fail "could not resolve the running app image"
 healthcheck_replica() {
   local replica="$1" healthy=0
   for _attempt in $(seq 1 60); do
-    if "${compose[@]}" exec -T "$replica" node -e "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"; then healthy=1; break; fi
+    if "${compose[@]}" exec -T "$replica" node -e "fetch('http://127.0.0.1:3000/api/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"; then healthy=1; break; fi
     sleep 1
   done
   test "$healthy" = 1

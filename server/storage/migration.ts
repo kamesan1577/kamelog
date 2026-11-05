@@ -834,6 +834,14 @@ export async function exportCloudDatabase(
     local = new Store(staging, { maintenanceBypass: true });
     const native = new DatabaseSync(join(staging, "kamelog.sqlite"));
     try {
+      // Schema 12 exports remain portable before the first read-model upgrade.
+      if (frozen.metadata.schemaVersion === 12) {
+        native.exec(`DROP TABLE post_media_refs;
+          DROP INDEX federation_deliveries_processing;
+          DROP INDEX posts_blogs;
+          DROP INDEX posts_federation_order;
+          DELETE FROM migrations WHERE version=13;`);
+      }
       const supported = describeTables(native);
       if (
         supported.length !== frozen.metadata.tables.length ||
@@ -892,6 +900,12 @@ export async function exportCloudDatabase(
         native.exec("COMMIT");
       } catch (error) {
         native.exec("ROLLBACK");
+        if (
+          error instanceof Error &&
+          "code" in error &&
+          error.code === "ERR_SQLITE_ERROR"
+        )
+          throw new StorageError("storage_integrity");
         throw error;
       }
     } finally {

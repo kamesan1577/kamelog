@@ -1,3 +1,9 @@
+import {
+  initializeReadModel,
+  replacePostMedia,
+  postRelations,
+} from "./storage/read-model.ts";
+import { federationLocalRows } from "./storage/federation-read-model.ts";
 import { initializeLocalLikes } from "./local-likes.ts";
 import { randomUUID, createHash } from "node:crypto";
 
@@ -16,8 +22,7 @@ export class Store {
     this.db = database;
     this.hooks = hooks;
     if (hooks.initialize === false) {
-      if (this.schemaVersion() !== 12)
-        throw new Error("Unsupported storage schema");
+      initializeReadModel(this.db);
       return;
     }
     this.db.exec(`PRAGMA foreign_keys=ON;
@@ -286,6 +291,7 @@ export class Store {
         bio: "つくったものと日々の記録。",
       }),
     );
+    initializeReadModel(this.db);
   }
   /** @template T @param {() => T} fn @returns {T} */
   transaction(fn) {
@@ -304,7 +310,8 @@ export class Store {
           : `SELECT * FROM ${table}`,
       )
       .all();
-    return rows.map((row) => this.#rowValue(row, table));
+    const relations = table === "posts" ? postRelations(this.db) : undefined;
+    return rows.map((row) => this.#rowValue(row, table, relations));
   }
   get(table, id) {
     this.table(table);
@@ -322,7 +329,7 @@ export class Store {
       .get(id);
     return row ? this.#rowValue(row, table) : null;
   }
-  #rowValue(row, table) {
+  #rowValue(row, table, relations) {
     const data = JSON.parse(row.data);
     return this.#withPostTags(
       {
@@ -338,15 +345,18 @@ export class Store {
           : {}),
       },
       table,
+      relations,
     );
   }
-  #withPostTags(value, table) {
+  #withPostTags(value, table, relations) {
     if (table !== "posts") return value;
-    const rows = this.db
-      .prepare(
-        "SELECT tag, source, confidence, model_version, content_hash FROM post_tags WHERE post_id=? ORDER BY rowid",
-      )
-      .all(value.id);
+    const rows = relations
+      ? relations.tags.get(value.id) || []
+      : this.db
+          .prepare(
+            "SELECT tag, source, confidence, model_version, content_hash FROM post_tags WHERE post_id=? ORDER BY rowid",
+          )
+          .all(value.id);
     const manual = rows
       .filter((row) => row.source === "manual")
       .map((row) => row.tag);
@@ -359,11 +369,13 @@ export class Store {
         modelVersion: model_version,
         contentHash: content_hash,
       }));
-    const inferred = this.db
-      .prepare(
-        "SELECT parent_id AS parentId, state FROM inferred_thread_links WHERE post_id=?",
-      )
-      .get(value.id);
+    const inferred = relations
+      ? relations.links.get(value.id)
+      : this.db
+          .prepare(
+            "SELECT parent_id AS parentId, state FROM inferred_thread_links WHERE post_id=?",
+          )
+          .get(value.id);
     return {
       ...value,
       tags: [
@@ -377,6 +389,22 @@ export class Store {
         ? { effectiveParentId: value.parentId || inferred.parentId }
         : {}),
     };
+  }
+  publicMediaReference(id) {
+    return Boolean(
+      this.db
+        .prepare(
+          "SELECT 1 AS found FROM post_media_refs WHERE media_id=? LIMIT 1",
+        )
+        .get(id),
+    );
+  }
+  sitemapPosts() {
+    return this.db
+      .prepare(
+        "SELECT id, json_extract(data, '$.date') AS date, json_extract(data, '$.updatedAt') AS updatedAt FROM posts WHERE json_extract(data, '$.kind')='blog'",
+      )
+      .all();
   }
   localPostLikes(id) {
     const row = this.db.prepare("SELECT data FROM posts WHERE id=?").get(id);
@@ -428,6 +456,7 @@ export class Store {
         )
         .run(id, JSON.stringify(next), next.revision);
       if (table === "posts") {
+        replacePostMedia(this.db, id, next);
         this.db
           .prepare("DELETE FROM post_tags WHERE post_id=? AND source='manual'")
           .run(id);
@@ -1015,7 +1044,17 @@ export class Store {
         entry.receivedAt,
       );
   }
-  federationTimeline(limit = 50) {
+  /** @param {[string, string] | null} cursor */
+  federationLocalPosts(cursor = null, limit = 31) {
+    const rows = federationLocalRows(this.db, cursor, limit);
+    const relations = postRelations(
+      this.db,
+      rows.map((row) => row.id),
+    );
+    return rows.map((row) => this.#rowValue(row, "posts", relations));
+  }
+  /** @param {number} limit @param {[string, string] | null} cursor */
+  federationTimeline(limit = 50, cursor = null) {
     return this.db
       .prepare(
         `SELECT entries.activity_id AS activityId,
@@ -1040,10 +1079,19 @@ export class Store {
            ON reposts.object_id=objects.object_id AND reposts.undone_at IS NULL
          WHERE entries.deleted_at IS NULL AND objects.deleted_at IS NULL
            AND following.state='accepted'
+           ${cursor ? "AND (entries.published_at, entries.activity_id) < (?, ?)" : ""}
          ORDER BY entries.published_at DESC, entries.activity_id DESC
          LIMIT ?`,
       )
-      .all(Math.max(1, Math.min(5_000, Number(limit) || 50)))
+      .all(
+        ...(cursor
+          ? [
+              cursor[0],
+              cursor[1].startsWith("remote:") ? cursor[1].slice(7) : "\uffff",
+            ]
+          : []),
+        Math.max(1, Math.min(5_000, Number(limit) || 50)),
+      )
       .map((row) => ({
         ...row,
         attachments: JSON.parse(row.attachments),

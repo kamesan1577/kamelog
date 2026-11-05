@@ -4,6 +4,7 @@ export type DurableSqlValue = string | number | null | ArrayBuffer;
 export interface DurableSqlCursor extends Iterable<
   Record<string, DurableSqlValue>
 > {
+  readonly rowsRead: number;
   readonly rowsWritten: number;
 }
 export interface DurableSqlStorage {
@@ -38,26 +39,42 @@ function rows(cursor: DurableSqlCursor): SqlRow[] {
 /** Runs inside a SQLite-backed Durable Object, never on the Node application. */
 export class DurableSqlDatabase implements SqlDatabase {
   private readonly storage: DurableSqlStorage;
+  private counters = { sqlCount: 0, rowsRead: 0, rowsWritten: 0 };
+
+  metrics() {
+    return { ...this.counters };
+  }
+
+  private consume(cursor: DurableSqlCursor): SqlRow[] {
+    try {
+      return rows(cursor);
+    } finally {
+      // Cloudflare finalizes cursor counters only after iteration completes.
+      this.counters.sqlCount++;
+      this.counters.rowsRead += cursor.rowsRead;
+      this.counters.rowsWritten += cursor.rowsWritten;
+    }
+  }
 
   constructor(storage: DurableSqlStorage) {
     this.storage = storage;
   }
 
   exec(sql: string): void {
-    Array.from(this.storage.sql.exec(sql));
+    this.consume(this.storage.sql.exec(sql));
   }
 
   prepare(sql: string): SqlStatement {
     const execute = (parameters: SqlValue[]) =>
       this.storage.sql.exec(sql, ...parameters.map(parameter));
     return {
-      get: (...parameters) => rows(execute(parameters))[0],
-      all: (...parameters) => rows(execute(parameters)),
+      get: (...parameters) => this.consume(execute(parameters))[0],
+      all: (...parameters) => this.consume(execute(parameters)),
       run: (...parameters) => {
-        Array.from(execute(parameters));
+        this.consume(execute(parameters));
         // rowsWritten includes trigger effects; changes() has the SQLite
         // semantics relied upon by likes, revision guards and queue claims.
-        const result = rows(
+        const result = this.consume(
           this.storage.sql.exec(
             "SELECT changes() AS changes, last_insert_rowid() AS lastInsertRowid",
           ),

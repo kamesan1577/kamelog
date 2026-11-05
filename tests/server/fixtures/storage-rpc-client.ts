@@ -3,6 +3,7 @@ import { writeFileSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 import { openStore } from "../../../server/storage/provider.ts";
 import { Conflict } from "../../../server/storage/local-store.ts";
+import { executeCommand } from "../../../server/storage/commands.ts";
 import { StorageError } from "../../../server/storage/errors.ts";
 
 const [directory, endpoint, generation, replacement] = process.argv.slice(2);
@@ -20,6 +21,22 @@ try {
     bytes: new Uint8Array([0, 127, 255]),
     count: BigInt("9007199254740993"),
     optional: undefined,
+  });
+  assert.equal(
+    store.publicMediaReference("11111111-1111-4111-8111-111111111111"),
+    true,
+  );
+  assert.equal(
+    store.publicMediaReference("22222222-2222-4222-8222-222222222222"),
+    false,
+  );
+  assert.deepEqual(store.sitemapPosts(), [
+    { id: "fixture-blog", date: "2026-01-01T00:00:00.000Z" },
+  ]);
+  assert.deepEqual(store.federationLocalPosts(null, 10), []);
+  assert.deepEqual(executeCommand(store, "pollFederation", [Date.now()]), {
+    delivery: null,
+    identity: null,
   });
   assert.equal(store.createSession(), "fictional-session");
   assert.throws(

@@ -106,6 +106,13 @@ function enqueueRepostUndo(
 }
 
 const handlers = {
+  pollFederation(store: Store, args: unknown[]) {
+    const [now] = z.tuple([z.number().finite()]).parse(args);
+    // The gateway already wraps this domain command in its receipt transaction.
+    store.heartbeatFederationWorker(new Date(now));
+    const delivery = store.claimFederationDelivery(now);
+    return { delivery, identity: delivery ? store.federationIdentity() : null };
+  },
   saveContent(store: Store, args: unknown[]) {
     const [input] = z.tuple([contentSchema]).parse(args);
     return store.save(

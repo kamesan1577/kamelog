@@ -72,16 +72,13 @@ test("a quota failure in post-commit dispatch cannot turn a saved post into a fa
 test("an idle cloud federation worker keeps its poll rate within the free request budget", async (context) => {
   context.mock.timers.enable({ apis: ["setTimeout"] });
   const controller = new AbortController();
-  let heartbeats = 0;
-  let claims = 0;
+  let polls = 0;
   const store = {
     provider: "cloudflare",
-    heartbeatFederationWorker() {
-      heartbeats++;
-    },
-    claimFederationDelivery() {
-      claims++;
-      return null;
+    command(name: string) {
+      assert.equal(name, "pollFederation");
+      polls++;
+      return { delivery: null, identity: null };
     },
   };
   const running = runFederationWorker(
@@ -92,14 +89,13 @@ test("an idle cloud federation worker keeps its poll rate within the free reques
     },
   );
   await setImmediate();
-  assert.equal(heartbeats, 1);
+  assert.equal(polls, 1);
   context.mock.timers.tick(14_999);
   await setImmediate();
-  assert.equal(heartbeats, 1);
+  assert.equal(polls, 1);
   context.mock.timers.tick(1);
   await setImmediate();
-  assert.equal(heartbeats, 2);
-  assert.equal(claims, 2);
+  assert.equal(polls, 2);
   controller.abort();
   context.mock.timers.tick(15_000);
   await running;
